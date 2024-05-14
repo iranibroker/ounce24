@@ -13,8 +13,12 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@ounce24/types": ["types/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
