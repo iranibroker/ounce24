@@ -41,6 +41,17 @@ export class Signal {
 
   @Prop()
   closedAt?: Date;
+
+  static getMessage(signal: Signal) {
+    const isSell = signal.type === SignalType.Sell;
+    return `سیگنال 
+${isSell ? '🔴 فروش (sell)' : '🔵 خرید (buy)'} به قیمت : ${signal.entryPrice}
+    
+✅حد سود: ${isSell ? signal.maxPrice : signal.minPrice}
+❌حد ضرر: ${isSell ? signal.minPrice : signal.maxPrice}
+    
+وضعیت :  ⛳️کاشته شده`;
+  }
 }
 
 export const SignalSchema = SchemaFactory.createForClass(Signal);

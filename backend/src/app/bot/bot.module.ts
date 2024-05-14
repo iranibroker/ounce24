@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { SignalsService } from './signals.service';
+import { BotService } from './bot.service';
 import { SchemasModule } from '../schemas/schemas.module';
 
 @Module({
   imports: [SchemasModule],
-  providers: [SignalsService],
+  providers: [BotService],
+  exports: [BotService],
 })
-export class SignalsModule {}
+export class BotModule {}
