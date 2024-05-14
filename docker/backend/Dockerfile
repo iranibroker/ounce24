@@ -16,7 +16,7 @@ WORKDIR /backend
 
 COPY package.json .
 
-COPY --from=development /usr/src/app/dist/apps/backend src
+COPY --from=development /usr/src/app/dist/backend src
 
 RUN yarn --production && yarn cache clean
 
