@@ -12,7 +12,9 @@ import { SchemasModule } from './schemas/schemas.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_URI),
+    MongooseModule.forRoot(process.env.MONGO_URI, {
+      dbName: process.env.MONGO_DB_NAME
+    }),
     TelegrafModule.forRoot({
       token: process.env.BOT_TOKEN,
     }),
