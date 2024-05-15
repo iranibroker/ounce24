@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, SignalType } from '@ounce24/types';
+import { Signal, SignalType, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import {
   Action,
@@ -12,46 +12,17 @@ import {
   Update,
 } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
-
-enum UserStateType {
-  NewSignal,
-}
-
-type UserState<T = any> = {
-  state: UserStateType;
-  data?: T;
-};
+import { BaseBot, UserStateType } from './base-bot';
 
 @Injectable()
 @Update()
-export class BotService {
-  private userStates = new Map<number, UserState>();
-
+export class BotService extends BaseBot {
   constructor(
     @InjectBot() private bot: Telegraf<Context>,
-    @InjectModel(Signal.name) private signalModel: Model<Signal>
-  ) {}
-
-  setState<T>(userId: number, state: UserState<T>) {
-    this.userStates.set(userId, state);
-  }
-
-  getState<T>(userId: number) {
-    const state: UserState<T> = this.userStates.get(userId);
-    return state;
-  }
-
-  setStateData<T>(userId: number, data: T) {
-    const state = this.userStates.get(userId);
-    if (state) {
-      state.data = data;
-      this.userStates.set(userId, state);
-    }
-  }
-
-  getStateData<T>(userId: number) {
-    const state: UserState<T> = this.userStates.get(userId);
-    return state?.data;
+    @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    @InjectModel(User.name) private userModel: Model<User>
+  ) {
+    super(userModel);
   }
 
   @Command('new_signal')
@@ -73,7 +44,9 @@ export class BotService {
   async newSellSignal(@Ctx() ctx: Context) {
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
     ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-    await ctx.editMessageText(`ایجاد سیگنال ${isSell ? '🔴 فروش (sell)' : '🔵 خرید (buy)'}:`);
+    await ctx.editMessageText(
+      `ایجاد سیگنال ${isSell ? '🔴 فروش (sell)' : '🔵 خرید (buy)'}:`
+    );
 
     this.setState<Partial<Signal>>(ctx.from.id, {
       state: UserStateType.NewSignal,
@@ -103,19 +76,6 @@ export class BotService {
       await createdData.save();
       ctx.reply(Signal.getMessage(signal));
       this.userStates.delete(ctx.from.id);
-    }
-  }
-
-  @On('message')
-  onMessage(@Ctx() ctx: Context) {
-    const userState = this.getState(ctx.from.id);
-    switch (userState?.state) {
-      case UserStateType.NewSignal:
-        this.handleNewSignalMessage(ctx);
-        break;
-
-      default:
-        break;
     }
   }
 }

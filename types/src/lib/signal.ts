@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { User } from './user';
 
 export type SignalDocument = HydratedDocument<Signal>;
 
@@ -17,8 +18,6 @@ export enum SignalStatus {
 
 @Schema({ timestamps: true })
 export class Signal {
-  // @Prop({type: 'ObjectId', index: true, auto: true})
-  // id: number;
   ـid: string;
 
   @Prop({ required: true, enum: SignalType })
@@ -38,6 +37,9 @@ export class Signal {
 
   @Prop()
   closedPrice?: number;
+
+  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+  owner: User;
 
   @Prop()
   closedAt?: Date;
