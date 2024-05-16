@@ -6,11 +6,11 @@ import { Model } from 'mongoose';
 @Injectable()
 export class SignalsService {
   constructor(@InjectModel(Signal.name) private signalModel: Model<Signal>) {
-    setTimeout(() => {
-      this.findAll().then((all) => {
-        console.log(all);
-      });
-    }, 3000);
+    // setTimeout(() => {
+    //   this.findAll().then((all) => {
+    //     console.log(all);
+    //   });
+    // }, 3000);
   }
 
   async create(

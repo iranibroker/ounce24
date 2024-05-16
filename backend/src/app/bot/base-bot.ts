@@ -40,21 +40,44 @@ export class BaseBot {
     return state?.data;
   }
 
-  async login(ctx: Context) {
-    const state = this.getState<Partial<User>>(ctx.from.id);
-    const dto = state?.data;
-    const text = ctx.message['text'];
-    if (state?.state !== UserStateType.Login) {
-      this.setState(ctx.from.id, {state: UserStateType.Login});
-      ctx.reply('شماره تلفن همراه خود را وارد کنید')
-    }
+  async welcome(ctx: Context) {
+    ctx.reply(`به ounce24 خوش‌آمدید
+از دستورات زیر میتوانید استفاده کنید
+/new_signal
+/my_signals`);
   }
 
-  async preCheckValid(ctx: Context) {
+  async login(ctx: Context) {
+    const state = this.getState<Partial<User>>(ctx.from.id);
+    const dto = state?.data || {
+      telegramId: ctx.from.id,
+    };
+    const text = ctx.message['text'];
+    if (state?.state !== UserStateType.Login) {
+      this.setState(ctx.from.id, { state: UserStateType.Login });
+      ctx.reply('شماره تلفن همراه خود را وارد کنید');
+    } else if (!dto?.phone) {
+      dto.phone = text;
+      ctx.reply('نام و نام خانوادگی خود را وارد کنید');
+    } else if (!dto?.name) {
+      dto.name = text;
+      const createdData = new this.usersModel(dto);
+      await createdData.save();
+      this.welcome(ctx);
+      this.userStates.delete(ctx.from.id);
+    }
+    this.setStateData(ctx.from.id, dto);
+  }
+
+  async isValid(ctx: Context) {
+    console.log(ctx.from.id);
     const user = await this.getUser(ctx.from.id);
+    console.log(user);
     if (!user) {
       this.login(ctx);
+      return false;
     }
+    return true;
   }
 
   getUser(telegramId: number): Promise<User> {

@@ -9,6 +9,7 @@ import {
   Hears,
   InjectBot,
   On,
+  Start,
   Update,
 } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
@@ -25,8 +26,14 @@ export class BotService extends BaseBot {
     super(userModel);
   }
 
+  @Start()
+  start(@Ctx() ctx: Context) {
+    this.welcome(ctx);
+  }
+
   @Command('new_signal')
   async newSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
     await ctx.reply('نوع سیگنال رو مشخص کنید', {
       reply_markup: {
         inline_keyboard: [
@@ -42,6 +49,7 @@ export class BotService extends BaseBot {
   @Action('new_buy_signal')
   @Action('new_sell_signal')
   async newSellSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
     ctx.editMessageReplyMarkup({ inline_keyboard: [] });
     await ctx.editMessageText(
@@ -58,6 +66,7 @@ export class BotService extends BaseBot {
   }
 
   async handleNewSignalMessage(ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
     const signal = this.getStateData<Signal>(ctx.from.id);
     const isSell = signal.type === SignalType.Sell;
     const text = ctx.message['text'];
@@ -76,6 +85,20 @@ export class BotService extends BaseBot {
       await createdData.save();
       ctx.reply(Signal.getMessage(signal));
       this.userStates.delete(ctx.from.id);
+    }
+  }
+
+  @On('message')
+  async onMessage(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const userState = this.getState(ctx.from.id);
+    switch (userState?.state) {
+      case UserStateType.NewSignal:
+        this.handleNewSignalMessage(ctx);
+        break;
+
+      default:
+        break;
     }
   }
 }
