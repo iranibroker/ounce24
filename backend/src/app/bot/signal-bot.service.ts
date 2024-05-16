@@ -73,7 +73,18 @@ export class SignalBotService extends BaseBot {
               .exec();
           }
         } else {
-          //
+          if (price > signal.maxPrice || price < signal.minPrice) {
+            signal.status = SignalStatus.Closed;
+            signal.closedAt = new Date();
+            signal.closedOuncePrice = price;
+            this.signalModel
+              .findByIdAndUpdate(signal.id, {
+                status: signal.status,
+                closedAt: signal.closedAt,
+                closedOuncePrice: signal.closedOuncePrice,
+              })
+              .exec();
+          }
         }
         if (signal.publishChannelMessageId) {
           this.bot.telegram
@@ -197,7 +208,9 @@ export class SignalBotService extends BaseBot {
     });
     ctx.answerCbQuery();
 
-    await ctx.reply(`قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`);
+    await ctx.reply(
+      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`
+    );
   }
 
   async handleNewSignalMessage(ctx: Context) {
