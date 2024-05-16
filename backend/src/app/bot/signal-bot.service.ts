@@ -12,16 +12,85 @@ import { Action, Command, Ctx, InjectBot, Update } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
+import { OuncePriceService } from '../ounce-price/ounce-price.service';
 
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
+  private publicChannelOuncePriceMessageId: number;
   constructor(
     @InjectBot() private bot: Telegraf<Context>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
-    @InjectModel(User.name) private userModel: Model<User>
+    @InjectModel(User.name) private userModel: Model<User>,
+    private ouncePriceService: OuncePriceService
   ) {
     super(userModel);
+
+    this.ouncePriceService.obs.subscribe(async (price) => {
+      if (!price) return;
+      if (this.publicChannelOuncePriceMessageId) {
+        this.bot.telegram
+          .editMessageText(
+            process.env.PUBLISH_CHANNEL_ID,
+            this.publicChannelOuncePriceMessageId,
+            '',
+            `قیمت لحظه‌ای اونس طلا: ${price}`
+          )
+          .catch((er) => {
+            //unhandled
+          });
+      } else {
+        this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
+        this.bot.telegram
+          .sendMessage(
+            process.env.PUBLISH_CHANNEL_ID,
+            `قیمت لحظه‌ای اونس طلا: ${price}`
+          )
+          .then((message) => {
+            this.publicChannelOuncePriceMessageId = message.message_id;
+            this.bot.telegram.pinChatMessage(
+              process.env.PUBLISH_CHANNEL_ID,
+              message.message_id
+            );
+          });
+      }
+
+      const signals = await this.signalModel
+        .find({
+          status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+          deletedAt: null,
+        })
+        .exec();
+
+      for (const signal of signals) {
+        let changeDetection = false;
+        if (signal.status === SignalStatus.Pending) {
+          if (Signal.activeTrigger(signal, price)) {
+            changeDetection = true;
+            signal.status = SignalStatus.Active;
+            this.signalModel
+              .findByIdAndUpdate(signal.id, {
+                status: signal.status,
+              })
+              .exec();
+          }
+        } else {
+          changeDetection = true;
+        }
+        if (signal.publishChannelMessageId && changeDetection) {
+          this.bot.telegram
+            .editMessageText(
+              process.env.PUBLISH_CHANNEL_ID,
+              signal.publishChannelMessageId,
+              '',
+              Signal.getMessage(signal, false, price)
+            )
+            .catch((er) => {
+              //unhandled
+            });
+        }
+      }
+    });
   }
 
   @Command('new_signal')
@@ -85,7 +154,7 @@ export class SignalBotService extends BaseBot {
     await this.signalModel
       .findByIdAndUpdate(id, { deletedAt: new Date() })
       .exec();
-    await ctx.deleteMessage(message.message_id);
+    if (message.message_id) await ctx.deleteMessage(message.message_id);
     ctx.answerCbQuery('سیگنال شما حذف شد');
   }
 
@@ -98,7 +167,8 @@ export class SignalBotService extends BaseBot {
     await this.signalModel
       .findByIdAndUpdate(id, { status: SignalStatus.Closed })
       .exec();
-    await ctx.deleteMessage(message.message_id);
+
+    if (message.message_id) await ctx.deleteMessage(message.message_id);
     ctx.answerCbQuery('سیگنال بسته شد');
   }
 
@@ -109,10 +179,19 @@ export class SignalBotService extends BaseBot {
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
     const signal = {
       type: isSell ? SignalType.Sell : SignalType.Buy,
+      createdOuncePrice: this.ouncePriceService.current,
     } as Signal;
 
     ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-    await ctx.editMessageText(`ایجاد سیگنال ${SignalTypeText[signal.type]}:`);
+    try {
+      await ctx
+        .editMessageText(`ایجاد سیگنال ${SignalTypeText[signal.type]}:`)
+        .catch(() => {
+          //unhandled
+        });
+    } catch (error) {
+      // unhandled
+    }
 
     this.setState<Partial<Signal>>(ctx.from.id, {
       state: UserStateType.NewSignal,

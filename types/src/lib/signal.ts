@@ -50,8 +50,11 @@ export class Signal {
   @Prop()
   publishChannelMessageId?: number;
 
+  @Prop({ required: true, default: 0 })
+  createdOuncePrice: number;
+
   @Prop()
-  closedPrice?: number;
+  closedOuncePrice?: number;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   owner: User;
@@ -61,6 +64,18 @@ export class Signal {
 
   @Prop()
   deletedAt?: Date;
+
+  static activeTrigger(signal: Signal, ouncePrice: number) {
+    const min = Math.min(signal.createdOuncePrice, ouncePrice);
+    const max = Math.max(signal.createdOuncePrice, ouncePrice);
+    return signal.entryPrice > min && signal.entryPrice < max;
+  }
+
+  static getPip(signal: Signal, ouncePrice: number) {
+    const isSell = signal.type === SignalType.Sell;
+    const diff = isSell ? signal.entryPrice - ouncePrice : ouncePrice - signal.entryPrice;
+    return `${(diff < 0 ? '🟥' : '🟩')} ${(diff * 10).toFixed(3)} pip`
+  }
 
   static getProfit(signal: Signal) {
     const isSell = signal.type === SignalType.Sell;
@@ -72,18 +87,24 @@ export class Signal {
     return isSell ? signal.maxPrice : signal.minPrice;
   }
 
-  static getMessage(signal: Signal, showId = false) {
+  static getMessage(signal: Signal, showId = false, ouncePrice?: number) {
     const isSell = signal.type === SignalType.Sell;
-    return `سیگنال
+    let text = `سیگنال
 ${SignalTypeText[signal.type]}
 به قیمت: ${signal.entryPrice}
     
 ❌ حد ضرر: ${this.getLoss(signal)}
 ✅ حد سود: ${this.getProfit(signal)}
     
-وضعیت : ${SignalStatusText[signal.status]}
+وضعیت: ${SignalStatusText[signal.status]}\n`;
 
-${showId ? '#' + signal.id : ''}`;
+    if (ouncePrice && signal.status === SignalStatus.Active) {
+      text += '\n' + Signal.getPip(signal, ouncePrice);
+    }
+
+    if (showId) text += `#${signal.id}`;
+
+    return text;
   }
 }
 

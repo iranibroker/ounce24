@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, User } from '@ounce24/types';
+import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Ctx, InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
