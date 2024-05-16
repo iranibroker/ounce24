@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { User } from './user';
 
 export type SignalDocument = HydratedDocument<Signal>;
@@ -38,7 +38,7 @@ export class Signal {
   @Prop()
   closedPrice?: number;
 
-  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+  @Prop({ type: Types.ObjectId, ref: 'User' })
   owner: User;
 
   @Prop()

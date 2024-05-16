@@ -1,7 +1,7 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { Signal, User, UserSchema } from '@ounce24/types';
+import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Context } from 'telegraf';
+import { PersianNumberService } from '@ounce24/utils';
 
 export enum UserStateType {
   Login,
@@ -57,7 +57,17 @@ export class BaseBot {
       this.setState(ctx.from.id, { state: UserStateType.Login });
       ctx.reply('شماره تلفن همراه خود را وارد کنید');
     } else if (!dto?.phone) {
-      dto.phone = text;
+      const phone = PersianNumberService.toEnglish(text);
+      if (
+        isNaN(Number(phone)) ||
+        phone.length !== 11 ||
+        phone.search('09') !== 0
+      ) {
+        ctx.reply(
+          'شماره همراه وارد شده صحیح نیست. لطفا به صورت کامل وارد کنید. مثلا: 09123456789'
+        );
+        return;
+      }
       ctx.reply('نام و نام خانوادگی خود را وارد کنید');
     } else if (!dto?.name) {
       dto.name = text;
@@ -70,9 +80,7 @@ export class BaseBot {
   }
 
   async isValid(ctx: Context) {
-    console.log(ctx.from.id);
     const user = await this.getUser(ctx.from.id);
-    console.log(user);
     if (!user) {
       this.login(ctx);
       return false;
