@@ -30,7 +30,7 @@ export const SignalTypeText = {
 
 @Schema({ timestamps: true })
 export class Signal {
-  ـid: string;
+  id: string;
 
   @Prop({ required: true, enum: SignalType })
   type: SignalType;
@@ -56,6 +56,9 @@ export class Signal {
   @Prop()
   closedAt?: Date;
 
+  @Prop()
+  deletedAt?: Date;
+
   static getProfit(signal: Signal) {
     const isSell = signal.type === SignalType.Sell;
     return isSell ? signal.minPrice : signal.maxPrice;
@@ -68,13 +71,16 @@ export class Signal {
 
   static getMessage(signal: Signal) {
     const isSell = signal.type === SignalType.Sell;
-    return `سیگنال 
-${SignalTypeText[signal.type]} به قیمت : ${signal.entryPrice}
+    return `سیگنال
+${SignalTypeText[signal.type]}
+به قیمت: ${signal.entryPrice}
     
-❌حد ضرر: ${this.getLoss(signal)}
-✅حد سود: ${this.getProfit(signal)}
+❌ حد ضرر: ${this.getLoss(signal)}
+✅ حد سود: ${this.getProfit(signal)}
     
-وضعیت : ${SignalStatusText[signal.status]}`;
+وضعیت : ${SignalStatusText[signal.status]}
+
+#${signal.id}`;
   }
 }
 

@@ -41,10 +41,22 @@ export class BaseBot {
   }
 
   async welcome(ctx: Context) {
-    ctx.reply(`به ounce24 خوش‌آمدید
+    ctx.reply(
+      `
+به ounce24 خوش‌آمدید
 از دستورات زیر میتوانید استفاده کنید
-/new_signal
-/my_signals`);
+
+/new_signal ایجاد سیگنال جدید
+
+/my_signals مدیریت سیگنال‌های ثبت شده
+`,
+      {
+        reply_markup: {
+          inline_keyboard: [],
+          remove_keyboard: true,
+        },
+      }
+    );
   }
 
   async login(ctx: Context) {
@@ -59,7 +71,6 @@ export class BaseBot {
       ctx.reply('شماره تلفن همراه خود را وارد کنید');
     } else if (!dto?.phone) {
       const phone = PersianNumberService.toEnglish(text);
-      console.log(isNaN(Number(phone)), phone.length, phone.search('09'));
       if (
         isNaN(Number(phone)) ||
         phone.length !== 11 ||
