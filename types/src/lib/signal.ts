@@ -48,6 +48,9 @@ export class Signal {
   minPrice: number;
 
   @Prop()
+  publishChannelMessageId?: number;
+
+  @Prop()
   closedPrice?: number;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
@@ -69,7 +72,7 @@ export class Signal {
     return isSell ? signal.maxPrice : signal.minPrice;
   }
 
-  static getMessage(signal: Signal) {
+  static getMessage(signal: Signal, showId = false) {
     const isSell = signal.type === SignalType.Sell;
     return `سیگنال
 ${SignalTypeText[signal.type]}
@@ -80,7 +83,7 @@ ${SignalTypeText[signal.type]}
     
 وضعیت : ${SignalStatusText[signal.status]}
 
-#${signal.id}`;
+${showId ? '#' + signal.id : ''}`;
   }
 }
 

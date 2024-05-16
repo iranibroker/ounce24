@@ -14,29 +14,29 @@ export type UserState<T = any> = {
 };
 
 export class BaseBot {
-  protected userStates = new Map<number, UserState>();
+  protected static userStates = new Map<number, UserState>();
 
   constructor(private usersModel: Model<User>) {}
 
   setState<T>(userId: number, state: UserState<T>) {
-    this.userStates.set(userId, state);
+    BaseBot.userStates.set(userId, state);
   }
 
   getState<T>(userId: number) {
-    const state: UserState<T> = this.userStates.get(userId);
+    const state: UserState<T> = BaseBot.userStates.get(userId);
     return state;
   }
 
   setStateData<T>(userId: number, data: T) {
-    const state = this.userStates.get(userId);
+    const state = BaseBot.userStates.get(userId);
     if (state) {
       state.data = data;
-      this.userStates.set(userId, state);
+      BaseBot.userStates.set(userId, state);
     }
   }
 
   getStateData<T>(userId: number) {
-    const state: UserState<T> = this.userStates.get(userId);
+    const state: UserState<T> = BaseBot.userStates.get(userId);
     return state?.data;
   }
 
@@ -88,7 +88,7 @@ export class BaseBot {
       const createdData = new this.usersModel(dto);
       await createdData.save();
       this.welcome(ctx);
-      this.userStates.delete(ctx.from.id);
+      BaseBot.userStates.delete(ctx.from.id);
     }
     this.setStateData(ctx.from.id, dto);
   }

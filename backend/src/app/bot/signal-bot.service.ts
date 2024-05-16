@@ -59,24 +59,26 @@ export class SignalBotService extends BaseBot {
       .exec();
 
     for (const signal of signals) {
-      await ctx.reply(Signal.getMessage(signal), {
+      await ctx.reply(Signal.getMessage(signal, true), {
         reply_markup: {
           inline_keyboard: [
             signal.status === SignalStatus.Active
               ? [{ text: 'بستن دستی', callback_data: 'close_signal' }]
               : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
+            [{ text: 'publish', callback_data: 'publish_signal' }],
           ],
         },
       });
     }
 
     if (!signals.length) {
-      ctx.reply('هیچ سیگنال کاشته شده یا فعالی ندارید.')
+      ctx.reply('هیچ سیگنال کاشته شده یا فعالی ندارید.');
     }
   }
 
   @Action('remove_signal')
   async removeSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
     const message = ctx.callbackQuery.message;
     const text: string = ctx.callbackQuery.message['text'];
     const id = text.split('#')[1];
@@ -89,6 +91,7 @@ export class SignalBotService extends BaseBot {
 
   @Action('close_signal')
   async closeSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
     const message = ctx.callbackQuery.message;
     const text: string = ctx.callbackQuery.message['text'];
     const id = text.split('#')[1];
@@ -176,10 +179,51 @@ export class SignalBotService extends BaseBot {
 
     if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
       const user = await this.getUser(ctx.from.id);
-      const createdData = new this.signalModel({ ...signal, owner: user._id });
-      await createdData.save();
-      ctx.reply(Signal.getMessage(signal));
-      this.userStates.delete(ctx.from.id);
+      const dto = new this.signalModel({ ...signal, owner: user._id });
+      const createdSignal = await dto.save();
+      ctx.reply(Signal.getMessage(createdSignal));
+      BaseBot.userStates.delete(ctx.from.id);
+      this.publishSignal(ctx, createdSignal);
     }
+  }
+
+  @Action('follow_signal')
+  async followSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const signal = await this.getSignalFromMessage(ctx);
+    if (signal) this.publishSignal(ctx, signal);
+  }
+
+  @Action('publish_signal')
+  async publishSignalAction(ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const signal = await this.getSignalFromMessage(ctx);
+    if (signal) this.publishSignal(ctx, signal);
+  }
+  async publishSignal(ctx: Context, signal: Signal) {
+    if (process.env.PUBLISH_CHANNEL_ID) {
+      const message = await this.bot.telegram.sendMessage(
+        process.env.PUBLISH_CHANNEL_ID,
+        Signal.getMessage(signal),
+        {
+          reply_markup: {
+            inline_keyboard: [[{ text: 'sample', callback_data: 'abcd' }]],
+          },
+        }
+      );
+
+      this.signalModel
+        .findByIdAndUpdate(signal.id, {
+          publishChannelMessageId: message.message_id,
+        })
+        .exec();
+    }
+  }
+
+  getSignalFromMessage(@Ctx() ctx: Context) {
+    const message = ctx.callbackQuery.message;
+    const text: string = message['text'];
+    const id = text.split('#')[1];
+    return this.signalModel.findById(id).exec();
   }
 }
