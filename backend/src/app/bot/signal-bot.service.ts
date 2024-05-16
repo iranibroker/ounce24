@@ -63,10 +63,8 @@ export class SignalBotService extends BaseBot {
         .exec();
 
       for (const signal of signals) {
-        let changeDetection = false;
         if (signal.status === SignalStatus.Pending) {
           if (Signal.activeTrigger(signal, price)) {
-            changeDetection = true;
             signal.status = SignalStatus.Active;
             this.signalModel
               .findByIdAndUpdate(signal.id, {
@@ -75,9 +73,9 @@ export class SignalBotService extends BaseBot {
               .exec();
           }
         } else {
-          changeDetection = true;
+          //
         }
-        if (signal.publishChannelMessageId && changeDetection) {
+        if (signal.publishChannelMessageId) {
           this.bot.telegram
             .editMessageText(
               process.env.PUBLISH_CHANNEL_ID,
@@ -199,7 +197,7 @@ export class SignalBotService extends BaseBot {
     });
     ctx.answerCbQuery();
 
-    await ctx.reply('قیمت ورود به معامله را وارد کنید: مثلا 1934.95');
+    await ctx.reply(`قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`);
   }
 
   async handleNewSignalMessage(ctx: Context) {
