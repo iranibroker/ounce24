@@ -16,6 +16,18 @@ export enum SignalStatus {
   Canceled = 'CANCELED',
 }
 
+export const SignalStatusText = {
+  [SignalStatus.Pending]: '⛳️ کاشته شده',
+  [SignalStatus.Active]: '▶️ فعال',
+  [SignalStatus.Closed]: '⏹ بسته',
+  [SignalStatus.Canceled]: '⏹ بسته',
+};
+
+export const SignalTypeText = {
+  [SignalType.Buy]: '🔵 خرید (buy)',
+  [SignalType.Sell]: '🔴 فروش (sell)',
+};
+
 @Schema({ timestamps: true })
 export class Signal {
   ـid: string;
@@ -44,15 +56,25 @@ export class Signal {
   @Prop()
   closedAt?: Date;
 
+  static getProfit(signal: Signal) {
+    const isSell = signal.type === SignalType.Sell;
+    return isSell ? signal.minPrice : signal.maxPrice;
+  }
+
+  static getLoss(signal: Signal) {
+    const isSell = signal.type === SignalType.Sell;
+    return isSell ? signal.maxPrice : signal.minPrice;
+  }
+
   static getMessage(signal: Signal) {
     const isSell = signal.type === SignalType.Sell;
     return `سیگنال 
-${isSell ? '🔴 فروش (sell)' : '🔵 خرید (buy)'} به قیمت : ${signal.entryPrice}
+${SignalTypeText[signal.type]} به قیمت : ${signal.entryPrice}
     
-✅حد سود: ${isSell ? signal.maxPrice : signal.minPrice}
-❌حد ضرر: ${isSell ? signal.minPrice : signal.maxPrice}
+❌حد ضرر: ${this.getLoss(signal)}
+✅حد سود: ${this.getProfit(signal)}
     
-وضعیت :  ⛳️کاشته شده`;
+وضعیت : ${SignalStatusText[signal.status]}`;
   }
 }
 

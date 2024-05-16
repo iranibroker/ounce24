@@ -51,6 +51,7 @@ export class BaseBot {
     const state = this.getState<Partial<User>>(ctx.from.id);
     const dto = state?.data || {
       telegramId: ctx.from.id,
+      telegramUsername: ctx.from.username,
     };
     const text = ctx.message['text'];
     if (state?.state !== UserStateType.Login) {
@@ -58,6 +59,7 @@ export class BaseBot {
       ctx.reply('شماره تلفن همراه خود را وارد کنید');
     } else if (!dto?.phone) {
       const phone = PersianNumberService.toEnglish(text);
+      console.log(isNaN(Number(phone)), phone.length, phone.search('09'));
       if (
         isNaN(Number(phone)) ||
         phone.length !== 11 ||
@@ -68,6 +70,7 @@ export class BaseBot {
         );
         return;
       }
+      dto.phone = phone;
       ctx.reply('نام و نام خانوادگی خود را وارد کنید');
     } else if (!dto?.name) {
       dto.name = text;

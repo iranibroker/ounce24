@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, SignalType, User } from '@ounce24/types';
+import { Signal, SignalType, SignalTypeText, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import {
   Action,
@@ -39,8 +39,14 @@ export class BotService extends BaseBot {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: '🔴 فروش (sell)', callback_data: 'new_sell_signal' },
-            { text: '🔵 خرید (buy)', callback_data: 'new_buy_signal' },
+            {
+              text: SignalTypeText[SignalType.Sell],
+              callback_data: 'new_sell_signal',
+            },
+            {
+              text: SignalTypeText[SignalType.Buy],
+              callback_data: 'new_buy_signal',
+            },
           ],
         ],
       },
@@ -52,14 +58,16 @@ export class BotService extends BaseBot {
   async newSellSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
+    const signal = {
+      type: isSell ? SignalType.Sell : SignalType.Buy,
+    } as Signal;
+
     ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-    await ctx.editMessageText(
-      `ایجاد سیگنال ${isSell ? '🔴 فروش (sell)' : '🔵 خرید (buy)'}:`
-    );
+    await ctx.editMessageText(`ایجاد سیگنال ${SignalTypeText[signal.type]}:`);
 
     this.setState<Partial<Signal>>(ctx.from.id, {
       state: UserStateType.NewSignal,
-      data: { type: isSell ? SignalType.Sell : SignalType.Buy },
+      data: signal,
     });
     ctx.answerCbQuery();
 
@@ -83,14 +91,18 @@ export class BotService extends BaseBot {
     } else if (isSell) {
       if (!signal.maxPrice) {
         if (value - signal.entryPrice < 1) {
-          ctx.reply(`مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`);
+          ctx.reply(
+            `مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`
+          );
           return;
         }
         signal.maxPrice = value;
         ctx.reply(`حد سود را مشخص کنید:`);
       } else if (!signal.minPrice) {
         if (signal.entryPrice - value < 1) {
-          ctx.reply(`مقدار وارد شده باید حداقل یک واحد کوچکتر از قیمت ورود باشد.`);
+          ctx.reply(
+            `مقدار وارد شده باید حداقل یک واحد کوچکتر از قیمت ورود باشد.`
+          );
           return;
         }
         signal.minPrice = value;
@@ -98,14 +110,18 @@ export class BotService extends BaseBot {
     } else {
       if (!signal.minPrice) {
         if (signal.entryPrice - value < 1) {
-          ctx.reply(`مقدار وارد شده باید حداقل یک واحد کوچکتر از قیمت ورود باشد.`);
+          ctx.reply(
+            `مقدار وارد شده باید حداقل یک واحد کوچکتر از قیمت ورود باشد.`
+          );
           return;
         }
         signal.minPrice = value;
         ctx.reply(`حد سود را مشخص کنید:`);
       } else if (!signal.maxPrice) {
         if (value - signal.entryPrice < 1) {
-          ctx.reply(`مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`);
+          ctx.reply(
+            `مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`
+          );
           return;
         }
         signal.maxPrice = value;
@@ -131,6 +147,7 @@ export class BotService extends BaseBot {
         break;
 
       default:
+        this.welcome(ctx);
         break;
     }
   }
