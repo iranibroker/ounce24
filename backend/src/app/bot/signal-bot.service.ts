@@ -13,20 +13,37 @@ import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
+import { BehaviorSubject, concatMap, delay, of } from 'rxjs';
 
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
   private publicChannelOuncePriceMessageId: number;
   private signalMessageTime = new Map<string, number>();
+  private publishBots: Telegraf<Context>[] = [];
+  private publisherSubject: BehaviorSubject<() => void>[] = [];
 
   constructor(
-    @InjectBot() private bot: Telegraf<Context>,
+    @InjectBot('main') private bot: Telegraf<Context>,
+    @InjectBot('publish1') private publish1bot: Telegraf<Context>,
+    @InjectBot('publish2') private publish2bot: Telegraf<Context>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
     private ouncePriceService: OuncePriceService
   ) {
     super(userModel);
+    this.publishBots = [this.publish1bot, this.publish2bot];
+    this.publisherSubject = [
+      new BehaviorSubject<() => void>(null),
+      new BehaviorSubject<() => void>(null),
+    ];
+
+    this.publisherSubject[0]
+      .pipe(concatMap((value) => of(value).pipe(delay(700))))
+      .subscribe((func) => func && func());
+    this.publisherSubject[1]
+      .pipe(concatMap((value) => of(value).pipe(delay(700))))
+      .subscribe((func) => func && func());
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
@@ -40,6 +57,7 @@ export class SignalBotService extends BaseBot {
         })
         .exec();
 
+      let publisherIndex = 0;
       for (const signal of signals) {
         let statusChangeDetection = false;
         if (signal.status === SignalStatus.Pending) {
@@ -76,18 +94,25 @@ export class SignalBotService extends BaseBot {
                 signal.createdAt.valueOf())) /
             1000;
 
-          if (statusChangeDetection || timeDiff > 20) {
+          if (statusChangeDetection || timeDiff > 0) {
             this.signalMessageTime.set(signal.id, Date.now());
-            await this.bot.telegram
-              .editMessageText(
-                process.env.PUBLISH_CHANNEL_ID,
-                signal.messageId,
-                '',
-                Signal.getMessage(signal, false, price)
-              )
-              .catch((er) => {
-                //unhandled
-              });
+            const publisherBot = this.publishBots[publisherIndex];
+            const publisehrSubject = this.publisherSubject[publisherIndex];
+            console.log('edit', publisherIndex, signal);
+            publisehrSubject.next(() => {
+              console.log('edit done', signal);
+              publisherBot.telegram
+                .editMessageText(
+                  process.env.PUBLISH_CHANNEL_ID,
+                  signal.messageId,
+                  '',
+                  Signal.getMessage(signal, false, price)
+                )
+                .catch((er) => {
+                  console.error(er);
+                });
+            });
+            publisherIndex = (publisherIndex + 1) % this.publishBots.length;
           }
         }
       }

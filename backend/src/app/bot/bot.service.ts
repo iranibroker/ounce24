@@ -11,7 +11,7 @@ import { SignalBotService } from './signal-bot.service';
 @Update()
 export class BotService extends BaseBot {
   constructor(
-    @InjectBot() private bot: Telegraf<Context>,
+    @InjectBot('main') private bot: Telegraf<Context>,
     @InjectModel(User.name) private userModel: Model<User>,
     private signalBot: SignalBotService
   ) {
