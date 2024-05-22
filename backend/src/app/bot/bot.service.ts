@@ -27,7 +27,6 @@ export class BotService extends BaseBot {
   async onMessage(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const userState = this.getState(ctx.from.id);
-    console.log(userState);
     switch (userState?.state) {
       case UserStateType.NewSignal:
         this.signalBot.handleNewSignalMessage(ctx);

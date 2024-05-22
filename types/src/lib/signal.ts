@@ -48,7 +48,7 @@ export class Signal {
   minPrice: number;
 
   @Prop()
-  publishChannelMessageId?: number;
+  messageId?: number;
 
   @Prop({ required: true, default: 0 })
   createdOuncePrice: number;
@@ -58,6 +58,8 @@ export class Signal {
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   owner: User;
+
+  createdAt?: Date;
 
   @Prop()
   closedAt?: Date;
@@ -73,8 +75,15 @@ export class Signal {
 
   static getPip(signal: Signal, ouncePrice: number) {
     const isSell = signal.type === SignalType.Sell;
-    const diff = isSell ? signal.entryPrice - ouncePrice : ouncePrice - signal.entryPrice;
-    return `${(diff < 0 ? '🟥' : '🟩')} ${(diff * 10).toFixed(3)} pip`
+    const diff = isSell
+      ? signal.entryPrice - ouncePrice
+      : ouncePrice - signal.entryPrice;
+    return Number((diff * 10).toFixed(3));
+  }
+
+  static getPipString(signal: Signal, ouncePrice: number) {
+    const diff = Signal.getPip(signal, ouncePrice);
+    return `${diff < 0 ? '🟥' : '🟩'} ${diff} pip`;
   }
 
   static getProfit(signal: Signal) {
@@ -99,7 +108,7 @@ ${SignalTypeText[signal.type]}
 وضعیت: ${SignalStatusText[signal.status]}\n`;
 
     if (ouncePrice && signal.status === SignalStatus.Active) {
-      text += '\n' + Signal.getPip(signal, ouncePrice);
+      text += '\n' + Signal.getPipString(signal, ouncePrice);
     }
 
     if (showId) text += `#${signal.id}`;

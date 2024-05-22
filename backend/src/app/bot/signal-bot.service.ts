@@ -18,6 +18,8 @@ import { OuncePriceService } from '../ounce-price/ounce-price.service';
 @Update()
 export class SignalBotService extends BaseBot {
   private publicChannelOuncePriceMessageId: number;
+  private signalMessageTime = new Map<string, number>();
+
   constructor(
     @InjectBot() private bot: Telegraf<Context>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
@@ -28,32 +30,8 @@ export class SignalBotService extends BaseBot {
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
-      if (this.publicChannelOuncePriceMessageId) {
-        this.bot.telegram
-          .editMessageText(
-            process.env.PUBLISH_CHANNEL_ID,
-            this.publicChannelOuncePriceMessageId,
-            '',
-            `قیمت لحظه‌ای اونس طلا: ${price}`
-          )
-          .catch((er) => {
-            //unhandled
-          });
-      } else {
-        this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
-        this.bot.telegram
-          .sendMessage(
-            process.env.PUBLISH_CHANNEL_ID,
-            `قیمت لحظه‌ای اونس طلا: ${price}`
-          )
-          .then((message) => {
-            this.publicChannelOuncePriceMessageId = message.message_id;
-            this.bot.telegram.pinChatMessage(
-              process.env.PUBLISH_CHANNEL_ID,
-              message.message_id
-            );
-          });
-      }
+
+      this.updateOunceMessage(price);
 
       const signals = await this.signalModel
         .find({
@@ -63,8 +41,10 @@ export class SignalBotService extends BaseBot {
         .exec();
 
       for (const signal of signals) {
+        let statusChangeDetection = false;
         if (signal.status === SignalStatus.Pending) {
           if (Signal.activeTrigger(signal, price)) {
+            statusChangeDetection = true;
             signal.status = SignalStatus.Active;
             this.signalModel
               .findByIdAndUpdate(signal.id, {
@@ -74,6 +54,7 @@ export class SignalBotService extends BaseBot {
           }
         } else {
           if (price > signal.maxPrice || price < signal.minPrice) {
+            statusChangeDetection = true;
             signal.status = SignalStatus.Closed;
             signal.closedAt = new Date();
             signal.closedOuncePrice = price;
@@ -86,20 +67,60 @@ export class SignalBotService extends BaseBot {
               .exec();
           }
         }
-        if (signal.publishChannelMessageId) {
-          this.bot.telegram
-            .editMessageText(
-              process.env.PUBLISH_CHANNEL_ID,
-              signal.publishChannelMessageId,
-              '',
-              Signal.getMessage(signal, false, price)
-            )
-            .catch((er) => {
-              //unhandled
-            });
+
+        // check change detections and update message
+        if (signal.messageId) {
+          const timeDiff =
+            (Date.now() -
+              (this.signalMessageTime.get(signal.id) ||
+                signal.createdAt.valueOf())) /
+            1000;
+
+          if (statusChangeDetection || timeDiff > 20) {
+            this.signalMessageTime.set(signal.id, Date.now());
+            await this.bot.telegram
+              .editMessageText(
+                process.env.PUBLISH_CHANNEL_ID,
+                signal.messageId,
+                '',
+                Signal.getMessage(signal, false, price)
+              )
+              .catch((er) => {
+                //unhandled
+              });
+          }
         }
       }
     });
+  }
+
+  private updateOunceMessage(price: number) {
+    if (this.publicChannelOuncePriceMessageId) {
+      this.bot.telegram
+        .editMessageText(
+          process.env.PUBLISH_CHANNEL_ID,
+          this.publicChannelOuncePriceMessageId,
+          '',
+          `قیمت لحظه‌ای اونس طلا: ${price}`
+        )
+        .catch((er) => {
+          //unhandled
+        });
+    } else {
+      this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
+      this.bot.telegram
+        .sendMessage(
+          process.env.PUBLISH_CHANNEL_ID,
+          `قیمت لحظه‌ای اونس طلا: ${price}`
+        )
+        .then((message) => {
+          this.publicChannelOuncePriceMessageId = message.message_id;
+          this.bot.telegram.pinChatMessage(
+            process.env.PUBLISH_CHANNEL_ID,
+            message.message_id
+          );
+        });
+    }
   }
 
   @Command('new_signal')
@@ -304,7 +325,7 @@ export class SignalBotService extends BaseBot {
 
       this.signalModel
         .findByIdAndUpdate(signal.id, {
-          publishChannelMessageId: message.message_id,
+          messageId: message.message_id,
         })
         .exec();
     }
