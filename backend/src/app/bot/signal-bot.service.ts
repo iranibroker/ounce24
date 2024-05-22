@@ -13,12 +13,14 @@ import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
+import { Redis } from 'ioredis';
 
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
   private publicChannelOuncePriceMessageId: number;
   private signalMessageTime = new Map<string, number>();
+  private redis: Redis;
 
   constructor(
     @InjectBot() private bot: Telegraf<Context>,
@@ -27,6 +29,12 @@ export class SignalBotService extends BaseBot {
     private ouncePriceService: OuncePriceService
   ) {
     super(userModel);
+    this.redis = new Redis(process.env.REDIS_URI);
+    this.redis.get('publicChannelOuncePriceMessageId', (err, result) => {
+      if (result) {
+        this.publicChannelOuncePriceMessageId = Number(result);
+      }
+    });
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
@@ -76,7 +84,7 @@ export class SignalBotService extends BaseBot {
                 signal.createdAt.valueOf())) /
             1000;
 
-          if (statusChangeDetection || timeDiff > 20) {
+          if (statusChangeDetection || timeDiff > 15) {
             this.signalMessageTime.set(signal.id, Date.now());
             await this.bot.telegram
               .editMessageText(
@@ -104,7 +112,7 @@ export class SignalBotService extends BaseBot {
           `قیمت لحظه‌ای اونس طلا: ${price}`
         )
         .catch((er) => {
-          //unhandled
+          this.publicChannelOuncePriceMessageId = undefined;
         });
     } else {
       this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
@@ -115,6 +123,10 @@ export class SignalBotService extends BaseBot {
         )
         .then((message) => {
           this.publicChannelOuncePriceMessageId = message.message_id;
+          this.redis.set(
+            'publicChannelOuncePriceMessageId',
+            this.publicChannelOuncePriceMessageId
+          );
           this.bot.telegram.pinChatMessage(
             process.env.PUBLISH_CHANNEL_ID,
             message.message_id
