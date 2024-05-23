@@ -11,9 +11,7 @@ export class OuncePublishBotService {
     private ouncePriceService: OuncePriceService
   ) {
     let publishChannelMessageId = 0;
-    const redis = new Redis(
-      'redis://:X7Y5T2sFNrdcn28h4JLURCKQkgVBynbc@075b5acd-5c6f-4d3e-8682-6f05b1d15743.hsvc.ir:31944/1'
-    );
+    const redis = new Redis(process.env.REDIS_URI);
 
     redis.get('publicChannelOuncePriceMessageId', (err, result) => {
       if (result) {
@@ -34,7 +32,9 @@ export class OuncePublishBotService {
               publishChannelMessageId = 0;
             });
         } else {
-          this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
+          this.bot.telegram.unpinAllChatMessages(
+            process.env.PUBLISH_CHANNEL_ID
+          );
           this.bot.telegram
             .sendMessage(
               process.env.PUBLISH_CHANNEL_ID,
@@ -54,6 +54,5 @@ export class OuncePublishBotService {
         }
       });
     });
-
   }
 }
