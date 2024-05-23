@@ -9,6 +9,7 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { BotModule } from './bot/bot.module';
 import { SchemasModule } from './schemas/schemas.module';
 import { OuncePriceModule } from './ounce-price/ounce-price.module';
+import { PublishBotsModules } from './configs/publisher-bots.config';
 
 @Module({
   imports: [
@@ -24,22 +25,7 @@ import { OuncePriceModule } from './ounce-price/ounce-price.module';
       }),
       inject: [ConfigService],
     }),
-    TelegrafModule.forRootAsync({
-      imports: [ConfigModule],
-      botName: 'publish1',
-      useFactory: (configService: ConfigService) => ({
-        token: configService.get<string>('PUBLISHER1_BOT_TOKEN'),
-      }),
-      inject: [ConfigService],
-    }),
-    TelegrafModule.forRootAsync({
-      imports: [ConfigModule],
-      botName: 'publish2',
-      useFactory: (configService: ConfigService) => ({
-        token: configService.get<string>('PUBLISHER2_BOT_TOKEN'),
-      }),
-      inject: [ConfigService],
-    }),
+    ...PublishBotsModules,
     SignalsModule,
     BotModule,
     SchemasModule,

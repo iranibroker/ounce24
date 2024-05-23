@@ -16,8 +16,9 @@ export class OuncePriceService {
 
     this.redis.on('message', (channel, message) => {
       if (channel === REDIS_CHANNEL) {
+        const oldPrice = this.current;
         const price = Number(message);
-        this.price.next(price);
+        if (price != oldPrice) this.price.next(price);
       }
     });
   }
