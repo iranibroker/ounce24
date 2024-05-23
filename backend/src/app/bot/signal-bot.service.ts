@@ -9,19 +9,18 @@ import {
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Action, Command, Ctx, InjectBot, Update } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
+import { Context, Telegraf, Telegram } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
-import { BehaviorSubject, concatMap, delay, of } from 'rxjs';
+import { Redis } from 'ioredis';
 
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
   private publicChannelOuncePriceMessageId: number;
-  private signalMessageTime = new Map<string, number>();
-  private publishBots: Telegraf<Context>[] = [];
-  private publisherSubject: BehaviorSubject<() => void>[] = [];
+  private redis: Redis;
+  private actionQueue: [string, (telegram: Telegram) => void][] = [];
 
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
@@ -32,18 +31,25 @@ export class SignalBotService extends BaseBot {
     private ouncePriceService: OuncePriceService
   ) {
     super(userModel);
-    this.publishBots = [this.publish1bot, this.publish2bot];
-    this.publisherSubject = [
-      new BehaviorSubject<() => void>(null),
-      new BehaviorSubject<() => void>(null),
-    ];
+    this.redis = new Redis(
+      'redis://:X7Y5T2sFNrdcn28h4JLURCKQkgVBynbc@075b5acd-5c6f-4d3e-8682-6f05b1d15743.hsvc.ir:31944/1'
+    );
+    this.redis.get('publicChannelOuncePriceMessageId', (err, result) => {
+      if (result) {
+        this.publicChannelOuncePriceMessageId = Number(result);
+      }
+    });
 
-    this.publisherSubject[0]
-      .pipe(concatMap((value) => of(value).pipe(delay(700))))
-      .subscribe((func) => func && func());
-    this.publisherSubject[1]
-      .pipe(concatMap((value) => of(value).pipe(delay(700))))
-      .subscribe((func) => func && func());
+    const publishBots = [this.publish1bot, this.publish2bot];
+
+    for (const bot of publishBots) {
+      setInterval(() => {
+        if (this.actionQueue.length) {
+          const action = this.actionQueue.shift();
+          action[1](bot.telegram);
+        }
+      }, 3000);
+    }
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
@@ -57,7 +63,6 @@ export class SignalBotService extends BaseBot {
         })
         .exec();
 
-      let publisherIndex = 0;
       for (const signal of signals) {
         let statusChangeDetection = false;
         if (signal.status === SignalStatus.Pending) {
@@ -71,8 +76,8 @@ export class SignalBotService extends BaseBot {
               .exec();
           }
         } else {
+          statusChangeDetection = true;
           if (price > signal.maxPrice || price < signal.minPrice) {
-            statusChangeDetection = true;
             signal.status = SignalStatus.Closed;
             signal.closedAt = new Date();
             signal.closedOuncePrice = price;
@@ -88,20 +93,9 @@ export class SignalBotService extends BaseBot {
 
         // check change detections and update message
         if (signal.messageId) {
-          const timeDiff =
-            (Date.now() -
-              (this.signalMessageTime.get(signal.id) ||
-                signal.createdAt.valueOf())) /
-            1000;
-
-          if (statusChangeDetection || timeDiff > 0) {
-            this.signalMessageTime.set(signal.id, Date.now());
-            const publisherBot = this.publishBots[publisherIndex];
-            const publisehrSubject = this.publisherSubject[publisherIndex];
-            console.log('edit', publisherIndex, signal);
-            publisehrSubject.next(() => {
-              console.log('edit done', signal);
-              publisherBot.telegram
+          if (statusChangeDetection) {
+            const func = (telegram) => {
+              telegram
                 .editMessageText(
                   process.env.PUBLISH_CHANNEL_ID,
                   signal.messageId,
@@ -111,8 +105,13 @@ export class SignalBotService extends BaseBot {
                 .catch((er) => {
                   console.error(er);
                 });
-            });
-            publisherIndex = (publisherIndex + 1) % this.publishBots.length;
+            };
+            const existAction = this.actionQueue.find(
+              (x) => x[0] === signal.id
+            );
+
+            if (existAction) existAction[1] = func;
+            else this.actionQueue.push([signal.id, func]);
           }
         }
       }
@@ -129,7 +128,7 @@ export class SignalBotService extends BaseBot {
           `قیمت لحظه‌ای اونس طلا: ${price}`
         )
         .catch((er) => {
-          //unhandled
+          this.publicChannelOuncePriceMessageId = undefined;
         });
     } else {
       this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
@@ -140,6 +139,10 @@ export class SignalBotService extends BaseBot {
         )
         .then((message) => {
           this.publicChannelOuncePriceMessageId = message.message_id;
+          this.redis.set(
+            'publicChannelOuncePriceMessageId',
+            this.publicChannelOuncePriceMessageId
+          );
           this.bot.telegram.pinChatMessage(
             process.env.PUBLISH_CHANNEL_ID,
             message.message_id
