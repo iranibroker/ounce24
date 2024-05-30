@@ -14,6 +14,19 @@ import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { PublishBotsService } from './publish-bots.service';
+import { BOT_KEYS } from '../configs/publisher-bots.config';
+
+function getAvailableBot(signals: Signal[]) {
+  let min: [number, string] = [10000, ''];
+  for (const bot of BOT_KEYS) {
+    const count = signals.filter(
+      (s) => s.status === SignalStatus.Active && s.telegramBot === bot
+    ).length;
+    if (count === 0) return bot;
+    if (count < min[0]) min = [count, bot];
+  }
+  return min[1];
+}
 
 @Injectable()
 @Update()
@@ -29,6 +42,7 @@ export class SignalBotService extends BaseBot {
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
+      console.log('price', price);
 
       const signals = await this.signalModel
         .find({
@@ -42,23 +56,47 @@ export class SignalBotService extends BaseBot {
         if (signal.status === SignalStatus.Pending) {
           if (Signal.activeTrigger(signal, price)) {
             statusChangeDetection = true;
+            if (signal.messageId)
+              this.bot.telegram.deleteMessage(
+                process.env.PUBLISH_CHANNEL_ID,
+                signal.messageId
+              );
             signal.status = SignalStatus.Active;
+            signal.telegramBot = getAvailableBot(signals);
+            signal.messageId = null;
             this.signalModel
               .findByIdAndUpdate(signal.id, {
                 status: signal.status,
+                telegramBot: signal.telegramBot,
+                messageId: null,
               })
               .exec();
           }
         } else {
           statusChangeDetection = true;
+          if (!signal.telegramBot) {
+            signal.telegramBot = getAvailableBot(signals);
+            this.signalModel
+              .findByIdAndUpdate(signal.id, {
+                telegramBot: signal.telegramBot,
+              })
+              .exec();
+          }
           if (price > signal.maxPrice || price < signal.minPrice) {
+            if (signal.messageId)
+              this.bot.telegram.deleteMessage(
+                process.env.PUBLISH_CHANNEL_ID,
+                signal.messageId
+              );
             signal.status = SignalStatus.Closed;
             signal.closedAt = new Date();
             signal.closedOuncePrice = price;
+            signal.messageId = null;
             this.signalModel
               .findByIdAndUpdate(signal.id, {
                 status: signal.status,
                 closedAt: signal.closedAt,
+                messageId: null,
                 closedOuncePrice: signal.closedOuncePrice,
               })
               .exec();
@@ -66,23 +104,44 @@ export class SignalBotService extends BaseBot {
         }
 
         // check change detections and update message
-        if (signal.messageId) {
-          if (statusChangeDetection) {
-            const func = (telegram) => {
+        if (statusChangeDetection) {
+          let func: any;
+          if (signal.messageId) {
+            func = (telegram) => {
               telegram
                 .editMessageText(
                   process.env.PUBLISH_CHANNEL_ID,
                   signal.messageId,
                   '',
-                  Signal.getMessage(signal, false, price)
+                  Signal.getMessage(signal, true, price)
                 )
                 .catch((er) => {
                   console.error(er.response);
                 });
             };
-
-            this.publishService.addAction(signal.id, func);
+          } else {
+            func = (telegram) => {
+              telegram
+                .sendMessage(
+                  process.env.PUBLISH_CHANNEL_ID,
+                  signal.messageId,
+                  '',
+                  Signal.getMessage(signal, true, price)
+                )
+                .then((message) => {
+                  this.signalModel
+                    .findByIdAndUpdate(signal.id, {
+                      messageId: message.message_id,
+                    })
+                    .exec();
+                })
+                .catch((er) => {
+                  console.error(er.response);
+                });
+            };
           }
+
+          this.publishService.addAction(signal.telegramBot, signal.id, func);
         }
       }
     });
@@ -276,6 +335,7 @@ export class SignalBotService extends BaseBot {
     const signal = await this.getSignalFromMessage(ctx);
     if (signal) this.publishSignal(ctx, signal);
   }
+
   async publishSignal(ctx: Context, signal: Signal) {
     if (process.env.PUBLISH_CHANNEL_ID) {
       const message = await this.bot.telegram.sendMessage(

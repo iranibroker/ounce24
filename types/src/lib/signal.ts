@@ -50,6 +50,9 @@ export class Signal {
   @Prop()
   messageId?: number;
 
+  @Prop()
+  telegramBot?: string;
+
   @Prop({ required: true, default: 0 })
   createdOuncePrice: number;
 
@@ -111,7 +114,7 @@ ${SignalTypeText[signal.type]}
       text += '\n' + Signal.getPipString(signal, ouncePrice);
     }
 
-    if (showId) text += `#${signal.id}`;
+    if (showId) text += `\n#${signal.id}`;
 
     return text;
   }
