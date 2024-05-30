@@ -11,7 +11,11 @@ export class OuncePublishBotService {
     private ouncePriceService: OuncePriceService
   ) {
     let publishChannelMessageId = 0;
-    const redis = new Redis(process.env.REDIS_URI);
+    const redis = new Redis(
+      process.env.IS_DEV
+        ? 'redis://:X7Y5T2sFNrdcn28h4JLURCKQkgVBynbc@075b5acd-5c6f-4d3e-8682-6f05b1d15743.hsvc.ir:31944/1'
+        : process.env.REDIS_URI
+    );
 
     redis.get('publicChannelOuncePriceMessageId', (err, result) => {
       if (result) {
