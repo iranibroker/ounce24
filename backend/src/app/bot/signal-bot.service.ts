@@ -113,7 +113,7 @@ export class SignalBotService extends BaseBot {
                   process.env.PUBLISH_CHANNEL_ID,
                   signal.messageId,
                   '',
-                  Signal.getMessage(signal, true, price)
+                  Signal.getMessage(signal, { ouncePrice: price, showId: true })
                 )
                 .catch((er) => {
                   console.error(er.response);
@@ -124,7 +124,7 @@ export class SignalBotService extends BaseBot {
               telegram
                 .sendMessage(
                   process.env.PUBLISH_CHANNEL_ID,
-                  Signal.getMessage(signal, true, price)
+                  Signal.getMessage(signal, { ouncePrice: price, showId: true })
                 )
                 .then((message) => {
                   this.signalModel
@@ -180,7 +180,7 @@ export class SignalBotService extends BaseBot {
       .exec();
 
     for (const signal of signals) {
-      await ctx.reply(Signal.getMessage(signal, true), {
+      await ctx.reply(Signal.getMessage(signal, { showId: true }), {
         reply_markup: {
           inline_keyboard: [
             signal.status === SignalStatus.Active
@@ -338,7 +338,7 @@ export class SignalBotService extends BaseBot {
     if (process.env.PUBLISH_CHANNEL_ID) {
       const message = await this.bot.telegram.sendMessage(
         process.env.PUBLISH_CHANNEL_ID,
-        Signal.getMessage(signal),
+        Signal.getMessage(signal)
         // {
         //   reply_markup: {
         //     inline_keyboard: [[{ text: 'sample', callback_data: 'abcd' }]],

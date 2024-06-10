@@ -20,7 +20,7 @@ export const SignalStatusText = {
   [SignalStatus.Pending]: '⛳️ کاشته شده',
   [SignalStatus.Active]: '▶️ فعال',
   [SignalStatus.Closed]: '⏹ بسته',
-  [SignalStatus.Canceled]: '⏹ بسته',
+  [SignalStatus.Canceled]: '⏹ لغو شده',
 };
 
 export const SignalTypeText = {
@@ -86,7 +86,7 @@ export class Signal {
 
   static getPipString(signal: Signal, ouncePrice: number) {
     const diff = Signal.getPip(signal, ouncePrice);
-    return `${diff < 0 ? '🟥' : '🟩'} ${diff} pip`;
+    return `${diff < 0 ? '🟥' : '🟩'} ${diff} pip ${diff < 0 ? 'ضرر' : 'سود'}`;
   }
 
   static getProfit(signal: Signal) {
@@ -99,8 +99,13 @@ export class Signal {
     return isSell ? signal.maxPrice : signal.minPrice;
   }
 
-  static getMessage(signal: Signal, showId = false, ouncePrice?: number) {
-    const isSell = signal.type === SignalType.Sell;
+  static getMessage(
+    signal: Signal,
+    options?: {
+      showId?: boolean;
+      ouncePrice?: number;
+    }
+  ) {
     let text = `سیگنال
 ${SignalTypeText[signal.type]}
 به قیمت: ${signal.entryPrice}
@@ -110,11 +115,13 @@ ${SignalTypeText[signal.type]}
     
 وضعیت: ${SignalStatusText[signal.status]}\n`;
 
-    if (ouncePrice && signal.status === SignalStatus.Active) {
-      text += '\n' + Signal.getPipString(signal, ouncePrice);
+    if (options?.ouncePrice && signal.status === SignalStatus.Active) {
+      text += '\n' + Signal.getPipString(signal, options?.ouncePrice);
+    } else if (signal.status === SignalStatus.Closed && signal.closedOuncePrice) {
+      text += '\n' + Signal.getPipString(signal, signal.closedOuncePrice);
     }
 
-    if (showId) text += `\n#${signal.id}`;
+    if (options?.showId) text += `\n#${signal.id}`;
 
     return text;
   }
