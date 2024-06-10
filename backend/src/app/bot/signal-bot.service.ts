@@ -124,8 +124,6 @@ export class SignalBotService extends BaseBot {
               telegram
                 .sendMessage(
                   process.env.PUBLISH_CHANNEL_ID,
-                  signal.messageId,
-                  '',
                   Signal.getMessage(signal, true, price)
                 )
                 .then((message) => {
@@ -341,11 +339,11 @@ export class SignalBotService extends BaseBot {
       const message = await this.bot.telegram.sendMessage(
         process.env.PUBLISH_CHANNEL_ID,
         Signal.getMessage(signal),
-        {
-          reply_markup: {
-            inline_keyboard: [[{ text: 'sample', callback_data: 'abcd' }]],
-          },
-        }
+        // {
+        //   reply_markup: {
+        //     inline_keyboard: [[{ text: 'sample', callback_data: 'abcd' }]],
+        //   },
+        // }
       );
 
       this.signalModel
