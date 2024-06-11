@@ -105,11 +105,10 @@ export class Signal {
 
   static getRiskReward(signal: Signal) {
     let profit = Signal.getProfit(signal);
-    let loss = Signal.getLoss(signal);
+    const loss = Signal.getLoss(signal);
     if (signal.status === SignalStatus.Closed) {
       const pip = Signal.getPip(signal, signal.closedOuncePrice);
-      if (pip < 0) loss = signal.closedOuncePrice;
-      else profit = signal.closedOuncePrice;
+      if (pip > 0) profit = signal.closedOuncePrice;
     }
     return Math.abs((profit - signal.entryPrice) / (loss - signal.entryPrice));
   }
