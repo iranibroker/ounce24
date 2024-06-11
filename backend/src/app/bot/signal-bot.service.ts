@@ -62,11 +62,13 @@ export class SignalBotService extends BaseBot {
                 signal.messageId
               );
             signal.status = SignalStatus.Active;
+            signal.activeAt = new Date();
             signal.telegramBot = getAvailableBot(signals);
             signal.messageId = null;
             this.signalModel
               .findByIdAndUpdate(signal.id, {
                 status: signal.status,
+                activeAt: signal.activeAt,
                 telegramBot: signal.telegramBot,
                 messageId: null,
               })
@@ -173,10 +175,11 @@ export class SignalBotService extends BaseBot {
     const signals = await this.signalModel
       .find({
         owner: user._id,
-        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+        status: { $in: [SignalStatus.Pending, SignalStatus.Active] },
         deletedAt: null,
       })
       .sort({ createdAt: 'desc' })
+      .populate('owner')
       .exec();
 
     for (const signal of signals) {
@@ -184,9 +187,12 @@ export class SignalBotService extends BaseBot {
         reply_markup: {
           inline_keyboard: [
             signal.status === SignalStatus.Active
-              ? [{ text: 'بستن دستی', callback_data: 'close_signal' }]
+              ? [
+                  { text: 'بستن دستی', callback_data: 'close_signal' },
+                  { text: 'ریسک فری', callback_data: 'risk_free' },
+                ]
               : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
-            [{ text: 'publish', callback_data: 'publish_signal' }],
+            // [{ text: 'publish', callback_data: 'publish_signal' }],
           ],
         },
       });
@@ -194,6 +200,38 @@ export class SignalBotService extends BaseBot {
 
     if (!signals.length) {
       ctx.reply('هیچ سیگنال کاشته شده یا فعالی ندارید.');
+    }
+  }
+
+  @Command('my_closed_signals')
+  async myClosedSignals(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const user = await this.getUser(ctx.from.id);
+    const signals = await this.signalModel
+      .find({
+        owner: user._id,
+        status: SignalStatus.Closed,
+        deletedAt: null,
+      })
+      .sort({ createdAt: 'desc' })
+      .populate('owner')
+      .exec();
+
+    const prevSignals = await this.signalModel
+      .find({
+        status: SignalStatus.Closed,
+        owner: user._id,
+      })
+      .exec();
+    console.log(prevSignals);
+    for (const signal of signals) {
+      await ctx.reply(
+        Signal.getMessage(signal, { showId: true, signals: prevSignals })
+      );
+    }
+
+    if (!signals.length) {
+      ctx.reply('هیچ سیگنال بسته شده‌ای ندارید.');
     }
   }
 
@@ -316,7 +354,13 @@ export class SignalBotService extends BaseBot {
       const createdSignal = await dto.save();
       ctx.reply(Signal.getMessage(createdSignal));
       BaseBot.userStates.delete(ctx.from.id);
-      this.publishSignal(ctx, createdSignal);
+      const prevSignals = await this.signalModel
+        .find({
+          status: SignalStatus.Closed,
+          owner: user._id,
+        })
+        .exec();
+      this.publishSignal(ctx, createdSignal, prevSignals);
     }
   }
 
@@ -334,7 +378,7 @@ export class SignalBotService extends BaseBot {
     if (signal) this.publishSignal(ctx, signal);
   }
 
-  async publishSignal(ctx: Context, signal: Signal) {
+  async publishSignal(ctx: Context, signal: Signal, signals?: Signal[]) {
     if (process.env.PUBLISH_CHANNEL_ID) {
       const message = await this.bot.telegram.sendMessage(
         process.env.PUBLISH_CHANNEL_ID,

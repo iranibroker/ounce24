@@ -19,8 +19,8 @@ export enum SignalStatus {
 export const SignalStatusText = {
   [SignalStatus.Pending]: '⛳️ کاشته شده',
   [SignalStatus.Active]: '▶️ فعال',
-  [SignalStatus.Closed]: '⏹ بسته',
-  [SignalStatus.Canceled]: '⏹ لغو شده',
+  [SignalStatus.Closed]: '🎯 بسته',
+  [SignalStatus.Canceled]: '🚫 لغو شده',
 };
 
 export const SignalTypeText = {
@@ -30,6 +30,7 @@ export const SignalTypeText = {
 
 @Schema({ timestamps: true })
 export class Signal {
+  _id: any;
   id: string;
 
   @Prop({ required: true, enum: SignalType })
@@ -63,6 +64,9 @@ export class Signal {
   owner: User;
 
   createdAt?: Date;
+
+  @Prop()
+  activeAt?: Date;
 
   @Prop()
   closedAt?: Date;
@@ -99,26 +103,69 @@ export class Signal {
     return isSell ? signal.maxPrice : signal.minPrice;
   }
 
+  static getRiskReward(signal: Signal) {
+    return Math.abs(
+      (Signal.getProfit(signal) - signal.entryPrice) /
+        (Signal.getLoss(signal) - signal.entryPrice)
+    );
+  }
+
+  static filterWinSignals(signals: Signal[]) {
+    return signals.filter(
+      (signal) =>
+        signal.status === SignalStatus.Closed &&
+        Signal.getPip(signal, signal.closedOuncePrice) >= 0
+    );
+  }
+
+  static getStatsText(signals: Signal[]) {
+    const rewardAvg = signals.reduce((value, signal) => {
+      const riskReward = Signal.getRiskReward(signal);
+      return riskReward / signals.length + value;
+    }, 0);
+
+    return `تعداد سیگنال: ${signals.length}
+وین ریت: ${Math.round(
+      (Signal.filterWinSignals(signals).length / signals.length) * 100
+    )}%
+میانگین ریسک-ریوارد: ${rewardAvg.toFixed(1)}
+    `;
+  }
+
   static getMessage(
     signal: Signal,
     options?: {
       showId?: boolean;
       ouncePrice?: number;
+      signals?: Signal[];
     }
   ) {
     let text = `سیگنال
 ${SignalTypeText[signal.type]}
 به قیمت: ${signal.entryPrice}
-    
+
 ❌ حد ضرر: ${this.getLoss(signal)}
 ✅ حد سود: ${this.getProfit(signal)}
+
+ریسک-ریوارد: ${Signal.getRiskReward(signal).toFixed(1)}
     
 وضعیت: ${SignalStatusText[signal.status]}\n`;
 
     if (options?.ouncePrice && signal.status === SignalStatus.Active) {
       text += '\n' + Signal.getPipString(signal, options?.ouncePrice);
-    } else if (signal.status === SignalStatus.Closed && signal.closedOuncePrice) {
+    } else if (
+      signal.status === SignalStatus.Closed &&
+      signal.closedOuncePrice
+    ) {
       text += '\n' + Signal.getPipString(signal, signal.closedOuncePrice);
+    }
+
+    if (signal.owner) {
+      text += `\n\n👤${signal.owner.name}`;
+    }
+
+    if (options?.signals) {
+      text += `\n` + Signal.getStatsText(options.signals);
     }
 
     if (options?.showId) text += `\n#${signal.id}`;
