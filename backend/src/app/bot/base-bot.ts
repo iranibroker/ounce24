@@ -49,6 +49,8 @@ export class BaseBot {
 /new_signal ایجاد سیگنال جدید
 
 /my_signals مدیریت سیگنال‌های ثبت شده
+
+/my_closed_signals لیست سیگنال‌های بسته شده
 `,
       {
         reply_markup: {

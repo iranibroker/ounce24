@@ -153,19 +153,26 @@ export class SignalBotService extends BaseBot {
       .exec();
 
     for (const signal of signals) {
-      await ctx.reply(Signal.getMessage(signal, { showId: true }), {
-        reply_markup: {
-          inline_keyboard: [
-            signal.status === SignalStatus.Active
-              ? [
-                  { text: 'بستن دستی', callback_data: 'close_signal' },
-                  { text: 'ریسک فری', callback_data: 'risk_free' },
-                ]
-              : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
-            // [{ text: 'publish', callback_data: 'publish_signal' }],
-          ],
-        },
-      });
+      await ctx.reply(
+        Signal.getMessage(signal, {
+          showId: true,
+          ouncePrice: this.ouncePriceService.current,
+        }),
+        {
+          reply_markup: {
+            inline_keyboard: [
+              signal.status === SignalStatus.Active
+                ? [
+                    { text: 'refresh', callback_data: 'refresh_signal' },
+                    { text: 'بستن دستی', callback_data: 'close_signal' },
+                    { text: 'ریسک فری', callback_data: 'risk_free' },
+                  ]
+                : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
+              // [{ text: 'publish', callback_data: 'publish_signal' }],
+            ],
+          },
+        }
+      );
     }
 
     if (!signals.length) {
@@ -198,6 +205,46 @@ export class SignalBotService extends BaseBot {
     if (!signals.length) {
       ctx.reply('هیچ سیگنال بسته شده‌ای ندارید.');
     }
+  }
+
+  @Action('refresh_signal')
+  async refreshSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const message = ctx.callbackQuery.message;
+    const text: string = message['text'];
+    const id = text.split('#')[1];
+    const signal = await this.signalModel.findById(id).populate('owner').exec();
+
+    try {
+      await ctx.telegram.editMessageText(
+        ctx.from.id,
+        message.message_id,
+        undefined,
+        Signal.getMessage(signal, {
+          showId: true,
+          ouncePrice: this.ouncePriceService.current,
+        }),
+        {
+          reply_markup: {
+            inline_keyboard: [
+              signal.status === SignalStatus.Active
+                ? [
+                    { text: 'refresh', callback_data: 'refresh_signal' },
+                    { text: 'بستن دستی', callback_data: 'close_signal' },
+                    { text: 'ریسک فری', callback_data: 'risk_free' },
+                  ]
+                : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
+              // [{ text: 'publish', callback_data: 'publish_signal' }],
+            ],
+          },
+        }
+      );
+    } catch (error) {
+      // no need
+    } finally {
+      ctx.answerCbQuery();
+    }
+
   }
 
   @Action('remove_signal')
@@ -366,7 +413,6 @@ export class SignalBotService extends BaseBot {
             signals: prevSignals,
           })
         );
-        console.log(message.message_id);
         this.signalModel
           .findByIdAndUpdate(createdSignal.id, {
             messageId: message.message_id,
