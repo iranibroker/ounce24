@@ -173,7 +173,7 @@ ${SignalTypeText[signal.type]}
       text += `\n\n👤${signal.owner.name}`;
     }
 
-    if (options?.signals) {
+    if (options?.signals?.length) {
       text += `\n` + Signal.getStatsText(options.signals);
     }
 

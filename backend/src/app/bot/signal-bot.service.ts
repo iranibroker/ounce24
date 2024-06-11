@@ -206,10 +206,17 @@ export class SignalBotService extends BaseBot {
     const message = ctx.callbackQuery.message;
     const text: string = ctx.callbackQuery.message['text'];
     const id = text.split('#')[1];
-    await this.signalModel
+    const signal = await this.signalModel
       .findByIdAndUpdate(id, { deletedAt: new Date() })
       .exec();
     if (message.message_id) await ctx.deleteMessage(message.message_id);
+    if (signal.messageId) {
+      ctx.telegram.deleteMessage(
+        process.env.PUBLISH_CHANNEL_ID,
+        signal.messageId
+      );
+    }
+
     ctx.answerCbQuery('سیگنال شما حذف شد');
   }
 
@@ -349,14 +356,19 @@ export class SignalBotService extends BaseBot {
       ctx.reply(Signal.getMessage(createdSignal));
       BaseBot.userStates.delete(ctx.from.id);
 
+      const prevSignals = this.userStats.getUserSignals(user.id);
+
       if (process.env.PUBLISH_CHANNEL_ID) {
         const message = await this.bot.telegram.sendMessage(
           process.env.PUBLISH_CHANNEL_ID,
-          Signal.getMessage(createdSignal)
+          Signal.getMessage(createdSignal, {
+            showId: true,
+            signals: prevSignals,
+          })
         );
-
+        console.log(message.message_id);
         this.signalModel
-          .findByIdAndUpdate(signal.id, {
+          .findByIdAndUpdate(createdSignal.id, {
             messageId: message.message_id,
           })
           .exec();
