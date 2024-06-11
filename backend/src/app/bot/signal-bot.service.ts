@@ -15,6 +15,7 @@ import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { PublishBotsService } from './publish-bots.service';
 import { BOT_KEYS } from '../configs/publisher-bots.config';
+import { UserStatsService } from './user-stats.service';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -36,7 +37,8 @@ export class SignalBotService extends BaseBot {
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
     private ouncePriceService: OuncePriceService,
-    private publishService: PublishBotsService
+    private publishService: PublishBotsService,
+    private userStats: UserStatsService
   ) {
     super(userModel);
 
@@ -49,6 +51,7 @@ export class SignalBotService extends BaseBot {
           status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
           deletedAt: null,
         })
+        .populate('owner')
         .exec();
 
       for (const signal of signals) {
@@ -102,46 +105,13 @@ export class SignalBotService extends BaseBot {
                 closedOuncePrice: signal.closedOuncePrice,
               })
               .exec();
+            this.userStats.updateUserSignals(signal.owner, signal);
           }
         }
 
         // check change detections and update message
         if (statusChangeDetection) {
-          let func: any;
-          if (signal.messageId) {
-            func = (telegram) => {
-              telegram
-                .editMessageText(
-                  process.env.PUBLISH_CHANNEL_ID,
-                  signal.messageId,
-                  '',
-                  Signal.getMessage(signal, { ouncePrice: price, showId: true })
-                )
-                .catch((er) => {
-                  console.error(er.response);
-                });
-            };
-          } else {
-            func = (telegram) => {
-              telegram
-                .sendMessage(
-                  process.env.PUBLISH_CHANNEL_ID,
-                  Signal.getMessage(signal, { ouncePrice: price, showId: true })
-                )
-                .then((message) => {
-                  this.signalModel
-                    .findByIdAndUpdate(signal.id, {
-                      messageId: message.message_id,
-                    })
-                    .exec();
-                })
-                .catch((er) => {
-                  console.error(er.response);
-                });
-            };
-          }
-
-          this.publishService.addAction(signal.telegramBot, signal.id, func);
+          this.publishSignal(signal, price);
         }
       }
     });
@@ -217,13 +187,8 @@ export class SignalBotService extends BaseBot {
       .populate('owner')
       .exec();
 
-    const prevSignals = await this.signalModel
-      .find({
-        status: SignalStatus.Closed,
-        owner: user._id,
-      })
-      .exec();
-    console.log(prevSignals);
+    const prevSignals = this.userStats.getUserSignals(user.id);
+
     for (const signal of signals) {
       await ctx.reply(
         Signal.getMessage(signal, { showId: true, signals: prevSignals })
@@ -254,11 +219,32 @@ export class SignalBotService extends BaseBot {
     const message = ctx.callbackQuery.message;
     const text: string = ctx.callbackQuery.message['text'];
     const id = text.split('#')[1];
-    await this.signalModel
-      .findByIdAndUpdate(id, { status: SignalStatus.Closed })
+    const signal = await this.signalModel.findById(id).populate('owner').exec();
+    const updatedSignal = await this.signalModel
+      .findByIdAndUpdate(
+        id,
+        {
+          status: SignalStatus.Closed,
+          messageId: null,
+          closedAt: new Date(),
+          closedOuncePrice: this.ouncePriceService.current,
+        },
+        { new: true }
+      )
       .exec();
 
+    updatedSignal.owner = signal.owner;
+
     if (message.message_id) await ctx.deleteMessage(message.message_id);
+
+    if (signal.messageId) {
+      this.publishService.addAction(signal.telegramBot, signal.id, (telegram) =>
+        telegram.deleteMessage(process.env.PUBLISH_CHANNEL_ID, signal.messageId)
+      );
+    }
+
+    this.publishSignal(updatedSignal);
+
     ctx.answerCbQuery('سیگنال بسته شد');
   }
 
@@ -350,52 +336,75 @@ export class SignalBotService extends BaseBot {
 
     if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
       const user = await this.getUser(ctx.from.id);
-      const dto = new this.signalModel({ ...signal, owner: user._id });
+      const dto = new this.signalModel({ ...signal, owner: user });
       const createdSignal = await dto.save();
       ctx.reply(Signal.getMessage(createdSignal));
       BaseBot.userStates.delete(ctx.from.id);
-      const prevSignals = await this.signalModel
-        .find({
-          status: SignalStatus.Closed,
-          owner: user._id,
-        })
-        .exec();
-      this.publishSignal(ctx, createdSignal, prevSignals);
+
+      if (process.env.PUBLISH_CHANNEL_ID) {
+        const message = await this.bot.telegram.sendMessage(
+          process.env.PUBLISH_CHANNEL_ID,
+          Signal.getMessage(createdSignal)
+        );
+
+        this.signalModel
+          .findByIdAndUpdate(signal.id, {
+            messageId: message.message_id,
+          })
+          .exec();
+      }
     }
   }
 
   @Action('follow_signal')
   async followSignal(@Ctx() ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const signal = await this.getSignalFromMessage(ctx);
-    if (signal) this.publishSignal(ctx, signal);
+    // if (!(await this.isValid(ctx))) return;
+    // const signal = await this.getSignalFromMessage(ctx);
+    // if (signal) this.publishSignal(ctx, signal);
   }
 
-  @Action('publish_signal')
-  async publishSignalAction(ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const signal = await this.getSignalFromMessage(ctx);
-    if (signal) this.publishSignal(ctx, signal);
-  }
+  async publishSignal(signal: Signal, ouncePrice?: number) {
+    const prevSignals = signal.owner
+      ? this.userStats.getUserSignals(signal.owner.id)
+      : undefined;
 
-  async publishSignal(ctx: Context, signal: Signal, signals?: Signal[]) {
-    if (process.env.PUBLISH_CHANNEL_ID) {
-      const message = await this.bot.telegram.sendMessage(
-        process.env.PUBLISH_CHANNEL_ID,
-        Signal.getMessage(signal)
-        // {
-        //   reply_markup: {
-        //     inline_keyboard: [[{ text: 'sample', callback_data: 'abcd' }]],
-        //   },
-        // }
-      );
-
-      this.signalModel
-        .findByIdAndUpdate(signal.id, {
-          messageId: message.message_id,
-        })
-        .exec();
+    const text = Signal.getMessage(signal, {
+      showId: true,
+      ouncePrice,
+      signals: prevSignals,
+    });
+    let func: any;
+    if (signal.messageId) {
+      func = (telegram) => {
+        telegram
+          .editMessageText(
+            process.env.PUBLISH_CHANNEL_ID,
+            signal.messageId,
+            '',
+            text
+          )
+          .catch((er) => {
+            console.error(er.response, signal.id);
+          });
+      };
+    } else {
+      func = (telegram) => {
+        telegram
+          .sendMessage(process.env.PUBLISH_CHANNEL_ID, text)
+          .then((message) => {
+            this.signalModel
+              .findByIdAndUpdate(signal.id, {
+                messageId: message.message_id,
+              })
+              .exec();
+          })
+          .catch((er) => {
+            console.error(er.response, signal.id);
+          });
+      };
     }
+
+    this.publishService.addAction(signal.telegramBot, signal.id, func);
   }
 
   getSignalFromMessage(@Ctx() ctx: Context) {

@@ -5,6 +5,7 @@ import { SignalBotService } from './signal-bot.service';
 import { OuncePriceModule } from '../ounce-price/ounce-price.module';
 import { PublishBotsService } from './publish-bots.service';
 import { OuncePublishBotService } from './ounce-publish-bot.service';
+import { UserStatsService } from './user-stats.service';
 
 @Module({
   imports: [SchemasModule, OuncePriceModule],
@@ -13,6 +14,7 @@ import { OuncePublishBotService } from './ounce-publish-bot.service';
     BotService,
     PublishBotsService,
     OuncePublishBotService,
+    UserStatsService,
   ],
   exports: [BotService],
 })

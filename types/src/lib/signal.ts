@@ -104,16 +104,21 @@ export class Signal {
   }
 
   static getRiskReward(signal: Signal) {
-    return Math.abs(
-      (Signal.getProfit(signal) - signal.entryPrice) /
-        (Signal.getLoss(signal) - signal.entryPrice)
-    );
+    let profit = Signal.getProfit(signal);
+    let loss = Signal.getLoss(signal);
+    if (signal.status === SignalStatus.Closed) {
+      const pip = Signal.getPip(signal, signal.closedOuncePrice);
+      if (pip < 0) loss = signal.closedOuncePrice;
+      else profit = signal.closedOuncePrice;
+    }
+    return Math.abs((profit - signal.entryPrice) / (loss - signal.entryPrice));
   }
 
   static filterWinSignals(signals: Signal[]) {
     return signals.filter(
       (signal) =>
-        signal.status === SignalStatus.Closed &&
+        (signal.status === SignalStatus.Closed ||
+          signal.status === SignalStatus.Canceled) &&
         Signal.getPip(signal, signal.closedOuncePrice) >= 0
     );
   }
@@ -150,6 +155,10 @@ ${SignalTypeText[signal.type]}
 ریسک-ریوارد: ${Signal.getRiskReward(signal).toFixed(1)}
     
 وضعیت: ${SignalStatusText[signal.status]}\n`;
+
+    if (signal.status === SignalStatus.Closed && signal.closedOuncePrice) {
+      text += `قیمت لحظه بسته شدن: ${signal.closedOuncePrice}`;
+    }
 
     if (options?.ouncePrice && signal.status === SignalStatus.Active) {
       text += '\n' + Signal.getPipString(signal, options?.ouncePrice);
