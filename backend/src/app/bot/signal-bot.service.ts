@@ -311,6 +311,10 @@ export class SignalBotService extends BaseBot {
           );
           return;
         }
+        if (value > signal.entryPrice - signal.maxPrice + signal.entryPrice) {
+          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
+          return;
+        }
         signal.minPrice = value;
       }
     } else {
@@ -328,6 +332,10 @@ export class SignalBotService extends BaseBot {
           ctx.reply(
             `مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`
           );
+          return;
+        }
+        if (value < signal.entryPrice - signal.minPrice + signal.entryPrice) {
+          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
           return;
         }
         signal.maxPrice = value;
