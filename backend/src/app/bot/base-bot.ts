@@ -51,6 +51,8 @@ export class BaseBot {
 /my_signals مدیریت سیگنال‌های ثبت شده
 
 /my_closed_signals لیست سیگنال‌های بسته شده
+
+/profile مشاهده اطلاعات کاربری و امتیاز
 `,
       {
         reply_markup: {

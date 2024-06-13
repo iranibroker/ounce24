@@ -29,6 +29,14 @@ function getAvailableBot(signals: Signal[]) {
   return min[1];
 }
 
+const MAX_DAILY_SIGNAL = isNaN(Number(process.env.MAX_DAILY_SIGNAL))
+  ? 3
+  : Number(process.env.MAX_DAILY_SIGNAL);
+
+const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
+  ? 20
+  : Number(process.env.MIN_SIGNAL_SCORE);
+
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
@@ -120,6 +128,23 @@ export class SignalBotService extends BaseBot {
   @Command('new_signal')
   async newSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
+    const user = await this.getUser(ctx.from.id);
+    const signals = await this.signalModel
+      .find({
+        owner: user._id,
+        status: { $in: [SignalStatus.Pending, SignalStatus.Active] },
+        deletedAt: null,
+      })
+      .sort({ createdAt: 'asc' })
+      .populate('owner')
+      .exec();
+    if (signals.length >= MAX_DAILY_SIGNAL) {
+      ctx.reply(
+        `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_DAILY_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
+      );
+      return;
+    }
+
     await ctx.reply('نوع سیگنال رو مشخص کنید', {
       reply_markup: {
         inline_keyboard: [
@@ -148,7 +173,7 @@ export class SignalBotService extends BaseBot {
         status: { $in: [SignalStatus.Pending, SignalStatus.Active] },
         deletedAt: null,
       })
-      .sort({ createdAt: 'desc' })
+      .sort({ createdAt: 'asc' })
       .populate('owner')
       .exec();
 
@@ -190,21 +215,30 @@ export class SignalBotService extends BaseBot {
         status: SignalStatus.Closed,
         deletedAt: null,
       })
-      .sort({ createdAt: 'desc' })
+      .sort({ createdAt: 'asc' })
       .populate('owner')
       .exec();
 
-    const prevSignals = this.userStats.getUserSignals(user.id);
+    // const prevSignals = this.userStats.getUserSignals(user.id);
 
     for (const signal of signals) {
-      await ctx.reply(
-        Signal.getMessage(signal, { showId: true, signals: prevSignals })
-      );
+      await ctx.reply(Signal.getMessage(signal, { showId: true }));
     }
 
     if (!signals.length) {
       ctx.reply('هیچ سیگنال بسته شده‌ای ندارید.');
     }
+  }
+
+  @Command('profile')
+  async profile(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const user = await this.getUser(ctx.from.id);
+
+    const prevSignals = this.userStats.getUserSignals(user.id);
+
+    await ctx.reply(`👤${user.name}`);
+    if (prevSignals.length) await ctx.reply(Signal.getStatsText(prevSignals));
   }
 
   @Action('refresh_signal')
@@ -380,12 +414,22 @@ export class SignalBotService extends BaseBot {
       const user = await this.getUser(ctx.from.id);
       const dto = new this.signalModel({ ...signal, owner: user });
       const createdSignal = await dto.save();
-      ctx.reply(Signal.getMessage(createdSignal));
+      await ctx.reply(Signal.getMessage(createdSignal));
       BaseBot.userStates.delete(ctx.from.id);
 
       const prevSignals = this.userStats.getUserSignals(user.id);
 
       if (process.env.PUBLISH_CHANNEL_ID) {
+        const userScore = this.userStats.getUserScore(user.id);
+        if (userScore < MIN_SIGNAL_SCORE) {
+          ctx.reply(
+            `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز فعلی شما ${userScore.toFixed(
+              2
+            )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود. برای مشاهده امتیاز سیگنال‌های قبلی خود، از /my_closed_signals استفاده کنید.`
+          );
+          return;
+        }
+
         const message = await this.bot.telegram.sendMessage(
           process.env.PUBLISH_CHANNEL_ID,
           Signal.getMessage(createdSignal, {

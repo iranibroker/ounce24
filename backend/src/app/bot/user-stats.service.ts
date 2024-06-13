@@ -40,4 +40,14 @@ export class UserStatsService {
   getUserSignals(userId: string) {
     return this.userSignals[userId];
   }
+
+  getUserScore(userId: string) {
+    const signals = this.getUserSignals(userId);
+    if (signals) {
+      return signals.reduce((value, signal) => {
+        return signal.score + value;
+      }, 0);
+    }
+    return 0;
+  }
 }

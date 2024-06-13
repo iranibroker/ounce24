@@ -74,13 +74,21 @@ export class Signal {
   @Prop()
   deletedAt?: Date;
 
+  //virtual props
+  isSell: boolean;
+  profit: number;
+  loss: number;
+  pip: number | null;
+  riskReward: number;
+  score: number;
+
   static activeTrigger(signal: Signal, ouncePrice: number) {
     const min = Math.min(signal.createdOuncePrice, ouncePrice);
     const max = Math.max(signal.createdOuncePrice, ouncePrice);
     return signal.entryPrice > min && signal.entryPrice < max;
   }
 
-  static getPip(signal: Signal, ouncePrice: number) {
+  static getActivePip(signal: Signal, ouncePrice: number) {
     const isSell = signal.type === SignalType.Sell;
     const diff = isSell
       ? signal.entryPrice - ouncePrice
@@ -88,29 +96,11 @@ export class Signal {
     return Number((diff * 10).toFixed(3));
   }
 
-  static getPipString(signal: Signal, ouncePrice: number) {
-    const diff = Signal.getPip(signal, ouncePrice);
+  static getPipString(signal: Signal, ouncePrice?: number) {
+    const diff = ouncePrice
+      ? Signal.getActivePip(signal, ouncePrice)
+      : signal.pip;
     return `${diff < 0 ? '🟥' : '🟩'} ${diff} pip ${diff < 0 ? 'ضرر' : 'سود'}`;
-  }
-
-  static getProfit(signal: Signal) {
-    const isSell = signal.type === SignalType.Sell;
-    return isSell ? signal.minPrice : signal.maxPrice;
-  }
-
-  static getLoss(signal: Signal) {
-    const isSell = signal.type === SignalType.Sell;
-    return isSell ? signal.maxPrice : signal.minPrice;
-  }
-
-  static getRiskReward(signal: Signal) {
-    let profit = Signal.getProfit(signal);
-    const loss = Signal.getLoss(signal);
-    if (signal.status === SignalStatus.Closed) {
-      const pip = Signal.getPip(signal, signal.closedOuncePrice);
-      if (pip > 0) profit = signal.closedOuncePrice;
-    }
-    return Math.abs((profit - signal.entryPrice) / (loss - signal.entryPrice));
   }
 
   static filterWinSignals(signals: Signal[]) {
@@ -118,14 +108,16 @@ export class Signal {
       (signal) =>
         (signal.status === SignalStatus.Closed ||
           signal.status === SignalStatus.Canceled) &&
-        Signal.getPip(signal, signal.closedOuncePrice) >= 0
+        Signal.getActivePip(signal, signal.closedOuncePrice) >= 0
     );
   }
 
   static getStatsText(signals: Signal[]) {
     const rewardAvg = signals.reduce((value, signal) => {
-      const riskReward = Signal.getRiskReward(signal);
-      return riskReward / signals.length + value;
+      return signal.riskReward / signals.length + value;
+    }, 0);
+    const scoreSum = signals.reduce((value, signal) => {
+      return signal.score + value;
     }, 0);
 
     return `تعداد سیگنال: ${signals.length}
@@ -133,6 +125,7 @@ export class Signal {
       (Signal.filterWinSignals(signals).length / signals.length) * 100
     )}%
 میانگین ریسک-ریوارد: ${rewardAvg.toFixed(1)}
+امتیاز: ${scoreSum.toFixed(1)}
     `;
   }
 
@@ -148,12 +141,15 @@ export class Signal {
 ${SignalTypeText[signal.type]}
 به قیمت: ${signal.entryPrice}
 
-❌ حد ضرر: ${this.getLoss(signal)}
-✅ حد سود: ${this.getProfit(signal)}
+❌ حد ضرر: ${signal.loss}
+✅ حد سود: ${signal.profit}
 
-ریسک-ریوارد: ${Signal.getRiskReward(signal).toFixed(1)}
-    
-وضعیت: ${SignalStatusText[signal.status]}\n`;
+ریسک-ریوارد: ${signal.riskReward.toFixed(1)}\n`;
+
+    if (signal.status === SignalStatus.Closed)
+      text += `امتیاز: ${signal.score.toFixed(1)}\n`;
+
+    text += `\nوضعیت: ${SignalStatusText[signal.status]}\n`;
 
     if (signal.status === SignalStatus.Closed && signal.closedOuncePrice) {
       text += `قیمت لحظه بسته شدن: ${signal.closedOuncePrice}`;
@@ -183,3 +179,40 @@ ${SignalTypeText[signal.type]}
 }
 
 export const SignalSchema = SchemaFactory.createForClass(Signal);
+
+SignalSchema.virtual('isSell').get(function () {
+  return this.type === SignalType.Sell;
+});
+SignalSchema.virtual('profit').get(function () {
+  return this.isSell ? this.minPrice : this.maxPrice;
+});
+SignalSchema.virtual('loss').get(function () {
+  return this.isSell ? this.maxPrice : this.minPrice;
+});
+SignalSchema.virtual('pip').get(function () {
+  if (this.status === SignalStatus.Closed && this.closedOuncePrice) {
+    const diff = this.isSell
+      ? this.entryPrice - this.closedOuncePrice
+      : this.closedOuncePrice - this.entryPrice;
+    return Number((diff * 10).toFixed(3));
+  }
+  return null;
+});
+SignalSchema.virtual('riskReward').get(function () {
+  const pip = this.pip;
+  const profit = pip > 0 ? this.closedOuncePrice : this.profit;
+  return Math.abs((profit - this.entryPrice) / (this.loss - this.entryPrice));
+});
+SignalSchema.virtual('score').get(function () {
+  if (this.status === SignalStatus.Closed) {
+    const diff = this.isSell
+      ? this.entryPrice - this.closedOuncePrice
+      : this.closedOuncePrice - this.entryPrice;
+
+    if (diff >= 0) return (diff / Math.abs(this.entryPrice - this.loss)) * 10;
+    else if (diff < 0)
+      return (diff / Math.abs(this.entryPrice - this.profit)) * 10;
+  }
+
+  return 0;
+});
