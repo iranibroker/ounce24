@@ -38,7 +38,7 @@ export class UserStatsService {
   }
 
   getUserSignals(userId: string) {
-    return this.userSignals[userId];
+    return this.userSignals[userId] || [];
   }
 
   getUserScore(userId: string) {

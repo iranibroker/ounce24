@@ -238,7 +238,7 @@ export class SignalBotService extends BaseBot {
     const prevSignals = this.userStats.getUserSignals(user.id);
 
     await ctx.reply(`👤${user.name}`);
-    if (prevSignals.length) await ctx.reply(Signal.getStatsText(prevSignals));
+    if (prevSignals?.length) await ctx.reply(Signal.getStatsText(prevSignals));
   }
 
   @Action('refresh_signal')
