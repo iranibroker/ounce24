@@ -6,7 +6,7 @@ import { BOT_KEYS } from '../configs/publisher-bots.config';
 @Injectable()
 export class PublishBotsService {
   private botActionQueue: {
-    [key: string]: [string, (telegram: Telegram) => void][];
+    [key: string]: [string, (telegram: Telegram) => void, boolean][];
   } = {};
 
   constructor(
@@ -23,18 +23,26 @@ export class PublishBotsService {
           const queue = this.botActionQueue[BOT_KEYS[i]];
           if (queue.length) {
             const action = queue.shift();
-            action[1](bot.telegram);
+            try {
+              action[1](bot.telegram);
+            } catch (error) {
+              console.warn('error on action', action[0], bot);
+            }
           }
         }, 3000);
       }, i * 1000);
     }
   }
 
-  addAction(bot: string, key: string, func: (telegram: Telegram) => void) {
+  addAction(
+    bot: string,
+    key: string,
+    func: (telegram: Telegram) => void,
+    skipOverride = false
+  ) {
     const queue = this.botActionQueue[bot];
     const existAction = queue.find((x) => x[0] === key);
-
-    if (existAction) existAction[1] = func;
-    else queue.push([key, func]);
+    if (existAction && !existAction[2]) existAction[1] = func;
+    else queue.push([key, func, skipOverride]);
   }
 }

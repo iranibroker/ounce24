@@ -215,36 +215,9 @@ export class SignalBotService extends BaseBot {
     const id = text.split('#')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
 
-    try {
-      await ctx.telegram.editMessageText(
-        ctx.from.id,
-        message.message_id,
-        undefined,
-        Signal.getMessage(signal, {
-          showId: true,
-          ouncePrice: this.ouncePriceService.current,
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              signal.status === SignalStatus.Active
-                ? [
-                    { text: 'refresh', callback_data: 'refresh_signal' },
-                    { text: 'بستن دستی', callback_data: 'close_signal' },
-                    { text: 'ریسک فری', callback_data: 'risk_free' },
-                  ]
-                : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
-              // [{ text: 'publish', callback_data: 'publish_signal' }],
-            ],
-          },
-        }
-      );
-    } catch (error) {
-      // no need
-    } finally {
-      ctx.answerCbQuery();
-    }
+    await this.refreshBotSignal(ctx, signal, message.message_id);
 
+    ctx.answerCbQuery();
   }
 
   @Action('remove_signal')
@@ -292,8 +265,15 @@ export class SignalBotService extends BaseBot {
     if (message.message_id) await ctx.deleteMessage(message.message_id);
 
     if (signal.messageId) {
-      this.publishService.addAction(signal.telegramBot, signal.id, (telegram) =>
-        telegram.deleteMessage(process.env.PUBLISH_CHANNEL_ID, signal.messageId)
+      this.publishService.addAction(
+        signal.telegramBot,
+        signal.id,
+        (telegram) =>
+          telegram.deleteMessage(
+            process.env.PUBLISH_CHANNEL_ID,
+            signal.messageId
+          ),
+        true
       );
     }
 
@@ -419,6 +399,36 @@ export class SignalBotService extends BaseBot {
           })
           .exec();
       }
+    }
+  }
+
+  async refreshBotSignal(ctx: Context, signal: Signal, messageId: number) {
+    try {
+      await ctx.telegram.editMessageText(
+        ctx.from.id,
+        messageId,
+        undefined,
+        Signal.getMessage(signal, {
+          showId: true,
+          ouncePrice: this.ouncePriceService.current,
+        }),
+        {
+          reply_markup: {
+            inline_keyboard: [
+              signal.status === SignalStatus.Active
+                ? [
+                    { text: 'refresh', callback_data: 'refresh_signal' },
+                    { text: 'بستن دستی', callback_data: 'close_signal' },
+                    { text: 'ریسک فری', callback_data: 'risk_free' },
+                  ]
+                : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
+              // [{ text: 'publish', callback_data: 'publish_signal' }],
+            ],
+          },
+        }
+      );
+    } catch (error) {
+      // no need
     }
   }
 
