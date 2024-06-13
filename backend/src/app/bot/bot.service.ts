@@ -16,6 +16,11 @@ export class BotService extends BaseBot {
     private signalBot: SignalBotService
   ) {
     super(userModel);
+    this.bot.telegram
+            .sendMessage(
+              process.env.PUBLISH_CHANNEL_ID,
+              `بروزرسانی جدید انجام شد`
+            )
   }
 
   @Start()
