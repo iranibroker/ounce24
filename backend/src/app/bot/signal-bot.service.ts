@@ -113,7 +113,7 @@ export class SignalBotService extends BaseBot {
                 closedOuncePrice: signal.closedOuncePrice,
               })
               .exec();
-            this.userStats.updateUserSignals(signal.owner, signal);
+            await this.userStats.updateUserSignals(signal.owner, signal);
           }
         }
 
@@ -219,8 +219,6 @@ export class SignalBotService extends BaseBot {
       .populate('owner')
       .exec();
 
-    // const prevSignals = this.userStats.getUserSignals(user.id);
-
     for (const signal of signals) {
       await ctx.reply(Signal.getMessage(signal, { showId: true }));
     }
@@ -310,6 +308,8 @@ export class SignalBotService extends BaseBot {
         true
       );
     }
+
+    await this.userStats.updateUserSignals(signal.owner);
 
     this.publishSignal(updatedSignal);
 
@@ -474,13 +474,6 @@ export class SignalBotService extends BaseBot {
     } catch (error) {
       // no need
     }
-  }
-
-  @Action('follow_signal')
-  async followSignal(@Ctx() ctx: Context) {
-    // if (!(await this.isValid(ctx))) return;
-    // const signal = await this.getSignalFromMessage(ctx);
-    // if (signal) this.publishSignal(ctx, signal);
   }
 
   async publishSignal(signal: Signal, ouncePrice?: number) {
