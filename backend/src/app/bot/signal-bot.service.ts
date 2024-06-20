@@ -345,6 +345,8 @@ export class SignalBotService extends BaseBot {
     this.publishSignal(updatedSignal);
 
     ctx.answerCbQuery('سیگنال بسته شد');
+
+    ctx.reply(Signal.getMessage(signal, { showId: true }));
   }
 
   @Action('risk_free')
