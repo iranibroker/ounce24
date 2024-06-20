@@ -253,8 +253,19 @@ export class SignalBotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
 
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
 
-    await ctx.reply(await this.userStats.getLeaderBoardMessage({userId: user.id}));
+    await ctx.reply(
+      await this.userStats.getLeaderBoardMessage({ userId: user.id })
+    );
+    await ctx.reply(
+      await this.userStats.getLeaderBoardMessage({
+        userId: user.id,
+        fromDate: startOfWeek,
+      })
+    );
   }
 
   @Action('refresh_signal')

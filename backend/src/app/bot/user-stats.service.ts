@@ -68,15 +68,12 @@ export class UserStatsService {
     return users;
   }
 
-  async getLeaderBoardMessage(options?: { userId?: string; length?: number }) {
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-    const users = await this.getLeaderBoard(startOfWeek);
+  async getLeaderBoardMessage(options?: { userId?: string; length?: number, fromDate?: Date }) {
+    const users = await this.getLeaderBoard(options?.fromDate);
 
     const top10 = users.slice(0, options?.length || 9);
 
-    let texts = `⭐ لیست برترین اساتید این هفته ⭐\n\n`;
+    let texts = `⭐ رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} اساتید ⭐\n\n`;
     texts += top10
       .map((user, index) => {
         return `${index + 1}. ${user.name} (${user.score.toFixed(1)} امتیاز)`;
