@@ -176,7 +176,7 @@ ${SignalTypeText[signal.type]}
       signal.status === SignalStatus.Closed &&
       signal.closedOuncePrice
     ) {
-      text += '\n' + Signal.getPipString(signal, signal.closedOuncePrice);
+      text += '\n' + Signal.getPipString(signal);
     }
 
     if (signal.owner) {
