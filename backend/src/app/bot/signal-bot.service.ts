@@ -84,6 +84,11 @@ export class SignalBotService extends BaseBot {
                 messageId: null,
               })
               .exec();
+
+            this.bot.telegram.sendMessage(
+              signal.owner.telegramId,
+              Signal.getMessage(signal, { showId: true })
+            );
           }
         } else {
           statusChangeDetection = true;
@@ -114,6 +119,10 @@ export class SignalBotService extends BaseBot {
               })
               .exec();
             await this.userStats.updateUserSignals(signal.owner, signal);
+            this.bot.telegram.sendMessage(
+              signal.owner.telegramId,
+              Signal.getMessage(signal, { showId: true })
+            );
           }
         }
 
