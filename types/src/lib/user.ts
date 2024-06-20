@@ -20,6 +20,7 @@ export class User {
   @Prop({ required: true, unique: true })
   phone: string;
 
+  score?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

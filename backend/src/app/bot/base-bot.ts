@@ -52,6 +52,8 @@ export class BaseBot {
 
 /my_closed_signals لیست سیگنال‌های بسته شده
 
+/leaderboard برترین اساتید
+
 /profile مشاهده اطلاعات کاربری و امتیاز
 `,
       {

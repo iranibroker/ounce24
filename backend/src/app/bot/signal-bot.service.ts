@@ -248,6 +248,15 @@ export class SignalBotService extends BaseBot {
     if (prevSignals?.length) await ctx.reply(Signal.getStatsText(prevSignals));
   }
 
+  @Command('leaderboard')
+  async leaderboard(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const user = await this.getUser(ctx.from.id);
+
+
+    await ctx.reply(await this.userStats.getLeaderBoardMessage({userId: user.id}));
+  }
+
   @Action('refresh_signal')
   async refreshSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
