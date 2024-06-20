@@ -6,9 +6,10 @@ import { OuncePriceModule } from '../ounce-price/ounce-price.module';
 import { PublishBotsService } from './publish-bots.service';
 import { OuncePublishBotService } from './ounce-publish-bot.service';
 import { UserStatsService } from './user-stats.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [SchemasModule, OuncePriceModule],
+  imports: [SchemasModule, OuncePriceModule, AuthModule],
   providers: [
     SignalBotService,
     BotService,

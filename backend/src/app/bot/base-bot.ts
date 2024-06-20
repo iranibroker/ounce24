@@ -2,9 +2,11 @@ import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Context } from 'telegraf';
 import { PersianNumberService } from '@ounce24/utils';
+import { AuthService } from '../auth/auth.service';
 
 export enum UserStateType {
   Login,
+  Otp,
   NewSignal,
 }
 
@@ -16,7 +18,10 @@ export type UserState<T = any> = {
 export class BaseBot {
   protected static userStates = new Map<number, UserState>();
 
-  constructor(private usersModel: Model<User>) {}
+  constructor(
+    private usersModel: Model<User>,
+    private authService: AuthService
+  ) {}
 
   setState<T>(userId: number, state: UserState<T>) {
     BaseBot.userStates.set(userId, state);
@@ -41,6 +46,7 @@ export class BaseBot {
   }
 
   async welcome(ctx: Context) {
+    BaseBot.userStates.delete(ctx.from.id);
     ctx.reply(
       `
 به ounce24 خوش‌آمدید
@@ -72,6 +78,28 @@ export class BaseBot {
       telegramUsername: ctx.from.username,
     };
     const text = ctx.message['text'];
+
+    if (state?.state === UserStateType.Otp && dto.phone) {
+      const token = PersianNumberService.toEnglish(text);
+      const isOk = this.authService.checkToken(dto.phone, token);
+      if (!isOk) {
+        ctx.reply('کد وارد شده نادرست است. لطفا کد صحیح را وارد کنید');
+        return;
+      } else {
+        state.state = UserStateType.Login;
+        this.setState(ctx.from.id, state);
+        if (!dto.name) {
+          ctx.reply(`لطفا نام و نام خانوادگی خود را وارد کنید`);
+          return
+        }
+        if (!dto.title) {
+          ctx.reply(`نام مستعار جهت نمایش به کاربران را وارد کنید`);
+          return;
+        }
+        
+      }
+    }
+
     if (state?.state !== UserStateType.Login) {
       this.setState(ctx.from.id, { state: UserStateType.Login });
       ctx.reply('شماره تلفن همراه خود را وارد کنید');
@@ -88,17 +116,33 @@ export class BaseBot {
         return;
       }
       dto.phone = phone;
-      ctx.reply('نام و نام خانوادگی خود را وارد کنید');
+      const user = await this.authService.sendToken(phone);
+      if (user) {
+        dto.id = user.id;
+        dto.name = user.name;
+        dto.title = user.title;
+      }
+      ctx.reply('یک کد عددی برای شما پیامک شد لطفا آن را وارد کنید');
+      state.state = UserStateType.Otp;
+      state.data = dto;
+      this.setState(ctx.from.id, state);
+      return;
     } else if (!dto?.name) {
       dto.name = text;
-      ctx.reply('نام مستعار جهت نمایش به کاربران');
+      ctx.reply('نام مستعار جهت نمایش به کاربران را وارد کنید');
     } else if (!dto?.title) {
       dto.title = text;
-      const createdData = new this.usersModel(dto);
-      await createdData.save();
+    }
+    if (dto.name, dto.phone, dto.title) {
+      console.log(dto);
+      if (dto.id) {
+        await this.usersModel.findByIdAndUpdate(dto.id, dto);
+      } else {
+        const createdData = new this.usersModel(dto);
+        await createdData.save();
+      }
       this.welcome(ctx);
-      BaseBot.userStates.delete(ctx.from.id);
-      return
+      return;
     }
     this.setStateData(ctx.from.id, dto);
   }

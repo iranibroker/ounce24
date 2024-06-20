@@ -15,6 +15,7 @@
     "@nestjs/platform-express": "^10.0.2",
     "axios": "^1.6.0",
     "ioredis": "^5.4.1",
+    "kavenegar": "^1.1.4",
     "mongoose": "^8.3.4",
     "nestjs-telegraf": "^2.7.0",
     "reflect-metadata": "^0.1.13",

@@ -16,6 +16,7 @@ import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { PublishBotsService } from './publish-bots.service';
 import { BOT_KEYS } from '../configs/publisher-bots.config';
 import { UserStatsService } from './user-stats.service';
+import { AuthService } from '../auth/auth.service';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -46,9 +47,10 @@ export class SignalBotService extends BaseBot {
     @InjectModel(User.name) private userModel: Model<User>,
     private ouncePriceService: OuncePriceService,
     private publishService: PublishBotsService,
-    private userStats: UserStatsService
+    private userStats: UserStatsService,
+    private auth: AuthService
   ) {
-    super(userModel);
+    super(userModel, auth);
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
@@ -442,7 +444,11 @@ export class SignalBotService extends BaseBot {
     if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
       const user = await this.getUser(ctx.from.id);
       const userScore = this.userStats.getUserScore(user.id);
-      const dto = new this.signalModel({ ...signal, owner: user, publishable: userScore >= MIN_SIGNAL_SCORE });
+      const dto = new this.signalModel({
+        ...signal,
+        owner: user,
+        publishable: userScore >= MIN_SIGNAL_SCORE,
+      });
       const createdSignal = await dto.save();
       await ctx.reply(Signal.getMessage(createdSignal));
       BaseBot.userStates.delete(ctx.from.id);

@@ -6,6 +6,7 @@ import { Ctx, InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { SignalBotService } from './signal-bot.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 @Update()
@@ -13,9 +14,10 @@ export class BotService extends BaseBot {
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
     @InjectModel(User.name) private userModel: Model<User>,
-    private signalBot: SignalBotService
+    private signalBot: SignalBotService,
+    private auth: AuthService,
   ) {
-    super(userModel);
+    super(userModel, auth);
     this.bot.telegram
             .sendMessage(
               process.env.PUBLISH_CHANNEL_ID,

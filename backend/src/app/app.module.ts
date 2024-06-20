@@ -10,6 +10,7 @@ import { BotModule } from './bot/bot.module';
 import { SchemasModule } from './schemas/schemas.module';
 import { OuncePriceModule } from './ounce-price/ounce-price.module';
 import { PublishBotsModules } from './configs/publisher-bots.config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PublishBotsModules } from './configs/publisher-bots.config';
       inject: [ConfigService],
     }),
     ...PublishBotsModules,
+    AuthModule,
     SignalsModule,
     BotModule,
     SchemasModule,
