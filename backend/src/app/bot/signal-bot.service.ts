@@ -127,7 +127,7 @@ export class SignalBotService extends BaseBot {
         }
 
         // check change detections and update message
-        if (statusChangeDetection) {
+        if (statusChangeDetection && signal.publishable) {
           this.publishSignal(signal, price);
         }
       }
@@ -244,7 +244,7 @@ export class SignalBotService extends BaseBot {
 
     const prevSignals = this.userStats.getUserSignals(user.id);
 
-    await ctx.reply(`👤${user.name}`);
+    await ctx.reply(`👤${user.title} (${user.name})`);
     if (prevSignals?.length) await ctx.reply(Signal.getStatsText(prevSignals));
   }
 
@@ -441,7 +441,8 @@ export class SignalBotService extends BaseBot {
 
     if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
       const user = await this.getUser(ctx.from.id);
-      const dto = new this.signalModel({ ...signal, owner: user });
+      const userScore = this.userStats.getUserScore(user.id);
+      const dto = new this.signalModel({ ...signal, owner: user, publishable: userScore >= MIN_SIGNAL_SCORE });
       const createdSignal = await dto.save();
       await ctx.reply(Signal.getMessage(createdSignal));
       BaseBot.userStates.delete(ctx.from.id);
@@ -449,8 +450,7 @@ export class SignalBotService extends BaseBot {
       const prevSignals = this.userStats.getUserSignals(user.id);
 
       if (process.env.PUBLISH_CHANNEL_ID) {
-        const userScore = this.userStats.getUserScore(user.id);
-        if (userScore < MIN_SIGNAL_SCORE) {
+        if (!createdSignal.publishable) {
           ctx.reply(
             `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز فعلی شما ${userScore.toFixed(
               2

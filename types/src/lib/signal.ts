@@ -51,6 +51,9 @@ export class Signal {
   @Prop()
   messageId?: number;
 
+  @Prop({default: false})
+  publishable?: boolean;
+
   @Prop()
   telegramBot?: string;
 
@@ -165,7 +168,7 @@ ${SignalTypeText[signal.type]}
     }
 
     if (signal.owner) {
-      text += `\n\n👤${signal.owner.name}`;
+      text += `\n\n👤${signal.owner.title}`;
     }
 
     if (options?.signals?.length) {

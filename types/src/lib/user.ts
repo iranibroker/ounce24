@@ -11,8 +11,11 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop()
-  telegramUsername: string;
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({required: false, unique: false})
+  telegramUsername?: string;
 
   @Prop({ index: true, unique: true })
   telegramId: number;

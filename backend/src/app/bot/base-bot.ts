@@ -91,10 +91,14 @@ export class BaseBot {
       ctx.reply('نام و نام خانوادگی خود را وارد کنید');
     } else if (!dto?.name) {
       dto.name = text;
+      ctx.reply('نام مستعار جهت نمایش به کاربران');
+    } else if (!dto?.title) {
+      dto.title = text;
       const createdData = new this.usersModel(dto);
       await createdData.save();
       this.welcome(ctx);
       BaseBot.userStates.delete(ctx.from.id);
+      return
     }
     this.setStateData(ctx.from.id, dto);
   }

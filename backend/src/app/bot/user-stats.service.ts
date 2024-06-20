@@ -76,7 +76,7 @@ export class UserStatsService {
     let texts = `⭐ رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} اساتید ⭐\n\n`;
     texts += top10
       .map((user, index) => {
-        return `${index + 1}. ${user.name} (${user.score.toFixed(1)} امتیاز)`;
+        return `${index + 1}. ${user.title} (${user.score.toFixed(1)} امتیاز)`;
       })
       .join('\n');
 
@@ -84,7 +84,7 @@ export class UserStatsService {
       const userIndex = users.findIndex((user) => user.id === options.userId);
       const user = users.find((user) => user.id === options.userId);
       texts += `\n--------\n${userIndex + top10.length}. ${
-        user.name
+        user.title
       } (${user.score.toFixed(1)} امتیاز)`;
     }
 
