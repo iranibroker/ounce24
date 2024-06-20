@@ -102,7 +102,7 @@ export class SignalBotService extends BaseBot {
               })
               .exec();
           }
-          if (price > signal.maxPrice || price < signal.minPrice) {
+          if (Signal.closeTrigger(signal, price)) {
             if (signal.messageId)
               this.bot.telegram.deleteMessage(
                 process.env.PUBLISH_CHANNEL_ID,
@@ -345,6 +345,32 @@ export class SignalBotService extends BaseBot {
     this.publishSignal(updatedSignal);
 
     ctx.answerCbQuery('سیگنال بسته شد');
+  }
+
+  @Action('risk_free')
+  async riskFree(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const message = ctx.callbackQuery.message;
+    const text: string = message['text'];
+    const id = text.split('#')[1];
+    const signal = await this.signalModel.findById(id).populate('owner').exec();
+    if (signal.pip < 0) {
+      ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
+      return;
+    }
+
+    const updatedSignal = await this.signalModel
+      .findByIdAndUpdate(
+        id,
+        {
+          riskFree: true,
+        },
+        { new: true }
+      )
+      .exec();
+
+    this.refreshBotSignal(ctx, updatedSignal, message.message_id);
+    ctx.answerCbQuery('سیگنال ریسک فری شد');
   }
 
   @Action('new_buy_signal')

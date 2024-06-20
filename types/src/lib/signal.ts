@@ -51,8 +51,11 @@ export class Signal {
   @Prop()
   messageId?: number;
 
-  @Prop({default: false})
+  @Prop({ default: false })
   publishable?: boolean;
+
+  @Prop({ default: false })
+  riskFree?: boolean;
 
   @Prop()
   telegramBot?: string;
@@ -91,6 +94,14 @@ export class Signal {
     return signal.entryPrice > min && signal.entryPrice < max;
   }
 
+  static closeTrigger(signal: Signal, ouncePrice: number) {
+    if (signal.riskFree) {
+      if (signal.isSell) return ouncePrice >= signal.entryPrice;
+      else return ouncePrice <= signal.entryPrice;
+    }
+    return ouncePrice > signal.maxPrice || ouncePrice < signal.minPrice;
+  }
+
   static getActivePip(signal: Signal, ouncePrice: number) {
     const isSell = signal.type === SignalType.Sell;
     const diff = isSell
@@ -109,8 +120,7 @@ export class Signal {
   static filterWinSignals(signals: Signal[]) {
     return signals.filter(
       (signal) =>
-        (signal.status === SignalStatus.Closed ||
-          signal.status === SignalStatus.Canceled) &&
+        signal.status === SignalStatus.Closed &&
         Signal.getActivePip(signal, signal.closedOuncePrice) >= 0
     );
   }
@@ -154,6 +164,8 @@ ${SignalTypeText[signal.type]}
 
     text += `\nوضعیت: ${SignalStatusText[signal.status]}\n`;
 
+    if (signal.riskFree) text += `🚧 ریسک فری\n`;
+
     if (signal.status === SignalStatus.Closed && signal.closedOuncePrice) {
       text += `قیمت لحظه بسته شدن: ${signal.closedOuncePrice}`;
     }
@@ -194,6 +206,7 @@ SignalSchema.virtual('loss').get(function () {
 });
 SignalSchema.virtual('pip').get(function () {
   if (this.status === SignalStatus.Closed && this.closedOuncePrice) {
+    if (this.riskFree) return 0;
     const diff = this.isSell
       ? this.entryPrice - this.closedOuncePrice
       : this.closedOuncePrice - this.entryPrice;
@@ -202,12 +215,13 @@ SignalSchema.virtual('pip').get(function () {
   return null;
 });
 SignalSchema.virtual('riskReward').get(function () {
+  if (this.status === SignalStatus.Closed && this.riskFree) return 0;
   const pip = this.pip;
   const profit = pip > 0 ? this.closedOuncePrice : this.profit;
   return Math.abs((profit - this.entryPrice) / (this.loss - this.entryPrice));
 });
 SignalSchema.virtual('score').get(function () {
-  if (this.status === SignalStatus.Closed) {
+  if (this.status === SignalStatus.Closed && !this.riskFree) {
     const diff = this.isSell
       ? this.entryPrice - this.closedOuncePrice
       : this.closedOuncePrice - this.entryPrice;
