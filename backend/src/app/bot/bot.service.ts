@@ -18,11 +18,11 @@ export class BotService extends BaseBot {
     private auth: AuthService,
   ) {
     super(userModel, auth);
-    this.bot.telegram
-            .sendMessage(
-              process.env.PUBLISH_CHANNEL_ID,
-              `بروزرسانی جدید انجام شد`
-            )
+    // this.bot.telegram
+    //         .sendMessage(
+    //           process.env.PUBLISH_CHANNEL_ID,
+    //           `بروزرسانی جدید انجام شد`
+    //         )
   }
 
   @Start()
