@@ -6,6 +6,7 @@ import { Redis } from 'ioredis';
 
 @Injectable()
 export class OuncePublishBotService {
+  errorCount = 0;
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
     private ouncePriceService: OuncePriceService
@@ -30,10 +31,13 @@ export class OuncePublishBotService {
               publishChannelMessageId,
               undefined,
               `قیمت لحظه‌ای اونس طلا: ${price}`
-            )
+            ).then(() => {
+              this.errorCount = 0;
+            })
             .catch((er) => {
+              this.errorCount++;
               console.log('OuncePublishBotService', er);
-              publishChannelMessageId = 0;
+              if (this.errorCount === 3) publishChannelMessageId = 0;
             });
         } else {
           this.bot.telegram.unpinAllChatMessages(
@@ -45,6 +49,7 @@ export class OuncePublishBotService {
               `قیمت لحظه‌ای اونس طلا: ${price}`
             )
             .then((message) => {
+              this.errorCount = 0;
               publishChannelMessageId = message.message_id;
               redis.set(
                 'publicChannelOuncePriceMessageId',
