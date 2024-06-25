@@ -30,6 +30,7 @@ export class UserStatsService {
       );
       if (existSignalIndex > -1)
         this.userSignals[owner.id][existSignalIndex] = signal;
+      else this.userSignals[owner.id].push(signal);
     } else {
       const signals = await this.signalModel.find({
         owner: owner._id,
@@ -68,12 +69,18 @@ export class UserStatsService {
     return users;
   }
 
-  async getLeaderBoardMessage(options?: { userId?: string; length?: number, fromDate?: Date }) {
+  async getLeaderBoardMessage(options?: {
+    userId?: string;
+    length?: number;
+    fromDate?: Date;
+  }) {
     const users = await this.getLeaderBoard(options?.fromDate);
 
     const top10 = users.slice(0, options?.length || 9);
 
-    let texts = `⭐ رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} اساتید ⭐\n\n`;
+    let texts = `⭐ رنکینگ ${
+      options?.fromDate ? 'هفتگی' : 'کلی'
+    } اساتید ⭐\n\n`;
     texts += top10
       .map((user, index) => {
         return `${index + 1}. ${user.title} (${user.score.toFixed(1)} امتیاز)`;

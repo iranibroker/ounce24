@@ -244,6 +244,7 @@ export class SignalBotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
 
+    await this.userStats.updateUserSignals(user);
     const prevSignals = this.userStats.getUserSignals(user.id);
 
     await ctx.reply(`👤${user.title} (${user.name})`);
