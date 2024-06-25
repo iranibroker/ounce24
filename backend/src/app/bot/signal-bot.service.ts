@@ -351,7 +351,6 @@ export class SignalBotService extends BaseBot {
 
   @Action('risk_free')
   async riskFree(@Ctx() ctx: Context) {
-    return
     if (!(await this.isValid(ctx))) return;
     const message = ctx.callbackQuery.message;
     const text: string = message['text'];

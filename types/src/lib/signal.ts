@@ -96,8 +96,11 @@ export class Signal {
 
   static closeTrigger(signal: Signal, ouncePrice: number) {
     if (signal.riskFree) {
-      if (signal.isSell) return ouncePrice >= signal.entryPrice;
-      else return ouncePrice <= signal.entryPrice;
+      if (
+        (signal.isSell && ouncePrice >= signal.entryPrice) ||
+        (!signal.isSell && ouncePrice <= signal.entryPrice)
+      )
+        return true;
     }
     return ouncePrice > signal.maxPrice || ouncePrice < signal.minPrice;
   }
@@ -206,28 +209,31 @@ SignalSchema.virtual('loss').get(function () {
 });
 SignalSchema.virtual('pip').get(function () {
   if (this.status === SignalStatus.Closed && this.closedOuncePrice) {
-    if (this.riskFree) return 0;
     const diff = this.isSell
       ? this.entryPrice - this.closedOuncePrice
       : this.closedOuncePrice - this.entryPrice;
-    return Number((diff * 10).toFixed(3));
+    const pip = Number((diff * 10).toFixed(3));
+    return this.riskFree && pip < 0 ? 0 : pip;
   }
   return null;
 });
 SignalSchema.virtual('riskReward').get(function () {
-  if (this.status === SignalStatus.Closed && this.riskFree) return 0;
-  const pip = this.pip;
-  const profit = pip > 0 ? this.closedOuncePrice : this.profit;
-  return Math.abs((profit - this.entryPrice) / (this.loss - this.entryPrice));
+  const profit = this.pip > 0 ? this.closedOuncePrice : this.profit;
+  const riskReward = Math.abs(
+    (profit - this.entryPrice) / (this.loss - this.entryPrice)
+  );
+  return this.status === SignalStatus.Closed && this.pip < 0 && this.riskFree
+    ? 0
+    : riskReward;
 });
 SignalSchema.virtual('score').get(function () {
-  if (this.status === SignalStatus.Closed && !this.riskFree) {
+  if (this.status === SignalStatus.Closed) {
     const diff = this.isSell
       ? this.entryPrice - this.closedOuncePrice
       : this.closedOuncePrice - this.entryPrice;
 
     if (diff >= 0) return (diff / Math.abs(this.entryPrice - this.loss)) * 10;
-    else if (diff < 0)
+    else if (diff < 0 && !this.riskFree)
       return (diff / Math.abs(this.entryPrice - this.profit)) * 10;
   }
 
