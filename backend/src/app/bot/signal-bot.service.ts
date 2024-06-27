@@ -9,7 +9,7 @@ import {
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Action, Command, Ctx, InjectBot, Update } from 'nestjs-telegraf';
-import { Context, Telegraf, Telegram } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
@@ -17,6 +17,7 @@ import { PublishBotsService } from './publish-bots.service';
 import { BOT_KEYS } from '../configs/publisher-bots.config';
 import { UserStatsService } from './user-stats.service';
 import { AuthService } from '../auth/auth.service';
+import { Cron } from '@nestjs/schedule';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -256,7 +257,6 @@ export class SignalBotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
 
-
     await ctx.reply(
       await this.userStats.getLeaderBoardMessage({ userId: user.id })
     );
@@ -266,7 +266,6 @@ export class SignalBotService extends BaseBot {
   async leaderboardWeeks(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
-
 
     await ctx.reply(
       await this.userStats.getLeaderBoardMessage({
@@ -290,31 +289,41 @@ export class SignalBotService extends BaseBot {
   }
 
   @Action('remove_signal')
-  async removeSignal(@Ctx() ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const message = ctx.callbackQuery.message;
-    const text: string = ctx.callbackQuery.message['text'];
-    const id = text.split('#')[1];
+  async removeSignal(@Ctx() ctx?: Context, signalId?: string) {
+    if (ctx && !(await this.isValid(ctx))) return;
+    const message = ctx?.callbackQuery.message;
+    const text: string = ctx?.callbackQuery.message['text'];
+    const id = text?.split('#')[1] || signalId;
     const signal = await this.signalModel
-      .findByIdAndUpdate(id, { deletedAt: new Date() })
+      .findByIdAndUpdate(
+        id,
+        { deletedAt: new Date(), status: SignalStatus.Canceled },
+        { new: true }
+      )
+      .populate('owner')
       .exec();
-    if (message.message_id) await ctx.deleteMessage(message.message_id);
+    if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
     if (signal.messageId) {
-      ctx.telegram.deleteMessage(
+      this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
         signal.messageId
       );
     }
 
-    ctx.answerCbQuery('سیگنال شما حذف شد');
+    this.bot.telegram.sendMessage(
+      signal.owner.telegramId,
+      Signal.getMessage(signal, { showId: true })
+    );
+
+    if (ctx) ctx.answerCbQuery('سیگنال شما حذف شد');
   }
 
   @Action('close_signal')
-  async closeSignal(@Ctx() ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const message = ctx.callbackQuery.message;
-    const text: string = ctx.callbackQuery.message['text'];
-    const id = text.split('#')[1];
+  async closeSignal(@Ctx() ctx?: Context, signalId?: string) {
+    if (ctx && !(await this.isValid(ctx))) return;
+    const message = ctx?.callbackQuery.message;
+    const text: string = ctx?.callbackQuery.message['text'];
+    const id = text?.split('#')[1] || signalId;
     const signal = await this.signalModel.findById(id).populate('owner').exec();
     const updatedSignal = await this.signalModel
       .findByIdAndUpdate(
@@ -327,11 +336,12 @@ export class SignalBotService extends BaseBot {
         },
         { new: true }
       )
+      .populate('owner')
       .exec();
 
     updatedSignal.owner = signal.owner;
 
-    if (message.message_id) await ctx.deleteMessage(message.message_id);
+    if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
 
     if (signal.messageId) {
       this.publishService.addAction(
@@ -350,9 +360,15 @@ export class SignalBotService extends BaseBot {
 
     this.publishSignal(updatedSignal);
 
-    ctx.answerCbQuery('سیگنال بسته شد');
-
-    ctx.reply(Signal.getMessage(signal, { showId: true }));
+    if (ctx) {
+      ctx.answerCbQuery('سیگنال بسته شد');
+      ctx.reply(Signal.getMessage(updatedSignal, { showId: true }));
+    } else {
+      this.bot.telegram.sendMessage(
+        signal.owner.telegramId,
+        Signal.getMessage(updatedSignal, { showId: true })
+      );
+    }
   }
 
   @Action('risk_free')
@@ -595,5 +611,26 @@ export class SignalBotService extends BaseBot {
     const text: string = message['text'];
     const id = text.split('#')[1];
     return this.signalModel.findById(id).exec();
+  }
+
+  @Cron('0 15 0 * * 6', {
+    timeZone: 'UTC',
+  })
+  async resetSignals() {
+    const signals = await this.signalModel
+      .find({
+        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+        deletedAt: null,
+      })
+      .populate('owner')
+      .exec();
+
+    for (const signal of signals) {
+      if (signal.status === SignalStatus.Active) {
+        await this.closeSignal(undefined, signal.id);
+      } else if (signal.status === SignalStatus.Pending) {
+        await this.removeSignal(undefined, signal.id);
+      }
+    }
   }
 }

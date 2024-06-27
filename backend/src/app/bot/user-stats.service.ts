@@ -75,7 +75,6 @@ export class UserStatsService {
     fromDate?: Date;
   }) {
     const users = await this.getLeaderBoard(options?.fromDate);
-    console.log(users.map((x) => x.score));
     const top10 = users.slice(0, options?.length || 9);
 
     let texts = `⭐ رنکینگ ${

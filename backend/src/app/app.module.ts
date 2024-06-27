@@ -11,10 +11,12 @@ import { SchemasModule } from './schemas/schemas.module';
 import { OuncePriceModule } from './ounce-price/ounce-price.module';
 import { PublishBotsModules } from './configs/publisher-bots.config';
 import { AuthModule } from './auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URI, {
       dbName: process.env.MONGO_DB_NAME,
     }),
