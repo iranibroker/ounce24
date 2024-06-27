@@ -35,14 +35,25 @@ export class OuncePublishBotService {
               process.env.PUBLISH_CHANNEL_ID,
               publishChannelMessageId,
               undefined,
-              `🟡 قیمت لحظه‌ای اونس طلا: ${price}`
-            ).then(() => {
+              `🟡 قیمت لحظه‌ای انس طلا: ${price}`
+            )
+            .then(() => {
               this.errorCount = 0;
             })
             .catch((er) => {
               this.errorCount++;
               console.log('OuncePublishBotService', er);
-              if (this.errorCount === MAX_ERROR) publishChannelMessageId = 0;
+              if (this.errorCount === MAX_ERROR) {
+                this.bot.telegram
+                  .deleteMessage(
+                    process.env.PUBLISH_CHANNEL_ID,
+                    publishChannelMessageId
+                  )
+                  .catch(() => {
+                    // unhandled
+                  });
+                publishChannelMessageId = 0;
+              }
             });
         } else {
           this.bot.telegram.unpinAllChatMessages(
@@ -51,7 +62,7 @@ export class OuncePublishBotService {
           this.bot.telegram
             .sendMessage(
               process.env.PUBLISH_CHANNEL_ID,
-              `قیمت لحظه‌ای اونس طلا: ${price}`
+              `قیمت لحظه‌ای انس طلا: ${price}`
             )
             .then((message) => {
               this.errorCount = 0;
