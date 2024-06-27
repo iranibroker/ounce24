@@ -90,13 +90,12 @@ export class BaseBot {
         this.setState(ctx.from.id, state);
         if (!dto.name) {
           ctx.reply(`لطفا نام و نام خانوادگی خود را وارد کنید`);
-          return
+          return;
         }
         if (!dto.title) {
           ctx.reply(`نام مستعار جهت نمایش به کاربران را وارد کنید`);
           return;
         }
-        
       }
     }
 
@@ -131,12 +130,18 @@ export class BaseBot {
       dto.name = text;
       ctx.reply('نام مستعار جهت نمایش به کاربران را وارد کنید');
     } else if (!dto?.title) {
+      const exist = await this.usersModel.findOne({ title: text }).exec();
+      if (exist) {
+        ctx.reply(
+          'نام انتخاب شده به شخص دیگری متعلق است. لطفا یک نام مستعار جدید انتخاب کنید'
+        );
+        return;
+      }
       dto.title = text;
     }
-    if (dto.name, dto.phone, dto.title) {
-      console.log(dto);
+    if ((dto.name, dto.phone, dto.title)) {
       if (dto.id) {
-        await this.usersModel.findByIdAndUpdate(dto.id, dto);
+        await this.usersModel.findByIdAndUpdate(dto.id, dto).exec();
       } else {
         const createdData = new this.usersModel(dto);
         await createdData.save();
@@ -162,16 +167,18 @@ export class BaseBot {
 
   getLastSundayAt21() {
     const currentDate = new Date();
-    const gmtDate = new Date(currentDate.getTime() + currentDate.getTimezoneOffset() * 60000);
-  
+    const gmtDate = new Date(
+      currentDate.getTime() + currentDate.getTimezoneOffset() * 60000
+    );
+
     // Get the current day of the week (0 - Sunday, 1 - Monday, etc.)
     const dayOfWeek = gmtDate.getUTCDay();
-  
+
     // Calculate the last Sunday
     const lastSunday = new Date(gmtDate);
     lastSunday.setUTCDate(gmtDate.getUTCDate() - dayOfWeek); // Move to the previous Sunday
     lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
-  
+
     return lastSunday;
   }
 }
