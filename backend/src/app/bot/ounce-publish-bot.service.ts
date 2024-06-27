@@ -19,6 +19,7 @@ export class OuncePublishBotService {
     );
 
     redis.get('publicChannelOuncePriceMessageId', (err, result) => {
+      console.log(result);
       if (result) {
         publishChannelMessageId = Number(result);
       }
