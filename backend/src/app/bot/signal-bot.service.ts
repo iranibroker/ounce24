@@ -129,7 +129,7 @@ export class SignalBotService extends BaseBot {
         }
 
         // check change detections and update message
-        if (statusChangeDetection && signal.publishable) {
+        if (statusChangeDetection) {
           this.publishSignal(signal, price);
         }
       }
@@ -541,6 +541,7 @@ export class SignalBotService extends BaseBot {
   }
 
   async publishSignal(signal: Signal, ouncePrice?: number) {
+    if (!signal.publishable) return;
     const prevSignals = signal.owner
       ? this.userStats.getUserSignals(signal.owner.id)
       : undefined;

@@ -35,7 +35,7 @@ export class OuncePublishBotService {
               process.env.PUBLISH_CHANNEL_ID,
               publishChannelMessageId,
               undefined,
-              `قیمت لحظه‌ای اونس طلا: ${price}`
+              `🟡 قیمت لحظه‌ای اونس طلا: ${price}`
             ).then(() => {
               this.errorCount = 0;
             })
