@@ -8,6 +8,7 @@ export enum UserStateType {
   Login,
   Otp,
   NewSignal,
+  Support,
 }
 
 export type UserState<T = any> = {
@@ -58,7 +59,11 @@ export class BaseBot {
 
 /my_closed_signals لیست سیگنال‌های بسته شده
 
-/leaderboard رنکینگ اساتید
+/leaderboard رنکینگ کلی اساتید
+
+/leaderboard_week رنکینگ هفتگی 
+
+/support پشتیبانی و ارسال نظر
 
 /profile مشاهده اطلاعات کاربری و امتیاز
 `,
