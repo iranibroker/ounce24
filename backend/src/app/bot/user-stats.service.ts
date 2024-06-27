@@ -82,7 +82,7 @@ export class UserStatsService {
     } اساتید ⭐\n\n`;
     texts += top10
       .map((user, index) => {
-        return `${index + 1}. ${user.title} (${user.score.toFixed(1)} امتیاز)`;
+        return `${index + 1}. ${user.tag} (${user.score.toFixed(1)} امتیاز)`;
       })
       .join('\n');
 

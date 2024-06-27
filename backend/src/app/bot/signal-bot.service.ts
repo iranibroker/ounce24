@@ -280,7 +280,7 @@ export class SignalBotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
     const message = ctx.callbackQuery.message;
     const text: string = message['text'];
-    const id = text.split('#')[1];
+    const id = text.split('^^')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
 
     await this.refreshBotSignal(ctx, signal, message.message_id);
@@ -293,7 +293,7 @@ export class SignalBotService extends BaseBot {
     if (ctx && !(await this.isValid(ctx))) return;
     const message = ctx?.callbackQuery.message;
     const text: string = ctx?.callbackQuery.message['text'];
-    const id = text?.split('#')[1] || signalId;
+    const id = text?.split('^^')[1] || signalId;
     const signal = await this.signalModel
       .findByIdAndUpdate(
         id,
@@ -323,7 +323,7 @@ export class SignalBotService extends BaseBot {
     if (ctx && !(await this.isValid(ctx))) return;
     const message = ctx?.callbackQuery.message;
     const text: string = ctx?.callbackQuery.message['text'];
-    const id = text?.split('#')[1] || signalId;
+    const id = text?.split('^^')[1] || signalId;
     const signal = await this.signalModel.findById(id).populate('owner').exec();
     const updatedSignal = await this.signalModel
       .findByIdAndUpdate(
@@ -376,7 +376,7 @@ export class SignalBotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
     const message = ctx.callbackQuery.message;
     const text: string = message['text'];
-    const id = text.split('#')[1];
+    const id = text.split('^^')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
     if (signal.pip < 0) {
       ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
@@ -518,7 +518,6 @@ export class SignalBotService extends BaseBot {
         const message = await this.bot.telegram.sendMessage(
           process.env.PUBLISH_CHANNEL_ID,
           Signal.getMessage(createdSignal, {
-            showId: true,
             signals: prevSignals,
           })
         );
@@ -568,7 +567,6 @@ export class SignalBotService extends BaseBot {
       : undefined;
 
     const text = Signal.getMessage(signal, {
-      showId: true,
       ouncePrice,
       signals: prevSignals,
     });
@@ -609,7 +607,7 @@ export class SignalBotService extends BaseBot {
   getSignalFromMessage(@Ctx() ctx: Context) {
     const message = ctx.callbackQuery.message;
     const text: string = message['text'];
-    const id = text.split('#')[1];
+    const id = text.split('^^')[1];
     return this.signalModel.findById(id).exec();
   }
 

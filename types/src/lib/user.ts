@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -14,7 +14,7 @@ export class User {
   @Prop({ required: true })
   title: string;
 
-  @Prop({required: false, unique: false})
+  @Prop({ required: false, unique: false })
   telegramUsername?: string;
 
   @Prop({ index: true, unique: true })
@@ -24,6 +24,16 @@ export class User {
   phone: string;
 
   score?: number;
+  tag: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('tag').get(function () {
+  let tag = '#استاد_';
+  if (this.title) {
+    const cleanedTitle = this.title.replace(/[&@#.]/g, '').replace(/[ -]/g, '_');
+    tag += cleanedTitle;
+  }
+  return tag;
+});

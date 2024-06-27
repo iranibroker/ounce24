@@ -183,14 +183,14 @@ ${SignalTypeText[signal.type]}
     }
 
     if (signal.owner) {
-      text += `\n\n👤${signal.owner.title}`;
+      text += `\n\n👤 ${signal.owner.tag}`;
     }
 
     if (options?.signals?.length) {
       text += `\n` + Signal.getStatsText(options.signals);
     }
 
-    if (options?.showId) text += `\n#${signal.id}`;
+    if (options?.showId) text += `\n\n\n^^${signal.id}`;
 
     return text;
   }
