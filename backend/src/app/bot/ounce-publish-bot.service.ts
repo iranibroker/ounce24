@@ -8,7 +8,8 @@ const MAX_ERROR = 5;
 
 @Injectable()
 export class OuncePublishBotService {
-  errorCount = 0;
+  private errorCount = 0;
+  private prevPrice = 0;
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
     private ouncePriceService: OuncePriceService
@@ -21,12 +22,13 @@ export class OuncePublishBotService {
     );
 
     redis.get('publicChannelOuncePriceMessageId', (err, result) => {
-      console.log(result);
       if (result) {
         publishChannelMessageId = Number(result);
       }
 
       this.ouncePriceService.obs.subscribe((price) => {
+        if (price === this.prevPrice) return;
+        this.prevPrice = price;
         if (publishChannelMessageId) {
           this.bot.telegram
             .editMessageText(
