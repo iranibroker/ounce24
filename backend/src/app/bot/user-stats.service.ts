@@ -75,7 +75,7 @@ export class UserStatsService {
     fromDate?: Date;
   }) {
     const users = await this.getLeaderBoard(options?.fromDate);
-
+    console.log(users.map((x) => x.score));
     const top10 = users.slice(0, options?.length || 9);
 
     let texts = `⭐ رنکینگ ${
@@ -87,12 +87,10 @@ export class UserStatsService {
       })
       .join('\n');
 
-    if (options?.userId && !top10.find((user) => user.id === options.userId)) {
+    if (options?.userId) {
       const userIndex = users.findIndex((user) => user.id === options.userId);
       const user = users.find((user) => user.id === options.userId);
-      texts += `\n--------\n${userIndex + top10.length}. ${
-        user.title
-      } (${user.score.toFixed(1)} امتیاز)`;
+      texts += `\n--------\n\nشما با امتیاز ${user.score.toFixed(1)} نفر ${userIndex + 1} در رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} هستید`;
     }
 
     return texts;

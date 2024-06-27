@@ -159,4 +159,19 @@ export class BaseBot {
   getUser(telegramId: number): Promise<User> {
     return this.usersModel.findOne({ telegramId }).exec();
   }
+
+  getLastSundayAt21() {
+    const currentDate = new Date();
+    const gmtDate = new Date(currentDate.getTime() + currentDate.getTimezoneOffset() * 60000);
+  
+    // Get the current day of the week (0 - Sunday, 1 - Monday, etc.)
+    const dayOfWeek = gmtDate.getUTCDay();
+  
+    // Calculate the last Sunday
+    const lastSunday = new Date(gmtDate);
+    lastSunday.setUTCDate(gmtDate.getUTCDate() - dayOfWeek); // Move to the previous Sunday
+    lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
+  
+    return lastSunday;
+  }
 }
