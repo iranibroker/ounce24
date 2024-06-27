@@ -4,6 +4,8 @@ import { Context, Telegraf } from 'telegraf';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { Redis } from 'ioredis';
 
+const MAX_ERROR = 5;
+
 @Injectable()
 export class OuncePublishBotService {
   errorCount = 0;
@@ -38,7 +40,7 @@ export class OuncePublishBotService {
             .catch((er) => {
               this.errorCount++;
               console.log('OuncePublishBotService', er);
-              if (this.errorCount === 3) publishChannelMessageId = 0;
+              if (this.errorCount === MAX_ERROR) publishChannelMessageId = 0;
             });
         } else {
           this.bot.telegram.unpinAllChatMessages(
