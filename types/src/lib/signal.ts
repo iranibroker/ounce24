@@ -228,13 +228,10 @@ SignalSchema.virtual('riskReward').get(function () {
 });
 SignalSchema.virtual('score').get(function () {
   if (this.status === SignalStatus.Closed) {
-    const diff = this.isSell
-      ? this.entryPrice - this.closedOuncePrice
-      : this.closedOuncePrice - this.entryPrice;
-
-    if (diff >= 0) return (diff / Math.abs(this.entryPrice - this.loss)) * 10;
-    else if (diff < 0 && !this.riskFree)
-      return (diff / Math.abs(this.entryPrice - this.profit)) * 10;
+    const lossPip = Math.abs(this.loss - this.entryPrice) * 10;
+    const pip = this.pip
+    const res = 1 + (pip / lossPip) * (Math.abs(pip) / 50 + 10);
+    return res;
   }
 
   return 0;

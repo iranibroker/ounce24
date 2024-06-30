@@ -294,7 +294,9 @@ export class SignalBotService extends BaseBot {
     const message = ctx?.callbackQuery.message;
     const text: string = ctx?.callbackQuery.message['text'];
     const id = text?.split('^^')[1] || signalId;
-    const signal = await this.signalModel
+    const signal = await this.signalModel.findById(id).exec();
+    if (signal.status !== SignalStatus.Pending) return;
+    const updatedSignal = await this.signalModel
       .findByIdAndUpdate(
         id,
         { deletedAt: new Date(), status: SignalStatus.Canceled },
@@ -303,16 +305,16 @@ export class SignalBotService extends BaseBot {
       .populate('owner')
       .exec();
     if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
-    if (signal.messageId) {
+    if (updatedSignal.messageId) {
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
-        signal.messageId
+        updatedSignal.messageId
       );
     }
 
     this.bot.telegram.sendMessage(
-      signal.owner.telegramId,
-      Signal.getMessage(signal, { showId: true })
+      updatedSignal.owner.telegramId,
+      Signal.getMessage(updatedSignal, { showId: true })
     );
 
     if (ctx) ctx.answerCbQuery('سیگنال شما حذف شد');
@@ -325,6 +327,7 @@ export class SignalBotService extends BaseBot {
     const text: string = ctx?.callbackQuery.message['text'];
     const id = text?.split('^^')[1] || signalId;
     const signal = await this.signalModel.findById(id).populate('owner').exec();
+    if (signal.status !== SignalStatus.Active) return;
     const updatedSignal = await this.signalModel
       .findByIdAndUpdate(
         id,
@@ -382,6 +385,8 @@ export class SignalBotService extends BaseBot {
       ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
       return;
     }
+
+    if (signal.status !== SignalStatus.Active) return;
 
     const updatedSignal = await this.signalModel
       .findByIdAndUpdate(

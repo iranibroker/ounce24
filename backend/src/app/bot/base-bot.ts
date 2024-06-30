@@ -50,8 +50,10 @@ export class BaseBot {
     BaseBot.userStates.delete(ctx.from.id);
     ctx.reply(
       `
-به ounce24 خوش‌آمدید
-از دستورات زیر میتوانید استفاده کنید
+سلام من انس 24 ام
+از گزینه های زیر میتونی استفاده کنی
+هرجا گیرکردی از گزینه menu کنار استفاده کن
+
 
 /new_signal ایجاد سیگنال جدید
 
@@ -61,7 +63,7 @@ export class BaseBot {
 
 /leaderboard رنکینگ کلی اساتید
 
-/leaderboard_week رنکینگ هفتگی 
+/leaderboard_week رنکینگ هفتگی اساتید
 
 /support پشتیبانی و ارسال نظر
 
