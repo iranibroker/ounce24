@@ -175,7 +175,7 @@ export class BaseBot {
       user.telegramId
     );
     console.log(chatMember);
-    if (chatMember?.status != 'member' && chatMember?.status != 'creator') {
+    if (chatMember?.status != 'member' && chatMember?.status != 'creator' && chatMember?.status != 'administrator') {
       ctx.reply(`
 برای استفاده از خدمات ربات ابتدا در کانال زیر عضو شوید.
 
