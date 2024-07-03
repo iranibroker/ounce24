@@ -51,7 +51,7 @@ export class SignalBotService extends BaseBot {
     private userStats: UserStatsService,
     private auth: AuthService
   ) {
-    super(userModel, auth);
+    super(userModel, auth, bot);
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;

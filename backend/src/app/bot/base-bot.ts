@@ -1,6 +1,6 @@
 import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
-import { Context } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 import { PersianNumberService } from '@ounce24/utils';
 import { AuthService } from '../auth/auth.service';
 
@@ -21,7 +21,8 @@ export class BaseBot {
 
   constructor(
     private usersModel: Model<User>,
-    private authService: AuthService
+    private authService: AuthService,
+    private botService: Telegraf<Context>
   ) {}
 
   setState<T>(userId: number, state: UserState<T>) {
@@ -163,6 +164,19 @@ export class BaseBot {
     const user = await this.getUser(ctx.from.id);
     if (!user) {
       this.login(ctx);
+      return false;
+    }
+    const chatMember = await this.botService.telegram.getChatMember(
+      process.env.PUBLISH_CHANNEL_ID,
+      user.telegramId
+    );
+    console.log(chatMember);
+    if (chatMember?.status != 'member' && chatMember?.status != 'creator') {
+      ctx.reply(`
+برای استفاده از خدمات ربات ابتدا در کانال زیر عضو شوید.
+
+@Ounce24_signal
+  `);
       return false;
     }
     return true;

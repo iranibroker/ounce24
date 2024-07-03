@@ -17,7 +17,7 @@ export class BotService extends BaseBot {
     private signalBot: SignalBotService,
     private auth: AuthService
   ) {
-    super(userModel, auth);
+    super(userModel, auth, bot);
     // this.bot.telegram
     //         .sendMessage(
     //           process.env.PUBLISH_CHANNEL_ID,
@@ -32,7 +32,6 @@ export class BotService extends BaseBot {
 
   @Command('support')
   support(@Ctx() ctx: Context) {
-    console.log(23);
     ctx.reply(`من یک رباتم نمیتونم پشتیبانی بدم!
 ولی نظراتت رو میتونم بررسی کنم و کارم رو بهبود بدم
 پس اگه نظری داری برام بنویس`);
@@ -62,7 +61,6 @@ export class BotService extends BaseBot {
 
   @On('message')
   async onMessage(@Ctx() ctx: Context) {
-    console.log(ctx.message['text']);
     if (!(await this.isValid(ctx))) return;
     const userState = this.getState(ctx.from.id);
     switch (userState?.state) {
