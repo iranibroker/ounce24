@@ -48,6 +48,7 @@ export class BaseBot {
   }
 
   async welcome(ctx: Context) {
+    const count = await this.usersModel.countDocuments().exec();
     BaseBot.userStates.delete(ctx.from.id);
     ctx.reply(
       `
@@ -69,6 +70,9 @@ export class BaseBot {
 /support پشتیبانی و ارسال نظر
 
 /profile مشاهده اطلاعات کاربری و امتیاز
+
+
+تعداد اعضای متصل به ربات: ${count} نفر
 `,
       {
         reply_markup: {
