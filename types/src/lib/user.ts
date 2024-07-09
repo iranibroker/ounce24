@@ -23,6 +23,9 @@ export class User {
   @Prop({ required: true, unique: true })
   phone: string;
 
+  @Prop({ required: false })
+  resetAt: Date;
+
   score?: number;
   tag: string;
 }

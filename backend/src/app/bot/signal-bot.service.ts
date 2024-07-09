@@ -555,6 +555,62 @@ ${Signal.getStatsText(signals)}
     }
   }
 
+  @Command('reset_all_profile')
+  async resetAllProfile(@Ctx() ctx: Context) {
+    const user = await this.getUser(ctx.from.id);
+    const lastResetDiff = Math.floor(
+      (Date.now() - new Date(user.resetAt).valueOf()) / 3600000 / 24
+    );
+    const isLessThan15 = user.resetAt && lastResetDiff <= 15;
+    ctx.reply(
+      `⚠️با تایید این گزینه تمام امتیازات گذشتت همراه تاریخچه سیگنال هات پاک میشه.
+و میتونی از صفر به عنوان کاربر جدید شروع به کار کنی.
+
+در هر 15 روز یکبار ازین فرصت میتونی استفاده کنی. ${isLessThan15 ? `شما به تازگی حساب خود را ریست کرده اید` : ''}.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            isLessThan15
+              ? []
+              : [
+                  {
+                    text: 'تایید و حذف',
+                    callback_data: 'accept_reset_all_profile',
+                  },
+                  { text: 'انصراف', callback_data: 'cancel_reset_all_profile' },
+                ],
+          ],
+        },
+      }
+    );
+  }
+
+  @Action('accept_reset_all_profile')
+  async acceptResetAllProfile(@Ctx() ctx: Context) {
+    const user = await this.getUser(ctx.from.id);
+    const isLessThan15 =
+      user.resetAt &&
+      Date.now() - new Date(user.resetAt).valueOf() < 3600000 * 24 * 15;
+    if (isLessThan15) return;
+    await this.signalModel.updateMany(
+      { owner: user._id, deletedAt: null },
+      { deletedAt: new Date() }
+    );
+    await this.userModel.findByIdAndUpdate(user.id, { resetAt: new Date() });
+    const message = ctx.callbackQuery.message;
+    ctx.deleteMessage(message.message_id);
+    await ctx.answerCbQuery('امتیاز شما صفر و سیگنال‌های شما پاک شد.');
+    this.welcome(ctx);
+  }
+
+  @Action('cancel_reset_all_profile')
+  async cancelResetAllProfile(@Ctx() ctx: Context) {
+    const message = ctx.callbackQuery.message;
+    ctx.answerCbQuery();
+    ctx.deleteMessage(message.message_id);
+    this.welcome(ctx);
+  }
+
   async refreshBotSignal(ctx: Context, signal: Signal, messageId: number) {
     try {
       await ctx.telegram.editMessageText(
