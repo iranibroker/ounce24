@@ -57,36 +57,21 @@ export class BaseBot {
 هرجا گیرکردی از گزینه menu کنار استفاده کن
 
 
-ایجاد سیگنال جدید
-/new_signal
+/new_signal ایجاد سیگنال جدید
 
+/my_signals مدیریت سیگنال‌های ثبت شده
 
-مدیریت سیگنال‌های ثبت شده
-/my_signals
+/my_closed_signals لیست سیگنال‌های بسته شده
 
+/leaderboard رنکینگ کلی اساتید
 
-لیست سیگنال‌های بسته شده
-/my_closed_signals
+/leaderboard_week رنکینگ هفتگی اساتید
 
+/support پشتیبانی و ارسال نظر
 
-رنکینگ کلی اساتید
-/leaderboard
+/profile مشاهده اطلاعات کاربری و امتیاز
 
-
-رنکینگ هفتگی اساتید
-/leaderboard_week
-
-
-پشتیبانی و ارسال نظر
-/support
-
-
-مشاهده اطلاعات کاربری و امتیاز
-/profile
-
-
-پاک کردن تاریخچه سیگنال ها - شروع دوباره
-/reset_all_profile
+/reset_all_profile پاک کردن تاریخچه سیگنال ها (شروع دوباره)
 
 
 
@@ -193,11 +178,7 @@ export class BaseBot {
       user.telegramId
     );
     console.log(chatMember);
-    if (
-      chatMember?.status != 'member' &&
-      chatMember?.status != 'creator' &&
-      chatMember?.status != 'administrator'
-    ) {
+    if (chatMember?.status != 'member' && chatMember?.status != 'creator' && chatMember?.status != 'administrator') {
       ctx.reply(`
 برای استفاده از خدمات ربات ابتدا در کانال زیر عضو شوید.
 
