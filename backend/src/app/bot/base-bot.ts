@@ -57,19 +57,37 @@ export class BaseBot {
 هرجا گیرکردی از گزینه menu کنار استفاده کن
 
 
-/new_signal ایجاد سیگنال جدید
+ایجاد سیگنال جدید
+/new_signal
 
-/my_signals مدیریت سیگنال‌های ثبت شده
 
-/my_closed_signals لیست سیگنال‌های بسته شده
+مدیریت سیگنال‌های ثبت شده
+/my_signals
 
-/leaderboard رنکینگ کلی اساتید
 
-/leaderboard_week رنکینگ هفتگی اساتید
+لیست سیگنال‌های بسته شده
+/my_closed_signals
 
-/support پشتیبانی و ارسال نظر
 
-/profile مشاهده اطلاعات کاربری و امتیاز
+رنکینگ کلی اساتید
+/leaderboard
+
+
+رنکینگ هفتگی اساتید
+/leaderboard_week
+
+
+پشتیبانی و ارسال نظر
+/support
+
+
+مشاهده اطلاعات کاربری و امتیاز
+/profile
+
+
+پاک کردن تاریخچه سیگنال ها - شروع دوباره
+/reset_all_profile
+
 
 
 تعداد اعضای متصل به ربات: ${count} نفر
@@ -175,7 +193,11 @@ export class BaseBot {
       user.telegramId
     );
     console.log(chatMember);
-    if (chatMember?.status != 'member' && chatMember?.status != 'creator' && chatMember?.status != 'administrator') {
+    if (
+      chatMember?.status != 'member' &&
+      chatMember?.status != 'creator' &&
+      chatMember?.status != 'administrator'
+    ) {
       ctx.reply(`
 برای استفاده از خدمات ربات ابتدا در کانال زیر عضو شوید.
 
