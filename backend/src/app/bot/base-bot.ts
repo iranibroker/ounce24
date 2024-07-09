@@ -190,6 +190,12 @@ export class BaseBot {
     return this.usersModel.findOne({ telegramId }).exec();
   }
 
+  getPrevSundayAt21() {
+    const date = this.getLastSundayAt21();
+    date.setDate(date.getDate() - 7);
+    return date;
+  }
+
   getLastSundayAt21() {
     const currentDate = new Date();
     const gmtDate = new Date(

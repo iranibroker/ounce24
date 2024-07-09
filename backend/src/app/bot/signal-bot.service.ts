@@ -275,6 +275,26 @@ export class SignalBotService extends BaseBot {
     );
   }
 
+  @Command('leaderboard_admin_prev_week')
+  async leaderboardPrevWeeksAdmin(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const fromDate = this.getPrevSundayAt21();
+    const toDate = this.getLastSundayAt21();
+
+    const leaderboard = await this.userStats.getLeaderBoard(fromDate, toDate);
+    for (let i = 0; i < 3; i++) {
+      const user = leaderboard[i];
+      const signals = this.userStats.getUserSignals(user.id, fromDate, toDate);
+      const sumPip = signals.reduce((sum, signal) => {
+        return sum + signal.pip;
+      }, 0);
+      await ctx.reply(`${i + 1}: ${user.name} (${user.title})
+${Signal.getStatsText(signals)}
+برآیند: ${sumPip}
+`);
+    }
+  }
+
   @Action('refresh_signal')
   async refreshSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;

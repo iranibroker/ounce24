@@ -41,16 +41,21 @@ export class UserStatsService {
     }
   }
 
-  getUserSignals(userId: string) {
-    return this.userSignals[userId] || [];
-  }
-
-  getUserScore(userId: string, fromDate?: Date) {
-    let signals = this.getUserSignals(userId);
+  getUserSignals(userId: string, fromDate?: Date, toDate?: Date) {
+    let signals = this.userSignals[userId] || [];
     if (fromDate)
       signals = signals.filter(
         (signal) => signal.closedAt.valueOf() >= fromDate.valueOf()
       );
+    if (toDate)
+      signals = signals.filter(
+        (signal) => signal.closedAt.valueOf() <= toDate.valueOf()
+      );
+    return signals
+  }
+
+  getUserScore(userId: string, fromDate?: Date, toDate?: Date) {
+    const signals = this.getUserSignals(userId, fromDate, toDate);
     if (signals) {
       return signals.reduce((value, signal) => {
         return signal.score + value;
@@ -59,10 +64,10 @@ export class UserStatsService {
     return 0;
   }
 
-  async getLeaderBoard(fromDate?: Date) {
+  async getLeaderBoard(fromDate?: Date, toDate?: Date) {
     const users = await this.userModel.find().exec();
     for (const user of users) {
-      user.score = this.getUserScore(user.id, fromDate);
+      user.score = this.getUserScore(user.id, fromDate, toDate);
     }
 
     users.sort((a, b) => b.score - a.score);
@@ -73,8 +78,9 @@ export class UserStatsService {
     userId?: string;
     length?: number;
     fromDate?: Date;
+    toDate?: Date;
   }) {
-    const users = await this.getLeaderBoard(options?.fromDate);
+    const users = await this.getLeaderBoard(options?.fromDate, options?.toDate);
     const top10 = users.slice(0, options?.length || 9);
 
     let texts = `⭐ رنکینگ ${
@@ -89,7 +95,9 @@ export class UserStatsService {
     if (options?.userId) {
       const userIndex = users.findIndex((user) => user.id === options.userId);
       const user = users.find((user) => user.id === options.userId);
-      texts += `\n--------\n\nشما با امتیاز ${user.score.toFixed(1)} نفر ${userIndex + 1} در رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} هستید`;
+      texts += `\n--------\n\nشما با امتیاز ${user.score.toFixed(1)} نفر ${
+        userIndex + 1
+      } در رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} هستید`;
     }
 
     return texts;
