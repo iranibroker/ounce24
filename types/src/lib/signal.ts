@@ -89,6 +89,11 @@ export class Signal {
   score: number;
 
   static activeTrigger(signal: Signal, ouncePrice: number) {
+    if (
+      signal.entryPrice === signal.createdOuncePrice &&
+      signal.createdOuncePrice !== ouncePrice
+    )
+      return true;
     const min = Math.min(signal.createdOuncePrice, ouncePrice);
     const max = Math.max(signal.createdOuncePrice, ouncePrice);
     return signal.entryPrice > min && signal.entryPrice < max;
@@ -229,7 +234,7 @@ SignalSchema.virtual('riskReward').get(function () {
 SignalSchema.virtual('score').get(function () {
   if (this.status === SignalStatus.Closed) {
     const lossPip = Math.abs(this.loss - this.entryPrice) * 10;
-    const pip = this.pip
+    const pip = this.pip;
     const res = 1 + (pip / lossPip) * (Math.abs(pip) / 50 + 10);
     return res;
   }
