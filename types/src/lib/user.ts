@@ -26,6 +26,9 @@ export class User {
   @Prop({ required: false })
   resetAt: Date;
 
+  @Prop({ required: false })
+  iban: string;
+
   score?: number;
   tag: string;
 }

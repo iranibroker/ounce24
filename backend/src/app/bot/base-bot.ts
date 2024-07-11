@@ -9,6 +9,7 @@ export enum UserStateType {
   Otp,
   NewSignal,
   Support,
+  Iban,
 }
 
 export type UserState<T = any> = {
@@ -32,6 +33,10 @@ export class BaseBot {
   getState<T>(userId: number) {
     const state: UserState<T> = BaseBot.userStates.get(userId);
     return state;
+  }
+
+  deleteState(userId: number) {
+    BaseBot.userStates.delete(userId);
   }
 
   setStateData<T>(userId: number, data: T) {
@@ -178,7 +183,11 @@ export class BaseBot {
       user.telegramId
     );
     console.log(chatMember);
-    if (chatMember?.status != 'member' && chatMember?.status != 'creator' && chatMember?.status != 'administrator') {
+    if (
+      chatMember?.status != 'member' &&
+      chatMember?.status != 'creator' &&
+      chatMember?.status != 'administrator'
+    ) {
       ctx.reply(`
 برای استفاده از خدمات ربات ابتدا در کانال زیر عضو شوید.
 
