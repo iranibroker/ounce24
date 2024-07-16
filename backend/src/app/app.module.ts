@@ -22,6 +22,14 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
+      botName: 'ounce',
+      useFactory: (configService: ConfigService) => ({
+        token: configService.get<string>('OUNCE_PUBLISHER_BOT'),
+      }),
+      inject: [ConfigService],
+    }),
+    TelegrafModule.forRootAsync({
+      imports: [ConfigModule],
       botName: 'main',
       useFactory: (configService: ConfigService) => ({
         token: configService.get<string>('BOT_TOKEN'),

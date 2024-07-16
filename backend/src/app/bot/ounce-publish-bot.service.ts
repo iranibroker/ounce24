@@ -12,7 +12,7 @@ export class OuncePublishBotService {
   private prevPrice = 0;
   prevPublishDatetime = 0;
   constructor(
-    @InjectBot('main') private bot: Telegraf<Context>,
+    @InjectBot('ounce') private bot: Telegraf<Context>,
     private ouncePriceService: OuncePriceService
   ) {
     let publishChannelMessageId = 0;
