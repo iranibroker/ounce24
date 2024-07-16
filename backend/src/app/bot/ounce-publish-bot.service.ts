@@ -4,7 +4,7 @@ import { Context, Telegraf } from 'telegraf';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { Redis } from 'ioredis';
 
-const MAX_ERROR = 5;
+const MAX_ERROR = 3;
 
 @Injectable()
 export class OuncePublishBotService {
@@ -32,7 +32,7 @@ export class OuncePublishBotService {
         this.prevPrice = price;
         if (publishChannelMessageId) {
           const diff = Date.now() - this.prevPublishDatetime;
-          if (diff < 10000) return;
+          if (diff < 3000) return;
           console.log('diff', diff);
           this.prevPublishDatetime = Date.now();
           this.bot.telegram
