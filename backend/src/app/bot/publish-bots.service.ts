@@ -19,14 +19,14 @@ export class PublishBotsService {
       const bot = publishBots[i];
       this.botActionQueue[BOT_KEYS[i]] = [];
       setTimeout(() => {
-        setInterval(async () => {
+        setInterval(() => {
           const queue = this.botActionQueue[BOT_KEYS[i]];
           if (queue.length) {
             const action = queue.shift();
             try {
-              await action[1](bot.telegram);
+              action[1](bot.telegram);
             } catch (error) {
-              Logger.error('error on action', action[0], bot);
+              console.error('error on action', action[0], bot);
             }
           }
         }, 3000);

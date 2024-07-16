@@ -55,7 +55,7 @@ export class SignalBotService extends BaseBot {
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
-      Logger.log('price', price);
+      console.log('price', price);
 
       const signals = await this.signalModel
         .find({
@@ -586,7 +586,9 @@ ${Signal.getStatsText(signals)}
       `⚠️با تایید این گزینه تمام امتیازات گذشتت همراه تاریخچه سیگنال هات پاک میشه.
 و میتونی از صفر به عنوان کاربر جدید شروع به کار کنی.
 
-در هر 15 روز یکبار ازین فرصت میتونی استفاده کنی. ${isLessThan15 ? `شما به تازگی حساب خود را ریست کرده اید` : ''}.`,
+در هر 15 روز یکبار ازین فرصت میتونی استفاده کنی. ${
+        isLessThan15 ? `شما به تازگی حساب خود را ریست کرده اید` : ''
+      }.`,
       {
         reply_markup: {
           inline_keyboard: [
@@ -682,7 +684,7 @@ ${Signal.getStatsText(signals)}
             text
           )
           .catch((er) => {
-            console.error(er.response, signal.id);
+            console.error('error editing signal', er.response, signal.id);
           });
       };
     } else {
@@ -697,7 +699,7 @@ ${Signal.getStatsText(signals)}
               .exec();
           })
           .catch((er) => {
-            console.error(er.response, signal.id);
+            console.error('error sending signal', er.response, signal.id);
           });
       };
     }
