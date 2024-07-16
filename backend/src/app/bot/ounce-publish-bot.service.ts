@@ -32,7 +32,8 @@ export class OuncePublishBotService {
         this.prevPrice = price;
         if (publishChannelMessageId) {
           const diff = Date.now() - this.prevPublishDatetime;
-          if (diff < 4000) return;
+          if (diff < 10000) return;
+          console.log('diff', diff);
           this.prevPublishDatetime = Date.now();
           this.bot.telegram
             .editMessageText(
