@@ -10,6 +10,7 @@ const MAX_ERROR = 5;
 export class OuncePublishBotService {
   private errorCount = 0;
   private prevPrice = 0;
+  prevPublishDatetime = 0;
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
     private ouncePriceService: OuncePriceService
@@ -30,6 +31,9 @@ export class OuncePublishBotService {
         if (price === this.prevPrice) return;
         this.prevPrice = price;
         if (publishChannelMessageId) {
+          const diff = Date.now() - this.prevPublishDatetime;
+          if (diff < 4000) return;
+          this.prevPublishDatetime = Date.now();
           this.bot.telegram
             .editMessageText(
               process.env.PUBLISH_CHANNEL_ID,
