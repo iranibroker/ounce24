@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { Context, Telegraf, Telegram } from 'telegraf';
 import { BOT_KEYS } from '../configs/publisher-bots.config';
@@ -19,14 +19,14 @@ export class PublishBotsService {
       const bot = publishBots[i];
       this.botActionQueue[BOT_KEYS[i]] = [];
       setTimeout(() => {
-        setInterval(() => {
+        setInterval(async () => {
           const queue = this.botActionQueue[BOT_KEYS[i]];
           if (queue.length) {
             const action = queue.shift();
             try {
-              action[1](bot.telegram);
+              await action[1](bot.telegram);
             } catch (error) {
-              console.warn('error on action', action[0], bot);
+              Logger.error('error on action', action[0], bot);
             }
           }
         }, 3000);

@@ -29,7 +29,6 @@ export class AuthService {
       delete this.mobilePhoneTokens[phone];
     }, validateTime);
     const user = await this.userModel.findOne({ phone });
-    console.log(user);
     return user;
   }
 

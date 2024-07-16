@@ -182,7 +182,6 @@ export class BaseBot {
       process.env.PUBLISH_CHANNEL_ID,
       user.telegramId
     );
-    console.log(chatMember);
     if (
       chatMember?.status != 'member' &&
       chatMember?.status != 'creator' &&

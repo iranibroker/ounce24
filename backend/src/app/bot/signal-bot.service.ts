@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Signal,
@@ -55,7 +55,7 @@ export class SignalBotService extends BaseBot {
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
-      console.log('price', price);
+      Logger.log('price', price);
 
       const signals = await this.signalModel
         .find({

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
@@ -33,7 +33,7 @@ export class OuncePublishBotService {
         if (publishChannelMessageId) {
           const diff = Date.now() - this.prevPublishDatetime;
           if (diff < 10000) return;
-          console.log('diff', diff);
+          Logger.log('diff', diff);
           this.prevPublishDatetime = Date.now();
           this.bot.telegram
             .editMessageText(
@@ -46,8 +46,13 @@ export class OuncePublishBotService {
               this.errorCount = 0;
             })
             .catch((er) => {
-              this.errorCount++;
-              console.log('OuncePublishBotService', er);
+              Logger.error(
+                'OuncePublishBotService',
+                this.errorCount,
+                er.response.error_code,
+                er
+              );
+              if (er.response.error_code !== 429) this.errorCount++;
               if (this.errorCount === MAX_ERROR) {
                 this.bot.telegram
                   .deleteMessage(
