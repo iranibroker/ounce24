@@ -138,7 +138,7 @@ export class Signal {
     const rewardAvg = rewardSignals.reduce((value, signal) => {
       return signal.riskReward / rewardSignals.length + value;
     }, 0);
-    
+
     const scoreSum = signals.reduce((value, signal) => {
       return signal.score + value;
     }, 0);
@@ -237,7 +237,7 @@ SignalSchema.virtual('score').get(function () {
   if (this.status === SignalStatus.Closed) {
     const lossPip = Math.abs(this.loss - this.entryPrice) * 10;
     const pip = this.pip;
-    const res = 1 + (pip / lossPip) * (Math.abs(pip) / 50 + 10);
+    const res = (pip / lossPip) * (Math.abs(pip) / (pip < 0 ? 10 : 50) + 10);
     return res;
   }
 

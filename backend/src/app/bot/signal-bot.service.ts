@@ -31,8 +31,12 @@ function getAvailableBot(signals: Signal[]) {
   return min[1];
 }
 
-const MAX_DAILY_SIGNAL = isNaN(Number(process.env.MAX_DAILY_SIGNAL))
+const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
   ? 3
+  : Number(process.env.MAX_ACTIVE_SIGNAL);
+
+const MAX_DAILY_SIGNAL = isNaN(Number(process.env.MAX_DAILY_SIGNAL))
+  ? 5
   : Number(process.env.MAX_DAILY_SIGNAL);
 
 const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
@@ -150,9 +154,21 @@ export class SignalBotService extends BaseBot {
       .sort({ createdAt: 'asc' })
       .populate('owner')
       .exec();
-    if (signals.length >= MAX_DAILY_SIGNAL) {
+    if (signals.length >= MAX_ACTIVE_SIGNAL) {
       ctx.reply(
-        `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_DAILY_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
+        `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_ACTIVE_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
+      );
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (
+      signals.filter((x) => new Date(x.createdAt).valueOf() >= today.valueOf())
+        .length >= MAX_DAILY_SIGNAL
+    ) {
+      ctx.reply(
+        `امکان کاشت بیشتر از ${MAX_ACTIVE_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
       );
       return;
     }
