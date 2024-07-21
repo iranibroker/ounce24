@@ -212,17 +212,16 @@ export class BaseBot {
     const gmtDate = new Date(
       currentDate.getTime() + currentDate.getTimezoneOffset() * 60000
     );
-    console.log('gmtDate', gmtDate);
     // Get the current day of the week (0 - Sunday, 1 - Monday, etc.)
     const dayOfWeek = gmtDate.getUTCDay();
-    console.log('dayOfWeek', dayOfWeek);
-    
+
     // Calculate the last Sunday
     const lastSunday = new Date(gmtDate);
-    console.log('lastSunday', lastSunday);
-    lastSunday.setUTCDate(gmtDate.getUTCDate() - dayOfWeek); // Move to the previous Sunday
+    lastSunday.setUTCDate(
+      gmtDate.getUTCDate() -
+        (dayOfWeek === 0 && gmtDate.getHours() < 21 ? 7 : 0)
+    ); // Move to the previous Sunday
     lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
-    console.log('lastSunday', lastSunday);
 
     return lastSunday;
   }
