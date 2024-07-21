@@ -218,7 +218,7 @@ export class SignalBotService extends BaseBot {
   }
 
   @Command('my_closed_signals')
-  async myClosedSignals(@Ctx() ctx: Context) {
+  async myClosedSignals(@Ctx() ctx: Context, limit = 10, skip = 0) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
     const signals = await this.signalModel
@@ -228,16 +228,45 @@ export class SignalBotService extends BaseBot {
         deletedAt: null,
       })
       .sort({ createdAt: 'asc' })
+      .limit(limit)
+      .skip(skip)
       .populate('owner')
+      .exec();
+
+    const totalCount = await this.signalModel
+      .countDocuments({
+        owner: user._id,
+        status: SignalStatus.Closed,
+        deletedAt: null,
+      })
       .exec();
 
     for (const signal of signals) {
       await ctx.reply(Signal.getMessage(signal, { showId: true }));
     }
+    if (totalCount > limit && !skip) {
+      await ctx.reply(`تا بحال ${totalCount} سیگنال بسته شده داشته اید.`, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'مشاهده همه سیگنال های بسته شده',
+                callback_data: 'my_closed_signals_all',
+              },
+            ],
+          ],
+        },
+      });
+    }
 
     if (!signals.length) {
       ctx.reply('هیچ سیگنال بسته شده‌ای ندارید.');
     }
+  }
+
+  @Action('my_closed_signals_all')
+  async myClosedSignalsAll(@Ctx() ctx: Context) {
+    this.myClosedSignals(ctx, 100, 10);
   }
 
   @Command('profile')
