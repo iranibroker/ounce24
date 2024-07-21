@@ -225,7 +225,8 @@ SignalSchema.virtual('pip').get(function () {
   return null;
 });
 SignalSchema.virtual('riskReward').get(function () {
-  const profit = this.pip >= 0 ? this.closedOuncePrice : this.profit;
+  if (this.pip === 0) return 0;
+  const profit = this.pip > 0 ? this.closedOuncePrice : this.profit;
   const riskReward = Math.abs(
     (profit - this.entryPrice) / (this.loss - this.entryPrice)
   );
