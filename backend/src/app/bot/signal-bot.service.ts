@@ -421,7 +421,7 @@ ${Signal.getStatsText(signals)}
     const text: string = message['text'];
     const id = text.split('^^')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
-    if (signal.pip < 0) {
+    if (Signal.getActivePip(signal, this.ouncePriceService.current) < 0) {
       ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
       return;
     }
@@ -490,18 +490,18 @@ ${Signal.getStatsText(signals)}
       this.setStateData(ctx.from.id, signal);
     } else if (isSell) {
       if (!signal.maxPrice) {
-        if (value - signal.entryPrice < 1) {
+        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
           ctx.reply(
-            `مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`
           );
           return;
         }
         signal.maxPrice = value;
         ctx.reply(`حد سود را مشخص کنید:`);
       } else if (!signal.minPrice) {
-        if (signal.entryPrice - value < 1) {
+        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
           ctx.reply(
-            `مقدار وارد شده باید حداقل یک واحد کوچکتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`
           );
           return;
         }
@@ -513,18 +513,18 @@ ${Signal.getStatsText(signals)}
       }
     } else {
       if (!signal.minPrice) {
-        if (signal.entryPrice - value < 1) {
+        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
           ctx.reply(
-            `مقدار وارد شده باید حداقل یک واحد کوچکتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`
           );
           return;
         }
         signal.minPrice = value;
         ctx.reply(`حد سود را مشخص کنید:`);
       } else if (!signal.maxPrice) {
-        if (value - signal.entryPrice < 1) {
+        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
           ctx.reply(
-            `مقدار وارد شده باید حداقل یک واحد بزرگتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`
           );
           return;
         }

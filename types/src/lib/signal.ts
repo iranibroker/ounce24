@@ -134,9 +134,11 @@ export class Signal {
   }
 
   static getStatsText(signals: Signal[]) {
-    const rewardAvg = signals.reduce((value, signal) => {
-      return signal.riskReward / signals.length + value;
+    const rewardSignals = signals.filter((s) => s.pip >= 0);
+    const rewardAvg = rewardSignals.reduce((value, signal) => {
+      return signal.riskReward / rewardSignals.length + value;
     }, 0);
+    
     const scoreSum = signals.reduce((value, signal) => {
       return signal.score + value;
     }, 0);
