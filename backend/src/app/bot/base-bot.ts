@@ -220,7 +220,10 @@ export class BaseBot {
     // Calculate the last Sunday
     const lastSunday = new Date(gmtDate);
     console.log('lastSunday', lastSunday);
-    lastSunday.setUTCDate(gmtDate.getUTCDate() - dayOfWeek); // Move to the previous Sunday
+    lastSunday.setUTCDate(
+      gmtDate.getUTCDate() -
+        ((dayOfWeek === 0 && gmtDate.getHours()) < 21 ? 7 : dayOfWeek)
+    ); // Move to the previous Sunday
     lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
     console.log('lastSunday', lastSunday);
     return lastSunday;

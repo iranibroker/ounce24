@@ -163,10 +163,16 @@ export class SignalBotService extends BaseBot {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (
-      signals.filter((x) => new Date(x.createdAt).valueOf() >= today.valueOf())
-        .length >= MAX_DAILY_SIGNAL
-    ) {
+    const todaySignals = await this.signalModel
+      .find({
+        owner: user._id,
+        createdAt: { $gte: today },
+        deletedAt: null,
+      })
+      .sort({ createdAt: 'asc' })
+      .populate('owner')
+      .exec();
+    if (todaySignals.length >= MAX_DAILY_SIGNAL) {
       ctx.reply(
         `امکان کاشت بیشتر از ${MAX_ACTIVE_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
       );
