@@ -239,6 +239,12 @@ export class SignalBotService extends BaseBot {
     }
   }
 
+  @Command('update_all_user_signals')
+  async update_all_user_signals(@Ctx() ctx: Context) {
+    await this.userStats.updateAll();
+    ctx.reply('done');
+  }
+
   @Command('my_closed_signals')
   async myClosedSignals(@Ctx() ctx: Context, limit = 10, skip = 0) {
     if (!(await this.isValid(ctx))) return;

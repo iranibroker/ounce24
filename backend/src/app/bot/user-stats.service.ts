@@ -13,6 +13,10 @@ export class UserStatsService {
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>
   ) {
+    this.updateAll();
+  }
+
+  updateAll() {
     this.userModel
       .find()
       .exec()
@@ -51,7 +55,7 @@ export class UserStatsService {
       signals = signals.filter(
         (signal) => signal.closedAt.valueOf() <= toDate.valueOf()
       );
-    return signals
+    return signals;
   }
 
   getUserScore(userId: string, fromDate?: Date, toDate?: Date) {
