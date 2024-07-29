@@ -249,7 +249,7 @@ export class SignalBotService extends BaseBot {
         status: SignalStatus.Closed,
         deletedAt: null,
       })
-      .sort({ createdAt: 'asc' })
+      .sort({ createdAt: 'desc' })
       .limit(limit)
       .skip(skip)
       .populate('owner')
