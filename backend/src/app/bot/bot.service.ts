@@ -34,6 +34,7 @@ export class BotService extends BaseBot {
   }
 
   @Start()
+  @Command('cancel')
   start(@Ctx() ctx: Context) {
     this.welcome(ctx);
   }
@@ -96,6 +97,23 @@ export class BotService extends BaseBot {
     }
   }
 
+  @Command('send_message_to_all_d3')
+  async sendMessageToAll(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+
+    this.setState(ctx.from.id, { state: UserStateType.SendMessageToAll });
+    ctx.reply(`لطفا پیام مورد نظر خود را وارد کنید\n/cancel`);
+  }
+
+  async sendMessage(ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const allUsers = await this.userModel.find().exec();
+    for (const user of allUsers) {
+      await ctx.copyMessage(user.telegramId);
+    }
+    this.deleteState(ctx.from.id);
+  }
+
   @On('message')
   async onMessage(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
@@ -109,6 +127,9 @@ export class BotService extends BaseBot {
         break;
       case UserStateType.Iban:
         this.setIban(ctx);
+        break;
+      case UserStateType.SendMessageToAll:
+        this.sendMessage(ctx);
         break;
 
       default:

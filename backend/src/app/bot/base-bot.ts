@@ -10,6 +10,7 @@ export enum UserStateType {
   NewSignal,
   Support,
   Iban,
+  SendMessageToAll,
 }
 
 export type UserState<T = any> = {
