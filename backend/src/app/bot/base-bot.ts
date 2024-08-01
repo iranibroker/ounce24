@@ -11,6 +11,7 @@ export enum UserStateType {
   Support,
   Iban,
   SendMessageToAll,
+  SearchUser,
 }
 
 export type UserState<T = any> = {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '@ounce24/types';
+import { SignalStatus, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import {
   Action,
@@ -97,6 +97,43 @@ export class BotService extends BaseBot {
     }
   }
 
+  @Command('search_r9')
+  async searchCommand(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+
+    this.setState(ctx.from.id, {
+      state: UserStateType.SearchUser,
+      data: ctx.message['text'],
+    });
+    ctx.reply(`لطفا عبارت جستجو خود را وارد کنید\n/cancel`);
+  }
+
+  async search(ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const query = ctx.message['text'];
+    const searchQuery = {
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { name: { $regex: query, $options: 'i' } },
+        { phone: { $regex: query, $options: 'i' } },
+      ],
+    };
+    const users = await this.userModel.find(searchQuery).exec();
+    const count = users.length;
+    const first5 = users.slice(0, 5);
+    this.deleteState(ctx.from.id);
+    ctx.reply(`کاربران یافت شده ${count} نفر:`, {
+      reply_markup: {
+        inline_keyboard: first5.map((x) => [
+          {
+            text: `${x.title} (${x.name} - ${x.phone})`,
+            callback_data: `user_closed_signals:::${x.id}`,
+          },
+        ]),
+      },
+    });
+  }
+
   @Command('send_message_to_all_d3')
   async sendMessageToAll(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
@@ -131,10 +168,31 @@ export class BotService extends BaseBot {
       case UserStateType.SendMessageToAll:
         this.sendMessage(ctx);
         break;
+      case UserStateType.SearchUser:
+        this.search(ctx);
+        break;
 
       default:
         this.welcome(ctx);
         break;
     }
+  }
+
+  @On('callback_query')
+  onCallback(@Ctx() ctx: Context) {
+    const key = ctx.callbackQuery['data'].split(':::')[0];
+    const value = ctx.callbackQuery['data'].split(':::')[1];
+    switch (key) {
+      case 'user_closed_signals':
+        this.signalBot.myClosedSignals(ctx, 10, 0, value);
+        break;
+      case 'user_closed_signals_all':
+        this.signalBot.myClosedSignals(ctx, 100, 10, value);
+        break;
+
+      default:
+        break;
+    }
+    ctx.answerCbQuery();
   }
 }

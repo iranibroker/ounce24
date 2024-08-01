@@ -7,7 +7,7 @@ import {
   SignalTypeText,
   User,
 } from '@ounce24/types';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Action, Command, Ctx, InjectBot, Update } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
@@ -246,12 +246,17 @@ export class SignalBotService extends BaseBot {
   }
 
   @Command('my_closed_signals')
-  async myClosedSignals(@Ctx() ctx: Context, limit = 10, skip = 0) {
+  async myClosedSignals(
+    @Ctx() ctx: Context,
+    limit = 10,
+    skip = 0,
+    userId?: string
+  ) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
     const signals = await this.signalModel
       .find({
-        owner: user._id,
+        owner: userId ? new Types.ObjectId(userId) : user._id,
         status: SignalStatus.Closed,
         deletedAt: null,
       })
@@ -263,7 +268,7 @@ export class SignalBotService extends BaseBot {
 
     const totalCount = await this.signalModel
       .countDocuments({
-        owner: user._id,
+        owner: userId ? new Types.ObjectId(userId) : user._id,
         status: SignalStatus.Closed,
         deletedAt: null,
       })
@@ -279,7 +284,9 @@ export class SignalBotService extends BaseBot {
             [
               {
                 text: 'مشاهده همه سیگنال های بسته شده',
-                callback_data: 'my_closed_signals_all',
+                callback_data: userId
+                  ? `user_closed_signals_all:::${userId}`
+                  : 'my_closed_signals_all',
               },
             ],
           ],
