@@ -109,7 +109,7 @@ export class BotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
     const allUsers = await this.userModel.find().exec();
     for (const user of allUsers) {
-      await ctx.copyMessage(user.telegramId);
+      if (user.telegramId) await ctx.copyMessage(user.telegramId);
     }
     this.deleteState(ctx.from.id);
   }
