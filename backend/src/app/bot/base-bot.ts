@@ -76,6 +76,8 @@ export class BaseBot {
 
 /support پشتیبانی و ارسال نظر
 
+/bank - ثبت شماره شبا بانکی
+
 /profile مشاهده اطلاعات کاربری و امتیاز
 
 /reset_all_profile پاک کردن تاریخچه سیگنال ها (شروع دوباره)
