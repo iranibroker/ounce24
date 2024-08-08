@@ -247,8 +247,8 @@ export class SignalBotService extends BaseBot {
           [{text: 'یک دقیقه‌ای (1M)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=1`}],
           [{text: '۵ دقیقه‌ای (5M)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=5`}],
           [{text: '۱۵ دقیقه‌ای (15M)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=15`}],
-          [{text: 'یک ساعتی (1H)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=60`}],
-          [{text: 'چهار ساعتی (4H)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=240`}],
+          [{text: 'یک ساعته (1H)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=60`}],
+          [{text: 'چهار ساعته (4H)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=240`}],
         ]
       }
     })
