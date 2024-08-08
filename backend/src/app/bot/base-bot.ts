@@ -70,6 +70,8 @@ export class BaseBot {
 
 /my_closed_signals لیست سیگنال‌های بسته شده
 
+/charts نمودار اونس
+
 /leaderboard رنکینگ کلی اساتید
 
 /leaderboard_week رنکینگ هفتگی اساتید
