@@ -9,7 +9,7 @@ import {
 } from '@ounce24/types';
 import { Model, Types } from 'mongoose';
 import { Action, Command, Ctx, InjectBot, Update } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
+import { Context, Telegraf, Telegram } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
@@ -244,14 +244,39 @@ export class SignalBotService extends BaseBot {
     ctx.reply(`تایم فریم نمودار خود را انتخاب کنید:`, {
       reply_markup: {
         inline_keyboard: [
-          [{text: 'یک دقیقه‌ای (1M)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=1`}],
-          [{text: '۵ دقیقه‌ای (5M)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=5`}],
-          [{text: '۱۵ دقیقه‌ای (15M)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=15`}],
-          [{text: 'یک ساعته (1H)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=60`}],
-          [{text: 'چهار ساعته (4H)', url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=240`}],
-        ]
-      }
-    })
+          [
+            {
+              text: 'یک دقیقه‌ای (1M)',
+              url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=1`,
+            },
+          ],
+          [
+            {
+              text: '۵ دقیقه‌ای (5M)',
+              url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=5`,
+            },
+          ],
+          [
+            {
+              text: '۱۵ دقیقه‌ای (15M)',
+              url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=15`,
+            },
+          ],
+          [
+            {
+              text: 'یک ساعته (1H)',
+              url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=60`,
+            },
+          ],
+          [
+            {
+              text: 'چهار ساعته (4H)',
+              url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=240`,
+            },
+          ],
+        ],
+      },
+    });
   }
 
   @Command('update_all_user_signals')
@@ -754,13 +779,26 @@ ${Signal.getStatsText(signals)}
     });
     let func: any;
     if (signal.messageId) {
-      func = (telegram) => {
+      console.log(signal.telegramBot);
+      func = (telegram: Telegram) => {
         telegram
           .editMessageText(
             process.env.PUBLISH_CHANNEL_ID,
             signal.messageId,
             '',
-            text
+            text,
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: `${Signal.getPipString(signal, ouncePrice)}`,
+                      callback_data: 'test',
+                    },
+                  ],
+                ],
+              },
+            }
           )
           .catch((er) => {
             console.error('error editing signal', er.response, signal.id);

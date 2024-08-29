@@ -180,9 +180,7 @@ ${SignalTypeText[signal.type]}
       text += `قیمت لحظه بسته شدن: ${signal.closedOuncePrice}`;
     }
 
-    if (options?.ouncePrice && signal.status === SignalStatus.Active) {
-      text += '\n' + Signal.getPipString(signal, options?.ouncePrice);
-    } else if (
+    if (
       signal.status === SignalStatus.Closed &&
       signal.closedOuncePrice
     ) {
