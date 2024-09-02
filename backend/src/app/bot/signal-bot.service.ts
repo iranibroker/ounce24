@@ -774,7 +774,6 @@ ${Signal.getStatsText(signals)}
       : undefined;
 
     const text = Signal.getMessage(signal, {
-      ouncePrice,
       signals: prevSignals,
     });
     let func: any;
