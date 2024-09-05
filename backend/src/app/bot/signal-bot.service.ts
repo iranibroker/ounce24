@@ -583,12 +583,22 @@ ${Signal.getStatsText(signals)}
     const signal = this.getStateData<Signal>(ctx.from.id);
     const isSell = signal.type === SignalType.Sell;
     const value = Number(PersianNumberService.toEnglish(ctx.message['text']));
+    const user = await this.getUser(ctx.from.id);
     if (isNaN(Number(value))) {
       ctx.reply('لطفا یک مقدار عددی وارد کنید. مثلا: 3234.32');
       return;
     }
 
     if (!signal.entryPrice) {
+      const nearSignal = await this.signalModel.findOne({
+        owner: user._id,
+        type: signal.type,
+        entryPrice: { $gte: value - 5, $lte: value + 5 },
+      }).exec();
+      if (nearSignal) {
+        ctx.reply(`شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`);
+        return;
+      }
       signal.entryPrice = value;
       ctx.reply(`حد ضرر را مشخص کنید:`);
       this.setStateData(ctx.from.id, signal);
