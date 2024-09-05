@@ -590,13 +590,21 @@ ${Signal.getStatsText(signals)}
     }
 
     if (!signal.entryPrice) {
-      const nearSignal = await this.signalModel.findOne({
-        owner: user._id,
-        type: signal.type,
-        entryPrice: { $gte: value - 4, $lte: value + 4 },
-      }).exec();
+      const nearSignal = await this.signalModel
+        .findOne({
+          owner: user._id,
+          type: signal.type,
+          entryPrice: { $gte: value - 4, $lte: value + 4 },
+          status: {
+            $in: [SignalStatus.Active, SignalStatus.Pending],
+          },
+          deletedAt: null,
+        })
+        .exec();
       if (nearSignal) {
-        ctx.reply(`شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`);
+        ctx.reply(
+          `شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`
+        );
         return;
       }
       signal.entryPrice = value;
