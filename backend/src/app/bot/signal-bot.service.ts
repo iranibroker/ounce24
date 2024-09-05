@@ -593,7 +593,7 @@ ${Signal.getStatsText(signals)}
       const nearSignal = await this.signalModel.findOne({
         owner: user._id,
         type: signal.type,
-        entryPrice: { $gte: value - 5, $lte: value + 5 },
+        entryPrice: { $gte: value - 4, $lte: value + 4 },
       }).exec();
       if (nearSignal) {
         ctx.reply(`شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`);
