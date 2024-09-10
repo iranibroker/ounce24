@@ -14,6 +14,9 @@ export class User {
   @Prop({ required: true })
   title: string;
 
+  @Prop({ required: true, default: 0 })
+  defaultScore: number;
+
   @Prop({ required: false, unique: false })
   telegramUsername?: string;
 

@@ -660,7 +660,7 @@ ${Signal.getStatsText(signals)}
 
     if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
       const user = await this.getUser(ctx.from.id);
-      const userScore = this.userStats.getUserScore(user.id);
+      const userScore = this.userStats.getUserScore(user);
       const dto = new this.signalModel({
         ...signal,
         owner: user,

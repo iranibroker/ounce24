@@ -58,10 +58,10 @@ export class UserStatsService {
     return signals;
   }
 
-  getUserScore(userId: string, fromDate?: Date, toDate?: Date) {
-    const signals = this.getUserSignals(userId, fromDate, toDate);
+  getUserScore(user: User, fromDate?: Date, toDate?: Date) {
+    const signals = this.getUserSignals(user.id, fromDate, toDate);
     if (signals) {
-      return signals.reduce((value, signal) => {
+      return (user.defaultScore || 0) + signals.reduce((value, signal) => {
         return signal.score + value;
       }, 0);
     }
@@ -71,7 +71,7 @@ export class UserStatsService {
   async getLeaderBoard(fromDate?: Date, toDate?: Date) {
     const users = await this.userModel.find().exec();
     for (const user of users) {
-      user.score = this.getUserScore(user.id, fromDate, toDate);
+      user.score = this.getUserScore(user, fromDate, toDate);
     }
 
     users.sort((a, b) => b.score - a.score);
