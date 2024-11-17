@@ -15,6 +15,7 @@ import { Context, Telegraf } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { SignalBotService } from './signal-bot.service';
 import { AuthService } from '../auth/auth.service';
+import { ConsultingBotService } from './consulting-bot.service';
 
 @Injectable()
 @Update()
@@ -23,20 +24,21 @@ export class BotService extends BaseBot {
     @InjectBot('main') private bot: Telegraf<Context>,
     @InjectModel(User.name) private userModel: Model<User>,
     private signalBot: SignalBotService,
+    private consultingBot: ConsultingBotService,
     private auth: AuthService
   ) {
     super(userModel, auth, bot);
-    // this.bot.telegram
-    //         .sendMessage(
-    //           process.env.PUBLISH_CHANNEL_ID,
-    //           `بروزرسانی جدید انجام شد`
-    //         )
   }
 
   @Start()
   @Command('cancel')
   start(@Ctx() ctx: Context) {
     this.welcome(ctx);
+  }
+
+  @Action('welcome_signal')
+  welcomeSignalAction(@Ctx() ctx: Context) {
+    this.welcomeSignal(ctx);
   }
 
   @Command('support')
@@ -154,6 +156,14 @@ export class BotService extends BaseBot {
   @On('message')
   async onMessage(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
+    const replyTo = ctx.message['reply_to_message']?.['forward_from'];
+    if (
+      replyTo &&
+      process.env.CONSULTING_ADMIN_IDS?.search(ctx.from.id.toString()) > -1
+    ) {
+      this.consultingBot.sendResponseMessage(ctx);
+      return;
+    }
     const userState = this.getState(ctx.from.id);
     switch (userState?.state) {
       case UserStateType.NewSignal:
@@ -161,6 +171,9 @@ export class BotService extends BaseBot {
         break;
       case UserStateType.Support:
         this.sendSupportMessage(ctx);
+        break;
+      case UserStateType.Consulting:
+        this.consultingBot.sendUserMessage(ctx);
         break;
       case UserStateType.Iban:
         this.setIban(ctx);
@@ -188,6 +201,12 @@ export class BotService extends BaseBot {
         break;
       case 'user_closed_signals_all':
         this.signalBot.myClosedSignals(ctx, 100, 10, value);
+        break;
+      case 'consulting':
+        this.consultingBot.onConsulting(ctx);
+        break;
+      case 'start':
+        this.start(ctx);
         break;
 
       default:

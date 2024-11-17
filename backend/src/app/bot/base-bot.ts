@@ -12,6 +12,7 @@ export enum UserStateType {
   Iban,
   SendMessageToAll,
   SearchUser,
+  Consulting,
 }
 
 export type UserState<T = any> = {
@@ -63,7 +64,24 @@ export class BaseBot {
 از گزینه های زیر میتونی استفاده کنی
 هرجا گیرکردی از گزینه menu کنار استفاده کن
 
+تعداد اعضای متصل به ربات: ${count} نفر
+`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'سیگنال', callback_data: 'welcome_signal' }],
+            [{ text: 'مشاوره تحلیلی', callback_data: 'consulting' }],
+          ],
+          remove_keyboard: true,
+        },
+      }
+    );
+  }
 
+  async welcomeSignal(ctx: Context) {
+    BaseBot.userStates.delete(ctx.from.id);
+    ctx.reply(
+      `
 /new_signal ایجاد سیگنال جدید
 
 /my_signals مدیریت سیگنال‌های ثبت شده
@@ -83,10 +101,6 @@ export class BaseBot {
 /profile مشاهده اطلاعات کاربری و امتیاز
 
 /reset_all_profile پاک کردن تاریخچه سیگنال ها (شروع دوباره)
-
-
-
-تعداد اعضای متصل به ربات: ${count} نفر
 `,
       {
         reply_markup: {
@@ -228,7 +242,7 @@ export class BaseBot {
     console.log('lastSunday', lastSunday);
     lastSunday.setUTCDate(
       gmtDate.getUTCDate() -
-        ((dayOfWeek === 0 && gmtDate.getHours() < 21) ? 7 : dayOfWeek)
+        (dayOfWeek === 0 && gmtDate.getHours() < 21 ? 7 : dayOfWeek)
     ); // Move to the previous Sunday
     lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
     console.log('lastSunday', lastSunday);

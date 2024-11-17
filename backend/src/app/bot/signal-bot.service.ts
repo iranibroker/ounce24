@@ -693,6 +693,14 @@ ${Signal.getStatsText(signals)}
             messageId: message.message_id,
           })
           .exec();
+
+        if (process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID) {
+          this.bot.telegram.forwardMessage(
+            process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID,
+            process.env.PUBLISH_CHANNEL_ID,
+            message.message_id
+          );
+        }
       }
     }
   }
@@ -831,6 +839,14 @@ ${Signal.getStatsText(signals)}
                 messageId: message.message_id,
               })
               .exec();
+
+            if (process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID) {
+              telegram.forwardMessage(
+                process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID,
+                process.env.PUBLISH_CHANNEL_ID,
+                message.message_id
+              );
+            }
           })
           .catch((er) => {
             console.error('error sending signal', er.response, signal.id);
