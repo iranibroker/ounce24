@@ -81,10 +81,10 @@ export class BotService extends BaseBot {
   async setIban(ctx: Context) {
     const fromId = ctx.from.id;
     const user = await this.getUser(fromId);
-    const iban: string = ctx.message['text'];
-    iban.replace('IR', '');
-    iban.replace('ir', '');
-    iban.replace('Ir', '');
+    let iban: string = ctx.message['text'];
+    iban = iban.replace('IR', '');
+    iban = iban.replace('ir', '');
+    iban = iban.replace('Ir', '');
     await ctx.sendChatAction('typing');
     if (iban.length !== 24) {
       ctx.reply(

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Signal, SignalSchema, User, UserSchema } from '@ounce24/types';
+import { Signal, User } from '@ounce24/types';
+import { UserSchema } from './user.schema';
+import { SignalSchema } from './signal.schema';
 
 @Module({
   imports: [

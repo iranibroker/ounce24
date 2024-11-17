@@ -1,8 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
 import { User } from './user';
-
-export type SignalDocument = HydratedDocument<Signal>;
 
 export enum SignalType {
   Buy = 'BUY',
@@ -28,56 +24,40 @@ export const SignalTypeText = {
   [SignalType.Sell]: '🔴 فروش (sell)',
 };
 
-@Schema({ timestamps: true })
 export class Signal {
   _id: any;
   id: string;
 
-  @Prop({ required: true, enum: SignalType })
   type: SignalType;
 
-  @Prop({ required: true, enum: SignalStatus, default: SignalStatus.Pending })
   status: SignalStatus;
 
-  @Prop({ required: true })
   entryPrice: number;
 
-  @Prop({ required: true })
   maxPrice: number;
 
-  @Prop({ required: true })
   minPrice: number;
 
-  @Prop()
   messageId?: number;
 
-  @Prop({ default: false })
   publishable?: boolean;
 
-  @Prop({ default: false })
   riskFree?: boolean;
 
-  @Prop()
   telegramBot?: string;
 
-  @Prop({ required: true, default: 0 })
   createdOuncePrice: number;
 
-  @Prop()
   closedOuncePrice?: number;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
   owner: User;
 
   createdAt?: Date;
 
-  @Prop()
   activeAt?: Date;
 
-  @Prop()
   closedAt?: Date;
 
-  @Prop()
   deletedAt?: Date;
 
   //virtual props
@@ -202,45 +182,3 @@ ${SignalTypeText[signal.type]}
     return text;
   }
 }
-
-export const SignalSchema = SchemaFactory.createForClass(Signal);
-
-SignalSchema.virtual('isSell').get(function () {
-  return this.type === SignalType.Sell;
-});
-SignalSchema.virtual('profit').get(function () {
-  return this.isSell ? this.minPrice : this.maxPrice;
-});
-SignalSchema.virtual('loss').get(function () {
-  return this.isSell ? this.maxPrice : this.minPrice;
-});
-SignalSchema.virtual('pip').get(function () {
-  if (this.status === SignalStatus.Closed && this.closedOuncePrice) {
-    const diff = this.isSell
-      ? this.entryPrice - this.closedOuncePrice
-      : this.closedOuncePrice - this.entryPrice;
-    const pip = Number((diff * 10).toFixed(3));
-    return this.riskFree && pip < 0 ? 0 : pip;
-  }
-  return null;
-});
-SignalSchema.virtual('riskReward').get(function () {
-  if (this.pip === 0) return 0;
-  const profit = this.pip > 0 ? this.closedOuncePrice : this.profit;
-  const riskReward = Math.abs(
-    (profit - this.entryPrice) / (this.loss - this.entryPrice)
-  );
-  return this.status === SignalStatus.Closed && this.pip < 0 && this.riskFree
-    ? 0
-    : riskReward;
-});
-SignalSchema.virtual('score').get(function () {
-  if (this.status === SignalStatus.Closed) {
-    const lossPip = Math.abs(this.loss - this.entryPrice) * 10;
-    const pip = this.pip;
-    const res = (pip / lossPip) * (Math.abs(pip) / (pip < 0 ? 10 : 50) + 10);
-    return res;
-  }
-
-  return 0;
-});
