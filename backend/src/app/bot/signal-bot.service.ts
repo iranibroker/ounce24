@@ -59,7 +59,6 @@ export class SignalBotService extends BaseBot {
 
     this.ouncePriceService.obs.subscribe(async (price) => {
       if (!price) return;
-      console.log('price', price);
 
       const signals = await this.signalModel
         .find({

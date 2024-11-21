@@ -41,11 +41,12 @@ export class ConsultingBotService extends BaseBot {
     if (process.env.CONSULTING_ADMIN_IDS) {
       const ids = process.env.CONSULTING_ADMIN_IDS.split(',');
       for (const admin of ids) {
-        this.bot.telegram.forwardMessage(
+        await this.bot.telegram.forwardMessage(
           admin,
           ctx.chat.id,
           ctx.message.message_id
         );
+        this.bot.telegram.sendMessage(admin, `${ctx.message.from.id}`);
       }
     }
     await ctx.sendChatAction('typing');
@@ -57,7 +58,7 @@ export class ConsultingBotService extends BaseBot {
   }
 
   sendResponseMessage(ctx: Context) {
-    const replyTo = ctx.message['reply_to_message']?.['forward_from'];
-    ctx.copyMessage(replyTo.id);
+    const replyTo = ctx.message['reply_to_message']['text'];
+    ctx.copyMessage(replyTo);
   }
 }

@@ -156,7 +156,7 @@ export class BotService extends BaseBot {
   @On('message')
   async onMessage(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-    const replyTo = ctx.message['reply_to_message']?.['forward_from'];
+    const replyTo = ctx.message['reply_to_message'];
     if (
       replyTo &&
       process.env.CONSULTING_ADMIN_IDS?.search(ctx.from.id.toString()) > -1
