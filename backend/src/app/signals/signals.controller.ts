@@ -11,7 +11,7 @@ export class SignalsController {
   activeSignals() {
     return this.signalModel.find({
       status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
-      deletedAt: { $ne: null }
+      deletedAt: null,
     }).select(['-messageId', '-_id', '-owner']);
   }
 }
