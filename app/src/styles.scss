@@ -1,4 +1,10 @@
 @use '@angular/material' as mat;
+@use '../public/fonts/fontawesome/scss/fontawesome.scss';
+@use '../public/fonts/fontawesome/scss/regular.scss';
+@use '../public/fonts/fontawesome/scss/brands.scss';
+@use '../public/fonts/fontawesome/scss/solid.scss';
+@use '../public/fonts/fontawesome/scss/light.scss';
+@use '../public/fonts/fontawesome/scss/thin.scss';
 @use 'theme-colors.scss' as theme;
 
 html {
