@@ -12,8 +12,8 @@ html {
   @include mat.theme(
     (
       color: theme.$primary,
-      typography: Roboto,
-      density: 0,
+      typography: Vazirmatn,
+      density: -2,
     )
   );
 }
@@ -21,10 +21,27 @@ html {
 html,
 body {
   height: 100%;
+  font-size: 14px;
 }
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: Vazirmatn, 'Helvetica Neue', sans-serif;
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
+}
+
+// override materials
+:root {
+  @include mat.theme-overrides(
+    (
+      outline: #999999,
+      outline-variant: #4d4d4d,
+    )
+  );
+
+  // @include mat.card-overrides(
+  //   (
+  //     title-text-size: 1rem,
+  //   )
+  // );
 }

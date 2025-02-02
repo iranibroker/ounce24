@@ -1,0 +1,15 @@
+{
+  "bottomNav": {
+    "home": "home",
+    "leaderboard": "leaderboard",
+    "notification": "notification",
+    "profile": "profile"
+  },
+  "signal": {
+    "buy": "buy",
+    "sell": "sell",
+    "profit": "profit",
+    "loss": "loss",
+    "riskReward": "risk reward"
+  }
+}

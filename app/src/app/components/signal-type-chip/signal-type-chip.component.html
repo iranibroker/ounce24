@@ -1,0 +1,10 @@
+@let isSell = type() === SignalType.Sell;
+<div class="wrapper" [ngClass]="isSell ? 'sell' : 'buy'">
+  @if (isSell) {
+    <i class="far fa-arrow-down-right"></i>
+    {{ 'signal.sell' | translate }}
+  } @else {
+    <i class="far fa-arrow-up-left"></i>
+    {{ 'signal.buy' | translate }}
+  }
+</div>
