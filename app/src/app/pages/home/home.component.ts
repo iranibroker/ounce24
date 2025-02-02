@@ -1,57 +1,23 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Signal, SignalStatus, SignalType, User } from '@ounce24/types';
+import { Signal } from '@ounce24/types';
 import { SignalCardComponent } from '../../components/signal-card/signal-card.component';
-
-const SIGNALS: Signal[] = [
-  {
-    type: SignalType.Sell,
-    minPrice: 2034,
-    maxPrice: 2085,
-    entryPrice: 2038,
-    status: SignalStatus.Pending,
-    owner: {
-      title: 'dmc_3349',
-    },
-  } as Signal,
-  {
-    type: SignalType.Sell,
-    minPrice: 2034,
-    maxPrice: 2085,
-    entryPrice: 2038,
-    status: SignalStatus.Pending,
-    owner: {
-      title: 'ali394',
-    } as User,
-  } as Signal,
-  {
-    type: SignalType.Buy,
-    minPrice: 2034,
-    maxPrice: 2085,
-    entryPrice: 2038,
-    status: SignalStatus.Pending,
-    owner: {
-      title: 'moh.dmci3',
-    } as User,
-  } as Signal,
-  {
-    type: SignalType.Sell,
-    minPrice: 2034,
-    maxPrice: 2085,
-    entryPrice: 2038,
-    status: SignalStatus.Pending,
-    owner: {
-      title: 'amir22',
-    } as User,
-  } as Signal,
-];
+import { injectQuery } from '@tanstack/angular-query-experimental';
+import { lastValueFrom } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { DataLoadingComponent } from '../../components/data-loading/data-loading.component';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, SignalCardComponent],
+  imports: [CommonModule, SignalCardComponent, DataLoadingComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent {
-  signals = signal<Signal[]>(SIGNALS);
+  private readonly http = inject(HttpClient);
+  query = injectQuery(() => ({
+    queryKey: ['signals'],
+    queryFn: () =>
+      lastValueFrom(this.http.get<Signal[]>('/api/signals/tempList')),
+  }));
 }

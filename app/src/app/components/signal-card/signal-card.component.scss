@@ -24,4 +24,10 @@ mat-card-title {
   .fa-arrow-trend-up {
     color: var(--mat-sys-secondary);
   }
+
+  &__prop {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
 }

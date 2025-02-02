@@ -1,5 +1,9 @@
 <div class="signals-container">
-  @for (signal of signals(); track $index) {
-  <app-signal-card [signal]="signal" />
+  @if (query.data()) {
+    @for (signal of query.data(); track $index) {
+      <app-signal-card [signal]="signal" />
+    }
+  } @else {
+    <app-data-loading />
   }
 </div>
