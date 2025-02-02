@@ -44,4 +44,9 @@ body {
   //     title-text-size: 1rem,
   //   )
   // );
+
+  @include mat.divider-overrides((
+    color: var(--mat-sys-outline-variant),
+  ));
+
 }

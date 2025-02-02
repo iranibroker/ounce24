@@ -2,7 +2,7 @@
   "bottomNav": {
     "home": "home",
     "leaderboard": "leaderboard",
-    "notification": "notification",
+    "notifications": "notifications",
     "profile": "profile"
   },
   "signal": {

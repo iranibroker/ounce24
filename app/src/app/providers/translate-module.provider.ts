@@ -8,7 +8,7 @@ function HttpLoaderFactory(http: HttpClient) {
 }
 
 const config = TranslateModule.forRoot({
-  defaultLanguage: 'fa',
+  defaultLanguage: 'en',
   loader: {
     provide: TranslateLoader,
     useFactory: HttpLoaderFactory,

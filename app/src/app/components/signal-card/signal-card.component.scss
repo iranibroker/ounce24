@@ -1,7 +1,27 @@
-
 mat-card-title {
   font-size: 1.3rem;
   display: flex;
   align-items: center;
   gap: 8px;
+  transform: translateY(-8px);
+
+  & > span {
+    display: inline-block;
+    margin-bottom: -6px;
+  }
+}
+
+.signal-props {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+
+  .fa-arrow-trend-down {
+    color: var(--mat-sys-error);
+  }
+
+  .fa-arrow-trend-up {
+    color: var(--mat-sys-secondary);
+  }
 }

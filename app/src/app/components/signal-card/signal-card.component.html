@@ -1,14 +1,28 @@
 <mat-card>
   <mat-card-header>
-    <!-- <mat-card-subtitle>entry price:</mat-card-subtitle> -->
     <mat-card-title>
       <app-signal-type-chip [type]="signal().type" />
-      {{ signal().entryPrice | currency : 'USD' : 'symbol' : '1.0-0' }}
+      <span>
+        {{ signal().entryPrice | currency: 'USD' : 'symbol' : '1.0-0' }}
+      </span>
     </mat-card-title>
   </mat-card-header>
-  <mat-card-actions>
-    
+  <mat-divider />
+  <mat-card-actions class="signal-props">
+    <span>
+      <i class="fa-regular fa-arrow-trend-up"></i>
+      {{ 'signal.profit' | translate }}:
+      {{ signal().profit | currency: 'USD' : 'symbol' : '1.0-0' }}
+    </span>
+    <span>
+      {{ 'signal.riskReward' | translate }}:
+      {{ signal().riskReward }}
+    </span>
+    <span>
+      <i class="fa-regular fa-arrow-trend-down"></i>
+      {{ 'signal.loss' | translate }}:
+      {{ signal().loss | currency: 'USD' : 'symbol' : '1.0-0' }}
+    </span>
   </mat-card-actions>
-  <mat-card-content>
-  </mat-card-content>
+  <mat-card-content> </mat-card-content>
 </mat-card>
