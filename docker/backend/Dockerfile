@@ -10,7 +10,7 @@ COPY . .
 
 RUN yarn build:backend
 
-FROM node:18.18.2-alpine As production
+FROM node:20.18.0-alpine As production
 
 WORKDIR /backend
 
