@@ -9,9 +9,24 @@ export class SignalsController {
 
   @Get('active')
   activeSignals() {
-    return this.signalModel.find({
-      status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
-      deletedAt: null,
-    }).select(['-messageId', '-_id', '-owner']);
+    return this.signalModel
+      .find({
+        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+        deletedAt: null,
+      })
+      .select(['-messageId', '-_id', '-owner']);
+  }
+
+  @Get('tempList')
+  tempListSignals() {
+    return this.signalModel
+      .find({
+        deletedAt: null,
+      })
+      .populate(['owner'])
+      .sort({
+        createdAt: -1,
+      })
+      .limit(20);
   }
 }
