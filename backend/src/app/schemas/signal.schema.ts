@@ -68,3 +68,5 @@ SignalSchema.virtual('score').get(function () {
 
   return 0;
 });
+SignalSchema.set('toJSON', { virtuals: true });
+SignalSchema.set('toObject', { virtuals: true });
