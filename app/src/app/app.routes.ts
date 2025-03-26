@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
+import { SignalsComponent } from './pages/signals/signals.component';
 
 export const appRoutes: Route[] = [
   {
@@ -10,8 +11,12 @@ export const appRoutes: Route[] = [
         component: HomeComponent,
       },
       {
+        path: 'signals',
+        component: SignalsComponent,
+      },
+      {
         path: '',
-        redirectTo: 'home',
+        redirectTo: 'signals',
         pathMatch: 'full',
       },
     ],

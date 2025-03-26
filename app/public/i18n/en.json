@@ -1,4 +1,7 @@
 {
+  "app": {
+    "loadMore": "load more"
+  },
   "bottomNav": {
     "home": "home",
     "leaderboard": "leaderboard",
@@ -10,6 +13,14 @@
     "sell": "sell",
     "profit": "tp",
     "loss": "sl",
-    "riskReward": "r/r"
+    "pip": "pip",
+    "riskReward": "r/r",
+    "closedOuncePrice": "closed at",
+    "status": {
+      "PENDING": "pending",
+      "ACTIVE": "active",
+      "CLOSED": "closed",
+      "CANCELED": "canceled"
+    }
   }
 }

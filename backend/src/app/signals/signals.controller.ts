@@ -40,6 +40,7 @@ export class SignalsController {
       .find({
         deletedAt: null,
         status,
+        publishable: true,
       })
       .populate(['owner'])
       .sort({

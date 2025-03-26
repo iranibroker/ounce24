@@ -8,7 +8,7 @@
 @use 'theme-colors.scss' as theme;
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
   @include mat.theme(
     (
       color: theme.$primary,
@@ -16,6 +16,26 @@ html {
       density: -2,
     )
   );
+
+  .form-theme {
+    @include mat.theme(
+      (
+        color: theme.$tertiary,
+        typography: monospace,
+        density: -2,
+      )
+    );
+  }
+
+  .error-theme {
+    @include mat.theme(
+      (
+        color: theme.$error,
+        typography: monospace,
+        density: -2,
+      )
+    );
+  }
 }
 
 html,
@@ -45,8 +65,16 @@ body {
   //   )
   // );
 
-  @include mat.divider-overrides((
-    color: var(--mat-sys-outline-variant),
-  ));
+  @include mat.divider-overrides(
+    (
+      color: var(--mat-sys-outline-variant),
+    )
+  );
 
+  @include mat.button-toggle-overrides(
+    (
+      selected-state-background-color: var(--mat-sys-primary-container),
+      selected-state-text-color: var(--mat-sys-on-primary-container),
+    )
+  );
 }

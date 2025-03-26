@@ -1,0 +1,28 @@
+<div class="signals-container">
+  <mat-button-toggle-group [(ngModel)]="status">
+    <mat-button-toggle [value]="SignalStatus.Active">
+      {{ 'signal.status.ACTIVE' | translate }}
+    </mat-button-toggle>
+    <mat-button-toggle [value]="SignalStatus.Pending">
+      {{ 'signal.status.PENDING' | translate }}
+    </mat-button-toggle>
+    <mat-button-toggle [value]="SignalStatus.Closed">
+      {{ 'signal.status.CLOSED' | translate }}
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
+  @if (data()) {
+    @for (signal of data(); track $index) {
+      <app-signal-card [signal]="signal" />
+    }
+  }
+  @if (query.isLoading() || query.isFetchingNextPage()) {
+    <app-data-loading />
+  } @else {
+    @if (query.hasNextPage()) {
+      <button mat-button (click)="query.fetchNextPage()">
+        {{ 'app.loadMore' | translate }}
+      </button>
+    }
+  }
+</div>

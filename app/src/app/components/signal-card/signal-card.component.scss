@@ -15,6 +15,14 @@ mat-card-title {
   position: absolute;
   right: 8px;
   top: 8px;
+
+  .red {
+    color: var(--mat-sys-error) !important;
+  }
+
+  .green {
+    color: var(--mat-sys-secondary) !important;
+  }
 }
 
 .signal-props {

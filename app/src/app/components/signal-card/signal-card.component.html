@@ -6,11 +6,30 @@
         {{ signal().entryPrice | currency: 'USD' : 'symbol' : '1.0-0' }}
       </span>
     </mat-card-title>
-    @if (signal().status === SignalStatus.Pending) {
-      <mat-chip [disabled]="true" id="status-chip">
-        <i class="fas fa-clock-rotate-left"></i>
-        pending
-      </mat-chip>
+    @switch (signal().status) {
+      @case (SignalStatus.Pending) {
+        <mat-chip [disabled]="true" id="status-chip">
+          <i class="fas fa-clock-rotate-left"></i>
+          {{ 'signal.status.' + signal().status | translate }}
+        </mat-chip>
+      }
+      @case (SignalStatus.Active) {
+        <mat-chip id="status-chip">
+          <span [class.red]="pip() < 0" [class.green]="pip() > 0">
+            {{ pip() }} {{ 'signal.pip' | translate }}
+            <i class="fa-solid fa-play fa-sm"></i>
+          </span>
+        </mat-chip>
+      }
+      @case (SignalStatus.Closed) {
+        <mat-chip id="status-chip" [disabled]="true">
+          <span [class.red]="pip() < 0" [class.green]="pip() > 0">
+            {{ pip() }}
+          </span>
+          <i class="fa-solid fa-stop fa-sm"></i>
+          {{ 'signal.status.' + signal().status | translate }}
+        </mat-chip>
+      }
     }
   </mat-card-header>
   <mat-card-actions class="signal-props">

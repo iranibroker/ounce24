@@ -1,0 +1,10 @@
+.signals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+mat-button-toggle {
+  flex: 1;
+}
