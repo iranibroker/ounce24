@@ -12,7 +12,7 @@ html {
   @include mat.theme(
     (
       color: theme.$primary,
-      typography: Vazirmatn,
+      typography: monospace,
       density: -2,
     )
   );
@@ -25,7 +25,7 @@ body {
 }
 body {
   margin: 0;
-  font-family: Vazirmatn, 'Helvetica Neue', sans-serif;
+  font-family: monospace, 'Helvetica Neue', sans-serif;
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
 }

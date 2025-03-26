@@ -8,8 +8,8 @@
   "signal": {
     "buy": "buy",
     "sell": "sell",
-    "profit": "profit",
-    "loss": "loss",
-    "riskReward": "risk reward"
+    "profit": "tp",
+    "loss": "sl",
+    "riskReward": "r/r"
   }
 }

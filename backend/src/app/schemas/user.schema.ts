@@ -8,13 +8,17 @@ export const UserSchema = new mongoose.Schema<User>(
     defaultScore: { type: Number, required: true, default: 0 },
     telegramUsername: { type: String, required: false },
     telegramId: { type: Number, index: true, unique: true },
+    avgRiskReward: { type: Number, required: true, default: 0 },
+    totalScore: { type: Number, required: true, default: 0 },
+    totalSignals: { type: Number, required: true, default: 0 },
+    winRate: { type: Number, required: true, default: 0 },
     phone: { type: String, required: true, unique: true },
     resetAt: { type: Date, required: false },
     iban: { type: String, required: false },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 UserSchema.virtual('tag').get(function () {

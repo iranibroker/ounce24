@@ -26,7 +26,7 @@ export const SignalSchema = new mongoose.Schema<Signal>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 SignalSchema.virtual('isSell').get(function () {
@@ -52,7 +52,7 @@ SignalSchema.virtual('riskReward').get(function () {
   if (this.pip === 0) return 0;
   const profit = this.pip > 0 ? this.closedOuncePrice : this.profit;
   const riskReward = Math.abs(
-    (profit - this.entryPrice) / (this.loss - this.entryPrice)
+    (profit - this.entryPrice) / (this.loss - this.entryPrice),
   );
   return this.status === SignalStatus.Closed && this.pip < 0 && this.riskFree
     ? 0

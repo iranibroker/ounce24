@@ -8,6 +8,14 @@ export class User {
 
   defaultScore: number;
 
+  totalScore: number;
+
+  totalSignals: number;
+
+  winRate: number;
+
+  avgRiskReward: number;
+
   telegramUsername?: string;
 
   telegramId: number;

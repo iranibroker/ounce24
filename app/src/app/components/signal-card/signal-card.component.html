@@ -6,15 +6,20 @@
         {{ signal().entryPrice | currency: 'USD' : 'symbol' : '1.0-0' }}
       </span>
     </mat-card-title>
+    @if (signal().status === SignalStatus.Pending) {
+      <mat-chip [disabled]="true" id="status-chip">
+        <i class="fas fa-clock-rotate-left"></i>
+        pending
+      </mat-chip>
+    }
   </mat-card-header>
-  <mat-divider />
   <mat-card-actions class="signal-props">
     <span>
       <i class="fa-regular fa-arrow-trend-up"></i>
       {{ 'signal.profit' | translate }}:
       {{ signal().profit | currency: 'USD' : 'symbol' : '1.0-0' }}
     </span>
-    <span>
+    <span style="color: var(--mat-sys-outline-variant)">
       {{ 'signal.riskReward' | translate }}:
       {{ signal().riskReward | number: '1.0-2' }}
     </span>
@@ -24,5 +29,12 @@
       {{ signal().loss | currency: 'USD' : 'symbol' : '1.0-0' }}
     </span>
   </mat-card-actions>
-  <mat-card-content> </mat-card-content>
+  <mat-divider />
+  <mat-card-actions>
+    <mat-chip-set>
+      <mat-chip>
+        #{{ signal().owner.title }} {{ signal().owner.score }}
+      </mat-chip>
+    </mat-chip-set>
+  </mat-card-actions>
 </mat-card>
