@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { BehaviorSubject } from 'rxjs';
 import { TvApiAdapter } from 'tradingview-api-adapter';
+import { QuoteService } from './quote.service';
 
 const REDIS_CHANNEL = 'xauusd-channel';
 
@@ -11,7 +12,7 @@ export class OuncePriceService {
   private price = new BehaviorSubject<number>(2800);
   adapter = new TvApiAdapter();
 
-  constructor() {
+  constructor(private quoteService: QuoteService) {
     // this.redis = new Redis(process.env.REDIS_URI);
 
     // this.redis.subscribe(REDIS_CHANNEL);
@@ -24,9 +25,9 @@ export class OuncePriceService {
     //   }
     // });
 
-    this.adapter.Quote('XAUUSD', 'OANDA', ['lp']).listen((data) => {
+    this.quoteService.data.subscribe((data) => {
       const oldPrice = this.current;
-      const price = Number(data.lp);
+      const price = data;
       if (price != oldPrice) this.price.next(price);
     });
   }
