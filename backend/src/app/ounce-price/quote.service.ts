@@ -6,7 +6,7 @@ import { Quote } from 'tradingview-api-adapter/dist/Quote';
 @Injectable()
 export class QuoteService {
   private reconnectTimeout: any;
-  private readonly TIMEOUT_MS = 5000;
+  private readonly TIMEOUT_MS = 10000;
   private adapter = new TvApiAdapter();
   private quote: Quote;
   private quoteUpdateSubject = new Subject<number>();
@@ -29,6 +29,7 @@ export class QuoteService {
 
     this.quote.listen((data) => {
       this.quoteUpdateSubject.next(data['lp']);
+      console.log(data['lp']);
       resetTimer(); // Reset watchdog timer on each update
     });
 
