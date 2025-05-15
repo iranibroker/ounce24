@@ -1,0 +1,14 @@
+@let price = priceService.value();
+<div class="container">
+  <mat-toolbar>
+    <span>
+      XAUUSD .
+      <span [style.color]="color()">
+        @if (price > 0) {
+          {{ price | currency }}
+        }
+      </span>
+    </span>
+  </mat-toolbar>
+  <mat-divider />
+</div>
