@@ -11,10 +11,15 @@
     </mat-button-toggle>
   </mat-button-toggle-group>
 
-  @if (data()) {
+  @if (data()?.length > 0) {
     @for (signal of data(); track $index) {
       <app-signal-card [signal]="signal" />
     }
+  } @else if (data() && data()?.length === 0) {
+    <app-empty-state
+      iconName="face-frown"
+      [text]="'signal.emptyState' | translate"
+    />
   }
   @if (query.isLoading() || query.isFetchingNextPage()) {
     <app-data-loading />

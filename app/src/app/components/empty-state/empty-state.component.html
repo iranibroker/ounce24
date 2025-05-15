@@ -1,0 +1,8 @@
+<div class="empty-state">
+  @if (iconName()) {
+    <i class="fa-solid fa-{{ iconName() }}" class="empty-state__icon"></i>
+  }
+  @if (text()) {
+    <p class="empty-state__text">{{ text() }}</p>
+  }
+</div>

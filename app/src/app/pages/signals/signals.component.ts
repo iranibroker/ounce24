@@ -10,21 +10,25 @@ import { SHARED } from '../../shared';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-signals',
+  standalone: true,
   imports: [
     CommonModule,
+    MatButtonToggleModule,
+    MatButtonModule,
+    FormsModule,
+    TranslateModule,
     SignalCardComponent,
     DataLoadingComponent,
-    SHARED,
-    MatButtonModule,
-    MatButtonToggleModule,
-    FormsModule,
+    EmptyStateComponent
   ],
   templateUrl: './signals.component.html',
-  styleUrl: './signals.component.scss',
+  styleUrls: ['./signals.component.scss']
 })
 export class SignalsComponent {
   private readonly http = inject(HttpClient);

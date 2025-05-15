@@ -21,6 +21,7 @@
       "ACTIVE": "active",
       "CLOSED": "closed",
       "CANCELED": "canceled"
-    }
+    },
+    "emptyState": "No signals found"
   }
 }
