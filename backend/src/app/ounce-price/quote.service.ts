@@ -7,7 +7,7 @@ import { Quote } from 'tradingview-api-adapter/dist/Quote';
 export class QuoteService {
   private reconnectTimeout: any;
   private readonly TIMEOUT_MS = 10000;
-  private adapter = new TvApiAdapter();
+  private adapter: TvApiAdapter;
   private quote: Quote;
   private quoteUpdateSubject = new Subject<number>();
   public data = this.quoteUpdateSubject.asObservable();
@@ -17,6 +17,7 @@ export class QuoteService {
   }
 
   private startListening() {
+    this.adapter = new TvApiAdapter();
     this.quote = this.adapter.Quote('XAUUSD', 'OANDA', ['lp']);
 
     const resetTimer = () => {
