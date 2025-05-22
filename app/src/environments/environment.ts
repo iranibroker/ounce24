@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://ounce24-api.darkube.app',
+  apiUrl: 'http://localhost:3000',
+  // apiUrl: 'https://ounce24-api.darkube.app',
 };
 
 /*

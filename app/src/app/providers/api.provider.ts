@@ -8,7 +8,7 @@ import {
 import { inject, Injectable, Provider } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../environments/environment';
 const JWT_KEY = 'jwtToken';
 const IGNORE_CASES = [new RegExp('^https?:\\/\\/?'), new RegExp('/i18n/')];
 
