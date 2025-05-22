@@ -23,7 +23,7 @@ function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
   for (const bot of BOT_KEYS) {
     const count = signals.filter(
-      (s) => s.status === SignalStatus.Active && s.telegramBot === bot
+      (s) => s.status === SignalStatus.Active && s.telegramBot === bot,
     ).length;
     if (count === 0) return bot;
     if (count < min[0]) min = [count, bot];
@@ -53,7 +53,7 @@ export class SignalBotService extends BaseBot {
     private ouncePriceService: OuncePriceService,
     private publishService: PublishBotsService,
     private userStats: UserStatsService,
-    private auth: AuthService
+    private auth: AuthService,
   ) {
     super(userModel, auth, bot);
 
@@ -76,7 +76,7 @@ export class SignalBotService extends BaseBot {
             if (signal.messageId)
               this.bot.telegram.deleteMessage(
                 process.env.PUBLISH_CHANNEL_ID,
-                signal.messageId
+                signal.messageId,
               );
             signal.status = SignalStatus.Active;
             signal.activeAt = new Date();
@@ -93,7 +93,7 @@ export class SignalBotService extends BaseBot {
 
             this.bot.telegram.sendMessage(
               signal.owner.telegramId,
-              Signal.getMessage(signal, { showId: true })
+              Signal.getMessage(signal, { showId: true }),
             );
           }
         } else {
@@ -110,7 +110,7 @@ export class SignalBotService extends BaseBot {
             if (signal.messageId)
               this.bot.telegram.deleteMessage(
                 process.env.PUBLISH_CHANNEL_ID,
-                signal.messageId
+                signal.messageId,
               );
             signal.status = SignalStatus.Closed;
             signal.closedAt = new Date();
@@ -127,7 +127,7 @@ export class SignalBotService extends BaseBot {
             await this.userStats.updateUserSignals(signal.owner, signal);
             this.bot.telegram.sendMessage(
               signal.owner.telegramId,
-              Signal.getMessage(signal, { showId: true })
+              Signal.getMessage(signal, { showId: true }),
             );
           }
         }
@@ -155,7 +155,7 @@ export class SignalBotService extends BaseBot {
       .exec();
     if (signals.length >= MAX_ACTIVE_SIGNAL) {
       ctx.reply(
-        `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_ACTIVE_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
+        `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_ACTIVE_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
       );
       return;
     }
@@ -173,7 +173,7 @@ export class SignalBotService extends BaseBot {
       .exec();
     if (todaySignals.length >= MAX_DAILY_SIGNAL) {
       ctx.reply(
-        `امکان کاشت بیشتر از ${MAX_ACTIVE_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`
+        `امکان کاشت بیشتر از ${MAX_ACTIVE_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
       );
       return;
     }
@@ -229,7 +229,7 @@ export class SignalBotService extends BaseBot {
               // [{ text: 'publish', callback_data: 'publish_signal' }],
             ],
           },
-        }
+        },
       );
     }
 
@@ -289,7 +289,7 @@ export class SignalBotService extends BaseBot {
     @Ctx() ctx: Context,
     limit = 10,
     skip = 0,
-    userId?: string
+    userId?: string,
   ) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
@@ -361,7 +361,7 @@ export class SignalBotService extends BaseBot {
     const user = await this.getUser(ctx.from.id);
 
     await ctx.reply(
-      await this.userStats.getLeaderBoardMessage({ userId: user.id })
+      await this.userStats.getLeaderBoardMessage({ userId: user.id }),
     );
   }
 
@@ -374,7 +374,7 @@ export class SignalBotService extends BaseBot {
       await this.userStats.getLeaderBoardMessage({
         userId: user.id,
         fromDate: this.getLastSundayAt21(),
-      })
+      }),
     );
   }
 
@@ -443,7 +443,7 @@ ${Signal.getStatsText(signals)}
       .findByIdAndUpdate(
         id,
         { deletedAt: new Date(), status: SignalStatus.Canceled },
-        { new: true }
+        { new: true },
       )
       .populate('owner')
       .exec();
@@ -451,13 +451,13 @@ ${Signal.getStatsText(signals)}
     if (updatedSignal.messageId) {
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
-        updatedSignal.messageId
+        updatedSignal.messageId,
       );
     }
 
     this.bot.telegram.sendMessage(
       updatedSignal.owner.telegramId,
-      Signal.getMessage(updatedSignal, { showId: true })
+      Signal.getMessage(updatedSignal, { showId: true }),
     );
 
     if (ctx) ctx.answerCbQuery('سیگنال شما حذف شد');
@@ -480,7 +480,7 @@ ${Signal.getStatsText(signals)}
           closedAt: new Date(),
           closedOuncePrice: this.ouncePriceService.current,
         },
-        { new: true }
+        { new: true },
       )
       .populate('owner')
       .exec();
@@ -496,9 +496,9 @@ ${Signal.getStatsText(signals)}
         (telegram) =>
           telegram.deleteMessage(
             process.env.PUBLISH_CHANNEL_ID,
-            signal.messageId
+            signal.messageId,
           ),
-        true
+        true,
       );
     }
 
@@ -512,7 +512,7 @@ ${Signal.getStatsText(signals)}
     } else {
       this.bot.telegram.sendMessage(
         signal.owner.telegramId,
-        Signal.getMessage(updatedSignal, { showId: true })
+        Signal.getMessage(updatedSignal, { showId: true }),
       );
     }
   }
@@ -537,7 +537,7 @@ ${Signal.getStatsText(signals)}
         {
           riskFree: true,
         },
-        { new: true }
+        { new: true },
       )
       .exec();
 
@@ -573,7 +573,7 @@ ${Signal.getStatsText(signals)}
     ctx.answerCbQuery();
 
     await ctx.reply(
-      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`
+      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`,
     );
   }
 
@@ -602,7 +602,7 @@ ${Signal.getStatsText(signals)}
         .exec();
       if (nearSignal) {
         ctx.reply(
-          `شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`
+          `شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`,
         );
         return;
       }
@@ -613,7 +613,7 @@ ${Signal.getStatsText(signals)}
       if (!signal.maxPrice) {
         if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
           ctx.reply(
-            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
           );
           return;
         }
@@ -622,7 +622,7 @@ ${Signal.getStatsText(signals)}
       } else if (!signal.minPrice) {
         if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
           ctx.reply(
-            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
           );
           return;
         }
@@ -636,7 +636,7 @@ ${Signal.getStatsText(signals)}
       if (!signal.minPrice) {
         if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
           ctx.reply(
-            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
           );
           return;
         }
@@ -645,7 +645,7 @@ ${Signal.getStatsText(signals)}
       } else if (!signal.maxPrice) {
         if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
           ctx.reply(
-            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`
+            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
           );
           return;
         }
@@ -675,8 +675,8 @@ ${Signal.getStatsText(signals)}
         if (!createdSignal.publishable) {
           ctx.reply(
             `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز فعلی شما ${userScore.toFixed(
-              2
-            )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از /my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از /my_signals استفاده کنید.`
+              2,
+            )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از /my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از /my_signals استفاده کنید.`,
           );
           return;
         }
@@ -685,7 +685,7 @@ ${Signal.getStatsText(signals)}
           process.env.PUBLISH_CHANNEL_ID,
           Signal.getMessage(createdSignal, {
             signals: prevSignals,
-          })
+          }),
         );
         this.signalModel
           .findByIdAndUpdate(createdSignal.id, {
@@ -697,7 +697,7 @@ ${Signal.getStatsText(signals)}
           this.bot.telegram.forwardMessage(
             process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID,
             process.env.PUBLISH_CHANNEL_ID,
-            message.message_id
+            message.message_id,
           );
         }
       }
@@ -708,7 +708,7 @@ ${Signal.getStatsText(signals)}
   async resetAllProfile(@Ctx() ctx: Context) {
     const user = await this.getUser(ctx.from.id);
     const lastResetDiff = Math.floor(
-      (Date.now() - new Date(user.resetAt).valueOf()) / 3600000 / 24
+      (Date.now() - new Date(user.resetAt).valueOf()) / 3600000 / 24,
     );
     const isLessThan15 = user.resetAt && lastResetDiff <= 15;
     ctx.reply(
@@ -732,7 +732,7 @@ ${Signal.getStatsText(signals)}
                 ],
           ],
         },
-      }
+      },
     );
   }
 
@@ -745,7 +745,7 @@ ${Signal.getStatsText(signals)}
     if (isLessThan15) return;
     await this.signalModel.updateMany(
       { owner: user._id, deletedAt: null },
-      { deletedAt: new Date() }
+      { deletedAt: new Date() },
     );
     await this.userModel.findByIdAndUpdate(user.id, { resetAt: new Date() });
     const message = ctx.callbackQuery.message;
@@ -785,7 +785,7 @@ ${Signal.getStatsText(signals)}
               // [{ text: 'publish', callback_data: 'publish_signal' }],
             ],
           },
-        }
+        },
       );
     } catch (error) {
       // no need
@@ -803,7 +803,6 @@ ${Signal.getStatsText(signals)}
     });
     let func: any;
     if (signal.messageId) {
-      console.log(signal.telegramBot);
       func = (telegram: Telegram) => {
         telegram
           .editMessageText(
@@ -819,10 +818,14 @@ ${Signal.getStatsText(signals)}
                       text: `${Signal.getPipString(signal, ouncePrice)}`,
                       callback_data: 'test',
                     },
+                    {
+                      text: 'لیست سیگنال‌ها',
+                      url: 'https://app.ounce24.com',
+                    },
                   ],
                 ],
               },
-            }
+            },
           )
           .catch((er) => {
             console.error('error editing signal', er.response, signal.id);
@@ -831,7 +834,18 @@ ${Signal.getStatsText(signals)}
     } else {
       func = (telegram) => {
         telegram
-          .sendMessage(process.env.PUBLISH_CHANNEL_ID, text)
+          .sendMessage(process.env.PUBLISH_CHANNEL_ID, text, {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: 'لیست سیگنال‌ها',
+                    url: 'https://app.ounce24.com',
+                  },
+                ],
+              ],
+            },
+          })
           .then((message) => {
             this.signalModel
               .findByIdAndUpdate(signal.id, {
@@ -843,7 +857,7 @@ ${Signal.getStatsText(signals)}
               telegram.forwardMessage(
                 process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID,
                 process.env.PUBLISH_CHANNEL_ID,
-                message.message_id
+                message.message_id,
               );
             }
           })

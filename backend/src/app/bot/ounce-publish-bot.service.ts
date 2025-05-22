@@ -13,13 +13,13 @@ export class OuncePublishBotService {
   prevPublishDatetime = 0;
   constructor(
     @InjectBot('ounce') private bot: Telegraf<Context>,
-    private ouncePriceService: OuncePriceService
+    private ouncePriceService: OuncePriceService,
   ) {
     let publishChannelMessageId = 0;
     const redis = new Redis(
       process.env.IS_DEV
         ? 'redis://:X7Y5T2sFNrdcn28h4JLURCKQkgVBynbc@075b5acd-5c6f-4d3e-8682-6f05b1d15743.hsvc.ir:31944/1'
-        : process.env.REDIS_URI
+        : process.env.REDIS_URI,
     );
 
     redis.get('publicChannelOuncePriceMessageId', (err, result) => {
@@ -39,7 +39,19 @@ export class OuncePublishBotService {
               process.env.PUBLISH_CHANNEL_ID,
               publishChannelMessageId,
               undefined,
-              `🟡 قیمت لحظه‌ای انس طلا: ${price}`
+              `🟡 قیمت لحظه‌ای انس طلا: ${price}`,
+              {
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: 'لیست سیگنال‌ها',
+                        url: 'https://app.ounce24.com',
+                      },
+                    ],
+                  ],
+                },
+              },
             )
             .then(() => {
               this.errorCount = 0;
@@ -49,14 +61,14 @@ export class OuncePublishBotService {
                 'OuncePublishBotService',
                 this.errorCount,
                 er.response.error_code,
-                er
+                er,
               );
               if (er.response.error_code !== 429) this.errorCount++;
               if (this.errorCount === MAX_ERROR) {
                 this.bot.telegram
                   .deleteMessage(
                     process.env.PUBLISH_CHANNEL_ID,
-                    publishChannelMessageId
+                    publishChannelMessageId,
                   )
                   .catch(() => {
                     // unhandled
@@ -66,23 +78,35 @@ export class OuncePublishBotService {
             });
         } else {
           this.bot.telegram.unpinAllChatMessages(
-            process.env.PUBLISH_CHANNEL_ID
+            process.env.PUBLISH_CHANNEL_ID,
           );
           this.bot.telegram
             .sendMessage(
               process.env.PUBLISH_CHANNEL_ID,
-              `قیمت لحظه‌ای انس طلا: ${price}`
+              `قیمت لحظه‌ای انس طلا: ${price}`,
+              {
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: 'لیست سیگنال‌ها',
+                        url: 'https://app.ounce24.com',
+                      },
+                    ],
+                  ],
+                },
+              },
             )
             .then((message) => {
               this.errorCount = 0;
               publishChannelMessageId = message.message_id;
               redis.set(
                 'publicChannelOuncePriceMessageId',
-                publishChannelMessageId
+                publishChannelMessageId,
               );
               this.bot.telegram.pinChatMessage(
                 process.env.PUBLISH_CHANNEL_ID,
-                message.message_id
+                message.message_id,
               );
             });
         }
