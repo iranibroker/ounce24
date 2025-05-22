@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.soodup.com',
+  apiUrl: 'https://api.ounce24.com',
 };
