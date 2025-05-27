@@ -1,11 +1,20 @@
 <mat-card>
   <mat-card-header>
+    <img mat-card-avatar src="https://placehold.co/100" />
     <mat-card-title>
-      <app-signal-type-chip [type]="signal().type" />
-      <span>
-        {{ signal().entryPrice | currency: 'USD' : 'symbol' : '1.0-0' }}
-      </span>
+      {{ signal().owner.title }}
     </mat-card-title>
+    <mat-card-subtitle>
+      {{ signal().owner.score }}
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-divider />
+  <mat-card-actions class="signal-header">
+    <app-signal-type-chip [type]="signal().type" />
+    <span>
+      {{ signal().entryPrice | currency: 'USD' : 'symbol' : '1.0-0' }}
+    </span>
+    <span style="flex: 1"></span>
     @switch (signal().status) {
       @case (SignalStatus.Pending) {
         <mat-chip [disabled]="true" id="status-chip">
@@ -31,7 +40,7 @@
         </mat-chip>
       }
     }
-  </mat-card-header>
+  </mat-card-actions>
   <mat-card-actions class="signal-props">
     <span>
       <i class="fa-regular fa-arrow-trend-up"></i>
@@ -47,13 +56,5 @@
       {{ 'signal.loss' | translate }}:
       {{ signal().loss | currency: 'USD' : 'symbol' : '1.0-0' }}
     </span>
-  </mat-card-actions>
-  <mat-divider />
-  <mat-card-actions>
-    <mat-chip-set>
-      <mat-chip>
-        #{{ signal().owner.title }} {{ signal().owner.score }}
-      </mat-chip>
-    </mat-chip-set>
   </mat-card-actions>
 </mat-card>
