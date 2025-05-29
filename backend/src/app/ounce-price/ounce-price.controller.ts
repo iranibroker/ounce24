@@ -4,7 +4,9 @@ import { map } from 'rxjs/operators';
 import { OuncePriceService } from './ounce-price.service';
 import { EVENTS } from '../consts';
 import { OnEvent } from '@nestjs/event-emitter';
+import { Public } from '../auth/public.decorator';
 
+@Public()
 @Controller('ounce-price')
 export class OuncePriceController {
   obs = new BehaviorSubject<number>(0);

@@ -2,7 +2,9 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Signal, SignalStatus } from '@ounce24/types';
 import { Model } from 'mongoose';
+import { Public } from '../auth/public.decorator';
 
+@Public()
 @Controller('signals')
 export class SignalsController {
   constructor(@InjectModel(Signal.name) private signalModel: Model<Signal>) {}

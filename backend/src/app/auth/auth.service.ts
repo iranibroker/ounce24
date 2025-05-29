@@ -10,18 +10,23 @@ import { PersianNumberService } from '@ounce24/utils';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
 let kavenegarApi;
 
 @Injectable()
 export class AuthService {
   mobilePhoneTokens: { [key: string]: string } = {};
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    private jwtService: JwtService,
+  ) {
     kavenegarApi = Kavenegar.KavenegarApi({
       apikey: process.env.KAVENEGAR_API_KEY,
     });
   }
 
   async validateUser(username: string, pass: string): Promise<User> {
+    console.log(username, pass);
     const mobilePhone = PersianNumberService.toEnglish(username);
     const user = await this.userModel.findOne({ mobilePhone });
 
@@ -30,6 +35,20 @@ export class AuthService {
     if (this.checkToken(mobilePhone, pass)) return user;
 
     throw new BadRequestException();
+  }
+
+  login(user: User, expireTokenIn = '365d') {
+    const payload: Partial<User> = {
+      id: user.id,
+      phone: user.phone,
+    };
+
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.JWT_ACCESS_SECRET,
+      expiresIn: expireTokenIn,
+    });
+
+    return token;
   }
 
   async sendToken(mobilePhone: string, validateTime = 70000) {

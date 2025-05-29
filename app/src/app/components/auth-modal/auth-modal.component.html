@@ -1,0 +1,89 @@
+<header class="header">
+  <h2>{{ currentStep() === 'phone' ? 'Login' : 'Enter OTP' }}</h2>
+  <button mat-icon-button (click)="close()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</header>
+
+@if (currentStep() === 'phone') {
+  <p class="description">Enter your phone number to continue.</p>
+  <form [formGroup]="phoneForm" (ngSubmit)="onSubmitPhone()">
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Phone Number</mat-label>
+      <input autofocus matInput formControlName="phone" type="number" />
+      <span matTextPrefix>0</span>
+      @if (
+        phoneForm.get('phone')?.errors?.['required'] &&
+        phoneForm.get('phone')?.touched
+      ) {
+        <mat-error>Phone number is required</mat-error>
+      }
+      @if (
+        phoneForm.get('phone')?.errors?.['pattern'] &&
+        phoneForm.get('phone')?.touched
+      ) {
+        <mat-error>Please enter a valid 11-digit phone number</mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="!phoneForm.valid || isLoading()"
+    >
+      @if (isLoading()) {
+        <app-data-loading />
+      } @else {
+        Continue
+      }
+    </button>
+  </form>
+}
+
+@if (currentStep() === 'otp') {
+  <p class="description">Enter the 4-digit code sent to your phone.</p>
+  <form [formGroup]="otpForm" (ngSubmit)="onSubmitOtp()" class="form">
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>OTP</mat-label>
+      <input matInput formControlName="otp" type="number" maxlength="4" />
+      @if (
+        otpForm.get('otp')?.errors?.['required'] && otpForm.get('otp')?.touched
+      ) {
+        <mat-error>OTP is required</mat-error>
+      }
+      @if (
+        otpForm.get('otp')?.errors?.['pattern'] && otpForm.get('otp')?.touched
+      ) {
+        <mat-error>Please enter a valid 6-digit OTP</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="timer">
+      <span>Time remaining: {{ timer() }}s</span>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="(timer() / 60) * 100"
+      ></mat-progress-bar>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="!otpForm.valid || isLoading()"
+    >
+      @if (isLoading()) {
+        <app-data-loading />
+      } @else {
+        Verify OTP
+      }
+    </button>
+  </form>
+}
+
+@if (errorMessage()) {
+  <div class="error-message">
+    {{ errorMessage() }}
+  </div>
+}

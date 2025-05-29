@@ -18,7 +18,7 @@
     </div>
   </button>
   <button mat-button>
-    <div class="nav-item-wrapper">
+    <div class="nav-item-wrapper" (click)="authService.openAuthModal()">
       <i class="far fa-user fa-xl"></i>
       {{ 'bottomNav.profile' | translate }}
     </div>

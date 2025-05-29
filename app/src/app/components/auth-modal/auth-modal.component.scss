@@ -1,0 +1,19 @@
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+p.description {
+  color: var(--mat-sys-outline);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+button[type='submit'] {
+  height: 48px;
+}

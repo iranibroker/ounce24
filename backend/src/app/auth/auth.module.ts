@@ -7,9 +7,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [SchemasModule, PassportModule, JwtModule.register({})], // TODO: JWT_SECRET
+  controllers: [AuthController],
   providers: [
     AuthService,
     LocalStrategy,
