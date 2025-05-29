@@ -412,7 +412,7 @@ export class SignalBotService extends BaseBot {
         if (createdSignal) {
           BaseBot.userStates.delete(ctx.from.id);
           await this.bot.telegram.sendMessage(
-            signal.owner.telegramId,
+            createdSignal.owner.telegramId,
             Signal.getMessage(createdSignal, { showId: true, skipOwner: true }),
           );
 
