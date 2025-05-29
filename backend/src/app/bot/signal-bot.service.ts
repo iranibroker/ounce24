@@ -16,10 +16,11 @@ import { PublishBotsService } from './publish-bots.service';
 import { BOT_KEYS } from '../configs/publisher-bots.config';
 import { UserStatsService } from './user-stats.service';
 import { AuthService } from '../auth/auth.service';
-import { Cron } from '@nestjs/schedule';
 import { EVENTS } from '../consts';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SignalsService } from '../signals/signals.service';
+import { UsersService } from '../users/users.service';
+import { OuncePriceService } from '../ounce-price/ounce-price.service';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -48,7 +49,6 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
-  ouncePrice = 0;
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
@@ -57,10 +57,12 @@ export class SignalBotService extends BaseBot {
     private userStats: UserStatsService,
     private auth: AuthService,
     private signalsService: SignalsService,
+    private usersService: UsersService,
+    private ouncePriceService: OuncePriceService,
   ) {
     super(userModel, auth, bot);
 
-    // this.ouncePriceService.obs.subscribe(async (price) => {
+    // this.ouncePriceService.currentService.obs.subscribe(async (price) => {
     //   if (!price) return;
 
     //   const signals = await this.signalModel
@@ -143,11 +145,6 @@ export class SignalBotService extends BaseBot {
     // });
   }
 
-  @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
-  handleOuncePriceUpdated(price: number) {
-    this.ouncePrice = price;
-  }
-
   @OnEvent(EVENTS.SIGNAL_ACTIVE)
   async handleSignalActive(signal: Signal) {
     const activeSignals = await this.signalModel
@@ -193,7 +190,7 @@ export class SignalBotService extends BaseBot {
         .populate('owner')
         .exec()
         .then((signal) => {
-          this.publishSignal(signal, this.ouncePrice);
+          this.publishSignal(signal, this.ouncePriceService.current);
         });
     }, 3000);
     this.bot.telegram.sendMessage(
@@ -234,7 +231,7 @@ export class SignalBotService extends BaseBot {
         messageId: null,
       })
       .exec();
-    this.publishSignal(signal, this.ouncePrice);
+    this.publishSignal(signal, this.ouncePriceService.current);
   }
 
   @Command('new_signal')
@@ -301,7 +298,7 @@ export class SignalBotService extends BaseBot {
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
     const signal = {
       type: isSell ? SignalType.Sell : SignalType.Buy,
-      createdOuncePrice: this.ouncePrice,
+      createdOuncePrice: this.ouncePriceService.current,
     } as Signal;
 
     ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
@@ -318,7 +315,7 @@ export class SignalBotService extends BaseBot {
     ctx.answerCbQuery();
 
     await ctx.reply(
-      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePrice} است`,
+      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`,
     );
   }
 
@@ -452,7 +449,7 @@ export class SignalBotService extends BaseBot {
       await ctx.reply(
         Signal.getMessage(signal, {
           showId: true,
-          ouncePrice: this.ouncePrice,
+          ouncePrice: this.ouncePriceService.current,
         }),
         {
           reply_markup: {
@@ -593,24 +590,31 @@ export class SignalBotService extends BaseBot {
   @Command('leaderboard')
   async leaderboard(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-    const user = await this.getUser(ctx.from.id);
+    const users = await this.usersService.getLeaderboard();
 
-    await ctx.reply(
-      await this.userStats.getLeaderBoardMessage({ userId: user.id }),
-    );
+    let text = `⭐ رنکینگ کلی اساتید ⭐\n\n`;
+    text += users
+      .map(
+        (user, index) =>
+          `${index + 1}. ${user.tag} (${user.score.toFixed(1)} امتیاز)`,
+      )
+      .join('\n');
+    await ctx.reply(text);
   }
 
   @Command('leaderboard_week')
   async leaderboardWeeks(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-    const user = await this.getUser(ctx.from.id);
+    const users = await this.usersService.getLeaderboard();
 
-    await ctx.reply(
-      await this.userStats.getLeaderBoardMessage({
-        userId: user.id,
-        fromDate: this.getLastSundayAt21(),
-      }),
-    );
+    let text = `⭐ رنکینگ کلی اساتید ⭐\n\n`;
+    text += users
+      .map(
+        (user, index) =>
+          `${index + 1}. ${user.tag} (${user.score.toFixed(1)} امتیاز)`,
+      )
+      .join('\n');
+    await ctx.reply(text);
   }
 
   @Command('leaderboard_admin_prev_week')
@@ -689,7 +693,7 @@ ${Signal.getStatsText(user)}
     if (signal.status !== SignalStatus.Active) return;
     const updatedSignal = await this.signalsService.closeSignal(
       signal,
-      this.ouncePrice,
+      this.ouncePriceService.current,
     );
 
     updatedSignal.owner = signal.owner;
@@ -731,7 +735,7 @@ ${Signal.getStatsText(user)}
     const text: string = message['text'];
     const id = text.split('^^')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
-    if (Signal.getActivePip(signal, this.ouncePrice) < 0) {
+    if (Signal.getActivePip(signal, this.ouncePriceService.current) < 0) {
       ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
       return;
     }
@@ -818,7 +822,7 @@ ${Signal.getStatsText(user)}
         undefined,
         Signal.getMessage(signal, {
           showId: true,
-          ouncePrice: this.ouncePrice,
+          ouncePrice: this.ouncePriceService.current,
         }),
         {
           reply_markup: {
@@ -918,26 +922,5 @@ ${Signal.getStatsText(user)}
     const text: string = message['text'];
     const id = text.split('^^')[1];
     return this.signalModel.findById(id).exec();
-  }
-
-  @Cron('0 15 0 * * 6', {
-    timeZone: 'UTC',
-  })
-  async resetSignals() {
-    const signals = await this.signalModel
-      .find({
-        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
-        deletedAt: null,
-      })
-      .populate('owner')
-      .exec();
-
-    for (const signal of signals) {
-      if (signal.status === SignalStatus.Active) {
-        await this.closeSignal(undefined, signal.id);
-      } else if (signal.status === SignalStatus.Pending) {
-        await this.removeSignal(undefined, signal.id);
-      }
-    }
   }
 }

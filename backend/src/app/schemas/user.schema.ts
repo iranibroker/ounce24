@@ -23,12 +23,10 @@ export const UserSchema = new mongoose.Schema<User>(
 
 UserSchema.virtual('tag').get(function () {
   let tag = '#استاد_';
-  if (this.title) {
-    const cleanedTitle = this.title
-      .replace(/[&@#.]/g, '')
-      .replace(/[ -]/g, '_');
-    tag += cleanedTitle;
-  }
+  const cleanedTitle = (this.title || this.name)
+    .replace(/[&@#.]/g, '')
+    .replace(/[ -]/g, '_');
+  tag += cleanedTitle;
   return tag;
 });
 

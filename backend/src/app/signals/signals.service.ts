@@ -4,6 +4,8 @@ import { Signal, SignalStatus, SignalType, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
+import { Cron } from '@nestjs/schedule';
+import { OuncePriceService } from '../ounce-price/ounce-price.service';
 
 const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
   ? 3
@@ -23,6 +25,7 @@ export class SignalsService {
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     private eventEmitter: EventEmitter2,
     @InjectModel(User.name) private userModel: Model<User>,
+    private ouncePriceService: OuncePriceService,
   ) {}
 
   @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
@@ -152,5 +155,26 @@ export class SignalsService {
       .exec();
     this.eventEmitter.emit(EVENTS.SIGNAL_CANCELED, savedSignal);
     return signal;
+  }
+
+  @Cron('0 15 0 * * 6', {
+    timeZone: 'UTC',
+  })
+  async resetSignals() {
+    const signals = await this.signalModel
+      .find({
+        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+        deletedAt: null,
+      })
+      .populate('owner')
+      .exec();
+
+    for (const signal of signals) {
+      if (signal.status === SignalStatus.Active) {
+        await this.closeSignal(signal, this.ouncePriceService.current);
+      } else if (signal.status === SignalStatus.Pending) {
+        await this.removeSignal(signal);
+      }
+    }
   }
 }

@@ -43,4 +43,13 @@ export class UsersService {
       })
       .exec();
   }
+
+  async getLeaderboard(skip = 0, limit = 10) {
+    return this.userModel
+      .find()
+      .sort({ score: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+  }
 }

@@ -8,9 +8,17 @@ import { UserStatsService } from './user-stats.service';
 import { AuthModule } from '../auth/auth.module';
 import { ConsultingBotService } from './consulting-bot.service';
 import { SignalsModule } from '../signals/signals.module';
+import { UsersModule } from '../users/users.module';
+import { OuncePriceModule } from '../ounce-price/ounce-price.module';
 
 @Module({
-  imports: [SchemasModule, AuthModule, SignalsModule],
+  imports: [
+    SchemasModule,
+    AuthModule,
+    SignalsModule,
+    UsersModule,
+    OuncePriceModule,
+  ],
   providers: [
     SignalBotService,
     BotService,
