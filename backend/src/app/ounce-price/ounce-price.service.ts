@@ -1,42 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { Redis } from 'ioredis';
-import { BehaviorSubject } from 'rxjs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TvApiAdapter } from 'tradingview-api-adapter';
 import { QuoteService } from './quote.service';
 
-const REDIS_CHANNEL = 'xauusd-channel';
+export const OUNCE_PRICE_UPDATED = 'ounce.price';
 
 @Injectable()
 export class OuncePriceService {
-  private readonly redis: Redis;
-  private price = new BehaviorSubject<number>(2800);
+  private currentPrice = 0;
   adapter = new TvApiAdapter();
 
-  constructor(private quoteService: QuoteService) {
-    // this.redis = new Redis(process.env.REDIS_URI);
-
-    // this.redis.subscribe(REDIS_CHANNEL);
-
-    // this.redis.on('message', (channel, message) => {
-    //   if (channel === REDIS_CHANNEL) {
-    //     const oldPrice = this.current;
-    //     const price = Number(message);
-    //     if (price != oldPrice) this.price.next(price);
-    //   }
-    // });
-
+  constructor(
+    private quoteService: QuoteService,
+    private eventEmitter: EventEmitter2,
+  ) {
     this.quoteService.data.subscribe((data) => {
-      const oldPrice = this.current;
+      const oldPrice = this.currentPrice;
       const price = data;
-      if (price != oldPrice) this.price.next(price);
+      if (price != oldPrice) {
+        this.currentPrice = price;
+        console.log(price);
+        this.eventEmitter.emit(OUNCE_PRICE_UPDATED, price);
+      }
     });
   }
 
-  get obs() {
-    return this.price.asObservable();
-  }
-
   get current() {
-    return this.price.value;
+    return this.currentPrice;
   }
 }

@@ -30,7 +30,6 @@ export class QuoteService {
 
     this.quote.listen((data) => {
       this.quoteUpdateSubject.next(data['lp']);
-      console.log(data['lp']);
       resetTimer(); // Reset watchdog timer on each update
     });
 

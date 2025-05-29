@@ -62,7 +62,8 @@ SignalSchema.virtual('score').get(function () {
   if (this.status === SignalStatus.Closed) {
     const lossPip = Math.abs(this.loss - this.entryPrice) * 10;
     const pip = this.pip;
-    const res = (pip / lossPip) * (Math.abs(pip) / (pip < 0 ? 10 : 50) + 10);
+    const res = (pip / lossPip) * (Math.abs(pip) / 50 + 10) + 1;
+    if (res > 500 || res < -500) return 0;
     return res;
   }
 

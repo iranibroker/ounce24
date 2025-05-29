@@ -1,26 +1,156 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal } from '@ounce24/types';
+import { Signal, SignalStatus, SignalType, User } from '@ounce24/types';
 import { Model } from 'mongoose';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { EVENTS } from '../consts';
+
+const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
+  ? 3
+  : Number(process.env.MAX_ACTIVE_SIGNAL);
+
+const MAX_DAILY_SIGNAL = isNaN(Number(process.env.MAX_DAILY_SIGNAL))
+  ? 5
+  : Number(process.env.MAX_DAILY_SIGNAL);
+
+const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
+  ? 20
+  : Number(process.env.MIN_SIGNAL_SCORE);
 
 @Injectable()
 export class SignalsService {
-  constructor(@InjectModel(Signal.name) private signalModel: Model<Signal>) {
-    // setTimeout(() => {
-    //   this.findAll().then((all) => {
-    //     console.log(all);
-    //   });
-    // }, 3000);
+  constructor(
+    @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    private eventEmitter: EventEmitter2,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
+
+  @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
+  private async handleOuncePriceUpdated(price: number) {
+    if (!price) return;
+
+    const signals = await this.signalModel
+      .find({
+        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+        deletedAt: null,
+      })
+      .populate('owner')
+      .exec();
+
+    for (const signal of signals) {
+      if (signal.status === SignalStatus.Pending) {
+        if (Signal.activeTrigger(signal, price)) {
+          signal.status = SignalStatus.Active;
+          signal.activeAt = new Date();
+          signal.save().then((savedSignal) => {
+            this.eventEmitter.emit(EVENTS.SIGNAL_ACTIVE, savedSignal);
+          });
+        }
+      } else {
+        if (Signal.closeTrigger(signal, price)) {
+          this.closeSignal(signal, price);
+        }
+      }
+    }
   }
 
-  async create(
-    dto: Pick<Signal, 'type' | 'entryPrice' | 'maxPrice' | 'minPrice'>
-  ): Promise<Signal> {
-    const createdData = new this.signalModel(dto);
-    return createdData.save();
+  async addSignal(signal: Signal) {
+    console.log('addSignal', signal);
+    if (!signal.owner) return;
+    const owner = await this.userModel.findById(signal.owner);
+    const signals = await this.signalModel
+      .find({
+        owner,
+        status: { $in: [SignalStatus.Pending, SignalStatus.Active] },
+        deletedAt: null,
+      })
+      .exec();
+
+    if (signals.length >= MAX_ACTIVE_SIGNAL) {
+      throw new HttpException(
+        `Maximum number of active signals (${MAX_ACTIVE_SIGNAL}) reached`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todaySignals = await this.signalModel
+      .find({
+        owner,
+        createdAt: { $gte: today },
+        deletedAt: null,
+      })
+      .exec();
+
+    if (todaySignals.length >= MAX_DAILY_SIGNAL) {
+      throw new HttpException(
+        `Maximum number of daily signals (${MAX_DAILY_SIGNAL}) reached`,
+        HttpStatus.REQUEST_TIMEOUT,
+      );
+    }
+
+    const nearSignal = await this.signalModel
+      .findOne({
+        owner,
+        type: signal.type,
+        entryPrice: {
+          $gte: signal.entryPrice - 4,
+          $lte: signal.entryPrice + 4,
+        },
+        status: {
+          $in: [SignalStatus.Active, SignalStatus.Pending],
+        },
+        deletedAt: null,
+      })
+      .exec();
+
+    if (nearSignal) {
+      throw new HttpException(
+        `You have another active signal near this point. Please enter a different entry point:`,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    if (
+      Math.abs(signal.entryPrice - signal.maxPrice) < 1 ||
+      Math.abs(signal.entryPrice - signal.maxPrice) > 200 ||
+      Math.abs(signal.entryPrice - signal.minPrice) < 1 ||
+      Math.abs(signal.entryPrice - signal.minPrice) > 200
+    ) {
+      throw new HttpException('Invalid entry', HttpStatus.BAD_REQUEST);
+    }
+
+    signal.publishable = owner.totalScore >= MIN_SIGNAL_SCORE;
+
+    const savedSignal = await this.signalModel.create(signal);
+    this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);
+    return savedSignal;
   }
 
-  async findAll(): Promise<Signal[]> {
-    return this.signalModel.find().exec();
+  async closeSignal(signal: Signal, price: number) {
+    signal.status = SignalStatus.Closed;
+    signal.closedAt = new Date();
+    signal.closedOuncePrice = price;
+    const savedSignal = await this.signalModel
+      .findByIdAndUpdate(signal._id, signal, { new: true })
+      .populate('owner')
+      .exec();
+    this.eventEmitter.emit(EVENTS.SIGNAL_CLOSED, savedSignal);
+    return signal;
+  }
+
+  async removeSignal(signal: Signal) {
+    if (signal.status !== SignalStatus.Pending) return;
+    const savedSignal = await this.signalModel
+      .findByIdAndUpdate(
+        signal,
+        { deletedAt: new Date(), status: SignalStatus.Canceled },
+        { new: true },
+      )
+      .populate('owner')
+      .exec();
+    this.eventEmitter.emit(EVENTS.SIGNAL_CANCELED, savedSignal);
+    return signal;
   }
 }

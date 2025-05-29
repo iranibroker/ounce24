@@ -26,7 +26,7 @@ export class BaseBot {
   constructor(
     private usersModel: Model<User>,
     private authService: AuthService,
-    private botService: Telegraf<Context>
+    private botService: Telegraf<Context>,
   ) {}
 
   setState<T>(userId: number, state: UserState<T>) {
@@ -74,7 +74,7 @@ export class BaseBot {
           ],
           remove_keyboard: true,
         },
-      }
+      },
     );
   }
 
@@ -107,7 +107,7 @@ export class BaseBot {
           inline_keyboard: [],
           remove_keyboard: true,
         },
-      }
+      },
     );
   }
 
@@ -150,7 +150,7 @@ export class BaseBot {
         phone.search('09') !== 0
       ) {
         ctx.reply(
-          'شماره همراه وارد شده صحیح نیست. لطفا به صورت کامل وارد کنید. مثلا: 09123456789'
+          'شماره همراه وارد شده صحیح نیست. لطفا به صورت کامل وارد کنید. مثلا: 09123456789',
         );
         return;
       }
@@ -173,7 +173,7 @@ export class BaseBot {
       const exist = await this.usersModel.findOne({ title: text }).exec();
       if (exist) {
         ctx.reply(
-          'نام انتخاب شده به شخص دیگری متعلق است. لطفا یک نام مستعار جدید انتخاب کنید'
+          'نام انتخاب شده به شخص دیگری متعلق است. لطفا یک نام مستعار جدید انتخاب کنید',
         );
         return;
       }
@@ -200,7 +200,7 @@ export class BaseBot {
     }
     const chatMember = await this.botService.telegram.getChatMember(
       process.env.PUBLISH_CHANNEL_ID,
-      user.telegramId
+      user.telegramId,
     );
     if (
       chatMember?.status != 'member' &&
@@ -230,22 +230,18 @@ export class BaseBot {
   getLastSundayAt21() {
     const currentDate = new Date();
     const gmtDate = new Date(
-      currentDate.getTime() + currentDate.getTimezoneOffset() * 60000
+      currentDate.getTime() + currentDate.getTimezoneOffset() * 60000,
     );
-    console.log('gmtDate', gmtDate);
     // Get the current day of the week (0 - Sunday, 1 - Monday, etc.)
     const dayOfWeek = gmtDate.getUTCDay();
-    console.log('dayOfWeek', dayOfWeek);
 
     // Calculate the last Sunday
     const lastSunday = new Date(gmtDate);
-    console.log('lastSunday', lastSunday);
     lastSunday.setUTCDate(
       gmtDate.getUTCDate() -
-        (dayOfWeek === 0 && gmtDate.getHours() < 21 ? 7 : dayOfWeek)
+        (dayOfWeek === 0 && gmtDate.getHours() < 21 ? 7 : dayOfWeek),
     ); // Move to the previous Sunday
     lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
-    console.log('lastSunday', lastSunday);
     return lastSunday;
   }
 }

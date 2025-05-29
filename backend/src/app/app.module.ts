@@ -12,11 +12,14 @@ import { OuncePriceModule } from './ounce-price/ounce-price.module';
 import { PublishBotsModules } from './configs/publisher-bots.config';
 import { AuthModule } from './auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URI, {
       dbName: process.env.MONGO_DB_NAME,
     }),
@@ -42,6 +45,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     BotModule,
     SchemasModule,
     OuncePriceModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

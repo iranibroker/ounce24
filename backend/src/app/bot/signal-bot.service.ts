@@ -12,12 +12,14 @@ import { Action, Command, Ctx, InjectBot, Update } from 'nestjs-telegraf';
 import { Context, Telegraf, Telegram } from 'telegraf';
 import { BaseBot, UserStateType } from './base-bot';
 import { PersianNumberService } from '@ounce24/utils';
-import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { PublishBotsService } from './publish-bots.service';
 import { BOT_KEYS } from '../configs/publisher-bots.config';
 import { UserStatsService } from './user-stats.service';
 import { AuthService } from '../auth/auth.service';
 import { Cron } from '@nestjs/schedule';
+import { EVENTS } from '../consts';
+import { OnEvent } from '@nestjs/event-emitter';
+import { SignalsService } from '../signals/signals.service';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -46,98 +48,193 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {
+  ouncePrice = 0;
   constructor(
     @InjectBot('main') private bot: Telegraf<Context>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
-    private ouncePriceService: OuncePriceService,
     private publishService: PublishBotsService,
     private userStats: UserStatsService,
     private auth: AuthService,
+    private signalsService: SignalsService,
   ) {
     super(userModel, auth, bot);
 
-    this.ouncePriceService.obs.subscribe(async (price) => {
-      if (!price) return;
+    // this.ouncePriceService.obs.subscribe(async (price) => {
+    //   if (!price) return;
 
-      const signals = await this.signalModel
-        .find({
-          status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
-          deletedAt: null,
-        })
+    //   const signals = await this.signalModel
+    //     .find({
+    //       status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
+    //       deletedAt: null,
+    //     })
+    //     .populate('owner')
+    //     .exec();
+
+    //   for (const signal of signals) {
+    //     let statusChangeDetection = false;
+    //     if (signal.status === SignalStatus.Pending) {
+    //       if (Signal.activeTrigger(signal, price)) {
+    //         statusChangeDetection = true;
+    //         if (signal.messageId)
+    //           this.bot.telegram.deleteMessage(
+    //             process.env.PUBLISH_CHANNEL_ID,
+    //             signal.messageId,
+    //           );
+    //         signal.status = SignalStatus.Active;
+    //         signal.activeAt = new Date();
+    //         signal.telegramBot = getAvailableBot(signals);
+    //         signal.messageId = null;
+    //         this.signalModel
+    //           .findByIdAndUpdate(signal.id, {
+    //             status: signal.status,
+    //             activeAt: signal.activeAt,
+    //             telegramBot: signal.telegramBot,
+    //             messageId: null,
+    //           })
+    //           .exec();
+
+    //         this.bot.telegram.sendMessage(
+    //           signal.owner.telegramId,
+    //           Signal.getMessage(signal, { showId: true }),
+    //         );
+    //       }
+    //     } else {
+    //       statusChangeDetection = true;
+    //       if (!signal.telegramBot) {
+    //         signal.telegramBot = getAvailableBot(signals);
+    //         this.signalModel
+    //           .findByIdAndUpdate(signal.id, {
+    //             telegramBot: signal.telegramBot,
+    //           })
+    //           .exec();
+    //       }
+    //       if (Signal.closeTrigger(signal, price)) {
+    //         if (signal.messageId)
+    //           this.bot.telegram.deleteMessage(
+    //             process.env.PUBLISH_CHANNEL_ID,
+    //             signal.messageId,
+    //           );
+    //         signal.status = SignalStatus.Closed;
+    //         signal.closedAt = new Date();
+    //         signal.closedOuncePrice = price;
+    //         signal.messageId = null;
+    //         this.signalModel
+    //           .findByIdAndUpdate(signal.id, {
+    //             status: signal.status,
+    //             closedAt: signal.closedAt,
+    //             messageId: null,
+    //             closedOuncePrice: signal.closedOuncePrice,
+    //           })
+    //           .exec();
+    //         await this.userStats.updateUserSignals(signal.owner, signal);
+    //         this.bot.telegram.sendMessage(
+    //           signal.owner.telegramId,
+    //           Signal.getMessage(signal, { showId: true }),
+    //         );
+    //       }
+    //     }
+
+    //     // check change detections and update message
+    //     if (statusChangeDetection) {
+    //       this.publishSignal(signal, price);
+    //     }
+    //   }
+    // });
+  }
+
+  @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
+  handleOuncePriceUpdated(price: number) {
+    this.ouncePrice = price;
+  }
+
+  @OnEvent(EVENTS.SIGNAL_ACTIVE)
+  async handleSignalActive(signal: Signal) {
+    const activeSignals = await this.signalModel
+      .find({
+        status: { $in: [SignalStatus.Active] },
+        deletedAt: null,
+      })
+      .exec();
+
+    if (signal.messageId)
+      this.bot.telegram.deleteMessage(
+        process.env.PUBLISH_CHANNEL_ID,
+        signal.messageId,
+      );
+    signal.telegramBot = getAvailableBot(activeSignals);
+    signal.messageId = null;
+    this.signalModel
+      .findByIdAndUpdate(signal.id, {
+        telegramBot: signal.telegramBot,
+        messageId: null,
+      })
+      .exec();
+
+    this.bot.telegram.sendMessage(
+      signal.owner.telegramId,
+      Signal.getMessage(signal, { showId: true, skipOwner: true }),
+    );
+    this.publishSignal(signal, signal.entryPrice);
+  }
+
+  @OnEvent(EVENTS.SIGNAL_CLOSED)
+  async handleSignalClosed(signal: Signal) {
+    if (signal.messageId)
+      this.bot.telegram.deleteMessage(
+        process.env.PUBLISH_CHANNEL_ID,
+        signal.messageId,
+      );
+
+    signal.messageId = null;
+    setTimeout(() => {
+      this.signalModel
+        .findById(signal._id)
         .populate('owner')
-        .exec();
+        .exec()
+        .then((signal) => {
+          this.publishSignal(signal, this.ouncePrice);
+        });
+    }, 3000);
+    this.bot.telegram.sendMessage(
+      signal.owner.telegramId,
+      Signal.getMessage(signal, { showId: true, skipOwner: true }),
+    );
+  }
 
-      for (const signal of signals) {
-        let statusChangeDetection = false;
-        if (signal.status === SignalStatus.Pending) {
-          if (Signal.activeTrigger(signal, price)) {
-            statusChangeDetection = true;
-            if (signal.messageId)
-              this.bot.telegram.deleteMessage(
-                process.env.PUBLISH_CHANNEL_ID,
-                signal.messageId,
-              );
-            signal.status = SignalStatus.Active;
-            signal.activeAt = new Date();
-            signal.telegramBot = getAvailableBot(signals);
-            signal.messageId = null;
-            this.signalModel
-              .findByIdAndUpdate(signal.id, {
-                status: signal.status,
-                activeAt: signal.activeAt,
-                telegramBot: signal.telegramBot,
-                messageId: null,
-              })
-              .exec();
+  @OnEvent(EVENTS.SIGNAL_CANCELED)
+  async handleSignalCanceled(signal: Signal) {
+    if (signal.messageId) {
+      this.bot.telegram.deleteMessage(
+        process.env.PUBLISH_CHANNEL_ID,
+        signal.messageId,
+      );
+    }
 
-            this.bot.telegram.sendMessage(
-              signal.owner.telegramId,
-              Signal.getMessage(signal, { showId: true }),
-            );
-          }
-        } else {
-          statusChangeDetection = true;
-          if (!signal.telegramBot) {
-            signal.telegramBot = getAvailableBot(signals);
-            this.signalModel
-              .findByIdAndUpdate(signal.id, {
-                telegramBot: signal.telegramBot,
-              })
-              .exec();
-          }
-          if (Signal.closeTrigger(signal, price)) {
-            if (signal.messageId)
-              this.bot.telegram.deleteMessage(
-                process.env.PUBLISH_CHANNEL_ID,
-                signal.messageId,
-              );
-            signal.status = SignalStatus.Closed;
-            signal.closedAt = new Date();
-            signal.closedOuncePrice = price;
-            signal.messageId = null;
-            this.signalModel
-              .findByIdAndUpdate(signal.id, {
-                status: signal.status,
-                closedAt: signal.closedAt,
-                messageId: null,
-                closedOuncePrice: signal.closedOuncePrice,
-              })
-              .exec();
-            await this.userStats.updateUserSignals(signal.owner, signal);
-            this.bot.telegram.sendMessage(
-              signal.owner.telegramId,
-              Signal.getMessage(signal, { showId: true }),
-            );
-          }
-        }
+    this.bot.telegram.sendMessage(
+      signal.owner.telegramId,
+      Signal.getMessage(signal, { showId: true, skipOwner: true }),
+    );
+  }
 
-        // check change detections and update message
-        if (statusChangeDetection) {
-          this.publishSignal(signal, price);
-        }
-      }
-    });
+  @OnEvent(EVENTS.SIGNAL_CREATED)
+  async handleSignalCreated(signal: Signal) {
+    if (!signal.owner) return;
+    const activeSignals = await this.signalModel
+      .find({
+        status: { $in: [SignalStatus.Active] },
+        deletedAt: null,
+      })
+      .exec();
+    signal.telegramBot = getAvailableBot(activeSignals);
+    signal.messageId = null;
+    this.signalModel
+      .findByIdAndUpdate(signal.id, {
+        telegramBot: signal.telegramBot,
+        messageId: null,
+      })
+      .exec();
+    this.publishSignal(signal, this.ouncePrice);
   }
 
   @Command('new_signal')
@@ -153,6 +250,7 @@ export class SignalBotService extends BaseBot {
       .sort({ createdAt: 'asc' })
       .populate('owner')
       .exec();
+
     if (signals.length >= MAX_ACTIVE_SIGNAL) {
       ctx.reply(
         `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_ACTIVE_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
@@ -173,7 +271,7 @@ export class SignalBotService extends BaseBot {
       .exec();
     if (todaySignals.length >= MAX_DAILY_SIGNAL) {
       ctx.reply(
-        `امکان کاشت بیشتر از ${MAX_ACTIVE_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
+        `امکان کاشت بیشتر از ${MAX_DAILY_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
       );
       return;
     }
@@ -196,6 +294,146 @@ export class SignalBotService extends BaseBot {
     });
   }
 
+  @Action('new_buy_signal')
+  @Action('new_sell_signal')
+  async newSellSignal(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
+    const signal = {
+      type: isSell ? SignalType.Sell : SignalType.Buy,
+      createdOuncePrice: this.ouncePrice,
+    } as Signal;
+
+    ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+    try {
+      await ctx.editMessageText(`ایجاد سیگنال ${SignalTypeText[signal.type]}:`);
+    } catch (error) {
+      // unhandled
+    }
+
+    this.setState<Partial<Signal>>(ctx.from.id, {
+      state: UserStateType.NewSignal,
+      data: signal,
+    });
+    ctx.answerCbQuery();
+
+    await ctx.reply(
+      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePrice} است`,
+    );
+  }
+
+  async handleNewSignalMessage(ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const signal = this.getStateData<Signal>(ctx.from.id);
+    const isSell = signal.type === SignalType.Sell;
+    const value = Number(PersianNumberService.toEnglish(ctx.message['text']));
+    const user = await this.getUser(ctx.from.id);
+    if (isNaN(Number(value))) {
+      ctx.reply('لطفا یک مقدار عددی وارد کنید. مثلا: 3234.32');
+      return;
+    }
+
+    if (!signal.entryPrice) {
+      const nearSignal = await this.signalModel
+        .findOne({
+          owner: user._id,
+          type: signal.type,
+          entryPrice: { $gte: value - 4, $lte: value + 4 },
+          status: {
+            $in: [SignalStatus.Active, SignalStatus.Pending],
+          },
+          deletedAt: null,
+        })
+        .exec();
+      if (nearSignal) {
+        ctx.reply(
+          `شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`,
+        );
+        return;
+      }
+      signal.entryPrice = value;
+      ctx.reply(`حد ضرر را مشخص کنید:`);
+      this.setStateData(ctx.from.id, signal);
+    } else if (isSell) {
+      if (!signal.maxPrice) {
+        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
+          ctx.reply(
+            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
+          );
+          return;
+        }
+        signal.maxPrice = value;
+        ctx.reply(`حد سود را مشخص کنید:`);
+      } else if (!signal.minPrice) {
+        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
+          ctx.reply(
+            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
+          );
+          return;
+        }
+        if (value > signal.entryPrice - signal.maxPrice + signal.entryPrice) {
+          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
+          return;
+        }
+        signal.minPrice = value;
+      }
+    } else {
+      if (!signal.minPrice) {
+        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
+          ctx.reply(
+            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
+          );
+          return;
+        }
+        signal.minPrice = value;
+        ctx.reply(`حد سود را مشخص کنید:`);
+      } else if (!signal.maxPrice) {
+        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
+          ctx.reply(
+            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
+          );
+          return;
+        }
+        if (value < signal.entryPrice - signal.minPrice + signal.entryPrice) {
+          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
+          return;
+        }
+        signal.maxPrice = value;
+      }
+    }
+
+    if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
+      const user = await this.getUser(ctx.from.id);
+      try {
+        const createdSignal = await this.signalsService.addSignal({
+          ...signal,
+          owner: user,
+        });
+        if (createdSignal) {
+          BaseBot.userStates.delete(ctx.from.id);
+          await this.bot.telegram.sendMessage(
+            signal.owner.telegramId,
+            Signal.getMessage(createdSignal, { showId: true, skipOwner: true }),
+          );
+
+          if (process.env.PUBLISH_CHANNEL_ID) {
+            if (!createdSignal.publishable) {
+              ctx.reply(
+                `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز فعلی شما ${user.totalScore.toFixed(
+                  2,
+                )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از /my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از /my_signals استفاده کنید.`,
+              );
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        ctx.reply('خطایی رخ داده است. لطفا دوباره تلاش کنید.');
+        BaseBot.userStates.delete(ctx.from.id);
+      }
+    }
+  }
+
   @Command('my_signals')
   async mySignals(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
@@ -214,7 +452,7 @@ export class SignalBotService extends BaseBot {
       await ctx.reply(
         Signal.getMessage(signal, {
           showId: true,
-          ouncePrice: this.ouncePriceService.current,
+          ouncePrice: this.ouncePrice,
         }),
         {
           reply_markup: {
@@ -302,7 +540,6 @@ export class SignalBotService extends BaseBot {
       .sort({ createdAt: 'desc' })
       .limit(limit)
       .skip(skip)
-      .populate('owner')
       .exec();
 
     const totalCount = await this.signalModel
@@ -314,7 +551,9 @@ export class SignalBotService extends BaseBot {
       .exec();
 
     for (const signal of signals) {
-      await ctx.reply(Signal.getMessage(signal, { showId: true }));
+      await ctx.reply(
+        Signal.getMessage(signal, { showId: true, skipOwner: true }),
+      );
     }
     if (totalCount > limit && !skip) {
       await ctx.reply(`تا بحال ${totalCount} سیگنال بسته شده داشته اید.`, {
@@ -347,12 +586,8 @@ export class SignalBotService extends BaseBot {
   async profile(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
-
-    await this.userStats.updateUserSignals(user);
-    const prevSignals = this.userStats.getUserSignals(user.id);
-
     await ctx.reply(`👤${user.title} (${user.name})`);
-    if (prevSignals?.length) await ctx.reply(Signal.getStatsText(prevSignals));
+    await ctx.reply(Signal.getStatsText(user));
   }
 
   @Command('leaderboard')
@@ -392,7 +627,7 @@ export class SignalBotService extends BaseBot {
         return sum + signal.pip;
       }, 0);
       await ctx.reply(`${i + 1}: ${user.name} (${user.title})
-${Signal.getStatsText(signals)}
+${Signal.getStatsText(user)}
 برآیند: ${sumPip}
 `);
     }
@@ -412,7 +647,7 @@ ${Signal.getStatsText(signals)}
         return sum + signal.pip;
       }, 0);
       await ctx.reply(`${i + 1}: ${user.name} (${user.title})
-${Signal.getStatsText(signals)}
+${Signal.getStatsText(user)}
 برآیند: ${sumPip}
 `);
     }
@@ -439,27 +674,8 @@ ${Signal.getStatsText(signals)}
     const id = text?.split('^^')[1] || signalId;
     const signal = await this.signalModel.findById(id).exec();
     if (signal.status !== SignalStatus.Pending) return;
-    const updatedSignal = await this.signalModel
-      .findByIdAndUpdate(
-        id,
-        { deletedAt: new Date(), status: SignalStatus.Canceled },
-        { new: true },
-      )
-      .populate('owner')
-      .exec();
+    await this.signalsService.removeSignal(signal);
     if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
-    if (updatedSignal.messageId) {
-      this.bot.telegram.deleteMessage(
-        process.env.PUBLISH_CHANNEL_ID,
-        updatedSignal.messageId,
-      );
-    }
-
-    this.bot.telegram.sendMessage(
-      updatedSignal.owner.telegramId,
-      Signal.getMessage(updatedSignal, { showId: true }),
-    );
-
     if (ctx) ctx.answerCbQuery('سیگنال شما حذف شد');
   }
 
@@ -471,19 +687,10 @@ ${Signal.getStatsText(signals)}
     const id = text?.split('^^')[1] || signalId;
     const signal = await this.signalModel.findById(id).populate('owner').exec();
     if (signal.status !== SignalStatus.Active) return;
-    const updatedSignal = await this.signalModel
-      .findByIdAndUpdate(
-        id,
-        {
-          status: SignalStatus.Closed,
-          messageId: null,
-          closedAt: new Date(),
-          closedOuncePrice: this.ouncePriceService.current,
-        },
-        { new: true },
-      )
-      .populate('owner')
-      .exec();
+    const updatedSignal = await this.signalsService.closeSignal(
+      signal,
+      this.ouncePrice,
+    );
 
     updatedSignal.owner = signal.owner;
 
@@ -504,15 +711,15 @@ ${Signal.getStatsText(signals)}
 
     await this.userStats.updateUserSignals(signal.owner);
 
-    this.publishSignal(updatedSignal);
-
     if (ctx) {
       ctx.answerCbQuery('سیگنال بسته شد');
-      ctx.reply(Signal.getMessage(updatedSignal, { showId: true }));
+      ctx.reply(
+        Signal.getMessage(updatedSignal, { showId: true, skipOwner: true }),
+      );
     } else {
       this.bot.telegram.sendMessage(
         signal.owner.telegramId,
-        Signal.getMessage(updatedSignal, { showId: true }),
+        Signal.getMessage(updatedSignal, { showId: true, skipOwner: true }),
       );
     }
   }
@@ -524,7 +731,7 @@ ${Signal.getStatsText(signals)}
     const text: string = message['text'];
     const id = text.split('^^')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
-    if (Signal.getActivePip(signal, this.ouncePriceService.current) < 0) {
+    if (Signal.getActivePip(signal, this.ouncePrice) < 0) {
       ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
       return;
     }
@@ -543,165 +750,6 @@ ${Signal.getStatsText(signals)}
 
     this.refreshBotSignal(ctx, updatedSignal, message.message_id);
     ctx.answerCbQuery('سیگنال ریسک فری شد');
-  }
-
-  @Action('new_buy_signal')
-  @Action('new_sell_signal')
-  async newSellSignal(@Ctx() ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
-    const signal = {
-      type: isSell ? SignalType.Sell : SignalType.Buy,
-      createdOuncePrice: this.ouncePriceService.current,
-    } as Signal;
-
-    ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-    try {
-      await ctx
-        .editMessageText(`ایجاد سیگنال ${SignalTypeText[signal.type]}:`)
-        .catch(() => {
-          //unhandled
-        });
-    } catch (error) {
-      // unhandled
-    }
-
-    this.setState<Partial<Signal>>(ctx.from.id, {
-      state: UserStateType.NewSignal,
-      data: signal,
-    });
-    ctx.answerCbQuery();
-
-    await ctx.reply(
-      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`,
-    );
-  }
-
-  async handleNewSignalMessage(ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const signal = this.getStateData<Signal>(ctx.from.id);
-    const isSell = signal.type === SignalType.Sell;
-    const value = Number(PersianNumberService.toEnglish(ctx.message['text']));
-    const user = await this.getUser(ctx.from.id);
-    if (isNaN(Number(value))) {
-      ctx.reply('لطفا یک مقدار عددی وارد کنید. مثلا: 3234.32');
-      return;
-    }
-
-    if (!signal.entryPrice) {
-      const nearSignal = await this.signalModel
-        .findOne({
-          owner: user._id,
-          type: signal.type,
-          entryPrice: { $gte: value - 4, $lte: value + 4 },
-          status: {
-            $in: [SignalStatus.Active, SignalStatus.Pending],
-          },
-          deletedAt: null,
-        })
-        .exec();
-      if (nearSignal) {
-        ctx.reply(
-          `شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`,
-        );
-        return;
-      }
-      signal.entryPrice = value;
-      ctx.reply(`حد ضرر را مشخص کنید:`);
-      this.setStateData(ctx.from.id, signal);
-    } else if (isSell) {
-      if (!signal.maxPrice) {
-        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
-          ctx.reply(
-            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
-          );
-          return;
-        }
-        signal.maxPrice = value;
-        ctx.reply(`حد سود را مشخص کنید:`);
-      } else if (!signal.minPrice) {
-        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
-          ctx.reply(
-            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
-          );
-          return;
-        }
-        if (value > signal.entryPrice - signal.maxPrice + signal.entryPrice) {
-          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
-          return;
-        }
-        signal.minPrice = value;
-      }
-    } else {
-      if (!signal.minPrice) {
-        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
-          ctx.reply(
-            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
-          );
-          return;
-        }
-        signal.minPrice = value;
-        ctx.reply(`حد سود را مشخص کنید:`);
-      } else if (!signal.maxPrice) {
-        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
-          ctx.reply(
-            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
-          );
-          return;
-        }
-        if (value < signal.entryPrice - signal.minPrice + signal.entryPrice) {
-          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
-          return;
-        }
-        signal.maxPrice = value;
-      }
-    }
-
-    if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
-      const user = await this.getUser(ctx.from.id);
-      const userScore = this.userStats.getUserScore(user);
-      const dto = new this.signalModel({
-        ...signal,
-        owner: user,
-        publishable: userScore >= MIN_SIGNAL_SCORE,
-      });
-      const createdSignal = await dto.save();
-      await ctx.reply(Signal.getMessage(createdSignal));
-      BaseBot.userStates.delete(ctx.from.id);
-
-      const prevSignals = this.userStats.getUserSignals(user.id);
-
-      if (process.env.PUBLISH_CHANNEL_ID) {
-        if (!createdSignal.publishable) {
-          ctx.reply(
-            `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز فعلی شما ${userScore.toFixed(
-              2,
-            )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از /my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از /my_signals استفاده کنید.`,
-          );
-          return;
-        }
-
-        const message = await this.bot.telegram.sendMessage(
-          process.env.PUBLISH_CHANNEL_ID,
-          Signal.getMessage(createdSignal, {
-            signals: prevSignals,
-          }),
-        );
-        this.signalModel
-          .findByIdAndUpdate(createdSignal.id, {
-            messageId: message.message_id,
-          })
-          .exec();
-
-        if (process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID) {
-          this.bot.telegram.forwardMessage(
-            process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID,
-            process.env.PUBLISH_CHANNEL_ID,
-            message.message_id,
-          );
-        }
-      }
-    }
   }
 
   @Command('reset_all_profile')
@@ -770,7 +818,7 @@ ${Signal.getStatsText(signals)}
         undefined,
         Signal.getMessage(signal, {
           showId: true,
-          ouncePrice: this.ouncePriceService.current,
+          ouncePrice: this.ouncePrice,
         }),
         {
           reply_markup: {
@@ -794,13 +842,8 @@ ${Signal.getStatsText(signals)}
 
   async publishSignal(signal: Signal, ouncePrice?: number) {
     if (!signal.publishable) return;
-    const prevSignals = signal.owner
-      ? this.userStats.getUserSignals(signal.owner.id)
-      : undefined;
 
-    const text = Signal.getMessage(signal, {
-      signals: prevSignals,
-    });
+    const text = Signal.getMessage(signal);
     let func: any;
     if (signal.messageId) {
       func = (telegram: Telegram) => {

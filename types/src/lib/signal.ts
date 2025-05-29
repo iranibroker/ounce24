@@ -109,26 +109,15 @@ export class Signal {
     return signals.filter(
       (signal) =>
         signal.status === SignalStatus.Closed &&
-        Signal.getActivePip(signal, signal.closedOuncePrice) >= 0
+        Signal.getActivePip(signal, signal.closedOuncePrice) >= 0,
     );
   }
 
-  static getStatsText(signals: Signal[]) {
-    const rewardSignals = signals.filter((s) => s.pip >= 0);
-    const rewardAvg = rewardSignals.reduce((value, signal) => {
-      return signal.riskReward / rewardSignals.length + value;
-    }, 0);
-
-    const scoreSum = signals.reduce((value, signal) => {
-      return signal.score + value;
-    }, 0);
-
-    return `تعداد سیگنال: ${signals.length}
-وین ریت: ${Math.round(
-      (Signal.filterWinSignals(signals).length / signals.length) * 100
-    )}%
-میانگین ریسک-ریوارد: ${rewardAvg.toFixed(1)}
-امتیاز: ${scoreSum.toFixed(1)}
+  static getStatsText(owner: User) {
+    return `تعداد سیگنال: ${owner.totalSignals}
+وین ریت: ${owner.winRate.toFixed(0)}%
+میانگین ریسک-ریوارد: ${owner.avgRiskReward.toFixed(1)}
+امتیاز: ${owner.score.toFixed(1)}
     `;
   }
 
@@ -138,7 +127,8 @@ export class Signal {
       showId?: boolean;
       ouncePrice?: number;
       signals?: Signal[];
-    }
+      skipOwner?: boolean;
+    },
   ) {
     let text = `سیگنال
 ${SignalTypeText[signal.type]}
@@ -169,12 +159,9 @@ ${SignalTypeText[signal.type]}
       text += '\n' + Signal.getPipString(signal);
     }
 
-    if (signal.owner) {
+    if (signal.owner && !options?.skipOwner) {
       text += `\n\n👤 ${signal.owner.tag}`;
-    }
-
-    if (options?.signals?.length) {
-      text += `\n` + Signal.getStatsText(options.signals);
+      text += `\n` + Signal.getStatsText(signal.owner);
     }
 
     if (options?.showId) text += `\n\n\n^^${signal.id}`;

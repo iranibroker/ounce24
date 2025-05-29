@@ -1,4 +1,4 @@
-import { User } from '@ounce24/types';
+import { SignalStatus, User } from '@ounce24/types';
 import mongoose from 'mongoose';
 
 export const UserSchema = new mongoose.Schema<User>(
@@ -31,3 +31,11 @@ UserSchema.virtual('tag').get(function () {
   }
   return tag;
 });
+
+UserSchema.virtual('score').get(function () {
+  if (this.totalScore === 0 || this.totalSignals === 0) return 0;
+  const avgScore = this.totalScore / this.totalSignals;
+  return avgScore * Math.log(this.totalSignals + 1);
+});
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });
