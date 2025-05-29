@@ -2,6 +2,12 @@ mat-card-title {
   font-size: 1.2rem;
 }
 
+mat-card-subtitle {
+  font-size: 0.8rem;
+  margin-top: 6px;
+  color: var(--mat-sys-outline);
+}
+
 .signal-header {
   font-size: 1.3rem;
   display: flex;
