@@ -29,10 +29,15 @@ export class AuthService {
   loginMutation = injectMutation<string, Error, { phone: string; otp: string }>(
     () => ({
       mutationFn: (dto) =>
-        this.http.post<string>(`/api/auth/login`, dto).toPromise(),
-      onSuccess: (response) => {
-        this.token.set(response);
-      },
+        this.http
+          .post<string>(`/api/auth/login`, {
+            username: dto.phone,
+            password: dto.otp,
+          })
+          .toPromise(),
+      // onSuccess: (response) => {
+      //   this.token.set(response);
+      // },
     }),
   );
 }

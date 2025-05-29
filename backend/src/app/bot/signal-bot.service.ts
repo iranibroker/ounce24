@@ -21,6 +21,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { SignalsService } from '../signals/signals.service';
 import { UsersService } from '../users/users.service';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
+import { Public } from '../auth/public.decorator';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -46,6 +47,7 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
   ? 20
   : Number(process.env.MIN_SIGNAL_SCORE);
 
+@Public()
 @Injectable()
 @Update()
 export class SignalBotService extends BaseBot {

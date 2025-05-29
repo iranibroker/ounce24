@@ -26,7 +26,6 @@ export class AuthService {
   }
 
   async validateUser(username: string, pass: string): Promise<User> {
-    console.log(username, pass);
     const mobilePhone = PersianNumberService.toEnglish(username);
     const user = await this.userModel.findOne({ mobilePhone });
 

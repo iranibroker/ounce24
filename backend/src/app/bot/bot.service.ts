@@ -16,7 +16,9 @@ import { BaseBot, UserStateType } from './base-bot';
 import { SignalBotService } from './signal-bot.service';
 import { AuthService } from '../auth/auth.service';
 import { ConsultingBotService } from './consulting-bot.service';
+import { Public } from '../auth/public.decorator';
 
+@Public()
 @Injectable()
 @Update()
 export class BotService extends BaseBot {
