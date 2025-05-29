@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { OuncePriceService } from '../../services/ounce-price.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatRippleModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-ounce-price-banner',
-  imports: [CommonModule, MatToolbarModule, MatDividerModule],
+  imports: [CommonModule, MatToolbarModule, MatDividerModule, MatRippleModule],
   templateUrl: './ounce-price-banner.component.html',
   styleUrl: './ounce-price-banner.component.scss',
 })

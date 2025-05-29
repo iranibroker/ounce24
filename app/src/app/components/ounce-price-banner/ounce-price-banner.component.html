@@ -1,6 +1,14 @@
 @let price = priceService.value();
-<div class="container">
+<a
+  class="container"
+  href="https://www.tradingview.com/symbols/XAUUSD"
+  target="_blank"
+>
   <mat-toolbar>
+    <img
+      src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"
+      alt="logo"
+    />
     <span>
       XAUUSD .
       <span [style.color]="color()">
@@ -9,6 +17,7 @@
         }
       </span>
     </span>
+    <span style="flex: 1"></span>
+    <i class="fa-regular fa-arrow-up-right-from-square"></i>
   </mat-toolbar>
-  <mat-divider />
-</div>
+</a>

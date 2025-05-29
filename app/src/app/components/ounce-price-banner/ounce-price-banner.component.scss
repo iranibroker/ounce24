@@ -1,6 +1,24 @@
 .container {
-  background-color: var(--mat-sys-background);
+  background-color: var(--mat-sys-inverse-surface);
+  color: var(--mat-sys-inverse-on-surface);
   position: sticky;
   top: 0;
   z-index: 1000;
+  overflow: hidden;
+  text-decoration: none;
+  height: 32px;
+
+  mat-toolbar {
+    background-color: var(--mat-sys-inverse-surface);
+    color: var(--mat-sys-inverse-on-surface);
+    height: 32px;
+    font-size: 0.8em;
+    gap: 8px;
+
+    img {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+  }
 }
