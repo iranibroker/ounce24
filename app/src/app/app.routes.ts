@@ -4,6 +4,7 @@ import { SignalsComponent } from './pages/signals/signals.component';
 import { loginActivator, translateActivator } from './guards';
 import { authRoutes } from './pages/auth/auth.routes';
 import { EditUserComponent } from './pages/profile/edit-user/edit-user.component';
+import { LeaderboardComponent } from './pages/leaderboard/leaderboard.component';
 
 export const appRoutes: Route[] = [
   {
@@ -21,6 +22,10 @@ export const appRoutes: Route[] = [
       {
         path: 'signals',
         component: SignalsComponent,
+      },
+      {
+        path: 'leaderboard',
+        component: LeaderboardComponent,
       },
       {
         path: 'profile',

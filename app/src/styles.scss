@@ -52,6 +52,20 @@ body {
 
 // override materials
 :root {
+  .mat-mdc-list-item {
+    display: flex !important;
+    align-items: center !important;
+
+    .mat-mdc-list-item-avatar {
+      margin-top: 0 !important;
+      align-self: initial !important;
+    }
+
+    .mat-mdc-list-item-title {
+      margin-top: -10px !important;
+    }
+  }
+
   @include mat.theme-overrides(
     (
       outline: #999999,
