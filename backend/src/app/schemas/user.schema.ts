@@ -9,6 +9,7 @@ export const UserSchema = new mongoose.Schema<User>(
     telegramUsername: { type: String, required: false },
     telegramId: { type: Number, index: true, unique: true },
     avgRiskReward: { type: Number, required: true, default: 0 },
+    score: { type: Number, required: true, default: 0 },
     totalScore: { type: Number, required: true, default: 0 },
     totalSignals: { type: Number, required: true, default: 0 },
     winRate: { type: Number, required: true, default: 0 },
@@ -28,12 +29,6 @@ UserSchema.virtual('tag').get(function () {
     .replace(/[ -]/g, '_');
   tag += cleanedTitle;
   return tag;
-});
-
-UserSchema.virtual('score').get(function () {
-  if (this.totalScore === 0 || this.totalSignals === 0) return 0;
-  const avgScore = this.totalScore / this.totalSignals;
-  return avgScore * Math.log(this.totalSignals + 1);
 });
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
