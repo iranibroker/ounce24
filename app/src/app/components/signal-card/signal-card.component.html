@@ -38,7 +38,7 @@
       @case (SignalStatus.Closed) {
         <mat-chip id="status-chip" [disabled]="true">
           <span [class.red]="pip() < 0" [class.green]="pip() > 0">
-            {{ pip() }}
+            {{ pip() }} {{ 'signal.pip' | translate }}
           </span>
           <i class="fa-solid fa-stop fa-sm"></i>
           {{ 'signal.status.' + signal().status | translate }}

@@ -46,7 +46,7 @@ export class SignalsController {
       })
       .populate(['owner'])
       .sort({
-        createdAt: -1,
+        updatedAt: -1,
       })
       .limit(PAGE_SIZE)
       .skip(page ? Number(page) * PAGE_SIZE : 0);

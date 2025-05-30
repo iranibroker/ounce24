@@ -6,7 +6,8 @@
     "home": "home",
     "leaderboard": "leaderboard",
     "notifications": "notifications",
-    "profile": "profile"
+    "profile": "profile",
+    "signals": "signals"
   },
   "signal": {
     "buy": "buy",
