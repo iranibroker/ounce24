@@ -23,5 +23,31 @@
       "CANCELED": "canceled"
     },
     "emptyState": "No signals found"
+  },
+  "login": {
+    "phoneTitle": "login",
+    "phoneDescription": "We will send you a verification code to your phone number",
+    "phonePlaceholder": "Phone number",
+    "phoneAction": "Send verification code",
+    "otpTitle": "Enter Code",
+    "otpDescription": "Enter the 4-digit code sent to your phone",
+    "otpPlaceholder": "OTP",
+    "otpAction": "Verify OTP",
+    "otpError": "Invalid OTP",
+    "otpExpired": "OTP expired",
+    "otpResend": "Resend OTP",
+    "remainingTime": "Time remaining: {{value}}s",
+    "tokenExpired": "OTP expired",
+    "resendToken": "Resend OTP"
+  },
+  "profile": {
+    "edit": {
+      "pageTitle": "Edit Profile",
+      "name": "Name",
+      "title": "Title",
+      "save": "Save Changes",
+      "success": "Profile updated successfully",
+      "error": "Failed to update profile"
+    }
   }
 }

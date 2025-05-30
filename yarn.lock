@@ -9897,6 +9897,13 @@ nestjs-telegraf@^2.7.0:
   dependencies:
     lodash "^4.17.21"
 
+ng-otp-input@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/ng-otp-input/-/ng-otp-input-2.0.8.tgz#909413693bf00edf5f84504438dda8d80b8b403d"
+  integrity sha512-mf9OhVRu34RSpTcWhbKqIfpA4n6xBB46p4pqBO346qD61ojv52HS6lb9pfcuGVMlJsvCeJsIyf6KynrNonjuMw==
+  dependencies:
+    tslib "^2.3.0"
+
 node-abort-controller@^3.0.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-3.1.1.tgz#a94377e964a9a37ac3976d848cb5c765833b8548"

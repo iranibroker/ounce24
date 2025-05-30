@@ -1,0 +1,22 @@
+h1 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+}
+
+button#action {
+  height: 48px;
+}
+
+input {
+  direction: ltr;
+}

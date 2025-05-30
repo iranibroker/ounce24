@@ -38,6 +38,7 @@
     "kavenegar": "^1.1.4",
     "mongoose": "^8.3.4",
     "nestjs-telegraf": "^2.7.0",
+    "ng-otp-input": "^2.0.8",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",

@@ -1,0 +1,29 @@
+<mat-toolbar>
+  <button mat-icon-button goBack>
+    <i class="fa-regular fa-chevron-left fa-sm"></i>
+  </button>
+</mat-toolbar>
+<form (ngSubmit)="sendToken(phoneInput.value, $event)">
+  <h1>{{ 'login.phoneTitle' | translate }}</h1>
+  <p>{{ 'login.phoneDescription' | translate }}</p>
+  <mat-form-field appearance="outline">
+    <input
+      #phoneInput
+      [autoFocus]
+      matInput
+      type="tel"
+      placeholder="{{ 'login.phonePlaceholder' | translate }}"
+      [readonly]="loading()"
+      minlength="11"
+      maxlength="11"
+      class="mono"
+    />
+  </mat-form-field>
+
+  <button id="action" type="submit" [disabled]="loading()" mat-flat-button>
+    {{ 'login.phoneAction' | translate }}
+    @if (loading()) {
+      ...
+    }
+  </button>
+</form>

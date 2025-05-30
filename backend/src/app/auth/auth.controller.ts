@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   Request,
@@ -12,6 +13,7 @@ import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { LocalAuthGuard } from './local-auth.guard';
 import { PersianNumberService } from '@ounce24/utils';
+import { LoginUser } from './user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -28,5 +30,15 @@ export class AuthController {
   @Get('sendToken/:mobile')
   async sendToken(@Param() params) {
     return this.auth.sendToken(PersianNumberService.toEnglish(params.mobile));
+  }
+
+  @Get('me')
+  async getMe(@LoginUser() user) {
+    return this.auth.getUserInfo(user.id);
+  }
+
+  @Patch('me')
+  async updateMe(@LoginUser() user, @Body() body) {
+    return this.auth.updateUser(user.id, body);
   }
 }

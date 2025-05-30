@@ -20,7 +20,6 @@ export class UsersService {
   }
 
   async calculateUserStats(user: User) {
-    console.log('calculateUserStats', user);
     const userSignals = await this.signalModel.find({
       owner: user,
       status: { $in: [SignalStatus.Closed] },

@@ -26,12 +26,14 @@ export class AuthService {
   }
 
   async validateUser(username: string, pass: string): Promise<User> {
-    const mobilePhone = PersianNumberService.toEnglish(username);
-    const user = await this.userModel.findOne({ mobilePhone });
+    const phone = PersianNumberService.toEnglish(username);
+    let user = await this.userModel.findOne({ phone });
 
-    if (!user) throw new NotFoundException();
+    if (!user) {
+      user = await this.userModel.create({ phone });
+    }
 
-    if (this.checkToken(mobilePhone, pass)) return user;
+    if (this.checkToken(phone, pass)) return user;
 
     throw new BadRequestException();
   }
@@ -93,5 +95,20 @@ export class AuthService {
         }
       });
     });
+  }
+
+  async getUserInfo(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async updateUser(userId: string, body: Partial<User>) {
+    const user = await this.userModel.findByIdAndUpdate(userId, body, {
+      new: true,
+    });
+    return user;
   }
 }

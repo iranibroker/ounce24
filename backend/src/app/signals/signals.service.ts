@@ -58,7 +58,6 @@ export class SignalsService {
   }
 
   async addSignal(signal: Signal) {
-    console.log('addSignal', signal);
     if (!signal.owner) return;
     const owner = await this.userModel.findById(signal.owner);
     const signals = await this.signalModel

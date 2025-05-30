@@ -1,0 +1,28 @@
+<mat-toolbar>
+  <button mat-icon-button goBack>
+    <i class="fa-regular fa-chevron-left"></i>
+  </button>
+</mat-toolbar>
+<div class="container">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+    <h2>{{ 'profile.edit.pageTitle' | translate }}</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'profile.edit.name' | translate }}</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'profile.edit.title' | translate }}</mat-label>
+      <input matInput formControlName="title" />
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="!form.valid || loading()"
+    >
+      {{ 'profile.edit.save' | translate }}
+    </button>
+  </form>
+</div>

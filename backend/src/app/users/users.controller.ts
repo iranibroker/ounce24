@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { Signal, SignalStatus } from '@ounce24/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Public } from '../auth/public.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -11,6 +12,7 @@ export class UsersController {
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
   ) {}
 
+  @Public()
   @Get('stats/recalculate')
   async recalculateAllUserStats() {
     // Get all closed signals
@@ -49,5 +51,11 @@ export class UsersController {
       message: 'User stats recalculated successfully',
       results,
     };
+  }
+
+  @Public()
+  @Get('leaderboard')
+  async getLeaderboard() {
+    return this.usersService.getLeaderboard();
   }
 }

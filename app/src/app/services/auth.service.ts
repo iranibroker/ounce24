@@ -1,17 +1,33 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, effect } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { AuthModalComponent } from '../components/auth-modal/auth-modal.component';
-import { injectMutation } from '@tanstack/angular-query-experimental';
+import {
+  injectMutation,
+  injectQuery,
+} from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
+import { User } from '@ounce24/types';
+const JWT_KEY = 'jwtToken';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  token = signal<string | null>(null);
+  token = signal<string | null>(localStorage.getItem(JWT_KEY));
   private bottomSheet = inject(MatBottomSheet);
   private http = inject(HttpClient);
+
+  constructor() {
+    effect(() => {
+      const currentToken = this.token();
+      if (currentToken) {
+        localStorage.setItem(JWT_KEY, currentToken);
+      } else {
+        localStorage.removeItem(JWT_KEY);
+      }
+    });
+  }
 
   openAuthModal(): void {
     this.bottomSheet.open(AuthModalComponent, {
@@ -30,14 +46,31 @@ export class AuthService {
     () => ({
       mutationFn: (dto) =>
         this.http
-          .post<string>(`/api/auth/login`, {
-            username: dto.phone,
-            password: dto.otp,
-          })
+          .post(
+            `/api/auth/login`,
+            {
+              username: dto.phone,
+              password: dto.otp,
+            },
+            {
+              responseType: 'text',
+            },
+          )
           .toPromise(),
-      // onSuccess: (response) => {
-      //   this.token.set(response);
-      // },
+      onSuccess: async (response) => {
+        this.token.set(response);
+        localStorage.setItem(JWT_KEY, response);
+        await this.userQuery.refetch();
+        return response;
+      },
     }),
   );
+
+  userQuery = injectQuery<User | null>(() => ({
+    queryKey: ['user', this.token()],
+    queryFn: () => {
+      if (!this.token()) return Promise.resolve(null);
+      return this.http.get<User>('/api/auth/me').toPromise();
+    },
+  }));
 }
