@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Signal, SignalStatus, User } from '@ounce24/types';
 import { Model } from 'mongoose';
@@ -55,6 +55,27 @@ export class UsersService {
     return this.userModel
       .find()
       .sort({ score: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+  }
+
+  async findById(id: string) {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async getUserSignals(id: string, page: number, limit: number) {
+    const skip = page * limit;
+    return this.signalModel
+      .find({
+        owner: id,
+        deletedAt: null,
+      })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();

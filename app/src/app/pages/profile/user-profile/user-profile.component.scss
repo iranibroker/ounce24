@@ -1,0 +1,70 @@
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.user-info-card {
+  mat-card-title {
+    font-size: 1.2rem;
+  }
+
+  mat-card-subtitle {
+    font-size: 0.8rem;
+    margin-top: 6px;
+    color: var(--mat-sys-outline);
+  }
+
+  mat-card-subtitle {
+    font-size: 1rem;
+  }
+
+  img.mat-mdc-card-avatar {
+    border-radius: 4px !important;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 16px 0;
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+
+    i {
+      font-size: 1.5rem;
+      color: var(--mat-sys-primary);
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: var(--mat-sys-outline);
+    }
+
+    strong {
+      font-size: 1.2rem;
+      color: var(--mat-sys-on-surface);
+    }
+  }
+}
+
+.signals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--mat-sys-on-surface);
+  }
+}

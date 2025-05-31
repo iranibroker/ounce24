@@ -43,6 +43,12 @@
     "resendToken": "Resend OTP"
   },
   "profile": {
+    "pageTitle": "Profile",
+    "signals": "Signals",
+    "totalSignals": "Total Signals",
+    "winRate": "Win Rate",
+    "avgProfit": "Avg Profit",
+    "score": "Score",
     "edit": {
       "pageTitle": "Edit Profile",
       "name": "Name",

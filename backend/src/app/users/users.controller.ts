@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Signal, SignalStatus } from '@ounce24/types';
 import { InjectModel } from '@nestjs/mongoose';
@@ -57,5 +57,21 @@ export class UsersController {
   @Get('leaderboard')
   async getLeaderboard() {
     return this.usersService.getLeaderboard();
+  }
+
+  @Public()
+  @Get(':id')
+  async getUserProfile(@Param('id') id: string) {
+    return this.usersService.findById(id);
+  }
+
+  @Public()
+  @Get(':id/signals')
+  async getUserSignals(
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('limit') limit = 20,
+  ) {
+    return this.usersService.getUserSignals(id, page, limit);
   }
 }

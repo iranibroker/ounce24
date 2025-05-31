@@ -1,0 +1,67 @@
+@if (userQuery.isLoading()) {
+  <app-data-loading />
+} @else if (userQuery.data()) {
+  <div class="profile-container">
+    <mat-card class="user-info-card">
+      <mat-card-header>
+        <img
+          mat-card-avatar
+          src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
+            userQuery.data().title || userQuery.data().name
+          }}"
+          [alt]="userQuery.data().title || userQuery.data().name"
+        />
+        <mat-card-title>{{
+          userQuery.data().title || userQuery.data().name
+        }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ 'profile.score' | translate }}:
+          {{ userQuery.data().score?.toFixed(1) }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider />
+      <mat-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <i class="fas fa-wave-square"></i>
+            <span>{{ 'profile.signals' | translate }}</span>
+            <strong>{{ userQuery.data().totalSignals }}</strong>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-trophy"></i>
+            <span>{{ 'profile.winRate' | translate }}</span>
+            <strong>{{ userQuery.data().winRate?.toFixed(1) }}%</strong>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-chart-line"></i>
+            <span>{{ 'profile.avgProfit' | translate }}</span>
+            <strong>{{ userQuery.data().avgProfit?.toFixed(1) }}</strong>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="signals-container">
+      <h2>{{ 'profile.signals' | translate }}</h2>
+      @if (data()?.length > 0) {
+        @for (signal of data(); track $index) {
+          <app-signal-card [signal]="signal" />
+        }
+      } @else if (data() && data()?.length === 0) {
+        <app-empty-state
+          iconName="face-frown"
+          [text]="'signal.emptyState' | translate"
+        />
+      }
+      @if (signalsQuery.isLoading() || signalsQuery.isFetchingNextPage()) {
+        <app-data-loading />
+      } @else {
+        @if (signalsQuery.hasNextPage()) {
+          <button mat-button (click)="signalsQuery.fetchNextPage()">
+            {{ 'app.loadMore' | translate }}
+          </button>
+        }
+      }
+    </div>
+  </div>
+}

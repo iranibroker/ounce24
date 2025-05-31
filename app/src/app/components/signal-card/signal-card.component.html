@@ -1,21 +1,23 @@
 @let ownerTitle = signal().owner.title || signal().owner.name;
 
 <mat-card>
-  <mat-card-header>
-    <img
-      mat-card-avatar
-      src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
-        ownerTitle
-      }}"
-    />
-    <mat-card-title>
-      {{ ownerTitle }}
-    </mat-card-title>
-    <mat-card-subtitle>
-      score: {{ signal().owner.score.toFixed(1) }}
-    </mat-card-subtitle>
-  </mat-card-header>
-  <mat-divider />
+  @if (signal().owner?.id) {
+    <mat-card-header routerLink="/profile/{{ signal().owner.id }}">
+      <img
+        mat-card-avatar
+        src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
+          ownerTitle
+        }}"
+      />
+      <mat-card-title>
+        {{ ownerTitle }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ 'profile.score' | translate }}: {{ signal().owner.score.toFixed(1) }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider />
+  }
   <mat-card-actions class="signal-header">
     <app-signal-type-chip [type]="signal().type" />
     <span>
