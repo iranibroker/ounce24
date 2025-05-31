@@ -31,8 +31,9 @@ export const appRoutes: Route[] = [
           {
             path: 'add',
             component: AddSignalComponent,
-          }
-        ]
+            canActivate: [loginActivator],
+          },
+        ],
       },
       {
         path: 'leaderboard',
@@ -43,7 +44,7 @@ export const appRoutes: Route[] = [
         children: [
           {
             path: '',
-            component: HomeComponent,
+            component: UserProfileComponent,
             canActivate: [loginActivator],
           },
           {
@@ -54,8 +55,8 @@ export const appRoutes: Route[] = [
           {
             path: ':id',
             component: UserProfileComponent,
-          }
-        ]
+          },
+        ],
       },
       {
         path: '',

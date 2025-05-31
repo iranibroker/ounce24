@@ -84,7 +84,6 @@ export class OtpComponent implements OnDestroy {
         otp: token,
       });
       const user = this.auth.userQuery.data();
-      console.log(user);
       if (user?.name) {
         window.history.go(-2);
         setTimeout(() => {

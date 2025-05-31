@@ -1,8 +1,12 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
 .profile-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 16px;
+  gap: 1rem;
+  padding: 1rem;
   max-width: 800px;
   margin: 0 auto;
 }
@@ -67,4 +71,25 @@
     font-size: 1.5rem;
     color: var(--mat-sys-on-surface);
   }
+}
+
+.toolbar-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  margin-inline-end: 16px;
+}
+
+.toolbar-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-score {
+  margin-right: 16px;
+  font-size: 0.9rem;
 }

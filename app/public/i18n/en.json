@@ -47,6 +47,7 @@
     "signals": "Signals",
     "totalSignals": "Total Signals",
     "winRate": "Win Rate",
+    "avgRiskReward": "Avg R/R",
     "avgProfit": "Avg Profit",
     "score": "Score",
     "edit": {
