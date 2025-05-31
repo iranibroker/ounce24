@@ -1,6 +1,7 @@
 import { Route } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
-import { SignalsComponent } from './pages/signals/signals.component';
+import { SignalsComponent } from './pages/signals/list/signals.component';
+import { AddSignalComponent } from './pages/signals/add/add-signal.component';
 import { loginActivator, translateActivator } from './guards';
 import { authRoutes } from './pages/auth/auth.routes';
 import { EditUserComponent } from './pages/profile/edit-user/edit-user.component';
@@ -21,7 +22,16 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'signals',
-        component: SignalsComponent,
+        children: [
+          {
+            path: '',
+            component: SignalsComponent,
+          },
+          {
+            path: 'add',
+            component: AddSignalComponent,
+          }
+        ]
       },
       {
         path: 'leaderboard',

@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+use latest template flow of angular and signals.
+inputs and outputs use new flow.
+
+for icons use font-awesome
+<i class="fas fa-chevron-left"></i>

@@ -58,6 +58,7 @@ export class SignalsService {
   }
 
   async addSignal(signal: Signal) {
+    console.log(signal);
     if (!signal.owner) return;
     const owner = await this.userModel.findById(signal.owner);
     const signals = await this.signalModel
@@ -127,6 +128,7 @@ export class SignalsService {
 
     const savedSignal = await this.signalModel.create(signal);
     this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);
+    console.log(savedSignal);
     return savedSignal;
   }
 

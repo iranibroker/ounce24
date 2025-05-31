@@ -4,21 +4,23 @@ import { Signal, SignalStatus } from '@ounce24/types';
 import { injectInfiniteQuery } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { SignalCardComponent } from '../../components/signal-card/signal-card.component';
-import { DataLoadingComponent } from '../../components/data-loading/data-loading.component';
-import { SHARED } from '../../shared';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
+import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
+import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
+import { RouterModule } from '@angular/router';
+
 const PAGE_SIZE = 20;
 
 @Component({
-  selector: 'app-signals',
+  selector: 'app-signals-list',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatButtonToggleModule,
     MatButtonModule,
     FormsModule,

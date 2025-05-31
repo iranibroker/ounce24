@@ -10,6 +10,7 @@
     "signals": "signals"
   },
   "signal": {
+    "add": "add",
     "buy": "buy",
     "sell": "sell",
     "profit": "tp",

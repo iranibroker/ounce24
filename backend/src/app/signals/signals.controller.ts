@@ -1,14 +1,19 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, SignalStatus } from '@ounce24/types';
+import { Signal, SignalStatus, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
+import { LoginUser } from '../auth/user.decorator';
+import { SignalsService } from './signals.service';
 
-@Public()
 @Controller('signals')
 export class SignalsController {
-  constructor(@InjectModel(Signal.name) private signalModel: Model<Signal>) {}
+  constructor(
+    @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    private readonly signalService: SignalsService,
+  ) {}
 
+  @Public()
   @Get('active')
   activeSignals() {
     return this.signalModel
@@ -19,6 +24,7 @@ export class SignalsController {
       .select(['-messageId', '-_id', '-owner']);
   }
 
+  @Public()
   @Get('tempList')
   tempListSignals() {
     return this.signalModel
@@ -32,6 +38,7 @@ export class SignalsController {
       .limit(20);
   }
 
+  @Public()
   @Get('status/:status')
   filterStatus(
     @Param('status') status: SignalStatus,
@@ -50,5 +57,10 @@ export class SignalsController {
       })
       .limit(PAGE_SIZE)
       .skip(page ? Number(page) * PAGE_SIZE : 0);
+  }
+
+  @Post()
+  createSignal(@Body() signal: Signal, @LoginUser() user: User) {
+    return this.signalService.addSignal({ ...signal, owner: user });
   }
 }

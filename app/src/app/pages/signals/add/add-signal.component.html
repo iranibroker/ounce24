@@ -1,0 +1,90 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="goBack()">
+    <i class="fas fa-chevron-left fa-xs"></i>
+  </button>
+  <span>Add New Signal</span>
+</mat-toolbar>
+
+<div class="form-container">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-button-toggle-group formControlName="type" class="signal-type-toggle">
+      <mat-button-toggle [value]="signalType.Buy">Buy</mat-button-toggle>
+      <mat-button-toggle [value]="signalType.Sell">Sell</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Entry Price</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="entryPrice"
+        placeholder="Enter entry price"
+      />
+      <mat-error *ngIf="form.get('entryPrice')?.hasError('required')"
+        >Entry price is required</mat-error
+      >
+      <mat-error *ngIf="form.get('entryPrice')?.hasError('min')"
+        >Entry price must be positive</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Take Profit</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="takeProfit"
+        placeholder="Enter TP"
+      />
+      <i matIconSuffix class="fa-regular fa-arrow-trend-up green"></i>
+      <mat-error *ngIf="form.get('takeProfit')?.hasError('required')"
+        >Take profit is required
+      </mat-error>
+      <mat-error *ngIf="form.get('takeProfit')?.hasError('min')"
+        >Take profit must be positive
+      </mat-error>
+      <mat-hint>
+        <span *ngIf="form.get('type')?.value === signalType.Buy"
+          >must be greater than entry price
+        </span>
+        <span *ngIf="form.get('type')?.value === signalType.Sell"
+          >must be less than entry price
+        </span>
+      </mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Stop Loss</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="stopLoss"
+        placeholder="Enter SL"
+      />
+      <i matIconSuffix class="fa-regular fa-arrow-trend-down red"></i>
+      <mat-hint>
+        <span *ngIf="form.get('type')?.value === signalType.Buy"
+          >must be less than entry price
+        </span>
+        <span *ngIf="form.get('type')?.value === signalType.Sell"
+          >must be greater than entry price
+        </span>
+      </mat-hint>
+      <mat-error *ngIf="form.get('stopLoss')?.hasError('required')"
+        >Stop loss is required</mat-error
+      >
+      <mat-error *ngIf="form.get('stopLoss')?.hasError('min')"
+        >Stop loss must be positive</mat-error
+      >
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="!form.valid"
+    >
+      Create Signal
+    </button>
+  </form>
+</div>

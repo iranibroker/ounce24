@@ -1,0 +1,41 @@
+.form-container {
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+.signal-type-toggle {
+  width: 100%;
+  margin-bottom: 24px;
+
+  .mat-button-toggle {
+    flex: 1;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+
+  i {
+    width: 32px;
+  }
+}
+
+button[type='submit'] {
+  width: 100%;
+  height: 48px;
+}
+
+.red {
+  color: var(--mat-sys-error) !important;
+}
+
+.green {
+  color: var(--mat-sys-secondary) !important;
+}
