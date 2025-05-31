@@ -20,6 +20,10 @@ mat-card-subtitle {
   }
 }
 
+img.mat-mdc-card-avatar {
+  border-radius: 4px !important;
+}
+
 #status-chip {
   .red {
     color: var(--mat-sys-error) !important;
