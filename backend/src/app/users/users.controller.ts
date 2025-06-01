@@ -56,7 +56,7 @@ export class UsersController {
   @Public()
   @Get('leaderboard')
   async getLeaderboard() {
-    return this.usersService.getLeaderboard();
+    return this.usersService.getLeaderboard(0, 30);
   }
 
   @Public()
