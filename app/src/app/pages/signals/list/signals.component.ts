@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Signal, SignalStatus } from '@ounce24/types';
 import { injectInfiniteQuery } from '@tanstack/angular-query-experimental';
@@ -11,7 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
 import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 
 const PAGE_SIZE = 20;
 
@@ -34,9 +34,29 @@ const PAGE_SIZE = 20;
 })
 export class SignalsComponent {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   status = signal<SignalStatus>(SignalStatus.Active);
   SignalStatus = SignalStatus;
+
+  constructor() {
+    // Initialize status from query params
+    const statusParam = this.route.snapshot.queryParams['status'];
+    if (statusParam && Object.values(SignalStatus).includes(statusParam as SignalStatus)) {
+      this.status.set(statusParam as SignalStatus);
+    }
+
+    // Update URL when status changes
+    effect(() => {
+      const currentStatus = this.status();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { status: currentStatus },
+        queryParamsHandling: 'merge'
+      });
+    });
+  }
 
   query = injectInfiniteQuery(() => ({
     queryKey: ['signals', 'status', this.status()],
