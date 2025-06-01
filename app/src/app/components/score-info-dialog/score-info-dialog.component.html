@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>
+  <i class="fa-solid fa-star"></i>
+  {{ 'leaderboard.scoreInfo.title' | translate }}
+</h2>
+<mat-dialog-content>
+  <div class="score-info">
+    <h3>{{ 'leaderboard.scoreInfo.howItWorks' | translate }}</h3>
+    <p>{{ 'leaderboard.scoreInfo.description' | translate }}</p>
+    
+    <div class="parameters">
+      <div class="parameter">
+        <i class="fa-solid fa-arrow-trend-up"></i>
+        <div>
+          <h4>{{ 'leaderboard.scoreInfo.pip.title' | translate }}</h4>
+          <p>{{ 'leaderboard.scoreInfo.pip.description' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="parameter">
+        <i class="fa-solid fa-scale-balanced"></i>
+        <div>
+          <h4>{{ 'leaderboard.scoreInfo.riskReward.title' | translate }}</h4>
+          <p>{{ 'leaderboard.scoreInfo.riskReward.description' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="parameter">
+        <i class="fa-solid fa-wave-square"></i>
+        <div>
+          <h4>{{ 'leaderboard.scoreInfo.totalSignals.title' | translate }}</h4>
+          <p>{{ 'leaderboard.scoreInfo.totalSignals.description' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">
+    {{ 'common.close' | translate }}
+  </button>
+</mat-dialog-actions> 

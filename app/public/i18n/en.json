@@ -62,7 +62,25 @@
     }
   },
   "leaderboard": {
-    "signalCount": "{{value}} signals"
+    "signalCount": "{{value}} signals",
+    "scoreInfo": {
+      "title": "Score Information",
+      "tooltip": "Learn about score calculation",
+      "howItWorks": "How Score is Calculated",
+      "description": "Your score is calculated based on several factors that measure your trading performance:",
+      "pip": {
+        "title": "Pip Performance",
+        "description": "The difference between entry and exit prices, measured in pips. Higher pip gains contribute more to your score."
+      },
+      "riskReward": {
+        "title": "Risk/Reward Ratio",
+        "description": "The ratio between potential profit and potential loss. Better risk/reward ratios lead to higher scores."
+      },
+      "totalSignals": {
+        "title": "Total Signals",
+        "description": "The number of signals you've provided. More signals with good performance increase your overall score."
+      }
+    }
   },
   "common": {
     "gemRequired": "GEM Required",

@@ -1,6 +1,16 @@
-<div class="leaderboard-container">
-  <h1>{{ 'bottomNav.leaderboard' | translate }}</h1>
+<mat-toolbar>
+  <mat-toolbar-row>
+    <h1>{{ 'bottomNav.leaderboard' | translate }}</h1>
+  </mat-toolbar-row>
+  <mat-toolbar-row>
+    <button mat-button (click)="openScoreInfo()">
+      <i class="fa-solid fa-circle-info"></i>
+      {{ 'leaderboard.scoreInfo.tooltip' | translate }}
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
 
+<div class="leaderboard-container">
   @if (query.isLoading()) {
     <app-data-loading />
   } @else if (query.data()) {
