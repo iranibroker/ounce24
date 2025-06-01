@@ -18,6 +18,8 @@ import { signal } from '@angular/core';
 import { User } from '@ounce24/types';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { SHARED } from '../../../shared';
+import { MatDialog } from '@angular/material/dialog';
+import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 
 @Component({
   selector: 'app-edit-user',
@@ -41,7 +43,8 @@ export class EditUserComponent {
   private http = inject(HttpClient);
   private snack = inject(MatSnackBar);
   private translate = inject(TranslateService);
-  private auth = inject(AuthService);
+  public auth = inject(AuthService);
+  private dialog = inject(MatDialog);
 
   loading = signal(false);
   form: FormGroup;
@@ -89,5 +92,14 @@ export class EditUserComponent {
       await this.updateUserMutation.mutateAsync(this.form.value);
       this.auth.userQuery.refetch();
     }
+  }
+
+  onAvatarClick(): void {
+    this.dialog.open(GemRequiredDialogComponent, {
+      width: '400px',
+      data: {
+        description: this.translate.instant('profile.needGems'),
+      },
+    });
   }
 }

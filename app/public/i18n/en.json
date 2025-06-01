@@ -51,6 +51,7 @@
     "avgRiskReward": "Avg R/R",
     "avgProfit": "Avg Profit",
     "score": "Score",
+    "needGems": "You need more GEMs to change your profile picture",
     "edit": {
       "pageTitle": "Edit Profile",
       "name": "Name",
@@ -62,5 +63,9 @@
   },
   "leaderboard": {
     "signalCount": "{{value}} signals"
+  },
+  "common": {
+    "gemRequired": "GEM Required",
+    "close": "Close"
   }
 }
