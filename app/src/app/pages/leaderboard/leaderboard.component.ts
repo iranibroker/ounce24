@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TranslateModule } from '@ngx-translate/core';
 import { DataLoadingComponent } from '../../components/data-loading/data-loading.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-leaderboard',
@@ -19,6 +20,7 @@ import { DataLoadingComponent } from '../../components/data-loading/data-loading
     MatIconModule,
     MatDividerModule,
     TranslateModule,
+    RouterModule,
     DataLoadingComponent
   ],
   templateUrl: './leaderboard.component.html',

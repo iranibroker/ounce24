@@ -6,11 +6,11 @@
   } @else if (query.data()) {
     <mat-nav-list>
       @for (user of query.data(); track user._id; let i = $index) {
-        <a mat-list-item>
+        <a mat-list-item routerLink="/profile/{{ user.id }}">
           <img
             matListItemAvatar
             src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
-              user.title || user.name
+              user.id
             }}"
             [alt]="user.title || user.name"
           />
