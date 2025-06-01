@@ -44,6 +44,7 @@
   },
   "profile": {
     "pageTitle": "Profile",
+    "yourGems": "Your GEMs",
     "signals": "Signals",
     "totalSignals": "Total Signals",
     "winRate": "Win Rate",

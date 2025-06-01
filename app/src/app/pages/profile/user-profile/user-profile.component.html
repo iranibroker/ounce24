@@ -1,9 +1,13 @@
 @if (userQuery.isLoading()) {
   <app-data-loading />
 } @else if (userQuery.data()) {
-  <mat-toolbar color="primary">
+  <mat-toolbar>
     <mat-toolbar-row>
       @if (isOwnProfile()) {
+        <button mat-button>
+          <i class="fa-solid fa-gem fa-lg"></i>
+          {{ 'profile.yourGems' | translate }}: 0
+        </button>
         <span class="spacer"></span>
         <button mat-stroked-button routerLink="/profile/edit">
           <i class="fa-regular fa-edit"></i>
