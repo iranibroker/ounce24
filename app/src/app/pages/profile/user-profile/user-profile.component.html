@@ -64,7 +64,7 @@
       <h2>{{ 'profile.signals' | translate }}</h2>
       @if (data()?.length > 0) {
         @for (signal of data(); track $index) {
-          <app-signal-card [signal]="signal" />
+          <app-signal-card [signal]="signal" [showScore]="true" />
         }
       } @else if (data() && data()?.length === 0) {
         <app-empty-state

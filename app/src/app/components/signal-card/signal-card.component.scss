@@ -24,14 +24,12 @@ img.mat-mdc-card-avatar {
   border-radius: 4px !important;
 }
 
-#status-chip {
-  .red {
-    color: var(--mat-sys-error) !important;
-  }
+.red {
+  color: var(--mat-sys-error) !important;
+}
 
-  .green {
-    color: var(--mat-sys-secondary) !important;
-  }
+.green {
+  color: var(--mat-sys-secondary) !important;
 }
 
 .signal-props {

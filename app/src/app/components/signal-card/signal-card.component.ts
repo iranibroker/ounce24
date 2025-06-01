@@ -8,6 +8,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { SHARED } from '../../shared';
 import { OuncePriceService } from '../../services/ounce-price.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ScoreInfoDialogComponent } from '../score-info-dialog/score-info-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-signal-card',
@@ -26,8 +28,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class SignalCardComponent {
   private readonly ouncePrice = inject(OuncePriceService);
   signal = input.required<Signal>();
+  showScore = input(false);
   Signal = Signal;
   SignalStatus = SignalStatus;
+  private readonly dialog = inject(MatDialog);
 
   pip = computed(() => {
     if (this.signal().status === SignalStatus.Active) {
@@ -38,4 +42,12 @@ export class SignalCardComponent {
     }
     return null;
   });
+
+  openScoreInfo() {
+    this.dialog.open(ScoreInfoDialogComponent, {
+      data: {
+        score: this.signal().score,
+      },
+    });
+  }
 }

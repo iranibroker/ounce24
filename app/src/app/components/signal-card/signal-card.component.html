@@ -42,9 +42,6 @@
       }
       @case (SignalStatus.Closed) {
         <mat-chip id="status-chip" [disabled]="true">
-          <span [class.red]="pip() < 0" [class.green]="pip() > 0">
-            {{ pip() }} {{ 'signal.pip' | translate }}
-          </span>
           <i class="fa-solid fa-stop fa-sm"></i>
           {{ 'signal.status.' + signal().status | translate }}
         </mat-chip>
@@ -67,4 +64,27 @@
       {{ signal().loss | currency: 'USD' : 'symbol' : '1.0-0' }}
     </span>
   </mat-card-actions>
+  @if (signal().status === SignalStatus.Closed && showScore()) {
+    <mat-divider />
+    <mat-card-actions>
+      <span [class.red]="pip() < 0" [class.green]="pip() > 0">
+        @if (pip() > 0) {
+          +
+        }
+        {{ pip() }} {{ 'signal.pip' | translate }}
+      </span>
+      <span style="flex: 1"></span>
+      <mat-chip-set aria-label="Fish selection">
+        <mat-chip (click)="openScoreInfo()">
+          <i class="fa-solid fa-star"></i>
+          <span
+            [class.red]="signal().score < 0"
+            [class.green]="signal().score > 0"
+          >
+            {{ signal().score | number: '1.0-1' }}
+          </span>
+        </mat-chip>
+      </mat-chip-set>
+    </mat-card-actions>
+  }
 </mat-card>
