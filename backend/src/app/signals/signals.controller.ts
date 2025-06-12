@@ -16,6 +16,15 @@ export class SignalsController {
   ) {}
 
   @Public()
+  @Get(':id')
+  getSignal(@Param('id') id: string) {
+    return this.signalModel
+      .findById(id)
+      .populate(['owner'])
+      .exec();
+  }
+
+  @Public()
   @Get('active')
   activeSignals() {
     return this.signalModel
