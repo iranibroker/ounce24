@@ -55,9 +55,16 @@ SignalSchema.virtual('pip').get(function () {
   return null;
 });
 SignalSchema.virtual('riskReward').get(function () {
-  return Math.abs(
-    (this.profit - this.entryPrice) / (this.loss - this.entryPrice),
+  if (this.pip === 0) return 0;
+  const profit = Signal.isManualClose(this)
+    ? this.closedOuncePrice
+    : this.profit;
+  const riskReward = Math.abs(
+    (profit - this.entryPrice) / (this.loss - this.entryPrice),
   );
+  return this.status === SignalStatus.Closed && this.pip < 0 && this.riskFree
+    ? 0
+    : riskReward;
 });
 SignalSchema.virtual('score').get(function () {
   if (this.status === SignalStatus.Closed) {
