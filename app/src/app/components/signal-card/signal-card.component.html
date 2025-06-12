@@ -1,8 +1,14 @@
 @let ownerTitle = signal().owner.title || signal().owner.name;
 
-<mat-card [routerLink]="['/signals', signal().id]" [state]="{ signal: signal() }">
+<mat-card
+  [routerLink]="['/signals', signal().id]"
+  [state]="{ signal: signal() }"
+>
   @if (signal().owner?.id) {
-    <mat-card-header routerLink="/profile/{{ signal().owner.id }}" (click)="$event.stopPropagation()">
+    <mat-card-header
+      routerLink="/profile/{{ signal().owner.id }}"
+      (click)="$event.stopPropagation()"
+    >
       <img
         mat-card-avatar
         src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
@@ -16,6 +22,9 @@
         <i class="fa-solid fa-star"></i>
         {{ 'profile.score' | translate }}: {{ signal().owner.score.toFixed(1) }}
       </mat-card-subtitle>
+      <button mat-icon-button class="info-button">
+        <i class="fa-regular fa-circle-info fa-xs"></i>
+      </button>
     </mat-card-header>
     <mat-divider />
   }

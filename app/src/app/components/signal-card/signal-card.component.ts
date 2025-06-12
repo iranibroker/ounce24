@@ -10,6 +10,7 @@ import { OuncePriceService } from '../../services/ounce-price.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ScoreInfoDialogComponent } from '../score-info-dialog/score-info-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-signal-card',
@@ -21,6 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
     SHARED,
     MatChipsModule,
     MatTooltipModule,
+    MatButtonModule,
   ],
   templateUrl: './signal-card.component.html',
   styleUrl: './signal-card.component.scss',
