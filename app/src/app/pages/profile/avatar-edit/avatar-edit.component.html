@@ -1,8 +1,24 @@
+<mat-toolbar>
+  <button mat-icon-button goBack>
+    <i class="fa-regular fa-chevron-left fa-xs"></i>
+  </button>
+  <span>{{ 'profile.avatar.edit' | translate }}</span>
+  <span class="spacer"></span>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    {{ 'app.save' | translate }}
+  </button>
+</mat-toolbar>
+
 <div class="container">
   <header>
-    <!-- Avatar will be displayed here -->
     <div class="avatar-placeholder">
-      <img appAvatar alt="Avatar" [color]="selectedColor()" [mouth]="selectedMouth()" [eye]="selectedEye()" />
+      <img
+        appAvatar
+        alt="Avatar"
+        [color]="selectedColor()"
+        [mouth]="selectedMouth()"
+        [eye]="selectedEye()"
+      />
     </div>
   </header>
 
@@ -11,7 +27,13 @@
       <mat-grid-list cols="4" rowHeight="1:1">
         @for (color of COLORS; track color) {
           <mat-grid-tile>
-            <img appAvatar [color]="color" [mouth]="selectedMouth()" [eye]="selectedEye()" (click)="selectedColor.set(color)" />
+            <img
+              appAvatar
+              [color]="color"
+              [mouth]="selectedMouth()"
+              [eye]="selectedEye()"
+              (click)="selectedColor.set(color)"
+            />
           </mat-grid-tile>
         }
       </mat-grid-list>
@@ -21,7 +43,13 @@
       <mat-grid-list cols="4" rowHeight="1:1">
         @for (eye of EYES; track eye) {
           <mat-grid-tile>
-            <img appAvatar [eye]="eye" [mouth]="selectedMouth()" [color]="selectedColor()" (click)="selectedEye.set(eye)" />
+            <img
+              appAvatar
+              [eye]="eye"
+              [mouth]="selectedMouth()"
+              [color]="selectedColor()"
+              (click)="selectedEye.set(eye)"
+            />
           </mat-grid-tile>
         }
       </mat-grid-list>
@@ -31,7 +59,13 @@
       <mat-grid-list cols="4" rowHeight="1:1">
         @for (mouth of MOUTHS; track mouth) {
           <mat-grid-tile>
-            <img appAvatar [mouth]="mouth" [eye]="selectedEye()" [color]="selectedColor()" (click)="selectedMouth.set(mouth)" />
+            <img
+              appAvatar
+              [mouth]="mouth"
+              [eye]="selectedEye()"
+              [color]="selectedColor()"
+              (click)="selectedMouth.set(mouth)"
+            />
           </mat-grid-tile>
         }
       </mat-grid-list>

@@ -5,6 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../services/auth.service';
 import { SHARED } from '../../../shared';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDialog } from '@angular/material/dialog';
+import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-avatar-edit',
@@ -15,12 +19,16 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatButtonModule,
     SHARED,
     MatGridListModule,
+    MatToolbarModule,
+    TranslateModule,
   ],
   templateUrl: './avatar-edit.component.html',
   styleUrls: ['./avatar-edit.component.scss'],
 })
 export class AvatarEditComponent {
   private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+  private translate = inject(TranslateService);
   COLORS = [
     '00acc1',
     '1e88e5',
@@ -75,4 +83,13 @@ export class AvatarEditComponent {
   selectedColor = signal<string | undefined>(undefined);
   selectedEye = signal<string | undefined>(undefined);
   selectedMouth = signal<string | undefined>(undefined);
+
+  onSave() {
+    this.dialog.open(GemRequiredDialogComponent, {
+      width: '400px',
+      data: {
+        description: this.translate.instant('profile.needGems'),
+      },
+    });
+  }
 }

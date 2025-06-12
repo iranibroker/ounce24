@@ -1,6 +1,7 @@
 {
   "app": {
-    "loadMore": "load more"
+    "loadMore": "load more",
+    "save": "save"
   },
   "bottomNav": {
     "home": "home",
@@ -70,6 +71,9 @@
       "save": "Save Changes",
       "success": "Profile updated successfully",
       "error": "Failed to update profile"
+    },
+    "avatar": {
+      "edit": "Edit Avatar"
     }
   },
   "leaderboard": {
