@@ -22,7 +22,11 @@
       "PENDING": "pending",
       "ACTIVE": "active",
       "CLOSED": "closed",
-      "CANCELED": "canceled"
+      "CANCELED": "canceled",
+      "PENDING.TITLE": "pending signals",
+      "ACTIVE.TITLE": "active signal",
+      "CLOSED.TITLE": "closed signal",
+      "CANCELED.TITLE": "canceled signal"
     },
     "emptyState": "No signals found"
   },

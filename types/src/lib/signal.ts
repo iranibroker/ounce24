@@ -120,6 +120,13 @@ export class Signal {
     );
   }
 
+  static isManualClose(signal: Signal) {
+    return (
+      signal.closedOuncePrice > signal.minPrice &&
+      signal.closedOuncePrice < signal.maxPrice
+    );
+  }
+
   static getStatsText(owner: User) {
     return `تعداد سیگنال: ${owner.totalSignals}
 وین ریت: ${owner.winRate.toFixed(0)}%

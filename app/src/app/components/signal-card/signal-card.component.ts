@@ -38,7 +38,7 @@ export class SignalCardComponent {
       const price = this.ouncePrice.value();
       return Signal.getActivePip(this.signal(), price);
     } else if (this.signal().status === SignalStatus.Closed) {
-      return Signal.getActivePip(this.signal(), this.signal().closedOuncePrice);
+      return this.signal().pip;
     }
     return null;
   });

@@ -44,6 +44,15 @@
         <mat-chip id="status-chip" [disabled]="true">
           <i class="fa-solid fa-stop fa-sm"></i>
           {{ 'signal.status.' + signal().status | translate }}
+          @if (Signal.isManualClose(signal())) {
+            ({{
+              signal().closedOuncePrice | currency: 'USD' : 'symbol' : '1.0-0'
+            }})
+          } @else if (signal().pip > 0) {
+            (tp)
+          } @else {
+            (sl)
+          }
         </mat-chip>
       }
     }
@@ -82,6 +91,9 @@
               [class.red]="signal().score < 0"
               [class.green]="signal().score > 0"
             >
+              @if (signal().score > 0) {
+                +
+              }
               {{ signal().score | number: '1.0-1' }}
             </span>
           </mat-chip>

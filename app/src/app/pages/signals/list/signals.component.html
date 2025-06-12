@@ -4,7 +4,7 @@
       {{ 'signal.status.ACTIVE' | translate }}
     </mat-button-toggle>
     <mat-button-toggle [value]="SignalStatus.Pending">
-      {{ 'signal.status.PENDING' | translate }}
+      {{ 'signal.status.PENDING.TITLE' | translate }}
     </mat-button-toggle>
     <mat-button-toggle [value]="SignalStatus.Closed">
       {{ 'signal.status.CLOSED' | translate }}
@@ -13,7 +13,7 @@
 
   @if (data()?.length > 0) {
     @for (signal of data(); track $index) {
-      <app-signal-card [signal]="signal" />
+      <app-signal-card [signal]="signal" [showScore]="true" />
     }
   } @else if (data() && data()?.length === 0) {
     <app-empty-state
