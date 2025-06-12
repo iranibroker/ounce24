@@ -1,4 +1,4 @@
-import { Signal, SignalStatus, SignalType } from '@ounce24/types';
+import { Signal, SignalStatus, SignalType, SignalSource } from '@ounce24/types';
 import mongoose from 'mongoose';
 
 export const SignalSchema = new mongoose.Schema<Signal>(
@@ -9,6 +9,12 @@ export const SignalSchema = new mongoose.Schema<Signal>(
       enum: SignalStatus,
       required: true,
       default: SignalStatus.Pending,
+    },
+    source: {
+      type: String,
+      enum: SignalSource,
+      required: true,
+      default: SignalSource.Telegram,
     },
     entryPrice: { type: Number, required: true },
     maxPrice: { type: Number, required: true },

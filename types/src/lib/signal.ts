@@ -12,6 +12,11 @@ export enum SignalStatus {
   Canceled = 'CANCELED',
 }
 
+export enum SignalSource {
+  Web = 'WEB',
+  Telegram = 'TELEGRAM',
+}
+
 export const SignalStatusText = {
   [SignalStatus.Pending]: '⛳️ کاشته شده',
   [SignalStatus.Active]: '▶️ فعال',
@@ -31,6 +36,8 @@ export class Signal {
   type: SignalType;
 
   status: SignalStatus;
+
+  source: SignalSource;
 
   entryPrice: number;
 

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, SignalStatus, User } from '@ounce24/types';
+import { Signal, SignalSource, SignalStatus, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
 import { LoginUser } from '../auth/user.decorator';
@@ -67,6 +67,7 @@ export class SignalsController {
       ...signal,
       owner: user,
       createdOuncePrice: this.ouncePriceService.current,
+      source: SignalSource.Web,
     });
   }
 }
