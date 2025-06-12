@@ -29,4 +29,5 @@ export class User {
   score?: number;
   tag: string;
   rank?: number;
+  gem?: number;
 }

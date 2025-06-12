@@ -74,6 +74,8 @@ export class Signal {
   pip: number | null;
   riskReward: number;
   score: number;
+  get?: number;
+  gem?: number;
 
   static activeTrigger(signal: Signal, ouncePrice: number) {
     if (

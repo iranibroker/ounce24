@@ -29,6 +29,7 @@ export const SignalSchema = new mongoose.Schema<Signal>(
     closedAt: { type: Date, required: false },
     deletedAt: { type: Date, required: false },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    gem: { type: Number, required: true, default: 0 },
   },
   {
     timestamps: true,

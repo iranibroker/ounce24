@@ -23,8 +23,8 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
 export class SignalsService {
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
-    private eventEmitter: EventEmitter2,
     @InjectModel(User.name) private userModel: Model<User>,
+    private eventEmitter: EventEmitter2,
     private ouncePriceService: OuncePriceService,
   ) {}
 
@@ -140,6 +140,18 @@ export class SignalsService {
       .findByIdAndUpdate(signal._id, signal, { new: true })
       .populate('owner')
       .exec();
+
+    if (process.env.MIN_SCORE_FOR_GEM) {
+      const minScoreForGem = Number(process.env.MIN_SCORE_FOR_GEM) || 0;
+      if (savedSignal.score > minScoreForGem) {
+        this.userModel.findByIdAndUpdate(savedSignal.owner._id, {
+          $inc: { gem: 1 },
+        });
+        savedSignal.gem = 1;
+        savedSignal.save();
+      }
+    }
+
     this.eventEmitter.emit(EVENTS.SIGNAL_CLOSED, savedSignal);
     return signal;
   }
