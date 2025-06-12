@@ -18,6 +18,7 @@
     "pip": "pip",
     "riskReward": "r/r",
     "closedOuncePrice": "closed at",
+    "riskFree": "risk free",
     "status": {
       "PENDING": "pending",
       "ACTIVE": "active",
@@ -28,7 +29,13 @@
       "CLOSED.TITLE": "closed signal",
       "CANCELED.TITLE": "canceled signal"
     },
-    "emptyState": "No signals found"
+    "emptyState": "No signals found",
+    "info": {
+      "title": "Signal Info",
+      "createdAt": "Created at",
+      "closedAt": "Closed at",
+      "activeAt": "Active at"
+    }
   },
   "login": {
     "phoneTitle": "login",

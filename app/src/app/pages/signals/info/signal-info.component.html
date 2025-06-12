@@ -1,0 +1,48 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button goBack>
+    <i class="fas fa-chevron-left fa-xs"></i>
+  </button>
+  <span>{{ 'signal.info.title' | translate }}</span>
+</mat-toolbar>
+
+<div class="signal-info-container">
+  @if (data()) {
+    @let signal = data();
+    <app-signal-card [signal]="signal" [showScore]="true" />
+    <mat-list>
+      <mat-list-item>
+        <span matListItemTitle>{{ 'signal.info.createdAt' | translate }}</span>
+        <span matListItemMeta
+          >{{ signal.createdAt | date: 'dd/MM/yyyy HH:mm' }} |
+          {{ signal.createdOuncePrice | currency }}</span
+        >
+      </mat-list-item>
+      @if (signal.activeAt) {
+        <mat-list-item>
+          <span matListItemTitle>{{ 'signal.info.activeAt' | translate }}</span>
+          <span matListItemMeta
+            >{{ signal.activeAt | date: 'dd/MM/yyyy HH:mm' }} |
+            {{ signal.entryPrice | currency }}</span
+          >
+        </mat-list-item>
+      }
+      @if (signal.closedAt) {
+        <mat-list-item>
+          <span matListItemTitle>{{ 'signal.info.closedAt' | translate }}</span>
+          <span matListItemMeta
+            >{{ signal.closedAt | date: 'dd/MM/yyyy HH:mm' }} |
+            {{ signal.closedOuncePrice | currency }}</span
+          >
+        </mat-list-item>
+      }
+      @if (signal.riskFree) {
+        <mat-divider />
+        <mat-list-item>
+          <span matListItemTitle>🚧 {{ 'signal.riskFree' | translate }}</span>
+        </mat-list-item>
+      }
+    </mat-list>
+  } @else {
+    <app-data-loading />
+  }
+</div>

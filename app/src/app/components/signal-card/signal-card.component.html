@@ -1,8 +1,8 @@
 @let ownerTitle = signal().owner.title || signal().owner.name;
 
-<mat-card>
+<mat-card [routerLink]="['/signals', signal().id]" [state]="{ signal: signal() }">
   @if (signal().owner?.id) {
-    <mat-card-header routerLink="/profile/{{ signal().owner.id }}">
+    <mat-card-header routerLink="/profile/{{ signal().owner.id }}" (click)="$event.stopPropagation()">
       <img
         mat-card-avatar
         src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
