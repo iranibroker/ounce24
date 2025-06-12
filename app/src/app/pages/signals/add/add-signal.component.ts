@@ -2,10 +2,10 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDialog } from '@angular/material/dialog';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -16,6 +16,9 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SignalType } from '@ounce24/types';
+import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
+import { SHARED } from '../../../shared';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-signal',
@@ -24,11 +27,11 @@ import { SignalType } from '@ounce24/types';
     CommonModule,
     MatToolbarModule,
     MatButtonModule,
-    MatIconModule,
     MatButtonToggleModule,
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
+    SHARED,
   ],
   templateUrl: './add-signal.component.html',
   styleUrls: ['./add-signal.component.scss'],
@@ -43,6 +46,8 @@ export class AddSignalComponent {
     private router: Router,
     private http: HttpClient,
     private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private translate: TranslateService,
   ) {
     this.form = this.fb.group({
       type: [SignalType.Buy, Validators.required],
@@ -156,5 +161,13 @@ export class AddSignalComponent {
         },
       });
     }
+  }
+
+  analyzeWithAI(): void {
+    this.dialog.open(GemRequiredDialogComponent, {
+      data: {
+        description: this.translate.instant('addSignal.gemRequired'),
+      },
+    });
   }
 }

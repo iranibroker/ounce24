@@ -100,5 +100,41 @@
   "common": {
     "gemRequired": "GEM Required",
     "close": "Close"
+  },
+  "addSignal": {
+    "title": "Add New Signal",
+    "type": {
+      "buy": "Buy",
+      "sell": "Sell"
+    },
+    "entryPrice": {
+      "label": "Entry Price",
+      "placeholder": "Enter entry price",
+      "required": "Entry price is required",
+      "min": "Entry price must be positive"
+    },
+    "takeProfit": {
+      "label": "Take Profit",
+      "placeholder": "Enter TP",
+      "required": "Take profit is required",
+      "min": "Take profit must be positive",
+      "hint": {
+        "buy": "must be greater than entry price",
+        "sell": "must be less than entry price"
+      }
+    },
+    "stopLoss": {
+      "label": "Stop Loss",
+      "placeholder": "Enter SL",
+      "required": "Stop loss is required",
+      "min": "Stop loss must be positive",
+      "hint": {
+        "buy": "must be less than entry price",
+        "sell": "must be greater than entry price"
+      }
+    },
+    "submit": "Create Signal",
+    "analyzeWithAI": "Analyze with AI",
+    "gemRequired": "You need gems to analyze your trading signal with AI"
   }
 }
