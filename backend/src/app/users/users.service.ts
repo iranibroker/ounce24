@@ -34,19 +34,13 @@ export class UsersService {
         totalSignals || 0;
     const totalScore = userSignals.reduce((acc, s) => acc + s.score, 0);
 
-    let score = 0;
-    if (totalScore > 0) {
-      const avgScore = totalScore / totalSignals;
-      score = avgScore * Math.log10(totalSignals + 1);
-    }
-
     this.userModel
       .findByIdAndUpdate(user, {
         totalSignals,
         winRate,
         avgRiskReward,
         totalScore,
-        score,
+        score: totalScore,
       })
       .exec();
   }

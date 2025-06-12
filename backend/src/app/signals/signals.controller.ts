@@ -5,12 +5,14 @@ import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
 import { LoginUser } from '../auth/user.decorator';
 import { SignalsService } from './signals.service';
+import { OuncePriceService } from '../ounce-price/ounce-price.service';
 
 @Controller('signals')
 export class SignalsController {
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     private readonly signalService: SignalsService,
+    private readonly ouncePriceService: OuncePriceService,
   ) {}
 
   @Public()
@@ -61,6 +63,10 @@ export class SignalsController {
 
   @Post()
   createSignal(@Body() signal: Signal, @LoginUser() user: User) {
-    return this.signalService.addSignal({ ...signal, owner: user });
+    return this.signalService.addSignal({
+      ...signal,
+      owner: user,
+      createdOuncePrice: this.ouncePriceService.current,
+    });
   }
 }
