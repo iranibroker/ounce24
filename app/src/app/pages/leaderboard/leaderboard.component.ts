@@ -16,6 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ScoreInfoDialogComponent } from '../../components/score-info-dialog/score-info-dialog.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-leaderboard',
@@ -34,16 +35,26 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatToolbarModule,
   ],
   templateUrl: './leaderboard.component.html',
-  styleUrl: './leaderboard.component.scss'
+  styleUrl: './leaderboard.component.scss',
 })
 export class LeaderboardComponent {
   private readonly http = inject(HttpClient);
   private dialog = inject(MatDialog);
+  public authService = inject(AuthService);
 
   query = injectQuery(() => ({
-    queryKey: ['leaderboard'],
-    queryFn: () => lastValueFrom(this.http.get<User[]>('/api/users/leaderboard')),
-    refetchInterval: 30000
+    queryKey: ['leaderboard', this.authService.userQuery.data()?.id],
+    queryFn: () =>
+      lastValueFrom(
+        this.http.get<User[]>('/api/users/leaderboard', {
+          params: this.authService.userQuery.data()
+            ? {
+                userId: this.authService.userQuery.data()?.id,
+              }
+            : undefined,
+        }),
+      ),
+    refetchInterval: 30000,
   }));
 
   openScoreInfo(): void {
@@ -51,4 +62,4 @@ export class LeaderboardComponent {
       width: '500px',
     });
   }
-} 
+}

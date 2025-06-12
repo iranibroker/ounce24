@@ -55,8 +55,8 @@ export class UsersController {
 
   @Public()
   @Get('leaderboard')
-  async getLeaderboard() {
-    return this.usersService.getLeaderboard(0, 30);
+  async getLeaderboard(@Query('userId') userId?: string) {
+    return this.usersService.getLeaderboard(0, 30, userId);
   }
 
   @Public()

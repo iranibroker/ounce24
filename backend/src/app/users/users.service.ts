@@ -45,13 +45,38 @@ export class UsersService {
       .exec();
   }
 
-  async getLeaderboard(skip = 0, limit = 10) {
-    return this.userModel
+  async getLeaderboard(skip = 0, limit = 10, userId?: string) {
+    const users = await this.userModel
       .find()
       .sort({ score: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
+
+    // Add rank to each user
+    const usersWithRank = users.map((user, index) => ({
+      ...user.toObject(),
+      rank: skip + index + 1,
+    }));
+
+    // If userId is provided, find that user's position
+    if (userId && !users.some((user) => user.id === userId)) {
+      const userPosition = await this.userModel
+        .countDocuments({
+          score: { $gt: (await this.userModel.findById(userId))?.score || 0 },
+        })
+        .exec();
+
+      const user = await this.userModel.findById(userId).exec();
+      if (user) {
+        usersWithRank.push({
+          ...user.toObject(),
+          rank: userPosition + 1,
+        });
+      }
+    }
+
+    return usersWithRank;
   }
 
   async findById(id: string) {

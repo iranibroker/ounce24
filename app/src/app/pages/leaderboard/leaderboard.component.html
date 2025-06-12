@@ -16,7 +16,12 @@
   } @else if (query.data()) {
     <mat-nav-list>
       @for (user of query.data(); track user._id; let i = $index) {
-        <a mat-list-item routerLink="/profile/{{ user.id }}">
+        <a
+          mat-list-item
+          routerLink="/profile/{{ user.id }}"
+          [class.owner]="user.id === authService.userQuery.data()?.id"
+        >
+          <span matListItemIcon class="rank">{{ user.rank }}</span>
           <img
             matListItemAvatar
             src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
