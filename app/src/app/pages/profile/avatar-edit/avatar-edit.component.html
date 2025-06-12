@@ -1,0 +1,40 @@
+<div class="container">
+  <header>
+    <!-- Avatar will be displayed here -->
+    <div class="avatar-placeholder">
+      <img appAvatar alt="Avatar" [color]="selectedColor()" [mouth]="selectedMouth()" [eye]="selectedEye()" />
+    </div>
+  </header>
+
+  <mat-tab-group>
+    <mat-tab label="Color">
+      <mat-grid-list cols="4" rowHeight="1:1">
+        @for (color of COLORS; track color) {
+          <mat-grid-tile>
+            <img appAvatar [color]="color" [mouth]="selectedMouth()" [eye]="selectedEye()" (click)="selectedColor.set(color)" />
+          </mat-grid-tile>
+        }
+      </mat-grid-list>
+    </mat-tab>
+
+    <mat-tab label="Eye">
+      <mat-grid-list cols="4" rowHeight="1:1">
+        @for (eye of EYES; track eye) {
+          <mat-grid-tile>
+            <img appAvatar [eye]="eye" [mouth]="selectedMouth()" [color]="selectedColor()" (click)="selectedEye.set(eye)" />
+          </mat-grid-tile>
+        }
+      </mat-grid-list>
+    </mat-tab>
+
+    <mat-tab label="Mouth">
+      <mat-grid-list cols="4" rowHeight="1:1">
+        @for (mouth of MOUTHS; track mouth) {
+          <mat-grid-tile>
+            <img appAvatar [mouth]="mouth" [eye]="selectedEye()" [color]="selectedColor()" (click)="selectedMouth.set(mouth)" />
+          </mat-grid-tile>
+        }
+      </mat-grid-list>
+    </mat-tab>
+  </mat-tab-group>
+</div>

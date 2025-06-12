@@ -8,6 +8,7 @@ import { authRoutes } from './pages/auth/auth.routes';
 import { EditUserComponent } from './pages/profile/edit-user/edit-user.component';
 import { LeaderboardComponent } from './pages/leaderboard/leaderboard.component';
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
+import { AvatarEditComponent } from './pages/profile/avatar-edit/avatar-edit.component';
 
 export const appRoutes: Route[] = [
   {
@@ -55,6 +56,11 @@ export const appRoutes: Route[] = [
           {
             path: 'edit',
             component: EditUserComponent,
+            canActivate: [loginActivator],
+          },
+          {
+            path: 'avatar',
+            component: AvatarEditComponent,
             canActivate: [loginActivator],
           },
           {

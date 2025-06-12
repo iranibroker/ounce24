@@ -9,12 +9,7 @@
       routerLink="/profile/{{ signal().owner.id }}"
       (click)="$event.stopPropagation()"
     >
-      <img
-        mat-card-avatar
-        src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
-          signal().owner.id
-        }}"
-      />
+      <img mat-card-avatar [appAvatar]="signal().owner.id" />
       <mat-card-title>
         {{ ownerTitle }}
       </mat-card-title>

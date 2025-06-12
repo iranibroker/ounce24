@@ -24,9 +24,7 @@
           <span matListItemIcon class="rank">{{ user.rank }}</span>
           <img
             matListItemAvatar
-            src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed={{
-              user.id
-            }}"
+            [appAvatar]="user.id"
             [alt]="user.title || user.name"
           />
           <span matListItemTitle>{{ user.title || user.name }}</span>
