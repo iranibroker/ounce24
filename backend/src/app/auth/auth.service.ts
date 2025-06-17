@@ -11,6 +11,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
+import { HttpService } from '@nestjs/axios';
 let kavenegarApi;
 
 @Injectable()
@@ -19,6 +20,7 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
+    private http: HttpService,
   ) {
     kavenegarApi = Kavenegar.KavenegarApi({
       apikey: process.env.KAVENEGAR_API_KEY,
@@ -75,26 +77,12 @@ export class AuthService {
     );
   }
 
-  async lookup(
-    mobilePhone: string,
-    kavenagarTemplate: string,
-    token: string,
-  ): Promise<boolean> {
-    const config = {
-      receptor: mobilePhone,
-      token,
-      template: kavenagarTemplate,
-    };
-
-    return new Promise((resolve, reject) => {
-      kavenegarApi.VerifyLookup(config, async (response, status) => {
-        if (status == 200) {
-          resolve(true);
-        } else {
-          reject(response);
-        }
-      });
-    });
+  async lookup(mobilePhone: string, kavenagarTemplate: string, token: string) {
+    return this.http
+      .get<void>(
+        `https://uptodate-api-proxy-utils.darkube.app/kavenegar/lookup/${kavenagarTemplate}/${mobilePhone}/${token}`,
+      )
+      .toPromise();
   }
 
   async getUserInfo(userId: string) {

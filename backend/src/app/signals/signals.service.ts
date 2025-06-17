@@ -128,7 +128,6 @@ export class SignalsService {
 
     const savedSignal = await this.signalModel.create(signal);
     this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);
-    console.log(savedSignal);
     return savedSignal;
   }
 
