@@ -20,6 +20,14 @@
       <button mat-icon-button class="info-button">
         <i class="fa-regular fa-circle-info fa-xs"></i>
       </button>
+      <button 
+        mat-icon-button 
+        class="analyze-button" 
+        (click)="openSignalAnalyze($event)"
+        matTooltip="{{ 'signalAnalyze.title' | translate }}"
+      >
+        <i class="fas fa-sparkles fa-xs"></i>
+      </button>
     </mat-card-header>
     <mat-divider />
   }

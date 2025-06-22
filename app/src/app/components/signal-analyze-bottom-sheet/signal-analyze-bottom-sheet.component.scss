@@ -1,0 +1,93 @@
+mat-toolbar {
+  padding: 0;
+  background-color: transparent;
+
+  span:first-child {
+    flex: 1;
+  }
+}
+.analysis-section {
+  padding: 16px 0;
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 0;
+
+    p {
+      color: var(--mat-sys-on-surface-variant);
+      margin: 0;
+    }
+  }
+
+  .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 0;
+
+    .error-icon {
+      font-size: 3rem;
+      color: var(--mat-sys-error);
+    }
+
+    p {
+      color: var(--mat-sys-on-surface-variant);
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  .analysis-result {
+    .analysis-text {
+      line-height: 1.8;
+      direction: rtl;
+      font-family: 'Vazirmatn', sans-serif;
+      white-space: break-spaces;
+    }
+  }
+
+  .initial-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 0;
+    text-align: center;
+
+    .ai-icon {
+      font-size: 3rem;
+      color: var(--mat-sys-primary);
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      margin: 0;
+      color: var(--mat-sys-on-surface);
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    p {
+      color: var(--mat-sys-on-surface-variant);
+      margin: 0;
+      line-height: 1.5;
+      max-width: 300px;
+    }
+
+    .analyze-button {
+      margin-top: 8px;
+      height: 48px;
+      padding: 0 24px;
+      font-size: 1rem;
+      font-weight: 600;
+
+      i {
+        margin-right: 8px;
+      }
+    }
+  }
+}

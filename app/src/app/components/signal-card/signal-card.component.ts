@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ScoreInfoDialogComponent } from '../score-info-dialog/score-info-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { SignalAnalyzeService } from '../../services/signal-analyze.service';
 
 @Component({
   selector: 'app-signal-card',
@@ -29,11 +30,13 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class SignalCardComponent {
   private readonly ouncePrice = inject(OuncePriceService);
+  private readonly dialog = inject(MatDialog);
+  private readonly signalAnalyzeService = inject(SignalAnalyzeService);
+  
   signal = input.required<Signal>();
   showScore = input(false);
   Signal = Signal;
   SignalStatus = SignalStatus;
-  private readonly dialog = inject(MatDialog);
 
   pip = computed(() => {
     if (this.signal().status === SignalStatus.Active) {
@@ -51,5 +54,10 @@ export class SignalCardComponent {
         score: this.signal().score,
       },
     });
+  }
+
+  openSignalAnalyze(event: Event) {
+    event.stopPropagation();
+    this.signalAnalyzeService.openSignalAnalyze(this.signal());
   }
 }

@@ -1,0 +1,46 @@
+<mat-toolbar>
+  <span>{{ 'signalAnalyze.analysis' | translate }}</span>
+  <button mat-icon-button (click)="close()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</mat-toolbar>
+
+<!-- Analysis Section -->
+<div class="analysis-section">
+  @if (analyzeMutation.isPending()) {
+    <div class="loading-state">
+      <app-data-loading />
+      <p>{{ 'signalAnalyze.analyzing' | translate }}</p>
+    </div>
+  } @else if (analyzeMutation.isError()) {
+    <div class="error-state">
+      <mat-icon class="error-icon">error</mat-icon>
+      <p>{{ 'signalAnalyze.error' | translate }}</p>
+      <button mat-button color="primary" (click)="analyzeSignal()">
+        {{ 'signalAnalyze.retry' | translate }}
+      </button>
+    </div>
+  } @else if (analyzeMutation.data()) {
+    <div class="analysis-result">
+      <div class="analysis-text">
+        {{ analyzeMutation.data()?.analysis }}
+      </div>
+    </div>
+  } @else {
+    <div class="initial-state">
+      <div class="ai-icon">
+        <i class="fas fa-sparkles"></i>
+      </div>
+      <h3>{{ 'signalAnalyze.getAnalysis' | translate }}</h3>
+      <p>{{ 'signalAnalyze.description' | translate }}</p>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="analyzeSignal()"
+        class="analyze-button"
+      >
+        {{ 'signalAnalyze.analyze' | translate }}
+      </button>
+    </div>
+  }
+</div>

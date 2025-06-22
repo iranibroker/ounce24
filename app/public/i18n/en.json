@@ -38,6 +38,17 @@
       "activeAt": "Active at"
     }
   },
+  "signalAnalyze": {
+    "title": "Signal Analysis",
+    "analyzing": "Analyzing your signal...",
+    "error": "Failed to analyze signal",
+    "retry": "Try Again",
+    "analysis": "AI Analysis",
+    "currentPrice": "Current Price",
+    "getAnalysis": "Get AI Analysis",
+    "description": "Get an intelligent analysis of your trading signal using AI (1GEM required)",
+    "analyze": "Analyze Signal"
+  },
   "login": {
     "phoneTitle": "login",
     "phoneDescription": "We will send you a verification code to your phone number",

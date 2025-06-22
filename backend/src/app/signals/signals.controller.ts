@@ -81,6 +81,8 @@ export class SignalsController {
 
   @Post('analyze')
   async analyzeSignal(@Body() signal: Signal, @LoginUser() user: User) {
+    
+    delete signal.owner;
     signal.createdOuncePrice = this.ouncePriceService.current;
     const messages: CoreMessage[] = [
       {
@@ -100,26 +102,15 @@ export class SignalsController {
 
 - پاراگراف  کوتاه و ساده
 - با لحن محاوره‌ای و دوستانه به صورت پاراگراف
-
-# مثال
-
-**ورودی:** قیمت لحظه‌ای انس طلا از کاربر: ۱۸۰۰ دلار
-
-**اطلاعات تکمیلی:** روند افزایشی در هفته‌ی گذشته
-
-**خروجی:** 
-
-"خب رفیق، قیمتی که شما آوردید ۱۸۰۰ دلاره و داده‌های بررسی‌شده نشون میده که هفته گذشته قیمت صعودی بوده. اگر همینطور ادامه پیدا کنه، انتظار میره قیمت همچنان بره بالا. البته نباید اخبار جریان‌هایی که ممکنه یهویی اتفاق بیفتن رو فراموش کنیم. فعلاً همه چیز مثبت به نظر می‌اد، ولی همیشه چک کردن اطلاعات و قیمت‌ها یادت نره!"
-        `,
+- اگه جایی امکان استفاده از اموجی رو داره در حد یکی دوتا استفاده کن
+- قالب اعداد با حروف انگلیسی باشه و جداکننده داشته باشه
+`,
       },
       {
         role: 'user',
         content: `اینو آنالیز کن:
         
-        Signal Type: ${signal.type}
-        Entry Price: ${signal.entryPrice}
-        Max Price (Take Profit): ${signal.maxPrice}
-        Min Price (Stop Loss): ${signal.minPrice}
+        ${JSON.stringify(signal)}
         Current Gold Price: ${signal.createdOuncePrice}
         `,
       },
