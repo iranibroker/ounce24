@@ -170,4 +170,12 @@ export class AddSignalComponent {
       },
     });
   }
+
+  analyzeWithAssistant(): void {
+    this.http.post('/api/signals/analyze', this.form.value).subscribe({
+      next: (response) => {
+        console.log(response);
+      },
+    });
+  }
 }
