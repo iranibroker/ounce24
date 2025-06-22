@@ -6,7 +6,8 @@
       @if (isOwnProfile()) {
         <button mat-button>
           <i class="fa-solid fa-gem fa-lg"></i>
-          {{ 'profile.yourGems' | translate }}: 0
+          {{ 'profile.yourGems' | translate }}:
+          {{ userQuery.data()?.gem || 0 | number }}
         </button>
         <span class="spacer"></span>
         <button mat-stroked-button routerLink="/profile/edit">

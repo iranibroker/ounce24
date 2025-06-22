@@ -88,7 +88,13 @@
       </span>
       @if (showScore()) {
         <span style="flex: 1"></span>
-        <mat-chip-set aria-label="Fish selection">
+        <mat-chip-set>
+          @if (signal().gem > 0) {
+            <mat-chip (click)="openScoreInfo()">
+              <i class="fa-solid fa-gem"></i>
+              +{{ signal().gem | number }}
+            </mat-chip>
+          }
           <mat-chip (click)="openScoreInfo()">
             <i class="fa-solid fa-star"></i>
             <span

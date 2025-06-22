@@ -143,9 +143,11 @@ export class SignalsService {
     if (process.env.MIN_SCORE_FOR_GEM) {
       const minScoreForGem = Number(process.env.MIN_SCORE_FOR_GEM) || 0;
       if (savedSignal.score > minScoreForGem) {
-        this.userModel.findByIdAndUpdate(savedSignal.owner._id, {
-          $inc: { gem: 1 },
-        });
+        this.userModel
+          .findByIdAndUpdate(savedSignal.owner._id, {
+            $inc: { gem: 1 },
+          })
+          .exec();
         savedSignal.gem = 1;
         savedSignal.save();
       }
