@@ -47,7 +47,8 @@
     "currentPrice": "Current Price",
     "getAnalysis": "Get AI Analysis",
     "description": "Get an intelligent analysis of your trading signal using AI (1GEM required)",
-    "analyze": "Analyze Signal"
+    "analyze": "Analyze Signal",
+    "noGems": "You don't have any GEMs to analyze your signal"
   },
   "login": {
     "phoneTitle": "login",

@@ -17,12 +17,9 @@
         <i class="fa-solid fa-star"></i>
         {{ 'profile.score' | translate }}: {{ signal().owner.score.toFixed(1) }}
       </mat-card-subtitle>
-      <button mat-icon-button class="info-button">
-        <i class="fa-regular fa-circle-info fa-xs"></i>
-      </button>
-      <button 
-        mat-icon-button 
-        class="analyze-button" 
+      <button
+        mat-icon-button
+        class="analyze-button"
         (click)="openSignalAnalyze($event)"
         matTooltip="{{ 'signalAnalyze.title' | translate }}"
       >

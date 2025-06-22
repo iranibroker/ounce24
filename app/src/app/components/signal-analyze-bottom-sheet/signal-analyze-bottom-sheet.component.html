@@ -12,14 +12,6 @@
       <app-data-loading />
       <p>{{ 'signalAnalyze.analyzing' | translate }}</p>
     </div>
-  } @else if (analyzeMutation.isError()) {
-    <div class="error-state">
-      <mat-icon class="error-icon">error</mat-icon>
-      <p>{{ 'signalAnalyze.error' | translate }}</p>
-      <button mat-button color="primary" (click)="analyzeSignal()">
-        {{ 'signalAnalyze.retry' | translate }}
-      </button>
-    </div>
   } @else if (analyzeMutation.data()) {
     <div class="analysis-result">
       <div class="analysis-text">

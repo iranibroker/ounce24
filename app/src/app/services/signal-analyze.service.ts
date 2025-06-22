@@ -13,6 +13,7 @@ export class SignalAnalyzeService {
     this.bottomSheet.open(SignalAnalyzeBottomSheetComponent, {
       data: { signal },
       panelClass: 'signal-analyze-bottom-sheet',
+      disableClose: true,
     });
   }
 } 
