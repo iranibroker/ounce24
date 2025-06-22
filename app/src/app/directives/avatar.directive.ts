@@ -7,13 +7,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { User } from '@ounce24/types';
 
 @Directive({
   selector: 'img[appAvatar]',
   standalone: true,
 })
 export class AvatarDirective implements OnInit {
-  appAvatar = input<string | undefined>();
+  appAvatar = input<User | undefined>();
   color = input<string | undefined>();
   mouth = input<string | undefined>();
   eye = input<string | undefined>();
@@ -34,19 +35,29 @@ export class AvatarDirective implements OnInit {
 
   private setImageSource() {
     const img = this.el.nativeElement;
-    let src = `https://api.dicebear.com/9.x/bottts-neutral/${this.type() || 'svg'}?seed=${this.appAvatar() || this.authService.userQuery.data()?.id}`;
+
+    let src = `https://api.dicebear.com/9.x/bottts-neutral/${this.type() || 'svg'}`;
+
+    const user = this.appAvatar() || this.authService.userQuery.data();
+    if (user) {
+      src += `?seed=${user.id}`;
+      if (user.avatar) src += `&${user.avatar || user.id}`;
+    }
     if (this.color()) {
-      src += `&backgroundColor=${this.color()}`;
+      src =
+        src.replace(/&backgroundColor=[^&]*/, '') +
+        `&backgroundColor=${this.color()}`;
     }
     if (this.mouth()) {
-      src += `&mouth=${this.mouth()}`;
+      src = src.replace(/&mouth=[^&]*/, '') + `&mouth=${this.mouth()}`;
     }
     if (this.eye()) {
-      src += `&eyes=${this.eye()}`;
+      src = src.replace(/&eyes=[^&]*/, '') + `&eyes=${this.eye()}`;
     }
     if (this.size()) {
-      src += `&size=${this.size()}`;
+      src = src.replace(/&size=[^&]*/, '') + `&size=${this.size()}`;
     }
+
     img.src = src;
   }
 }

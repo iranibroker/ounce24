@@ -6,6 +6,8 @@ export class User {
 
   title: string;
 
+  avatar?: string;
+
   defaultScore: number;
 
   totalScore: number;

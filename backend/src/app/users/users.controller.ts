@@ -1,15 +1,17 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Patch, Body, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Signal, SignalStatus } from '@ounce24/types';
+import { Signal, SignalStatus, User } from '@ounce24/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
+import { LoginUser } from '../auth/user.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   @Public()
@@ -73,5 +75,33 @@ export class UsersController {
     @Query('limit') limit = 20,
   ) {
     return this.usersService.getUserSignals(id, page, limit);
+  }
+
+  @Patch('avatar')
+  async updateUserAvatar(
+    @LoginUser() user: User,
+    @Body() body: { avatar: string },
+  ) {
+    // Fetch current user data from database
+    const currentUser = await this.userModel.findById(user.id).exec();
+    if (!currentUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if user has gems
+    if (!currentUser.gem || currentUser.gem <= 0) {
+      throw new NotAcceptableException('Insufficient gems to update avatar');
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      user.id,
+      { 
+        avatar: body.avatar,
+        gem: currentUser.gem - 1 
+      },
+      { new: true }
+    ).exec();
+    
+    return updatedUser;
   }
 }

@@ -4,8 +4,17 @@
   </button>
   <span>{{ 'profile.avatar.edit' | translate }}</span>
   <span class="spacer"></span>
-  <button mat-flat-button color="primary" (click)="onSave()">
-    {{ 'app.save' | translate }}
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="onSave()"
+    [disabled]="updateAvatarMutation.isPending()"
+  >
+    @if (updateAvatarMutation.isPending()) {
+      <i class="fa-solid fa-spinner fa-spin"></i>
+    } @else {
+      {{ 'app.save' | translate }}
+    }
   </button>
 </mat-toolbar>
 
@@ -13,7 +22,7 @@
   <header>
     <div class="avatar-placeholder">
       <img
-        appAvatar
+        [appAvatar]
         alt="Avatar"
         [color]="selectedColor()"
         [mouth]="selectedMouth()"
@@ -28,7 +37,7 @@
         @for (color of COLORS; track color) {
           <mat-grid-tile>
             <img
-              appAvatar
+              [appAvatar]
               [color]="color"
               [mouth]="selectedMouth()"
               [eye]="selectedEye()"
@@ -44,7 +53,7 @@
         @for (eye of EYES; track eye) {
           <mat-grid-tile>
             <img
-              appAvatar
+              [appAvatar]
               [eye]="eye"
               [mouth]="selectedMouth()"
               [color]="selectedColor()"
@@ -60,7 +69,7 @@
         @for (mouth of MOUTHS; track mouth) {
           <mat-grid-tile>
             <img
-              appAvatar
+              [appAvatar]
               [mouth]="mouth"
               [eye]="selectedEye()"
               [color]="selectedColor()"

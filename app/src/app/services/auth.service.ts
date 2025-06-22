@@ -72,5 +72,9 @@ export class AuthService {
       if (!this.token()) return Promise.resolve(null);
       return this.http.get<User>('/api/auth/me').toPromise();
     },
+    onError: (error) => {
+      localStorage.removeItem(JWT_KEY);
+      this.token.set(null);
+    },
   }));
 }

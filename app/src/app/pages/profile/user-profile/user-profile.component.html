@@ -22,7 +22,7 @@
     </mat-toolbar-row>
     <mat-toolbar-row>
       <img
-        [appAvatar]="userQuery.data().id"
+        [appAvatar]="userQuery.data()"
         [alt]="userQuery.data().title || userQuery.data().name"
         class="toolbar-avatar"
       />

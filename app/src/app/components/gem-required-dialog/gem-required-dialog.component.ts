@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
@@ -25,7 +25,8 @@ import { CommonModule } from '@angular/common';
 export class GemRequiredDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<GemRequiredDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { description: string },
+    @Inject(MAT_DIALOG_DATA)
+    public data: { description: string; accept?: boolean },
   ) {}
 
   onClose(): void {

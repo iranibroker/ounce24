@@ -9,7 +9,7 @@
       routerLink="/profile/{{ signal().owner.id }}"
       (click)="$event.stopPropagation()"
     >
-      <img mat-card-avatar [appAvatar]="signal().owner.id" />
+      <img mat-card-avatar [appAvatar]="signal().owner" />
       <mat-card-title>
         {{ ownerTitle }}
       </mat-card-title>

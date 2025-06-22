@@ -9,6 +9,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog } from '@angular/material/dialog';
 import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { injectMutation } from '@tanstack/angular-query-experimental';
+import { HttpClient } from '@angular/common/http';
+import { User } from '@ounce24/types';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-avatar-edit',
@@ -21,6 +25,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     MatGridListModule,
     MatToolbarModule,
     TranslateModule,
+    MatSnackBarModule,
   ],
   templateUrl: './avatar-edit.component.html',
   styleUrls: ['./avatar-edit.component.scss'],
@@ -29,6 +34,8 @@ export class AvatarEditComponent {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
+  private http = inject(HttpClient);
+  private snackBar = inject(MatSnackBar);
   COLORS = [
     '00acc1',
     '1e88e5',
@@ -84,12 +91,77 @@ export class AvatarEditComponent {
   selectedEye = signal<string | undefined>(undefined);
   selectedMouth = signal<string | undefined>(undefined);
 
-  onSave() {
-    this.dialog.open(GemRequiredDialogComponent, {
-      width: '400px',
-      data: {
-        description: this.translate.instant('profile.needGems'),
+  updateAvatarMutation = injectMutation<User, Error, { avatar: string }>(
+    () => ({
+      mutationFn: (avatarData) =>
+        this.http.patch<User>('/api/users/avatar', avatarData).toPromise(),
+      onSuccess: () => {
+        this.snackBar.open(
+          this.translate.instant('profile.avatar.success'),
+          '',
+          {
+            duration: 2000,
+          },
+        );
+        this.authService.userQuery.refetch();
+        history.back();
       },
-    });
+      onError: (error: any) => {
+        if (error?.status === 406) {
+          this.dialog.open(GemRequiredDialogComponent, {
+            width: '400px',
+            data: {
+              description: this.translate.instant('profile.avatar.noGems'),
+            },
+          });
+        } else {
+          this.snackBar.open(
+            this.translate.instant('profile.avatar.error'),
+            '',
+            {
+              duration: 2000,
+            },
+          );
+        }
+      },
+    }),
+  );
+
+  onSave() {
+    const hasGem = this.authService.userQuery.data()?.gem > 0;
+    this.dialog
+      .open(GemRequiredDialogComponent, {
+        data: {
+          description: this.translate.instant(
+            hasGem ? 'profile.avatar.useGem' : 'profile.avatar.noGems',
+          ),
+          accept: hasGem,
+        },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          const avatar = this.buildAvatarString();
+          if (avatar) {
+            this.updateAvatarMutation.mutate({ avatar });
+          }
+        }
+      });
+  }
+
+  private buildAvatarString(): string {
+    const parts = [];
+
+    if (this.selectedColor()) {
+      parts.push(`backgroundColor=${this.selectedColor()}`);
+    }
+    if (this.selectedEye()) {
+      parts.push(`eye=${this.selectedEye()}`);
+    }
+    if (this.selectedMouth()) {
+      parts.push(`mouth=${this.selectedMouth()}`);
+    }
+
+    return parts.join('&');
   }
 }

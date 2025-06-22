@@ -63,7 +63,6 @@
     "avgRiskReward": "Avg R/R",
     "avgProfit": "Avg Profit",
     "score": "Score",
-    "needGems": "You need more GEMs to change your profile picture",
     "edit": {
       "pageTitle": "Edit Profile",
       "name": "Name",
@@ -73,7 +72,11 @@
       "error": "Failed to update profile"
     },
     "avatar": {
-      "edit": "Edit Avatar"
+      "edit": "Edit Avatar",
+      "success": "Avatar updated successfully",
+      "error": "Failed to update avatar",
+      "noGems": "You don't have any GEMs to change your profile picture",
+      "useGem": "You need 1 GEM. Do you want to use to change your profile picture?"
     }
   },
   "leaderboard": {
@@ -97,9 +100,10 @@
       }
     }
   },
-  "common": {
+  "gemDialog": {
     "gemRequired": "GEM Required",
-    "close": "Close"
+    "close": "Close",
+    "accept": "Use GEM"
   },
   "addSignal": {
     "title": "Add New Signal",
