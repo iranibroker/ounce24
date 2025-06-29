@@ -11,23 +11,25 @@ export interface LanguageConfig {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LanguageService {
   private readonly LANGUAGE_KEY = 'app_language';
   private readonly DEFAULT_LANGUAGE = 'en';
-  
-  private currentLanguageSubject = new BehaviorSubject<string>(this.DEFAULT_LANGUAGE);
+
+  private currentLanguageSubject = new BehaviorSubject<string>(
+    this.DEFAULT_LANGUAGE,
+  );
   public currentLanguage$ = this.currentLanguageSubject.asObservable();
 
   public readonly supportedLanguages: LanguageConfig[] = [
     { code: 'en', name: 'English', rtl: false, flag: '🇺🇸' },
-    { code: 'fa', name: 'فارسی', rtl: true, flag: '🇮🇷' }
+    { code: 'fa', name: 'فارسی', rtl: true, flag: '🇮🇷' },
   ];
 
   constructor(
     private translateService: TranslateService,
-    @Inject(PLATFORM_ID) private platformId: object
+    @Inject(PLATFORM_ID) private platformId: object,
   ) {
     this.initializeLanguage();
   }
@@ -37,9 +39,9 @@ export class LanguageService {
       // Get language from localStorage or use default
       const storedLanguage = this.getStoredLanguage();
       const language = storedLanguage || this.DEFAULT_LANGUAGE;
-      
+
       // Set the language
-      this.setLanguage(language);
+      this.setLanguage(language, true);
     }
   }
 
@@ -56,19 +58,23 @@ export class LanguageService {
     }
   }
 
-  public setLanguage(languageCode: string): void {
-    const languageConfig = this.supportedLanguages.find(lang => lang.code === languageCode);
-    
+  public setLanguage(languageCode: string, skipLocalStorage = false): void {
+    const languageConfig = this.supportedLanguages.find(
+      (lang) => lang.code === languageCode,
+    );
+
     if (languageConfig) {
       // Set language in translate service
       this.translateService.use(languageCode);
-      
+
       // Store in localStorage
-      this.setStoredLanguage(languageCode);
-      
+      if (!skipLocalStorage) {
+        this.setStoredLanguage(languageCode);
+      }
+
       // Update current language subject
       this.currentLanguageSubject.next(languageCode);
-      
+
       // Handle RTL
       this.setRTL(languageConfig.rtl);
     }
@@ -80,7 +86,7 @@ export class LanguageService {
 
   public getCurrentLanguageConfig(): LanguageConfig | undefined {
     const currentLang = this.getCurrentLanguage();
-    return this.supportedLanguages.find(lang => lang.code === currentLang);
+    return this.supportedLanguages.find((lang) => lang.code === currentLang);
   }
 
   public isRTL(): boolean {
@@ -92,7 +98,7 @@ export class LanguageService {
     if (isPlatformBrowser(this.platformId)) {
       const htmlElement = document.documentElement;
       const bodyElement = document.body;
-      
+
       if (isRTL) {
         htmlElement.setAttribute('dir', 'rtl');
         htmlElement.setAttribute('lang', 'fa');
@@ -110,4 +116,11 @@ export class LanguageService {
   public getSupportedLanguages(): LanguageConfig[] {
     return this.supportedLanguages;
   }
-} 
+
+  public hasExplicitLanguageSelection(): boolean {
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem(this.LANGUAGE_KEY) !== null;
+    }
+    return false;
+  }
+}

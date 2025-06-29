@@ -1,0 +1,13 @@
+<h3 mat-dialog-title>{{ 'languageSelection.title' | translate }}</h3>
+
+<mat-dialog-content>
+  <p>{{ 'languageSelection.description' | translate }}</p>
+
+  <mat-nav-list>
+    @for (language of supportedLanguages; track language.code) {
+      <mat-list-item (click)="selectLanguage(language)">
+        <div matListItemTitle>{{ language.flag }} {{ language.name }}</div>
+      </mat-list-item>
+    }
+  </mat-nav-list>
+</mat-dialog-content>

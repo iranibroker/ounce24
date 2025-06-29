@@ -2,7 +2,8 @@
   "app": {
     "loadMore": "load more",
     "save": "save",
-    "close": "close"
+    "close": "close",
+    "cancel": "Cancel"
   },
   "bottomNav": {
     "home": "home",
@@ -153,5 +154,9 @@
     "submit": "Create Signal",
     "analyzeWithAI": "Analyze with AI",
     "gemRequired": "You need gems to analyze your trading signal with AI"
+  },
+  "languageSelection": {
+    "title": "Select Language",
+    "description": "Please select your preferred language to continue using the application."
   }
 }
