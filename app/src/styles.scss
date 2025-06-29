@@ -74,10 +74,6 @@ html[dir='rtl'] {
       margin-top: 0 !important;
       align-self: initial !important;
     }
-
-    .mat-mdc-list-item-title {
-      margin-top: -10px !important;
-    }
   }
 
   @include mat.theme-overrides(
