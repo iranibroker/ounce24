@@ -7,8 +7,17 @@ function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './i18n/');
 }
 
+// Get initial language from localStorage
+function getInitialLanguage(): string {
+  if (typeof window !== 'undefined') {
+    const storedLanguage = localStorage.getItem('app_language');
+    return storedLanguage || 'en';
+  }
+  return 'en';
+}
+
 const config = TranslateModule.forRoot({
-  defaultLanguage: 'en',
+  defaultLanguage: getInitialLanguage(),
   loader: {
     provide: TranslateLoader,
     useFactory: HttpLoaderFactory,

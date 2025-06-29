@@ -3,6 +3,7 @@
 <mat-card
   [routerLink]="['/signals', signal().id]"
   [state]="{ signal: signal() }"
+  dir="ltr"
 >
   @if (signal().owner?.id) {
     <mat-card-header

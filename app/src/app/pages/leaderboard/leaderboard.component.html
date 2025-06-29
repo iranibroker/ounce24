@@ -14,7 +14,7 @@
   @if (query.isLoading()) {
     <app-data-loading />
   } @else if (query.data()) {
-    <mat-nav-list>
+    <mat-nav-list dir="ltr">
       @for (user of query.data(); track user._id; let i = $index) {
         <a
           mat-list-item

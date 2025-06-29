@@ -1,7 +1,8 @@
 {
   "app": {
     "loadMore": "load more",
-    "save": "save"
+    "save": "save",
+    "close": "close"
   },
   "bottomNav": {
     "home": "home",
