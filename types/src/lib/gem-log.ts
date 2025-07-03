@@ -3,6 +3,7 @@ import { User } from './user';
 export enum GemLogAction {
   SignalAnalyze = 'signal_analyze',
   ChangeAvatar = 'change_avatar',
+  CloseSignal = 'close_signal',
 }
 
 export class GemLog {
@@ -11,7 +12,7 @@ export class GemLog {
 
   user: User;
 
-  gemsUsed: number;
+  gemsChange: number;
 
   gemsBefore: number;
 

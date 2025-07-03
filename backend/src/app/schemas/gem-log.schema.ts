@@ -9,9 +9,9 @@ export const GemLogSchema = new mongoose.Schema<GemLog>(
       required: true,
       index: true,
     },
-    gemsUsed: { type: Number, required: true, min: 0 },
-    gemsBefore: { type: Number, required: true, min: 0 },
-    gemsAfter: { type: Number, required: true, min: 0 },
+    gemsChange: { type: Number, required: true },
+    gemsBefore: { type: Number, required: true },
+    gemsAfter: { type: Number, required: true },
     action: { type: String, required: true, enum: GemLogAction },
   },
   {

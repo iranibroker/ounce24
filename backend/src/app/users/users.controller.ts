@@ -1,6 +1,21 @@
-import { Controller, Get, Param, Query, Patch, Body, NotFoundException, NotAcceptableException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Patch,
+  Body,
+  NotFoundException,
+  NotAcceptableException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Signal, SignalStatus, User } from '@ounce24/types';
+import {
+  GemLog,
+  GemLogAction,
+  Signal,
+  SignalStatus,
+  User,
+} from '@ounce24/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
@@ -12,6 +27,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
   ) {}
 
   @Public()
@@ -93,15 +109,25 @@ export class UsersController {
       throw new NotAcceptableException('Insufficient gems to update avatar');
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      user.id,
-      { 
-        avatar: body.avatar,
-        gem: currentUser.gem - 1 
-      },
-      { new: true }
-    ).exec();
-    
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        user.id,
+        {
+          avatar: body.avatar,
+          gem: currentUser.gem - 1,
+        },
+        { new: true },
+      )
+      .exec();
+
+    this.gemLogModel.create({
+      user: user.id,
+      gemsChange: -1,
+      gemsBefore: currentUser.gem,
+      gemsAfter: currentUser.gem - 1,
+      action: GemLogAction.ChangeAvatar,
+    });
+
     return updatedUser;
   }
 }
