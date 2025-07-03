@@ -71,7 +71,18 @@ SignalSchema.virtual('score').get(function () {
   if (this.status === SignalStatus.Closed) {
     const lossPip = Math.abs(this.loss - this.entryPrice) * 10;
     const pip = this.pip;
-    const res = (pip / lossPip) * (Math.abs(pip) / 50 + 10) + 1;
+    const ratio = pip / lossPip;
+    let part1 = 0;
+
+    if (pip >= 0) {
+      if (this.riskReward >= 1) part1 = Math.sqrt(ratio);
+      else part1 = Math.sqrt(ratio) * 0.5;
+    } else {
+      part1 = ratio;
+    }
+
+    const res = part1 * (Math.abs(pip) / 50 + 10) + 1;
+    // const res = (pip / lossPip) * (Math.abs(pip) / 50 + 10) + 1;
     if (res > 500 || res < -500) return 0;
     return res;
   }
