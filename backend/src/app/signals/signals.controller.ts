@@ -8,7 +8,14 @@ import {
   NotAcceptableException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, SignalSource, SignalStatus, User } from '@ounce24/types';
+import {
+  GemLog,
+  GemLogAction,
+  Signal,
+  SignalSource,
+  SignalStatus,
+  User,
+} from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
 import { LoginUser } from '../auth/user.decorator';
@@ -22,6 +29,7 @@ export class SignalsController {
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
     private readonly signalService: SignalsService,
     private readonly ouncePriceService: OuncePriceService,
   ) {}
@@ -147,6 +155,14 @@ export class SignalsController {
         $inc: { gem: -1 },
       })
       .exec();
+
+    this.gemLogModel.create({
+      user: user.id,
+      gemsUsed: 1,
+      gemsBefore: currentUser.gem,
+      gemsAfter: currentUser.gem - 1,
+      action: GemLogAction.SignalAnalyze,
+    });
 
     return {
       analysis: result.text,
