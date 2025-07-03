@@ -73,7 +73,8 @@ export class SignalsService {
   }
 
   async addSignal(signal: Signal) {
-    console.log(signal);
+    signal.createdOuncePrice = this.ouncePriceService.current;
+    signal.status = SignalStatus.Pending;
     if (!signal.owner) return;
     const owner = await this.userModel.findById(signal.owner);
     const signals = await this.signalModel
@@ -106,6 +107,12 @@ export class SignalsService {
         `Maximum number of daily signals (${MAX_DAILY_SIGNAL}) reached`,
         HttpStatus.REQUEST_TIMEOUT,
       );
+    }
+
+    if (signal.instantEntry) {
+      signal.entryPrice = this.ouncePriceService.current;
+      signal.status = SignalStatus.Active;
+      signal.activeAt = new Date();
     }
 
     const nearSignal = await this.signalModel
@@ -253,7 +260,7 @@ export class SignalsService {
 - قالب اعداد با حروف انگلیسی باشه و جداکننده داشته باشه
 
 # اطلاعات تکمیلی
-قیمت فعلی انس طلا: ${signal.createdOuncePrice}
+قیمت فعلی انس طلا: ${this.ouncePriceService.current}
 `,
       },
       {

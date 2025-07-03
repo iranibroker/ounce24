@@ -16,12 +16,17 @@
       }}</mat-button-toggle>
     </mat-button-toggle-group>
 
+    <mat-checkbox formControlName="instantEntry">
+      {{ 'addSignal.byMarket' | translate }}
+    </mat-checkbox>
+
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>{{ 'addSignal.entryPrice.label' | translate }}</mat-label>
       <input
         matInput
         type="number"
         formControlName="entryPrice"
+        [disabled]="form.get('instantEntry')?.value"
         [placeholder]="'addSignal.entryPrice.placeholder' | translate"
       />
       <mat-error *ngIf="form.get('entryPrice')?.hasError('required')">{{

@@ -121,6 +121,7 @@
   },
   "addSignal": {
     "title": "Add New Signal",
+    "byMarket": "By Market Entry Price",
     "type": {
       "buy": "Buy",
       "sell": "Sell"

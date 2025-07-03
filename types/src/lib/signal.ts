@@ -59,6 +59,8 @@ export class Signal {
 
   owner: User;
 
+  instantEntry: boolean;
+
   createdAt?: Date;
 
   activeAt?: Date;

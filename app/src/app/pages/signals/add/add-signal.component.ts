@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,6 +17,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SignalType } from '@ounce24/types';
 import { SHARED } from '../../../shared';
 import { SignalAnalyzeService } from '../../../services/signal-analyze.service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { OuncePriceService } from '../../../services/ounce-price.service';
 
 @Component({
   selector: 'app-add-signal',
@@ -29,6 +31,7 @@ import { SignalAnalyzeService } from '../../../services/signal-analyze.service';
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
+    MatCheckboxModule,
     SHARED,
   ],
   templateUrl: './add-signal.component.html',
@@ -38,6 +41,7 @@ export class AddSignalComponent {
   signalType = SignalType;
   form: FormGroup;
   isSubmitting = false;
+  private ounceService = inject(OuncePriceService);
 
   constructor(
     private fb: FormBuilder,
@@ -51,6 +55,7 @@ export class AddSignalComponent {
       entryPrice: ['', [Validators.required, Validators.min(0)]],
       takeProfit: ['', [Validators.required, Validators.min(0)]],
       stopLoss: ['', [Validators.required, Validators.min(0)]],
+      instantEntry: [false],
     });
 
     // Add validators based on signal type
@@ -106,6 +111,22 @@ export class AddSignalComponent {
       takeProfit?.updateValueAndValidity();
       stopLoss?.updateValueAndValidity();
     });
+
+    this.form.get('instantEntry')?.valueChanges.subscribe((instantEntry) => {
+      if (instantEntry) {
+        this.form.get('entryPrice')?.disable();
+        this.form.get('entryPrice')?.setValue(this.ounceService.value());
+      } else {
+        this.form.get('entryPrice')?.enable();
+      }
+    });
+
+    effect(() => {
+      const currentOuncePrice = this.ounceService.value();
+      if (this.form.get('instantEntry')?.value) {
+        this.form.get('entryPrice')?.setValue(currentOuncePrice);
+      }
+    });
   }
 
   goBack(): void {
@@ -128,6 +149,7 @@ export class AddSignalComponent {
           formValue.type === SignalType.Buy
             ? formValue.stopLoss
             : formValue.takeProfit,
+        instantEntry: formValue.instantEntry,
       };
 
       this.http.post('/api/signals', signal).subscribe({

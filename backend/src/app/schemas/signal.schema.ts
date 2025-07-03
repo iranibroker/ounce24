@@ -22,6 +22,7 @@ export const SignalSchema = new mongoose.Schema<Signal>(
     messageId: { type: Number },
     publishable: { type: Boolean, default: false },
     riskFree: { type: Boolean, default: false },
+    instantEntry: { type: Boolean, default: false },
     telegramBot: { type: String },
     createdOuncePrice: { type: Number, required: true, default: 0 },
     closedOuncePrice: { type: Number, required: false },
