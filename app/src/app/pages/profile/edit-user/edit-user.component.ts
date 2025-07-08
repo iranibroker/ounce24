@@ -58,10 +58,11 @@ export class EditUserComponent {
       });
       this.loading.set(false);
     },
-    onError: (error) => {
-      this.snack.open(this.translate.instant('profile.edit.error'), '', {
-        duration: 2000,
-      });
+    onError: (error: any) => {
+      if (!error.error?.translationKey)
+        this.snack.open(this.translate.instant('profile.edit.error'), '', {
+          duration: 2000,
+        });
       this.loading.set(false);
     },
   }));

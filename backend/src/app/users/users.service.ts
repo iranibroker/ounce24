@@ -82,7 +82,9 @@ export class UsersService {
   async findById(id: string) {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
     }
     return user;
   }

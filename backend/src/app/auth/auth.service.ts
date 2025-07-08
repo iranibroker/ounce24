@@ -58,7 +58,12 @@ export class AuthService {
     const phone = PersianNumberService.toEnglish(mobilePhone);
     const token = Math.floor(Math.random() * 8000 + 1000).toString();
     if (this.mobilePhoneTokens[phone])
-      throw new HttpException('duplicate', HttpStatus.CONFLICT);
+      throw new HttpException(
+        {
+          translationKey: 'auth.duplicate',
+        },
+        HttpStatus.CONFLICT,
+      );
     await this.lookup(phone, process.env.KAVENEGAR_OTP, token);
     this.mobilePhoneTokens[phone] = token;
     setTimeout(() => {
@@ -88,7 +93,9 @@ export class AuthService {
   async getUserInfo(userId: string) {
     const user = await this.userModel.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
     }
     return user;
   }

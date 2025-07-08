@@ -9,12 +9,16 @@ import { inject, Injectable, Provider } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { TranslateService } from '@ngx-translate/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 const JWT_KEY = 'jwtToken';
 const IGNORE_CASES = [new RegExp('^https?:\\/\\/?'), new RegExp('/i18n/')];
 
 @Injectable()
 class ApiInterceptor implements HttpInterceptor {
   router = inject(Router);
+  translate = inject(TranslateService);
+  snackBar = inject(MatSnackBar);
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     let ignore = false;
     for (const cases of IGNORE_CASES) {
@@ -44,6 +48,17 @@ class ApiInterceptor implements HttpInterceptor {
 
     return next.handle(req).pipe(
       catchError((err) => {
+        console.log(err.error);
+        if (err.error?.translationKey) {
+          this.translate
+            .get(`apiError.${err.error?.translationKey}`, {
+              value: err.error?.data,
+            })
+            .subscribe((res) => {
+              this.snackBar.open(res, '', { duration: 2500 });
+            });
+        }
+
         if (
           err.status === HttpStatusCode.Unauthorized ||
           err.status === HttpStatusCode.Forbidden

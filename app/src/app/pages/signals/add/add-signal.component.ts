@@ -161,22 +161,6 @@ export class AddSignalComponent {
         },
         error: (error) => {
           this.isSubmitting = false;
-          let errorMessage = 'Failed to create signal';
-
-          if (error.status === 429) {
-            errorMessage = 'Maximum number of active signals reached';
-          } else if (error.status === 408) {
-            errorMessage = 'Maximum number of daily signals reached';
-          } else if (error.status === 409) {
-            errorMessage =
-              error.error.message ||
-              'You have another active signal near this point';
-          } else if (error.status === 400) {
-            errorMessage =
-              'Invalid entry price or take profit/stop loss values';
-          }
-
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
         },
       });
     }

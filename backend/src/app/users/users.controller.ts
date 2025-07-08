@@ -101,12 +101,16 @@ export class UsersController {
     // Fetch current user data from database
     const currentUser = await this.userModel.findById(user.id).exec();
     if (!currentUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
     }
 
     // Check if user has gems
     if (!currentUser.gem || currentUser.gem <= 0) {
-      throw new NotAcceptableException('Insufficient gems to update avatar');
+      throw new NotAcceptableException({
+        translationKey: 'insufficientGems',
+      });
     }
 
     const updatedUser = await this.userModel

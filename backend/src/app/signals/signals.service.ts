@@ -76,6 +76,16 @@ export class SignalsService {
     signal.createdOuncePrice = this.ouncePriceService.current;
     signal.status = SignalStatus.Pending;
     if (!signal.owner) return;
+
+    if (signal.maxPrice < signal.minPrice) {
+      throw new HttpException(
+        {
+          translationKey: 'signal.invalidEntry',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const owner = await this.userModel.findById(signal.owner);
     const signals = await this.signalModel
       .find({
@@ -87,7 +97,10 @@ export class SignalsService {
 
     if (signals.length >= MAX_ACTIVE_SIGNAL) {
       throw new HttpException(
-        `Maximum number of active signals (${MAX_ACTIVE_SIGNAL}) reached`,
+        {
+          translationKey: 'signal.maxActive',
+          data: MAX_ACTIVE_SIGNAL,
+        },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
@@ -104,7 +117,10 @@ export class SignalsService {
 
     if (todaySignals.length >= MAX_DAILY_SIGNAL) {
       throw new HttpException(
-        `Maximum number of daily signals (${MAX_DAILY_SIGNAL}) reached`,
+        {
+          translationKey: 'signal.maxDaily',
+          data: MAX_DAILY_SIGNAL,
+        },
         HttpStatus.REQUEST_TIMEOUT,
       );
     }
@@ -132,7 +148,9 @@ export class SignalsService {
 
     if (nearSignal) {
       throw new HttpException(
-        `You have another active signal near this point. Please enter a different entry point:`,
+        {
+          translationKey: 'signal.near',
+        },
         HttpStatus.CONFLICT,
       );
     }
@@ -143,7 +161,12 @@ export class SignalsService {
       Math.abs(signal.entryPrice - signal.minPrice) < 1 ||
       Math.abs(signal.entryPrice - signal.minPrice) > 200
     ) {
-      throw new HttpException('Invalid entry', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          translationKey: 'signal.invalidEntry',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     signal.publishable = owner.totalScore >= MIN_SIGNAL_SCORE;
@@ -229,11 +252,15 @@ export class SignalsService {
     // Check if user has gems
     const currentUser = await this.userModel.findById(user.id).exec();
     if (!currentUser) {
-      throw new NotAcceptableException('User not found');
+      throw new NotAcceptableException({
+        translationKey: 'userNotFound',
+      });
     }
 
     if (!currentUser.gem || currentUser.gem <= 0) {
-      throw new NotAcceptableException('Insufficient gems to analyze signal');
+      throw new NotAcceptableException({
+        translationKey: 'insufficientGems',
+      });
     }
 
     delete signal.owner;

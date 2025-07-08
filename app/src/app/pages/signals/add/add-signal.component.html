@@ -91,7 +91,7 @@
       mat-flat-button
       color="primary"
       type="submit"
-      [disabled]="!form.valid"
+      [disabled]="!form.valid || isSubmitting"
     >
       {{ 'addSignal.submit' | translate }}
     </button>

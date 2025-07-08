@@ -159,5 +159,18 @@
   "languageSelection": {
     "title": "Select Language",
     "description": "Please select your preferred language to continue using the application."
+  },
+  "apiError": {
+    "auth": {
+      "duplicate": "Phone number already exists"
+    },
+    "userNotFound": "User not found",
+    "insufficientGems": "Insufficient gems",
+    "signal": {
+      "invalidEntry": "Invalid signal entry",
+      "maxActive": "You have reached the maximum number of active signals ({{value}})",
+      "maxDaily": "You have reached the maximum number of daily signals ({{value}})",
+      "near": "You have a signal near this entry price"
+    }
   }
 }
