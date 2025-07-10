@@ -53,7 +53,7 @@
     "noGems": "You don't have any GEMs to analyze your signal"
   },
   "login": {
-    "phoneTitle": "login",
+    "phoneTitle": "Login/Register",
     "phoneDescription": "We will send you a verification code to your phone number",
     "phonePlaceholder": "Phone number",
     "phoneAction": "Send verification code",
@@ -70,6 +70,7 @@
   },
   "profile": {
     "pageTitle": "Profile",
+    "yourProfile": "Your Profile",
     "yourGems": "Your GEMs",
     "signals": "Signals",
     "totalSignals": "Total Signals",

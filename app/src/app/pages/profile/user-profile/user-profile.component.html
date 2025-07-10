@@ -3,33 +3,31 @@
 } @else if (userQuery.data()) {
   <mat-toolbar>
     <mat-toolbar-row>
+      <button mat-icon-button goBack>
+        <i class="fa-solid fa-chevron-left fa-xs rtl"></i>
+      </button>
       @if (isOwnProfile()) {
-        <button mat-button>
-          <i class="fa-solid fa-gem fa-lg"></i>
-          {{ 'profile.yourGems' | translate }}:
-          {{ userQuery.data()?.gem || 0 | number }}
-        </button>
+        <h1>{{ 'profile.yourProfile' | translate }}</h1>
         <span class="spacer"></span>
-        <button mat-stroked-button routerLink="/profile/edit">
-          <i class="fa-regular fa-edit"></i>
+        <button mat-button routerLink="/profile/edit">
           {{ 'profile.edit.pageTitle' | translate }}
+          <i class="fa-regular fa-edit"></i>
         </button>
       } @else {
-        <button mat-icon-button goBack>
-          <i class="fa-solid fa-chevron-left fa-xs rtl"></i>
-        </button>
       }
     </mat-toolbar-row>
-    <mat-toolbar-row>
-      <img
-        [appAvatar]="userQuery.data()"
-        [alt]="userQuery.data().title || userQuery.data().name"
-        class="toolbar-avatar"
-      />
-      <h1 class="toolbar-title">
-        {{ userQuery.data().title || userQuery.data().name }}
-      </h1>
-    </mat-toolbar-row>
+    @if (!isOwnProfile()) {
+      <mat-toolbar-row>
+        <img
+          [appAvatar]="userQuery.data()"
+          [alt]="userQuery.data().title || userQuery.data().name"
+          class="toolbar-avatar"
+        />
+        <h1 class="toolbar-title">
+          {{ userQuery.data().title || userQuery.data().name }}
+        </h1>
+      </mat-toolbar-row>
+    }
   </mat-toolbar>
   <div class="profile-container">
     <mat-card class="user-info-card">

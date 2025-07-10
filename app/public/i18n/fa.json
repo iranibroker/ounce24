@@ -53,7 +53,7 @@
     "noGems": "شما الماسی برای تحلیل سیگنال خود ندارید"
   },
   "login": {
-    "phoneTitle": "ورود",
+    "phoneTitle": "ورود/ثبت نام",
     "phoneDescription": "کد تایید را به شماره تلفن شما ارسال خواهیم کرد",
     "phonePlaceholder": "شماره تلفن",
     "phoneAction": "ارسال کد تایید",
@@ -70,6 +70,7 @@
   },
   "profile": {
     "pageTitle": "پروفایل",
+    "yourProfile": "پروفایل شما",
     "yourGems": "الماسهای شما",
     "signals": "سیگنال‌ها",
     "totalSignals": "کل سیگنال‌ها",
@@ -162,7 +163,7 @@
   },
   "apiError": {
     "auth": {
-      "duplicate": "شماره تلفن قبلاً استفاده شده است",
+      "duplicate": "شماره تلفن قبلاً استفاده شده است"
     },
     "userNotFound": "کاربر یافت نشد",
     "insufficientGems": "تعداد الماس کافی نیست",

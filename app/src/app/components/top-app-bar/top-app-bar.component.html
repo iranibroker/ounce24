@@ -1,0 +1,36 @@
+@let user = auth.userQuery.data();
+<mat-toolbar fxLayout="row" fxLayoutAlign="space-between center">
+  @if (user) {
+    <button mat-button class="user-button" routerLink="/profile">
+      <div class="user-button__container">
+        <img [src]="user.avatar" [appAvatar]="user" [size]="32" class="user-button__avatar" />
+        <div class="user-button__texts">
+          {{ user | fullname }}
+          <span ltr class="user-button__gem">
+            <i class="fa-solid fa-gem"></i>
+            {{ user.gem || 0 | number }}
+          </span>
+        </div>
+      </div>
+    </button>
+  } @else {
+    <button mat-button routerLink="/login">
+      <i class="fa-solid fa-user"></i>
+      {{ 'login.phoneTitle' | translate }}
+    </button>
+  }
+  <span spacer></span>
+  <button mat-icon-button class="language-button" (click)="toggleLanguage()">
+    <span class="language-button__flag">
+      {{ languageService.getCurrentLanguageConfig()?.flag }}
+    </span>
+  </button>
+  <a mat-stroked-button class="ounce-price-button" href="https://www.tradingview.com/symbols/XAUUSD" target="_blank">
+    <img
+      src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"
+      alt="logo"
+    />
+    {{ priceService.value() | currency }}
+  </a>
+
+</mat-toolbar>

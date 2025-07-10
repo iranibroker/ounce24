@@ -32,4 +32,9 @@ export class User {
   tag: string;
   rank?: number;
   gem?: number;
+
+  static getFullName(user?: User): string {
+    if (!user) return '';
+    return user.title || user.name;
+  }
 }
