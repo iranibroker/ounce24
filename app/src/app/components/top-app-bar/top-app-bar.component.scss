@@ -25,14 +25,17 @@ mat-toolbar {
   }
 
   &__texts {
+    color: var(--mat-sys-on-surface);
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
     align-items: flex-start;
+    font-size: 11px;
+    font-weight: 100;
   }
 
-  &__gem {
-    margin-top: -6px;
-  }
+  // &__gem {
+  //   margin-top: -12px;
+  // }
 }
 
 .ounce-price-button {

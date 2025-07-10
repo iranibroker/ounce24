@@ -33,6 +33,13 @@
     <mat-card class="user-info-card">
       <mat-card-content>
         <div class="stats-row">
+          @if (isOwnProfile()) {
+            <div class="stat-item">
+              <i class="fas fa-gem"></i>
+              <span>{{ 'profile.yourGems' | translate }}</span>
+              <strong>{{ userQuery.data().gem | number }}</strong>
+            </div>
+          }
           <div class="stat-item">
             <i class="fas fa-trophy"></i>
             <span>{{ 'profile.rank' | translate }}</span>

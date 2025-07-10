@@ -3,13 +3,13 @@
   @if (user) {
     <button mat-button class="user-button" routerLink="/profile">
       <div class="user-button__container">
-        <img [src]="user.avatar" [appAvatar]="user" [size]="32" class="user-button__avatar" />
+        <img [src]="user.avatar" [appAvatar]="user" [size]="24" class="user-button__avatar" />
         <div class="user-button__texts">
           {{ user | fullname }}
-          <span ltr class="user-button__gem">
+          <!-- <span ltr class="user-button__gem">
             <i class="fa-solid fa-gem"></i>
             {{ user.gem || 0 | number }}
-          </span>
+          </span> -->
         </div>
       </div>
     </button>
