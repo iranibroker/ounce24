@@ -22,6 +22,28 @@ export class SignalsController {
   ) {}
 
   @Public()
+  @Get('problem')
+  getProblemSignals() {
+    return this.signalModel
+      .find({
+        $or: [
+          {
+            $expr: {
+              $gt: ['$minPrice', '$maxPrice']
+            }
+          },
+          {
+            closedAtPrice: { $lt: 2900 }
+          }
+        ],
+        deletedAt: null
+      })
+      .sort({
+        createdAt: -1
+      }).exec();
+  }
+
+  @Public()
   @Get(':id')
   getSignal(@Param('id') id: string) {
     return this.signalModel.findById(id).populate(['owner']).exec();
