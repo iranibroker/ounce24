@@ -27,9 +27,9 @@
     />
     {{ priceService.value() | currency }}
   </a>
-  <button mat-icon-button [matMenuTriggerFor]="menu">
+  <!-- <button mat-icon-button [matMenuTriggerFor]="menu">
     <i class="fa-regular fa-ellipsis-vertical fa-sm"></i>
-  </button>
+  </button> -->
   <mat-menu #menu="matMenu">
     <button mat-menu-item (click)="toggleLanguage()">
       <span matIcon class="mat-icon">
