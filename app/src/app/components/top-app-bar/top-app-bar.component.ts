@@ -9,6 +9,7 @@ import { OuncePriceService } from '../../services/ounce-price.service';
 import { LanguageService } from '../../services/language.service';
 import { LanguageSelectionModalComponent } from '../language-selection-modal/language-selection-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-top-app-bar',
@@ -18,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
     SHARED,
     MatButtonModule,
     MatDividerModule,
+    MatMenuModule,
   ],
   templateUrl: './top-app-bar.component.html',
   styleUrl: './top-app-bar.component.scss',

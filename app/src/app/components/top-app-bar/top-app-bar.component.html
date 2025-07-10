@@ -20,17 +20,23 @@
     </button>
   }
   <span spacer></span>
-  <button mat-icon-button class="language-button" (click)="toggleLanguage()">
-    <span class="language-button__flag">
-      {{ languageService.getCurrentLanguageConfig()?.flag }}
-    </span>
-  </button>
   <a mat-stroked-button class="ounce-price-button" href="https://www.tradingview.com/symbols/XAUUSD" target="_blank">
     <img
-      src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"
-      alt="logo"
+    src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"
+    alt="logo"
     />
     {{ priceService.value() | currency }}
   </a>
+  <button mat-icon-button [matMenuTriggerFor]="menu">
+    <i class="fa-regular fa-ellipsis-vertical fa-sm"></i>
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="toggleLanguage()">
+      <span matIcon class="mat-icon">
+        {{ languageService.getCurrentLanguageConfig()?.flag }}
+      </span>
+      {{ languageService.getCurrentLanguageConfig()?.name }}
+    </button>
+  </mat-menu>
 
 </mat-toolbar>
