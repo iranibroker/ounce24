@@ -31,13 +31,13 @@
   }
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.stats-row {
+  display: flex;
   gap: 16px;
   padding: 16px 0;
 
   .stat-item {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;

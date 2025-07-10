@@ -91,12 +91,18 @@ export class AuthService {
   }
 
   async getUserInfo(userId: string) {
-    const user = await this.userModel.findById(userId);
+    const user = (await this.userModel.findById(userId)).toJSON();
+
     if (!user) {
       throw new NotFoundException({
         translationKey: 'userNotFound',
       });
     }
+
+    const rank = await this.userModel.countDocuments({
+      totalScore: { $gt: user.totalScore },
+    }).exec();
+    user.rank = rank + 1;
     return user;
   }
 

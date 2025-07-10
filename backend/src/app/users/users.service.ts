@@ -48,7 +48,7 @@ export class UsersService {
   async getLeaderboard(skip = 0, limit = 10, userId?: string) {
     const users = await this.userModel
       .find()
-      .sort({ score: -1 })
+      .sort({ totalScore: -1 })
       .skip(skip)
       .limit(limit)
       .exec();

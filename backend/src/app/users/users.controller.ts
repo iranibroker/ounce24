@@ -20,10 +20,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
 import { LoginUser } from '../auth/user.decorator';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
+    private auth: AuthService,
     private readonly usersService: UsersService,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
@@ -80,7 +82,7 @@ export class UsersController {
   @Public()
   @Get(':id')
   async getUserProfile(@Param('id') id: string) {
-    return this.usersService.findById(id);
+    return this.auth.getUserInfo(id);
   }
 
   @Public()

@@ -75,7 +75,8 @@
     "signals": "سیگنال‌ها",
     "totalSignals": "کل سیگنال‌ها",
     "winRate": "نرخ برد",
-    "avgRiskReward": "میانگین ریسک/سود",
+    "avgRiskReward": "میانگین r/r",
+    "rank": "رتبه",
     "avgProfit": "میانگین سود",
     "score": "امتیاز",
     "edit": {
