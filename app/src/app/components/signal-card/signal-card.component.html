@@ -86,14 +86,7 @@
   @if (signal().status === SignalStatus.Closed) {
     <mat-divider />
     <mat-card-actions>
-      <span [class.red]="pip() < 0" [class.green]="pip() > 0">
-        @if (pip() > 0) {
-          +
-        }
-        {{ pip() }} {{ 'signal.pip' | translate }}
-      </span>
       @if (showScore()) {
-        <span style="flex: 1"></span>
         <mat-chip-set>
           @if (signal().gem > 0) {
             <mat-chip (click)="openScoreInfo()">
@@ -114,6 +107,16 @@
             </span>
           </mat-chip>
         </mat-chip-set>
+      <span style="flex: 1"></span>
+      <mat-chip>
+        <span [class.red]="pip() < 0" [class.green]="pip() > 0">
+          @if (pip() > 0) {
+            +
+          }
+          {{ pip() }} {{ 'signal.pip' | translate }}
+        </span>
+      </mat-chip>
+
       }
     </mat-card-actions>
   }
