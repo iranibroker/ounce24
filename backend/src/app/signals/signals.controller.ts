@@ -32,6 +32,7 @@ export class SignalsController {
         status: SignalStatus.Closed,
         deletedAt: null
       })
+      .populate(['owner'])
       .sort({
         updatedAt: -1
       }).exec();
