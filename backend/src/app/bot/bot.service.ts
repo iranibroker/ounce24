@@ -27,7 +27,7 @@ export class BotService extends BaseBot {
     @InjectModel(User.name) private userModel: Model<User>,
     private signalBot: SignalBotService,
     private consultingBot: ConsultingBotService,
-    private auth: AuthService
+    private auth: AuthService,
   ) {
     super(userModel, auth, bot);
   }
@@ -41,6 +41,32 @@ export class BotService extends BaseBot {
   @Action('welcome_signal')
   welcomeSignalAction(@Ctx() ctx: Context) {
     this.welcomeSignal(ctx);
+  }
+
+  @Command('temp_link')
+  tempLink(@Ctx() ctx: Context) {
+    ctx.reply(
+      `📍 سیگنال رایگان انس طلا، همین‌جاست!
+
+📊 معامله‌گر انس هستی؟
+با انس ۲۴ می‌تونی هم سیگنال بدی، هم از سیگنال بقیه استفاده کنی!
+
+ما اینجا بهترین ایده‌های معاملاتی رو از دل بازار جمع کردیم؛ کاملاً رایگان، کاملاً کاربردی.
+
+✅ سیگنال‌های اعضای فعال کانال
+✅ مقایسه تحلیل‌ها و استراتژی‌ها
+✅ فرصتی برای دیده شدن و یاد گرفتن
+
+🎯 فقط کافیه روی دکمه زیر بزنی تا آخرین سیگنال‌های انس طلا رو ببینی 👇
+📌 فرصت یادگیری، تمرین و سود هم‌زمان`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'سیگنال‌ها', url: 'https://app.ounce24.com' }],
+          ],
+        },
+      },
+    );
   }
 
   @Command('support')
@@ -71,12 +97,12 @@ export class BotService extends BaseBot {
       for (const admin of ids) {
         this.bot.telegram.sendMessage(
           admin,
-          `${user.tag}\n${user.name}:\n\n${text}`
+          `${user.tag}\n${user.name}:\n\n${text}`,
         );
       }
     }
     await ctx.reply(
-      'پیام شما با موفقیت به مدیریت ارسال شد. ممنون از ثبت نظر شما'
+      'پیام شما با موفقیت به مدیریت ارسال شد. ممنون از ثبت نظر شما',
     );
     await ctx.sendChatAction('typing');
     this.welcome(ctx);
@@ -92,7 +118,7 @@ export class BotService extends BaseBot {
     await ctx.sendChatAction('typing');
     if (iban.length !== 24) {
       ctx.reply(
-        `شماره شبا وارد شده صحیح نیست. لطفا شماره شبای صحیح را وارد کنید:`
+        `شماره شبا وارد شده صحیح نیست. لطفا شماره شبای صحیح را وارد کنید:`,
       );
     } else {
       await this.userModel.findByIdAndUpdate(user.id, { iban }).exec();
