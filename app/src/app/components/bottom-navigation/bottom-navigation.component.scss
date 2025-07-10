@@ -6,6 +6,10 @@ mat-toolbar {
   bottom: 0;
   left: 0;
   right: 0;
+
+  a {
+    flex: 1
+  }
 }
 
 .nav-item-wrapper {

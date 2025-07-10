@@ -10,7 +10,8 @@
     "leaderboard": "leaderboard",
     "notifications": "notifications",
     "profile": "profile",
-    "signals": "signals"
+    "signals": "signals",
+    "podcast": "podcast"
   },
   "signal": {
     "add": "add",
