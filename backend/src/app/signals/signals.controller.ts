@@ -22,6 +22,23 @@ export class SignalsController {
   ) {}
 
   @Public()
+  @Get('today')
+  todaySignals() {
+    const date = new Date();
+    date.setHours(0,0,0,0);
+    return this.signalModel
+      .find({
+        closedAt: { $gte: date },
+        status: SignalStatus.Closed,
+        deletedAt: null
+      })
+      .sort({
+        updatedAt: -1
+      }).exec();
+  }
+  
+
+  @Public()
   @Get('problem')
   getProblemSignals() {
     return this.signalModel
