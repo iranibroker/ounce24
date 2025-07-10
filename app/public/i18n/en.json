@@ -13,6 +13,12 @@
     "signals": "signals",
     "podcast": "podcast"
   },
+  "podcast": {
+    "comingSoon": {
+      "title": "The podcast is currently in the process of being prepared in the Telegram channel of Ounce 24 and will be placed here soon",
+      "button": "@ounce24_signal"
+    }
+  },
   "signal": {
     "add": "add",
     "buy": "buy",

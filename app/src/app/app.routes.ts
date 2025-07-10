@@ -9,6 +9,7 @@ import { EditUserComponent } from './pages/profile/edit-user/edit-user.component
 import { LeaderboardComponent } from './pages/leaderboard/leaderboard.component';
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
 import { AvatarEditComponent } from './pages/profile/avatar-edit/avatar-edit.component';
+import { CommingSoonComponent } from './pages/podcast/comming-soon/comming-soon.component';
 
 export const appRoutes: Route[] = [
   {
@@ -22,6 +23,10 @@ export const appRoutes: Route[] = [
       {
         path: 'home',
         component: HomeComponent,
+      },
+      {
+        path: 'podcast',
+        component: CommingSoonComponent,
       },
       {
         path: 'signals',
