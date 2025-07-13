@@ -9,7 +9,7 @@ import { EditUserComponent } from './pages/profile/edit-user/edit-user.component
 import { LeaderboardComponent } from './pages/leaderboard/leaderboard.component';
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
 import { AvatarEditComponent } from './pages/profile/avatar-edit/avatar-edit.component';
-import { CommingSoonComponent } from './pages/podcast/comming-soon/comming-soon.component';
+import { PodcastListComponent } from './pages/podcast/podcast-list/podcast-list.component';
 
 export const appRoutes: Route[] = [
   {
@@ -26,7 +26,7 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'podcast',
-        component: CommingSoonComponent,
+        component: PodcastListComponent,
       },
       {
         path: 'signals',

@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './users/users.module';
+import { PodcastModule } from './podcast/podcast.module';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
@@ -48,6 +49,7 @@ import { HttpModule } from '@nestjs/axios';
     BotModule,
     OuncePriceModule,
     UsersModule,
+    PodcastModule,
   ],
   controllers: [AppController],
   providers: [AppService],
