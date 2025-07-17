@@ -721,7 +721,11 @@ ${Signal.getStatsText(user)}
       { owner: user._id, deletedAt: null },
       { deletedAt: new Date() },
     );
-    await this.userModel.findByIdAndUpdate(user.id, { resetAt: new Date() });
+    await this.userModel.findByIdAndUpdate(user.id, {
+      resetAt: new Date(),
+      score: 0,
+      totalScore: 0,
+    });
     const message = ctx.callbackQuery.message;
     ctx.deleteMessage(message.message_id);
     await ctx.answerCbQuery('امتیاز شما صفر و سیگنال‌های شما پاک شد.');
