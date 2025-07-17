@@ -64,13 +64,49 @@ export class BaseBot {
 از گزینه های زیر میتونی استفاده کنی
 هرجا گیرکردی از گزینه menu کنار استفاده کن
 
+ما به تازگی یک اپلیکیشن جدید تولید کردیم که میتونی ازش راحتتر استفاده کنی.
+📱 https://app.ounce24.com
+
 تعداد اعضای متصل به ربات: ${count} نفر
 `,
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'سیگنال', callback_data: 'welcome_signal' }],
-            [{ text: 'مشاوره تحلیلی', callback_data: 'consulting' }],
+            [{ text: '➕ ایجاد سیگنال جدید', callback_data: 'new_signal' }],
+            [
+              {
+                text: '🎯 بسته شده',
+                callback_data: 'my_closed_signals',
+              },
+              { text: '⛳️▶️ سیگنال‌های من', callback_data: 'my_signals' },
+            ],
+            [
+              {
+                text: 'جدول امتیازات',
+                url: 'https://app.ounce24.com/leaderboard',
+              },
+            ],
+            [
+              {
+                text: 'پروفایل و امتیاز',
+                url: 'https://app.ounce24.com/profile',
+              },
+            ],
+            [
+              {
+                text: '🎙️ پادکست تحلیلی هوش مصنوعی',
+                url: 'https://app.ounce24.com/podcast',
+              },
+            ],
+            [
+              {text: 'نمودار انس طلا', callback_data: 'charts'},
+            ],
+            [
+              {
+                text: 'پشتیبانی',
+                callback_data: 'support',
+              },
+            ],
           ],
           remove_keyboard: true,
         },

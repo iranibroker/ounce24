@@ -1,4 +1,4 @@
-import { SignalStatus, User } from '@ounce24/types';
+import { User } from '@ounce24/types';
 import mongoose from 'mongoose';
 
 export const UserSchema = new mongoose.Schema<User>(

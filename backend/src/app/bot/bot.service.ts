@@ -68,7 +68,7 @@ export class BotService extends BaseBot {
     );
   }
 
-  @Command('support')
+  @Action('support')
   support(@Ctx() ctx: Context) {
     ctx.reply(`من یک رباتم نمیتونم پشتیبانی بدم!
 ولی نظراتت رو میتونم بررسی کنم و کارم رو بهبود بدم

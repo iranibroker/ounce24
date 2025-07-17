@@ -63,88 +63,6 @@ export class SignalBotService extends BaseBot {
     private ouncePriceService: OuncePriceService,
   ) {
     super(userModel, auth, bot);
-
-    // this.ouncePriceService.currentService.obs.subscribe(async (price) => {
-    //   if (!price) return;
-
-    //   const signals = await this.signalModel
-    //     .find({
-    //       status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
-    //       deletedAt: null,
-    //     })
-    //     .populate('owner')
-    //     .exec();
-
-    //   for (const signal of signals) {
-    //     let statusChangeDetection = false;
-    //     if (signal.status === SignalStatus.Pending) {
-    //       if (Signal.activeTrigger(signal, price)) {
-    //         statusChangeDetection = true;
-    //         if (signal.messageId)
-    //           this.bot.telegram.deleteMessage(
-    //             process.env.PUBLISH_CHANNEL_ID,
-    //             signal.messageId,
-    //           );
-    //         signal.status = SignalStatus.Active;
-    //         signal.activeAt = new Date();
-    //         signal.telegramBot = getAvailableBot(signals);
-    //         signal.messageId = null;
-    //         this.signalModel
-    //           .findByIdAndUpdate(signal.id, {
-    //             status: signal.status,
-    //             activeAt: signal.activeAt,
-    //             telegramBot: signal.telegramBot,
-    //             messageId: null,
-    //           })
-    //           .exec();
-
-    //         this.bot.telegram.sendMessage(
-    //           signal.owner.telegramId,
-    //           Signal.getMessage(signal, { showId: true }),
-    //         );
-    //       }
-    //     } else {
-    //       statusChangeDetection = true;
-    //       if (!signal.telegramBot) {
-    //         signal.telegramBot = getAvailableBot(signals);
-    //         this.signalModel
-    //           .findByIdAndUpdate(signal.id, {
-    //             telegramBot: signal.telegramBot,
-    //           })
-    //           .exec();
-    //       }
-    //       if (Signal.closeTrigger(signal, price)) {
-    //         if (signal.messageId)
-    //           this.bot.telegram.deleteMessage(
-    //             process.env.PUBLISH_CHANNEL_ID,
-    //             signal.messageId,
-    //           );
-    //         signal.status = SignalStatus.Closed;
-    //         signal.closedAt = new Date();
-    //         signal.closedOuncePrice = price;
-    //         signal.messageId = null;
-    //         this.signalModel
-    //           .findByIdAndUpdate(signal.id, {
-    //             status: signal.status,
-    //             closedAt: signal.closedAt,
-    //             messageId: null,
-    //             closedOuncePrice: signal.closedOuncePrice,
-    //           })
-    //           .exec();
-    //         await this.userStats.updateUserSignals(signal.owner, signal);
-    //         this.bot.telegram.sendMessage(
-    //           signal.owner.telegramId,
-    //           Signal.getMessage(signal, { showId: true }),
-    //         );
-    //       }
-    //     }
-
-    //     // check change detections and update message
-    //     if (statusChangeDetection) {
-    //       this.publishSignal(signal, price);
-    //     }
-    //   }
-    // });
   }
 
   @OnEvent(EVENTS.SIGNAL_ACTIVE)
@@ -236,7 +154,7 @@ export class SignalBotService extends BaseBot {
     this.publishSignal(signal, this.ouncePriceService.current);
   }
 
-  @Command('new_signal')
+  @Action('new_signal')
   async newSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
@@ -433,7 +351,7 @@ export class SignalBotService extends BaseBot {
     }
   }
 
-  @Command('my_signals')
+  @Action('my_signals')
   async mySignals(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
@@ -475,7 +393,7 @@ export class SignalBotService extends BaseBot {
     }
   }
 
-  @Command('charts')
+  @Action('charts')
   charts(@Ctx() ctx: Context) {
     ctx.reply(`تایم فریم نمودار خود را انتخاب کنید:`, {
       reply_markup: {
@@ -521,7 +439,7 @@ export class SignalBotService extends BaseBot {
     ctx.reply('done');
   }
 
-  @Command('my_closed_signals')
+  @Action('my_closed_signals')
   async myClosedSignals(
     @Ctx() ctx: Context,
     limit = 10,
