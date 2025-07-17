@@ -91,13 +91,24 @@ export class UsersService {
 
     // If userId is provided, find that user's position
     if (userId && !users.some((user) => user.id === userId)) {
+      const user = await this.userModel.findById(userId).exec();
+      const condition = week
+        ? {
+            weekScore: {
+              $gt: user?.weekScore || 0,
+            },
+          }
+        : {
+            totalScore: {
+              $gt: user?.totalScore || 0,
+            },
+          };
       const userPosition = await this.userModel
         .countDocuments({
-          score: { $gt: (await this.userModel.findById(userId))?.score || 0 },
+          ...condition,
         })
         .exec();
 
-      const user = await this.userModel.findById(userId).exec();
       if (user) {
         usersWithRank.push({
           ...user.toObject(),
