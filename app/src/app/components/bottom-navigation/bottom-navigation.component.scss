@@ -6,9 +6,12 @@ mat-toolbar {
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 90;
+  height: 72px;
 
   a {
-    flex: 1
+    flex: 1;
+    height: 48px;
   }
 }
 
