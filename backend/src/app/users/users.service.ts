@@ -72,10 +72,12 @@ export class UsersService {
       .exec();
   }
 
-  async getLeaderboard(skip = 0, limit = 10, userId?: string) {
+  async getLeaderboard(skip = 0, limit = 10, userId?: string, week = false) {
+    const sort: any = week ? { weekScore: -1 } : { totalScore: -1 };
+
     const users = await this.userModel
       .find()
-      .sort({ totalScore: -1 })
+      .sort(sort)
       .skip(skip)
       .limit(limit)
       .exec();

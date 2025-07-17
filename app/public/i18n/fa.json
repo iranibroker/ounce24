@@ -106,6 +106,8 @@
     }
   },
   "leaderboard": {
+    "week": "هفته",
+    "total": "کل",
     "signalCount": "{{value}} سیگنال",
     "scoreInfo": {
       "title": "اطلاعات امتیاز",

@@ -65,6 +65,12 @@ export class UsersController {
   }
 
   @Public()
+  @Get('leaderboard/week')
+  async getLeaderboardWeek(@Query('userId') userId?: string) {
+    return this.usersService.getLeaderboard(0, 30, userId, true);
+  }
+
+  @Public()
   @Get(':id')
   async getUserProfile(@Param('id') id: string) {
     return this.auth.getUserInfo(id);

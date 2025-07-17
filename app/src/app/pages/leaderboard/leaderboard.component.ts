@@ -4,11 +4,7 @@ import { User } from '@ounce24/types';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
 import { TranslateModule } from '@ngx-translate/core';
-import { DataLoadingComponent } from '../../components/data-loading/data-loading.component';
 import { RouterModule } from '@angular/router';
 import { SHARED } from '../../shared';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,22 +13,22 @@ import { ScoreInfoDialogComponent } from '../../components/score-info-dialog/sco
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../services/auth.service';
+import { MatTabsModule } from '@angular/material/tabs';
+import { LeaderboardTableComponent } from './table/table.component';
 
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
   imports: [
     CommonModule,
-    MatListModule,
-    MatIconModule,
-    MatDividerModule,
     TranslateModule,
     RouterModule,
-    DataLoadingComponent,
     SHARED,
     MatButtonModule,
     MatTooltipModule,
     MatToolbarModule,
+    MatTabsModule,
+    LeaderboardTableComponent,
   ],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
@@ -47,6 +43,21 @@ export class LeaderboardComponent {
     queryFn: () =>
       lastValueFrom(
         this.http.get<User[]>('/api/users/leaderboard', {
+          params: this.authService.userQuery.data()
+            ? {
+                userId: this.authService.userQuery.data()?.id,
+              }
+            : undefined,
+        }),
+      ),
+    refetchInterval: 30000,
+  }));
+
+  queryWeek = injectQuery(() => ({
+    queryKey: ['leaderboardWeek', this.authService.userQuery.data()?.id],
+    queryFn: () =>
+      lastValueFrom(
+        this.http.get<User[]>('/api/users/leaderboard/week', {
           params: this.authService.userQuery.data()
             ? {
                 userId: this.authService.userQuery.data()?.id,

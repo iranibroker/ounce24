@@ -105,6 +105,8 @@
     }
   },
   "leaderboard": {
+    "week": "Week",
+    "total": "Total",
     "signalCount": "{{value}} signals",
     "scoreInfo": {
       "title": "Score Information",

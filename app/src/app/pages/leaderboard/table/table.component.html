@@ -1,0 +1,31 @@
+@let userList = data();
+@if (!userList) {
+  <app-data-loading />
+} @else {
+  <mat-nav-list dir="ltr">
+    @for (user of userList; track user._id; let i = $index) {
+      <a
+        mat-list-item
+        routerLink="/profile/{{ user.id }}"
+        [class.owner]="user.id === authService.userQuery.data()?.id"
+      >
+        <span matListItemIcon class="rank">{{ user.rank }}</span>
+        <img
+          matListItemAvatar
+          [appAvatar]="user"
+          [alt]="user.title || user.name"
+        />
+        <span matListItemTitle>{{ user.title || user.name }}</span>
+        <span matListItemLine>{{
+          'leaderboard.signalCount' | translate: { value: user.totalSignals }
+        }}</span>
+        <span matListItemMeta class="score">
+          <i class="fa-solid fa-star"></i>
+          {{ isWeek() ? user.weekScore?.toFixed(1) : user.totalScore?.toFixed(1) }}
+        </span>
+        <mat-divider></mat-divider>
+      </a>
+      @if (!$last) {}
+    }
+  </mat-nav-list>
+}

@@ -10,7 +10,20 @@
   </mat-toolbar-row>
 </mat-toolbar>
 
-<div class="leaderboard-container">
+<mat-tab-group>
+  <mat-tab label="{{ 'leaderboard.week' | translate }}">
+    <ng-template matTabContent>
+      <app-leaderboard-table [data]="queryWeek.data()" [isWeek]="true" />
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="{{ 'leaderboard.total' | translate }}">
+    <ng-template matTabContent>
+      <app-leaderboard-table [data]="query.data()" />
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>
+
+<!-- <div class="leaderboard-container">
   @if (query.isLoading()) {
     <app-data-loading />
   } @else if (query.data()) {
@@ -41,4 +54,4 @@
       }
     </mat-nav-list>
   }
-</div>
+</div> -->
