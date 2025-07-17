@@ -29,6 +29,7 @@ export class User {
   iban: string;
 
   score?: number;
+  weekScore?: number;
   tag: string;
   rank?: number;
   gem?: number;

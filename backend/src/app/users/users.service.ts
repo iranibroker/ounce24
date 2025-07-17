@@ -20,11 +20,21 @@ export class UsersService {
   }
 
   async calculateUserStats(user: User) {
+    const now = new Date();
+    const daysSinceSaturday = (now.getUTCDay() + 1) % 7; // Days since last Saturday
+    const lastSaturday = new Date(now);
+    lastSaturday.setUTCDate(now.getUTCDate() - daysSinceSaturday);
+    lastSaturday.setUTCHours(0, 16, 0, 0);
+
     const userSignals = await this.signalModel.find({
       owner: user,
       status: { $in: [SignalStatus.Closed] },
       deletedAt: null,
     });
+
+    if (userSignals.length === 0) {
+      return;
+    }
 
     const totalSignals = userSignals.length;
     const winSignals = userSignals.filter((s) => s.pip > 0).length;
@@ -34,14 +44,31 @@ export class UsersService {
         totalSignals || 0;
     const totalScore = userSignals.reduce((acc, s) => acc + s.score, 0);
 
-    this.userModel
-      .findByIdAndUpdate(user, {
-        totalSignals,
-        winRate,
-        avgRiskReward,
-        totalScore,
-        score: totalScore,
-      })
+    const weekScore = userSignals.reduce((acc, s) => {
+      if (
+        s.closedAt &&
+        new Date(s.createdAt).valueOf() >= lastSaturday.valueOf()
+      ) {
+        return acc + s.score;
+      }
+      return acc;
+    }, 0);
+
+    return this.userModel
+      .findByIdAndUpdate(
+        user,
+        {
+          totalSignals,
+          winRate,
+          avgRiskReward,
+          totalScore,
+          score: totalScore,
+          weekScore,
+        },
+        {
+          new: true,
+        },
+      )
       .exec();
   }
 

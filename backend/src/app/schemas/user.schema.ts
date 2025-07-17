@@ -19,6 +19,7 @@ export const UserSchema = new mongoose.Schema<User>(
     iban: { type: String, required: false },
     gem: { type: Number, required: true, default: 0 },
     alternativeTelegramToken: { type: String, required: false },
+    weekScore: { type: Number, required: true, default: 0 },
   },
   {
     timestamps: true,

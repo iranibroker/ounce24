@@ -35,34 +35,19 @@ export class UsersController {
   @Public()
   @Get('stats/recalculate')
   async recalculateAllUserStats() {
-    // Get all closed signals
-    const closedSignals = await this.signalModel.find({
-      status: SignalStatus.Closed,
-      deletedAt: null,
-    });
+    const users = await this.userModel.find({});
 
-    // Group signals by owner
-    const signalsByOwner = closedSignals.reduce<Record<string, Signal[]>>(
-      (acc, signal) => {
-        if (!signal.owner) return acc;
-        const ownerId = signal.owner.toString();
-        if (!acc[ownerId]) {
-          acc[ownerId] = [];
-        }
-        acc[ownerId].push(signal);
-        return acc;
-      },
-      {},
-    );
-
-    // Calculate stats for each owner
     const results = await Promise.all(
-      Object.entries(signalsByOwner).map(async ([ownerId, signals]) => {
-        const owner = signals[0].owner;
-        await this.usersService.calculateUserStats(owner);
+      users.map(async (user) => {
+        const updatedUser = await this.usersService.calculateUserStats(user);
         return {
-          ownerId,
-          signalsCount: signals.length,
+          id: user.id,
+          name: user.name,
+          title: user.title,
+          weekScore: updatedUser?.weekScore || 0,
+          totalScore: updatedUser?.totalScore || 0,
+          score: updatedUser?.score || 0,
+          totalSignals: updatedUser?.totalSignals || 0,
         };
       }),
     );
