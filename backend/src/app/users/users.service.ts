@@ -4,6 +4,7 @@ import { Signal, SignalStatus, User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UsersService {
@@ -21,10 +22,10 @@ export class UsersService {
 
   async calculateUserStats(user: User) {
     const now = new Date();
-    const daysSinceSaturday = (now.getUTCDay() + 1) % 7; // Days since last Saturday
-    const lastSaturday = new Date(now);
-    lastSaturday.setUTCDate(now.getUTCDate() - daysSinceSaturday);
-    lastSaturday.setUTCHours(0, 16, 0, 0);
+    const daysSinceMonday = (now.getUTCDay() + 6) % 7; // Days since last Monday (Monday = 1, Sunday = 0)
+    const lastMonday = new Date(now);
+    lastMonday.setUTCDate(now.getUTCDate() - daysSinceMonday);
+    lastMonday.setUTCHours(0, 0, 0, 0);
 
     const userSignals = await this.signalModel.find({
       owner: user,
@@ -47,7 +48,7 @@ export class UsersService {
     const weekScore = userSignals.reduce((acc, s) => {
       if (
         s.closedAt &&
-        new Date(s.createdAt).valueOf() >= lastSaturday.valueOf()
+        new Date(s.createdAt).valueOf() >= lastMonday.valueOf()
       ) {
         return acc + s.score;
       }
@@ -129,5 +130,15 @@ export class UsersService {
       .skip(skip)
       .limit(limit)
       .exec();
+  }
+
+  @Cron('0 15 0 * * 1', {
+    timeZone: 'UTC',
+  })
+  async resetWeekScore() {
+    const users = await this.userModel.find().exec();
+    for (const user of users) {
+      await this.calculateUserStats(user);
+    }
   }
 }

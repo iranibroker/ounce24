@@ -16,6 +16,10 @@
   font-weight: 600 !important;
 }
 
+a.mat-mdc-list-item {
+  height: 56px !important;
+}
+
 img.mat-mdc-list-item-avatar {
   border-radius: 4px !important;
   margin-left: 32px !important;
@@ -24,8 +28,11 @@ img.mat-mdc-list-item-avatar {
 .rank {
   position: absolute;
   left: 0px;
-  top: 7px;
+  top: 0px;
+  line-height: 56px;
+  text-align: center;
   font-size: 0.8rem;
+  margin: 0 !important;
 }
 
 .mat-mdc-list-item-title {
