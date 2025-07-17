@@ -47,6 +47,8 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
   ? 20
   : Number(process.env.MIN_SIGNAL_SCORE);
 
+const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
+
 @Public()
 @Injectable()
 @Update()
@@ -787,7 +789,7 @@ ${Signal.getStatsText(user)}
                     },
                     {
                       text: 'لیست سیگنال‌ها',
-                      url: 'https://app.ounce24.com',
+                      url: APP_URL,
                     },
                   ],
                 ],
@@ -807,7 +809,7 @@ ${Signal.getStatsText(user)}
                 [
                   {
                     text: 'لیست سیگنال‌ها',
-                    url: 'https://app.ounce24.com',
+                    url: APP_URL,
                   },
                 ],
               ],

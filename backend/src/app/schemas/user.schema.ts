@@ -18,6 +18,7 @@ export const UserSchema = new mongoose.Schema<User>(
     resetAt: { type: Date, required: false },
     iban: { type: String, required: false },
     gem: { type: Number, required: true, default: 0 },
+    alternativeTelegramToken: { type: String, required: false },
   },
   {
     timestamps: true,

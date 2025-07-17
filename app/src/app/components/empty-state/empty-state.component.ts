@@ -10,5 +10,6 @@ import { CommonModule } from '@angular/common';
 })
 export class EmptyStateComponent {
   iconName = input('');
+  icon = input('');
   text = input('');
 }

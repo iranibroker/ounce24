@@ -4,6 +4,8 @@ import { Context, Telegraf } from 'telegraf';
 import { PersianNumberService } from '@ounce24/utils';
 import { AuthService } from '../auth/auth.service';
 
+const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
+
 export enum UserStateType {
   Login,
   Otp,
@@ -65,13 +67,13 @@ export class BaseBot {
 هرجا گیرکردی از گزینه menu کنار استفاده کن
 
 ما به تازگی یک اپلیکیشن جدید تولید کردیم که میتونی ازش راحتتر استفاده کنی.
-📱 https://app.ounce24.com
 
 تعداد اعضای متصل به ربات: ${count} نفر
 `,
       {
         reply_markup: {
           inline_keyboard: [
+            [{ text: '📱 اپلیکیشن', callback_data: 'app' }],
             [{ text: '➕ ایجاد سیگنال جدید', callback_data: 'new_signal' }],
             [
               {
@@ -83,19 +85,19 @@ export class BaseBot {
             [
               {
                 text: 'جدول امتیازات',
-                url: 'https://app.ounce24.com/leaderboard',
+                url: `${APP_URL}/leaderboard`,
               },
             ],
             [
               {
                 text: 'پروفایل و امتیاز',
-                url: 'https://app.ounce24.com/profile',
+                url: `${APP_URL}/profile`,
               },
             ],
             [
               {
                 text: '🎙️ پادکست تحلیلی هوش مصنوعی',
-                url: 'https://app.ounce24.com/podcast',
+                url: `${APP_URL}/podcast`,
               },
             ],
             [

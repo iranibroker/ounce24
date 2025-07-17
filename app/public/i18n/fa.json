@@ -73,7 +73,10 @@
     "otpResend": "ارسال مجدد کد",
     "remainingTime": "زمان باقی‌مانده: {{value}} ثانیه",
     "tokenExpired": "کد تایید منقضی شده",
-    "resendToken": "ارسال مجدد کد"
+    "resendToken": "ارسال مجدد کد",
+    "telegram": {
+      "text": "در حال ورود از طریق تلگرام..."
+    }
   },
   "profile": {
     "pageTitle": "پروفایل",

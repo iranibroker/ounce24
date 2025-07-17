@@ -18,6 +18,8 @@ import { AuthService } from '../auth/auth.service';
 import { ConsultingBotService } from './consulting-bot.service';
 import { Public } from '../auth/public.decorator';
 
+const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
+
 @Public()
 @Injectable()
 @Update()
@@ -61,11 +63,31 @@ export class BotService extends BaseBot {
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'سیگنال‌های فعال', url: 'https://app.ounce24.com?utm_source=telegram&utm_medium=pin&utm_campaign=introduce&utm_id=start' }],
+            [{ text: 'سیگنال‌های فعال', url: `${APP_URL}?utm_source=telegram&utm_medium=pin&utm_campaign=introduce&utm_id=start` }],
           ],
         },
       },
     );
+  }
+
+  @Action('app')
+  async app(@Ctx() ctx: Context) {
+    const token = await this.auth.createAlternativeTelegramToken(ctx.from.id);
+    if (token) {
+      ctx.reply(`برای ورود به اپلیکیشن از دکمه زیر استفاده کنید 👇`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'ورود به اپلیکیشن', url: `${APP_URL}/login/telegram?token=${token}` }],
+          ],
+        },
+      }).then((message) => {
+        setTimeout(() => {
+          this.bot.telegram.deleteMessage(ctx.from.id, message.message_id);
+        }, 20000);
+      });
+    } else {
+      ctx.reply('خطایی رخ داده است. لطفا دوباره تلاش کنید.');
+    }
   }
 
   @Action('support')

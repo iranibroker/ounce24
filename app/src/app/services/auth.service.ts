@@ -58,9 +58,7 @@ export class AuthService {
           )
           .toPromise(),
       onSuccess: async (response) => {
-        this.token.set(response);
-        localStorage.setItem(JWT_KEY, response);
-        await this.userQuery.refetch();
+        await this.saveToken(response);
         return response;
       },
     }),
@@ -78,4 +76,10 @@ export class AuthService {
       this.token.set(null);
     },
   }));
+
+  async saveToken(token: string) {
+    this.token.set(token);
+    localStorage.setItem(JWT_KEY, token);
+    await this.userQuery.refetch();
+  }
 }

@@ -54,6 +54,22 @@ export class AuthService {
     return token;
   }
 
+  async createAlternativeTelegramToken(telegramId: number) {
+    const user = await this.userModel.findOne({ telegramId });
+    if (user) {
+      const payload: Partial<User> = {
+        id: user.id,
+        phone: user.phone,
+      };
+
+      const token = this.jwtService.sign(payload, {
+        secret: process.env.JWT_ACCESS_SECRET,
+        expiresIn: '3d',
+      });
+      return token;
+    }
+  }
+
   async sendToken(mobilePhone: string, validateTime = 70000) {
     const phone = PersianNumberService.toEnglish(mobilePhone);
     const token = Math.floor(Math.random() * 8000 + 1000).toString();
@@ -99,9 +115,11 @@ export class AuthService {
       });
     }
 
-    const rank = await this.userModel.countDocuments({
-      totalScore: { $gt: user.totalScore },
-    }).exec();
+    const rank = await this.userModel
+      .countDocuments({
+        totalScore: { $gt: user.totalScore },
+      })
+      .exec();
     user.rank = rank + 1;
     return user;
   }

@@ -2,6 +2,9 @@
   @if (iconName()) {
     <i class="fa-solid fa-{{ iconName() }}" class="empty-state__icon"></i>
   }
+  @if (icon()) {
+    <i class="{{ icon() }}" class="empty-state__icon"></i>
+  }
   @if (text()) {
     <p class="empty-state__text">{{ text() }}</p>
   }

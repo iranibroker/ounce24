@@ -7,6 +7,8 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 const MAX_ERROR = 3;
 
+const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
+
 @Injectable()
 export class OuncePublishBotService {
   private errorCount = 0;
@@ -46,7 +48,7 @@ export class OuncePublishBotService {
                 [
                   {
                     text: 'لیست سیگنال‌ها',
-                    url: 'https://app.ounce24.com',
+                    url: APP_URL,
                   },
                 ],
               ],
@@ -88,7 +90,7 @@ export class OuncePublishBotService {
                 [
                   {
                     text: 'لیست سیگنال‌ها',
-                    url: 'https://app.ounce24.com',
+                    url: APP_URL,
                   },
                 ],
               ],

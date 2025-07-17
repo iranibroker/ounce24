@@ -73,7 +73,10 @@
     "otpResend": "Resend OTP",
     "remainingTime": "Time remaining: {{value}}s",
     "tokenExpired": "OTP expired",
-    "resendToken": "Resend OTP"
+    "resendToken": "Resend OTP",
+    "telegram": {
+      "text": "Logging in with Telegram..."
+    }
   },
   "profile": {
     "pageTitle": "Profile",
