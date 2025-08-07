@@ -21,6 +21,7 @@
     "@angular/platform-browser": "~19.1.0",
     "@angular/platform-browser-dynamic": "~19.1.0",
     "@angular/router": "~19.1.0",
+    "@microsoft/clarity": "^1.0.0",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.2.2",

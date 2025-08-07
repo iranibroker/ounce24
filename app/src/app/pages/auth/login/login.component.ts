@@ -10,6 +10,7 @@ import { AuthService } from '../../../services/auth.service';
 import { SHARED } from '../../../shared';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-login',
@@ -34,12 +35,14 @@ export class LoginComponent {
     private auth: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private analyticsService: AnalyticsService,
   ) {}
 
   async sendToken(phone: string, ev: SubmitEvent) {
     if (phone.length !== 11) return;
     phone = PersianNumberService.toEnglish(phone);
     this.loading.set(true);
+    this.analyticsService.trackEvent('send_token', { phone });
     await this.auth.sendTokenMutation.mutateAsync(`${phone}`);
     this.router.navigate(['/login/otp'], {
       state: { phone: `${phone}` },

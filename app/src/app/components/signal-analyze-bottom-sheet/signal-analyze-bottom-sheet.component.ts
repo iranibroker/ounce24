@@ -18,6 +18,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { GemRequiredDialogComponent } from '../gem-required-dialog/gem-required-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
+import { AnalyticsService } from '../../services/analytics.service';
 
 interface SignalAnalysisResponse {
   analysis: string;
@@ -50,6 +51,7 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
   private http = inject(HttpClient);
   private data = inject(MAT_BOTTOM_SHEET_DATA) as SignalAnalyzeData;
   private dialog = inject(MatDialog);
+  private analyticsService = inject(AnalyticsService);
   private translate = inject(TranslateService);
   signal!: Signal;
 
@@ -77,6 +79,7 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
 
   ngOnInit() {
     this.signal = this.data.signal;
+    this.analyticsService.trackEvent('signal_analyze_bottom_sheet_opened');
   }
 
   close() {
@@ -84,6 +87,7 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
   }
 
   analyzeSignal() {
+    this.analyticsService.trackEvent('analyze_signal');
     this.analyzeMutation.mutate(this.signal);
   }
 }

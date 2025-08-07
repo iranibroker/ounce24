@@ -19,6 +19,7 @@ import { SHARED } from '../../../shared';
 import { SignalAnalyzeService } from '../../../services/signal-analyze.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OuncePriceService } from '../../../services/ounce-price.service';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-add-signal',
@@ -49,6 +50,7 @@ export class AddSignalComponent {
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private analyzeService: SignalAnalyzeService,
+    private analyticsService: AnalyticsService,
   ) {
     this.form = this.fb.group({
       type: [SignalType.Buy, Validators.required],
@@ -156,6 +158,9 @@ export class AddSignalComponent {
         next: () => {
           this.snackBar.open('Signal created successfully', 'Close', {
             duration: 3000,
+          });
+          this.analyticsService.trackEvent('signal_created', {
+            signal,
           });
           this.router.navigate(['/signals']);
         },

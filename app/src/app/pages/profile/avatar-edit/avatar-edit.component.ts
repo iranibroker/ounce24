@@ -13,6 +13,7 @@ import { injectMutation } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { User } from '@ounce24/types';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-avatar-edit',
@@ -36,6 +37,7 @@ export class AvatarEditComponent {
   private translate = inject(TranslateService);
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
+  private analyticsService = inject(AnalyticsService);
   COLORS = [
     '00acc1',
     '1e88e5',
@@ -96,6 +98,7 @@ export class AvatarEditComponent {
       mutationFn: (avatarData) =>
         this.http.patch<User>('/api/users/avatar', avatarData).toPromise(),
       onSuccess: () => {
+        this.analyticsService.trackEvent('avatar_edit_success');
         this.snackBar.open(
           this.translate.instant('profile.avatar.success'),
           '',
@@ -128,6 +131,7 @@ export class AvatarEditComponent {
   );
 
   onSave() {
+    this.analyticsService.trackEvent('avatar_edit');
     const hasGem = this.authService.userQuery.data()?.gem > 0;
     this.dialog
       .open(GemRequiredDialogComponent, {

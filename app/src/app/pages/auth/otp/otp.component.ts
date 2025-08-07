@@ -19,6 +19,7 @@ import { SHARED } from '../../../shared';
 import { AuthService } from '../../../services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-otp',
@@ -55,6 +56,7 @@ export class OtpComponent implements OnDestroy {
     private router: Router,
     private snack: MatSnackBar,
     private translate: TranslateService,
+    private analyticsService: AnalyticsService,
   ) {
     const phone = this.router.getCurrentNavigation()?.extras?.state?.['phone'];
 
@@ -83,6 +85,7 @@ export class OtpComponent implements OnDestroy {
         phone: this.phone,
         otp: token,
       });
+      this.analyticsService.trackEvent('login', { phone: this.phone });
       const user = this.auth.userQuery.data();
       if (user?.name) {
         window.history.go(-2);
