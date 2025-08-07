@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Signal, SignalStatus, User } from '@ounce24/types';
+import {
+  Achievement,
+  AchievementType,
+  Signal,
+  SignalStatus,
+  User,
+} from '@ounce24/types';
 import { Model } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
@@ -11,6 +17,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    @InjectModel(Achievement.name) private achievementModel: Model<Achievement>,
   ) {}
 
   @OnEvent(EVENTS.SIGNAL_CLOSED)
@@ -150,6 +157,20 @@ export class UsersService {
     const users = await this.userModel.find().exec();
     for (const user of users) {
       await this.calculateUserStats(user);
+    }
+  }
+
+  @Cron('0 30 0 * * 6', {
+    timeZone: 'UTC',
+  })
+  async weekWinners() {
+    const leaderboard = await this.getLeaderboard(0, 10, undefined, true);
+    const winner = leaderboard[0];
+    if (winner) {
+      await this.achievementModel.create({
+        type: AchievementType.WeekWin,
+        user: winner,
+      });
     }
   }
 }
