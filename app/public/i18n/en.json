@@ -102,7 +102,8 @@
       "error": "Failed to update avatar",
       "noGems": "You don't have any GEMs to change your profile picture",
       "useGem": "You need 1 GEM. Do you want to use to change your profile picture?"
-    }
+    },
+    "achievements": "Achievements"
   },
   "leaderboard": {
     "week": "Week",
@@ -184,6 +185,11 @@
       "maxActive": "You have reached the maximum number of active signals ({{value}})",
       "maxDaily": "You have reached the maximum number of daily signals ({{value}})",
       "near": "You have a signal near this entry price"
+    }
+  },
+  "achievement": {
+    "type": {
+      "WEEK_WIN": "Week Winner"
     }
   }
 }

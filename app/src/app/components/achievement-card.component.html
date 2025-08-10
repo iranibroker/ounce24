@@ -1,0 +1,17 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title-group>
+      <mat-card-title>{{
+        achievement().type | achievementType
+      }}</mat-card-title>
+      <mat-card-subtitle>{{
+        achievement().createdAt | date: 'YYYY-MM-dd'
+      }}</mat-card-subtitle>
+      <img
+        mat-card-sm-image
+        src="images/achievements/{{ achievement().type }}.png"
+      />
+    </mat-card-title-group>
+  </mat-card-header>
+  <mat-card-content></mat-card-content>
+</mat-card>

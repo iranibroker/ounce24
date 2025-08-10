@@ -12,13 +12,15 @@ import {
 } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { Signal } from '@ounce24/types';
+import { Achievement, Signal } from '@ounce24/types';
 import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
 import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { Location } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { SHARED } from '../../../shared';
+import { MatTabsModule } from '@angular/material/tabs';
+import { AchievementCardComponent } from '../../../components/achievement-card.component';
 
 const PAGE_SIZE = 20;
 
@@ -36,7 +38,9 @@ const PAGE_SIZE = 20;
     SignalCardComponent,
     DataLoadingComponent,
     EmptyStateComponent,
+    MatTabsModule,
     SHARED,
+    AchievementCardComponent,
   ],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
@@ -83,7 +87,30 @@ export class UserProfileComponent {
       lastPageData.length === PAGE_SIZE ? lastPage + 1 : null,
   }));
 
-  data = computed(() => {
+  achievementsQuery = injectInfiniteQuery(() => ({
+    queryKey: ['user-achievements', this.route.snapshot.params['id']],
+    queryFn: async ({ pageParam }) => {
+      return lastValueFrom(
+        this.http.get<Achievement[]>(
+          `/api/users/${this.route.snapshot.params['id'] || this.auth.userQuery.data()?.id}/achievements`,
+          {
+            params: {
+              page: pageParam,
+            },
+          },
+        ),
+      );
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPageData, allPages, lastPage) =>
+      lastPageData.length === PAGE_SIZE ? lastPage + 1 : null,
+  }));
+
+  signals = computed(() => {
     return this.signalsQuery.data()?.pages?.flat();
+  });
+
+  achievements = computed(() => {
+    return this.achievementsQuery.data()?.pages?.flat();
   });
 }

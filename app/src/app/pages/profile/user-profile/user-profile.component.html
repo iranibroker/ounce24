@@ -13,8 +13,7 @@
           {{ 'profile.edit.pageTitle' | translate }}
           <i class="fa-regular fa-edit"></i>
         </button>
-      } @else {
-      }
+      } @else {}
     </mat-toolbar-row>
     @if (!isOwnProfile()) {
       <mat-toolbar-row>
@@ -71,27 +70,56 @@
       </mat-card-content>
     </mat-card>
 
-    <div class="signals-container">
-      <h2>{{ 'profile.signals' | translate }}</h2>
-      @if (data()?.length > 0) {
-        @for (signal of data(); track $index) {
-          <app-signal-card [signal]="signal" [showScore]="true" />
-        }
-      } @else if (data() && data()?.length === 0) {
-        <app-empty-state
-          iconName="face-frown"
-          [text]="'signal.emptyState' | translate"
-        />
-      }
-      @if (signalsQuery.isLoading() || signalsQuery.isFetchingNextPage()) {
-        <app-data-loading />
-      } @else {
-        @if (signalsQuery.hasNextPage()) {
-          <button mat-button (click)="signalsQuery.fetchNextPage()">
-            {{ 'app.loadMore' | translate }}
-          </button>
-        }
-      }
-    </div>
+    <mat-tab-group>
+      <mat-tab label="{{ 'profile.signals' | translate }}">
+        <div class="list-container">
+          @if (signals()?.length > 0) {
+            @for (signal of signals(); track $index) {
+              <app-signal-card [signal]="signal" [showScore]="true" />
+            }
+          } @else if (signals() && signals()?.length === 0) {
+            <app-empty-state
+              iconName="face-frown"
+              [text]="'signal.emptyState' | translate"
+            />
+          }
+          @if (signalsQuery.isLoading() || signalsQuery.isFetchingNextPage()) {
+            <app-data-loading />
+          } @else {
+            @if (signalsQuery.hasNextPage()) {
+              <button mat-button (click)="signalsQuery.fetchNextPage()">
+                {{ 'app.loadMore' | translate }}
+              </button>
+            }
+          }
+        </div>
+      </mat-tab>
+      <mat-tab label="{{ 'profile.achievements' | translate }}">
+        <div class="list-container">
+          @if (achievements()?.length > 0) {
+            @for (achievement of achievements(); track $index) {
+              <app-achievement-card [achievement]="achievement" />
+            }
+          } @else if (achievements() && achievements()?.length === 0) {
+            <app-empty-state
+              iconName="face-frown"
+              [text]="'achievement.emptyState' | translate"
+            />
+          }
+          @if (
+            achievementsQuery.isLoading() ||
+            achievementsQuery.isFetchingNextPage()
+          ) {
+            <app-data-loading />
+          } @else {
+            @if (achievementsQuery.hasNextPage()) {
+              <button mat-button (click)="achievementsQuery.fetchNextPage()">
+                {{ 'app.loadMore' | translate }}
+              </button>
+            }
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </div>
 }

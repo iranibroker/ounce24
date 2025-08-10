@@ -61,16 +61,11 @@
   }
 }
 
-.signals-container {
+.list-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
-
-  h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: var(--mat-sys-on-surface);
-  }
+  padding: 16px 0;
 }
 
 .toolbar-avatar {
