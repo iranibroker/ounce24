@@ -79,7 +79,7 @@ export class UsersController {
   }
 
   @Public()
-  @Get('achievements/:id')
+  @Get(':id/achievements')
   async getUserAchievements(
     @Param('id') id: string,
     @Query('page') page = 0,
