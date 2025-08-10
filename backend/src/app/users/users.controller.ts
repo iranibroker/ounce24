@@ -9,14 +9,7 @@ import {
   NotAcceptableException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import {
-  GemLog,
-  GemLogAction,
-  Signal,
-  SignalStatus,
-  User,
-  Achievement,
-} from '@ounce24/types';
+import { GemLog, GemLogAction, User } from '@ounce24/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
@@ -28,10 +21,8 @@ export class UsersController {
   constructor(
     private auth: AuthService,
     private readonly usersService: UsersService,
-    @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
-    @InjectModel(Achievement.name) private achievementModel: Model<Achievement>,
   ) {}
 
   @Public()
@@ -85,11 +76,7 @@ export class UsersController {
     @Query('page') page = 0,
     @Query('limit') limit = 20,
   ) {
-    return this.achievementModel
-      .find({ userId: id })
-      .sort({ createdAt: -1 })
-      .skip(page * limit)
-      .limit(limit);
+    return this.usersService.getUserAchievements(id, page, limit);
   }
 
   @Public()

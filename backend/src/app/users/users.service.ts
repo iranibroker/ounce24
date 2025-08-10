@@ -150,6 +150,18 @@ export class UsersService {
       .exec();
   }
 
+  async getUserAchievements(id: string, page: number, limit: number) {
+    const skip = page * limit;
+    return this.achievementModel
+      .find({
+        user: id,
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+  }
+
   @Cron('0 15 0 * * 1', {
     timeZone: 'UTC',
   })
