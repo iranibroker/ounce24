@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { Achievement } from '@ounce24/types';
-import { SHARED } from '../shared';
+import { SHARED } from '../../shared';
 
 @Component({
   selector: 'app-achievement-card',

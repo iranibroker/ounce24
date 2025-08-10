@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ShellComponent } from './shell/shell.component';
 import { LanguageService } from './services/language.service';
 import { AnalyticsService } from './services/analytics.service';
+import { AchievementService } from './services/achievement.service';
 
 @Component({
   imports: [ShellComponent],
@@ -15,6 +16,7 @@ export class AppComponent {
   constructor(
     private languageService: LanguageService,
     private analyticsService: AnalyticsService,
+    private achievementService: AchievementService,
   ) {
     // Language service will handle initialization
     // This ensures RTL is set correctly on app startup

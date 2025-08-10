@@ -1,0 +1,21 @@
+mat-toolbar {
+  padding: 0;
+  background-color: transparent;
+
+  span:first-child {
+    flex: 1;
+  }
+}
+
+main {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+  align-items: center;
+
+  img {
+    width: 200px;
+  }
+}

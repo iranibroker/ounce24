@@ -20,7 +20,7 @@ import { Location } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { SHARED } from '../../../shared';
 import { MatTabsModule } from '@angular/material/tabs';
-import { AchievementCardComponent } from '../../../components/achievement-card.component';
+import { AchievementCardComponent } from '../../../components/achievement-card/achievement-card.component';
 
 const PAGE_SIZE = 20;
 

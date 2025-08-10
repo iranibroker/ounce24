@@ -189,6 +189,10 @@
     }
   },
   "achievement": {
+    "emptyState": "هیچ مدالی یافت نشد",
+    "newAchievementDialog": {
+      "title": "مدال جدید 🎉"
+    },
     "type": {
       "WEEK_WIN": "برنده هفته"
     }

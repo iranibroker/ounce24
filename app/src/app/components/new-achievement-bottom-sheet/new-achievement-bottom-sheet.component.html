@@ -1,0 +1,13 @@
+<mat-toolbar>
+  <span>{{ 'achievement.newAchievementDialog.title' | translate }}</span>
+  <button mat-icon-button (click)="close()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</mat-toolbar>
+<main>
+  <img
+    mat-card-sm-image
+    src="images/achievements/{{ achievement.type }}.png"
+  />
+  {{ achievement.type | achievementType }}
+</main>

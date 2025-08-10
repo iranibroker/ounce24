@@ -188,6 +188,10 @@
     }
   },
   "achievement": {
+    "emptyState": "No achievements found",
+    "newAchievementDialog": {
+      "title": "New Achievement 🎉"
+    },
     "type": {
       "WEEK_WIN": "Week Winner"
     }
