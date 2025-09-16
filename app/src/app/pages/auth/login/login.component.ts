@@ -39,13 +39,13 @@ export class LoginComponent {
   ) {}
 
   async sendToken(phone: string, ev: SubmitEvent) {
-    if (phone.length !== 11) return;
-    phone = PersianNumberService.toEnglish(phone);
+    if (phone.length !== 10) return;
+    phone = `0${PersianNumberService.toEnglish(phone)}`;
     this.loading.set(true);
     this.analyticsService.trackEvent('send_token', { phone });
-    await this.auth.sendTokenMutation.mutateAsync(`${phone}`);
+    await this.auth.sendTokenMutation.mutateAsync(phone);
     this.router.navigate(['/login/otp'], {
-      state: { phone: `${phone}` },
+      state: { phone },
       queryParams: this.route.snapshot.queryParams,
     });
     ev.preventDefault();

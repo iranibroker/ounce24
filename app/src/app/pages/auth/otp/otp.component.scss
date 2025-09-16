@@ -11,6 +11,12 @@ form {
   flex-direction: column;
   gap: 24px;
   padding: 16px;
+
+  input {
+    direction: ltr;
+    text-align: center;
+    letter-spacing: 24px !important;
+  }
 }
 
 button#action {

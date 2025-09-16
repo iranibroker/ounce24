@@ -7,21 +7,17 @@
   <h1>{{ 'login.otpTitle' | translate }}</h1>
   <p>{{ 'login.otpDescription' | translate }}</p>
 
-  <ng-otp-input
-    #otpInputs
-    [formCtrl]="otpFormControl"
-    [config]="{
-      length: 4,
-      allowNumbersOnly: true,
-      containerStyles: {
-        display: 'flex',
-        justifyContent: 'center',
-        direction: 'ltr',
-      },
-      containerClass: 'token-container',
-      inputStyles: { outline: 'none', border: 'none', padding: '8px' },
-    }"
-  ></ng-otp-input>
+  <mat-form-field>
+    <input
+      #otpInput
+      [autoFocus]
+      [formControl]="otpFormControl"
+      matInput
+      type="number"
+      [readonly]="loading()"
+      class="mono"
+    />
+  </mat-form-field>
 
   <br />
 

@@ -56,6 +56,10 @@ html[dir='rtl'] {
   }
 }
 
+input::placeholder {
+  opacity: 0.3 !important;
+}
+
 .fa-gem {
   color: #42a5f5 !important;
 }

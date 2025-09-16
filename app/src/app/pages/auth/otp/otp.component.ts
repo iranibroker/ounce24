@@ -83,7 +83,7 @@ export class OtpComponent implements OnDestroy {
     try {
       await this.auth.loginMutation.mutateAsync({
         phone: this.phone,
-        otp: token,
+        otp: token.toString(),
       });
       this.analyticsService.trackEvent('login', { phone: this.phone });
       const user = this.auth.userQuery.data();

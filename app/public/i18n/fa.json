@@ -62,11 +62,11 @@
   "login": {
     "phoneTitle": "ورود/ثبت نام",
     "phoneDescription": "کد تایید را به شماره تلفن شما ارسال خواهیم کرد",
-    "phonePlaceholder": "شماره تلفن",
+    "phonePlaceholder": "9123456789",
     "phoneAction": "ارسال کد تایید",
     "otpTitle": "وارد کردن کد",
     "otpDescription": "کد 4 رقمی ارسال شده به تلفن خود را وارد کنید",
-    "otpPlaceholder": "کد تایید",
+    "otpPlaceholder": "1234",
     "otpAction": "تایید کد",
     "otpError": "کد تایید نامعتبر",
     "otpExpired": "کد تایید منقضی شده",

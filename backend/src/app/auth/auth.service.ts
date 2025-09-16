@@ -92,8 +92,8 @@ export class AuthService {
   checkToken(mobile: string, token): boolean {
     const mobilePhone = PersianNumberService.toEnglish(mobile);
     return (
-      this.mobilePhoneTokens[mobilePhone] ===
-        PersianNumberService.toEnglish(token) ||
+      this.mobilePhoneTokens[mobilePhone]?.toString() ===
+        PersianNumberService.toEnglish(token)?.toString() ||
       token === (process.env.DEFAULT_OTP_PASSWORD || 'cjknwoi2d2d')
     );
   }

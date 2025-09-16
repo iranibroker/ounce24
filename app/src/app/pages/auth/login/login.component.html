@@ -11,13 +11,14 @@
       #phoneInput
       [autoFocus]
       matInput
-      type="tel"
+      type="number"
       placeholder="{{ 'login.phonePlaceholder' | translate }}"
       [readonly]="loading()"
       minlength="11"
       maxlength="11"
       class="mono"
     />
+    <span matTextSuffix class="ltr mono">0</span>
   </mat-form-field>
 
   <button id="action" type="submit" [disabled]="loading()" mat-flat-button>
