@@ -22,6 +22,8 @@ export class User {
 
   telegramId: number;
 
+  alwaysPublish?: boolean;
+
   phone: string;
 
   resetAt: Date;

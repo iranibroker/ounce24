@@ -169,7 +169,7 @@ export class SignalsService {
       );
     }
 
-    signal.publishable = owner.totalScore >= MIN_SIGNAL_SCORE;
+    signal.publishable = owner.alwaysPublish || owner.totalScore >= MIN_SIGNAL_SCORE;
 
     const savedSignal = await this.signalModel.create(signal);
     this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);

@@ -15,6 +15,7 @@ export const UserSchema = new mongoose.Schema<User>(
     totalSignals: { type: Number, required: true, default: 0 },
     winRate: { type: Number, required: true, default: 0 },
     phone: { type: String, required: true, unique: true },
+    alwaysPublish: { type: Boolean, required: false, default: false },
     resetAt: { type: Date, required: false },
     iban: { type: String, required: false },
     gem: { type: Number, required: true, default: 0 },
