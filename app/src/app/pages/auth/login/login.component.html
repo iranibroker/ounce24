@@ -18,7 +18,11 @@
       maxlength="11"
       class="mono"
     />
-    <span matTextSuffix class="ltr mono">0</span>
+    @if (languageService.isRTL()) {
+      <span matTextSuffix>0</span>
+    } @else {
+      <span matTextPrefix>0</span>
+    }
   </mat-form-field>
 
   <button id="action" type="submit" [disabled]="loading()" mat-flat-button>

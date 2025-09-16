@@ -11,6 +11,7 @@ import { SHARED } from '../../../shared';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AnalyticsService } from '../../../services/analytics.service';
+import { LanguageService } from '../../../services/language.service';
 
 @Component({
   selector: 'app-login',
@@ -36,6 +37,7 @@ export class LoginComponent {
     private router: Router,
     private route: ActivatedRoute,
     private analyticsService: AnalyticsService,
+    public languageService: LanguageService,
   ) {}
 
   async sendToken(phone: string, ev: SubmitEvent) {

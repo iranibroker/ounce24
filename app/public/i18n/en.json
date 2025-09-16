@@ -62,11 +62,11 @@
   "login": {
     "phoneTitle": "Login/Register",
     "phoneDescription": "We will send you a verification code to your phone number",
-    "phonePlaceholder": "Phone number",
+    "phonePlaceholder": "9123456789",
     "phoneAction": "Send verification code",
     "otpTitle": "Enter Code",
     "otpDescription": "Enter the 4-digit code sent to your phone",
-    "otpPlaceholder": "OTP",
+    "otpPlaceholder": "1234",
     "otpAction": "Verify OTP",
     "otpError": "Invalid OTP",
     "otpExpired": "OTP expired",
