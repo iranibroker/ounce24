@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 
 export const UserSchema = new mongoose.Schema<User>(
   {
-    name: { type: String, required: true },
-    title: { type: String, required: true },
+    name: { type: String, required: false },
+    title: { type: String, required: false },
     defaultScore: { type: Number, required: true, default: 0 },
     avatar: { type: String, required: false },
     telegramUsername: { type: String, required: false },
