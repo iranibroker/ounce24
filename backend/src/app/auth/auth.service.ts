@@ -46,7 +46,7 @@ export class AuthService {
       phone: user.phone,
     };
 
-    const token = this.jwtService.sign(payload, {
+    const token = this.jwtService.sign(payload as any, {
       secret: process.env.JWT_ACCESS_SECRET!,
       expiresIn: expireTokenIn,
     });
@@ -62,7 +62,7 @@ export class AuthService {
         phone: user.phone,
       };
 
-      const token = this.jwtService.sign(payload, {
+      const token = this.jwtService.sign(payload as any, {
         secret: process.env.JWT_ACCESS_SECRET!,
         expiresIn: '3d',
       });
