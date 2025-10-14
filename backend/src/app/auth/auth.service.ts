@@ -49,7 +49,7 @@ export class AuthService {
     const token = this.jwtService.sign(payload as any, {
       secret: process.env.JWT_ACCESS_SECRET!,
       expiresIn: expireTokenIn,
-    });
+    } as any);
 
     return token;
   }
@@ -65,7 +65,7 @@ export class AuthService {
       const token = this.jwtService.sign(payload as any, {
         secret: process.env.JWT_ACCESS_SECRET!,
         expiresIn: '3d',
-      });
+      } as any);
       return token;
     }
   }
