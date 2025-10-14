@@ -41,7 +41,7 @@ export class AuthService {
   }
 
   login(user: User, expireTokenIn = '365d') {
-    const payload: Partial<User> = {
+    const payload = {
       id: user.id,
       phone: user.phone,
     };
@@ -57,7 +57,7 @@ export class AuthService {
   async createAlternativeTelegramToken(telegramId: number) {
     const user = await this.userModel.findOne({ telegramId });
     if (user) {
-      const payload: Partial<User> = {
+      const payload = {
         id: user.id,
         phone: user.phone,
       };
