@@ -80,6 +80,7 @@ export class AuthService {
         },
         HttpStatus.CONFLICT,
       );
+    console.log('sendToken', phone, token);
     await this.lookup(phone, process.env.KAVENEGAR_OTP, token);
     this.mobilePhoneTokens[phone] = token;
     setTimeout(() => {
@@ -91,6 +92,7 @@ export class AuthService {
 
   checkToken(mobile: string, token): boolean {
     const mobilePhone = PersianNumberService.toEnglish(mobile);
+    console.log('checkToken', mobilePhone, token, this.mobilePhoneTokens[mobilePhone]);
     return (
       this.mobilePhoneTokens[mobilePhone]?.toString() ===
         PersianNumberService.toEnglish(token)?.toString() ||
