@@ -125,6 +125,6 @@ export class SignalsController {
   @Post('analyze')
   async analyzeSignal(@Body() signal: Signal, @LoginUser() user: User) {
     // Check if user has gems
-    return this.signalService.analyzeSignal(signal, user);
+    return this.signalService.analyzeSignal(signal);
   }
 }

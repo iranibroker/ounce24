@@ -28,7 +28,7 @@ export const UserSchema = new mongoose.Schema<User>(
 );
 
 UserSchema.virtual('tag').get(function () {
-  let tag = '#استاد_';
+  let tag = '#';
   const cleanedTitle = (this.title || this.name)
     .replace(/[&@#.]/g, '')
     .replace(/[ -]/g, '_');

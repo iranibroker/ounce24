@@ -1,5 +1,6 @@
 import {
   HttpException,
+  NotFoundException,
   HttpStatus,
   Injectable,
   NotAcceptableException,
@@ -9,6 +10,7 @@ import {
   GemLog,
   GemLogAction,
   Signal,
+  SignalAnalyze,
   SignalStatus,
   SignalType,
   User,
@@ -18,8 +20,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
-import { CoreMessage, generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { AiChatService } from '../ai-chat/ai-chat.service';
 
 const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
   ? 3
@@ -41,6 +42,9 @@ export class SignalsService {
     @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
     private eventEmitter: EventEmitter2,
     private ouncePriceService: OuncePriceService,
+    private aiChatService: AiChatService,
+    @InjectModel(SignalAnalyze.name)
+    private signalAnalyzeModel: Model<SignalAnalyze>,
   ) {}
 
   @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
@@ -169,7 +173,8 @@ export class SignalsService {
       );
     }
 
-    signal.publishable = owner.alwaysPublish || owner.totalScore >= MIN_SIGNAL_SCORE;
+    signal.publishable =
+      owner.alwaysPublish || owner.totalScore >= MIN_SIGNAL_SCORE;
 
     const savedSignal = await this.signalModel.create(signal);
     this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);
@@ -248,63 +253,32 @@ export class SignalsService {
     }
   }
 
-  async analyzeSignal(signal: Signal, user: User) {
+  async analyzeSignal(signal: Signal) {
     // Check if user has gems
-    const currentUser = await this.userModel.findById(user.id).exec();
-    if (!currentUser) {
-      throw new NotAcceptableException({
+    const user = await this.userModel.findById(signal.owner._id).exec();
+    if (!user) {
+      throw new NotFoundException({
         translationKey: 'userNotFound',
       });
     }
 
-    if (!currentUser.gem || currentUser.gem <= 0) {
+    if (!user.gem || user.gem <= 0) {
       throw new NotAcceptableException({
         translationKey: 'insufficientGems',
       });
     }
 
-    delete signal.owner;
-    signal.createdOuncePrice = this.ouncePriceService.current;
-    const messages: CoreMessage[] = [
-      {
-        role: 'system',
-        content: `
-          دریافت کنید و تحلیل کوتاه و محاوره‌ای برای خرید و فروش انس طلا براساس اطلاعات کاربر و تکمیلی از TradingView آماده کنید.
+    const currentPrice = this.ouncePriceService.current;
+    const dto = {
+      type: signal.type,
+      entryPrice: signal.entryPrice,
+      tp: signal.profit,
+      sl: signal.loss,
+    };
 
-# مراحل
+    const result = await this.aiChatService.createResponse(JSON.stringify(dto));
 
-1. **دریافت قیمت لحظه‌ای از کاربر**: قیمتی که کاربر می‌دهد را دریافت کنید.
-2. **جمع‌آوری اطلاعات از TradingView**: برای تکمیل تحلیل، داده‌های مرتبط به بازار انس طلا را از TradingView بخوانید.
-3. **تحلیل بازار**: بر اساس اطلاعات دریافتی از تریدیتک ویو و داده‌های کاربر، بازار را تحلیل کن و روند رو به صعودی یا نزولی بودن در آینده رو هم در نظر بگیر. الگوها و روندهای مهم را شناسایی کنید.
-4. **نتیجه‌گیری و پیش‌بینی**: بر اساس تحلیل‌ها، خلاصه‌ای از وضعیت بازار و پیش‌بینی‌های احتمالی خود را بیان کنید.
-5. **بیان به زبان محاوره‌ای**: نتیجه‌گیری‌ها را به شکلی ساده و دوستانه بیان کنید.
-
-# قالب خروجی
-
-- پاراگراف  کوتاه و ساده
-- با لحن محاوره‌ای و دوستانه به صورت پاراگراف
-- اگه جایی امکان استفاده از اموجی رو داره در حد یکی دوتا استفاده کن
-- قالب اعداد با حروف انگلیسی باشه و جداکننده داشته باشه
-
-# اطلاعات تکمیلی
-قیمت فعلی انس طلا: ${this.ouncePriceService.current}
-`,
-      },
-      {
-        role: 'user',
-        content: `اینو آنالیز کن:
-        
-        ${JSON.stringify(signal)}
-        `,
-      },
-    ];
-
-    const result = await generateText({
-      model: openai('gpt-4o'),
-      messages,
-    });
-
-    // Deduct 1 gem from user
+    // // Deduct 1 gem from user
     await this.userModel
       .findByIdAndUpdate(user.id, {
         $inc: { gem: -1 },
@@ -314,15 +288,25 @@ export class SignalsService {
     this.gemLogModel.create({
       user: user.id,
       gemsChange: -1,
-      gemsBefore: currentUser.gem,
-      gemsAfter: currentUser.gem - 1,
+      gemsBefore: user.gem,
+      gemsAfter: user.gem - 1,
       action: GemLogAction.SignalAnalyze,
+    });
+
+    this.signalAnalyzeModel.create({
+      signal: signal.id,
+      ouncePrice: currentPrice,
+      totalTokens: result.totalTokens,
+      analyzeText: result.text,
+      creator: user.id,
     });
 
     return {
       analysis: result.text,
-      signal: signal,
-      currentPrice: signal.createdOuncePrice,
+      signal,
+      user,
+      currentPrice: currentPrice,
+      totalTokens: result.totalTokens,
     };
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Signal,
@@ -333,6 +333,18 @@ export class SignalBotService extends BaseBot {
           await this.bot.telegram.sendMessage(
             createdSignal.owner.telegramId,
             Signal.getMessage(createdSignal, { showId: true, skipOwner: true }),
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: 'تحلیل سیگنال',
+                      callback_data: `analyze_signal_${createdSignal.id}`,
+                    },
+                  ],
+                ],
+              },
+            },
           );
 
           if (process.env.PUBLISH_CHANNEL_ID) {
@@ -349,6 +361,32 @@ export class SignalBotService extends BaseBot {
       } catch (error) {
         ctx.reply('خطایی رخ داده است. لطفا دوباره تلاش کنید.');
         BaseBot.userStates.delete(ctx.from.id);
+      }
+    }
+  }
+
+  @Action(/^analyze_signal_/)
+  async analyzeSignal(@Ctx() ctx: Context) {
+    const id = ctx.callbackQuery['data'].split('_')[2];
+    ctx.reply('در حال تحلیل سیگنال...');
+    const signal = await this.signalModel.findById(id).populate('owner').exec();
+    ctx.reply(Signal.getMessage(signal, { showId: false, skipOwner: true }));
+    try {
+      const result = await this.signalsService.analyzeSignal(signal);
+
+      await ctx.reply(result.analysis, {
+        link_preview_options: {
+          is_disabled: true,
+        },
+      });
+      ctx.reply(`جم باقیمانده برای شما: ${result.user.gem - 1} 💎`);
+    } catch (error) {
+      if (error.status === 404) {
+        ctx.reply('کاربر یافت نشد.');
+      } else if (error.status === 406) {
+        ctx.reply('💎 برای تحلیل سیگنال به جم نیاز دارید');
+      } else {
+        ctx.reply('خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.');
       }
     }
   }

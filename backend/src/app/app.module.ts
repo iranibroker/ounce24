@@ -16,6 +16,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './users/users.module';
 import { PodcastModule } from './podcast/podcast.module';
 import { HttpModule } from '@nestjs/axios';
+import { AiChatModule } from './ai-chat/ai-chat.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { HttpModule } from '@nestjs/axios';
     OuncePriceModule,
     UsersModule,
     PodcastModule,
+    AiChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
