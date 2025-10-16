@@ -107,13 +107,13 @@ export class SignalBotService extends BaseBot {
         signal.messageId,
       );
 
-    signal.messageId = null;
-    setTimeout(() => {
-      this.signalModel
+      setTimeout(() => {
+        this.signalModel
         .findById(signal._id)
         .populate('owner')
         .exec()
         .then((signal) => {
+          signal.messageId = null;
           this.publishSignal(signal, this.ouncePriceService.current);
         });
     }, 3000);
