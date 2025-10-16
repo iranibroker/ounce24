@@ -369,11 +369,17 @@ export class SignalBotService extends BaseBot {
   async analyzeSignal(@Ctx() ctx: Context) {
     const userId = ctx.from.id;
     const user = await this.getUser(ctx.from.id);
+    if (!user) {
+      ctx.answerCbQuery('لطفا ابتدا به ربات اونس24 متصل شوید');
+      return;
+    }
+    console.log(`✨ Analyzing signal for user ${user.id}`);
     const id = ctx.callbackQuery['data'].split('_')[2];
     ctx.answerCbQuery('از طریق ربات برای شما ارسال می‌شود');
+    try {
     await this.bot.telegram.sendMessage(
       userId,
-      '✨ در حال تحلیل سیگنال زیر ...',
+      '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
     );
     const signal = await this.signalModel.findById(id).populate('owner').exec();
     await this.bot.telegram.sendMessage(
@@ -407,6 +413,10 @@ export class SignalBotService extends BaseBot {
           'خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.',
         );
       }
+    }
+    } catch (error) {
+      console.error('error analyzing signal', error.response, error.status);
+      await ctx.answerCbQuery('لطفا ابتدا به ربات اونس24 متصل شوید');
     }
   }
 

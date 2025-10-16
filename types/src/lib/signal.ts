@@ -132,9 +132,9 @@ export class Signal {
 
   static getStatsText(owner: User) {
     return `تعداد سیگنال: ${owner.totalSignals}
-وین ریت: ${owner.winRate.toFixed(0)}%
-میانگین ریسک-ریوارد: ${owner.avgRiskReward.toFixed(1)}
-⭐️ امتیاز: \n${owner.score.toFixed(1)}
+وین ریت: ${owner.winRate?.toFixed(0)}%
+میانگین ریسک-ریوارد: ${owner.avgRiskReward?.toFixed(1)}
+⭐️ امتیاز: \n${owner.score?.toFixed(1)}
     `;
   }
 
