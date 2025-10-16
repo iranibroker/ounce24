@@ -26,7 +26,6 @@ export class AiChatService {
   ): Promise<{ text: string; totalTokens: number }> {
     const abortController = new AbortController();
     try {
-      console.log('💬', message);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const response = await this.client.responses.create({
         input: message,
@@ -46,14 +45,8 @@ export class AiChatService {
       return { text: cleanedText, totalTokens: response.usage.total_tokens };
     } catch (error) {
       if (abortController.signal.aborted) {
-        console.log('AI request was aborted');
         throw new Error('Request was cancelled');
       }
-      console.warn(
-        'Structured output failed, falling back to text generation:',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        error,
-      );
       throw error;
     }
   }

@@ -59,12 +59,6 @@ export class OuncePublishBotService {
           this.errorCount = 0;
         })
         .catch((er) => {
-          console.error(
-            'OuncePublishBotService',
-            this.errorCount,
-            er.response.error_code,
-            er,
-          );
           if (er.response.error_code !== 429) this.errorCount++;
           if (this.errorCount === MAX_ERROR) {
             this.bot.telegram
