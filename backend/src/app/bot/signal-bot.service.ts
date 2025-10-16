@@ -69,6 +69,7 @@ export class SignalBotService extends BaseBot {
 
   @OnEvent(EVENTS.SIGNAL_ACTIVE)
   async handleSignalActive(signal: Signal) {
+    if (!signal.owner) return;
     const activeSignals = await this.signalModel
       .find({
         status: { $in: [SignalStatus.Active] },
@@ -99,6 +100,7 @@ export class SignalBotService extends BaseBot {
 
   @OnEvent(EVENTS.SIGNAL_CLOSED)
   async handleSignalClosed(signal: Signal) {
+    if (!signal.owner) return;
     if (signal.messageId)
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
@@ -123,6 +125,7 @@ export class SignalBotService extends BaseBot {
 
   @OnEvent(EVENTS.SIGNAL_CANCELED)
   async handleSignalCanceled(signal: Signal) {
+    if (!signal.owner) return;
     if (signal.messageId) {
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
@@ -238,21 +241,44 @@ export class SignalBotService extends BaseBot {
 
     await ctx.reply(
       `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'ورود با قیمت فعلی بازار',
+                callback_data: 'instant_entry',
+              },
+            ],
+          ],
+        },
+      },
     );
   }
 
-  async handleNewSignalMessage(ctx: Context) {
+  @Action('instant_entry')
+  async instantEntry(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const state = this.getState<UserStateType>(ctx.from.id);
+    const signal = this.getStateData<Signal>(ctx.from.id);
+    if (!signal || state.state !== UserStateType.NewSignal) return;
+    ctx.answerCbQuery();
+    this.handleNewSignalMessage(ctx, true);
+  }
+
+  async handleNewSignalMessage(ctx: Context, instantEntry = false) {
     if (!(await this.isValid(ctx))) return;
     const signal = this.getStateData<Signal>(ctx.from.id);
     const isSell = signal.type === SignalType.Sell;
-    const value = Number(PersianNumberService.toEnglish(ctx.message['text']));
+    const value = instantEntry
+      ? this.ouncePriceService.current
+      : Number(PersianNumberService.toEnglish(ctx.message['text']));
     const user = await this.getUser(ctx.from.id);
-    if (isNaN(Number(value))) {
+    if (value && isNaN(Number(value))) {
       ctx.reply('لطفا یک مقدار عددی وارد کنید. مثلا: 3234.32');
       return;
     }
-
-    if (!signal.entryPrice) {
+    if (!signal.entryPrice && !signal.instantEntry) {
       const nearSignal = await this.signalModel
         .findOne({
           owner: user._id,
@@ -270,12 +296,14 @@ export class SignalBotService extends BaseBot {
         );
         return;
       }
-      signal.entryPrice = value;
+      if (instantEntry) signal.instantEntry = true;
+      else signal.entryPrice = value;
       ctx.reply(`حد ضرر را مشخص کنید:`);
       this.setStateData(ctx.from.id, signal);
     } else if (isSell) {
+      const entryPrice = instantEntry ? this.ouncePriceService.current : signal.entryPrice;
       if (!signal.maxPrice) {
-        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
+        if (value - entryPrice < 1 || value - entryPrice > 200) {
           ctx.reply(
             `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
           );
@@ -284,21 +312,22 @@ export class SignalBotService extends BaseBot {
         signal.maxPrice = value;
         ctx.reply(`حد سود را مشخص کنید:`);
       } else if (!signal.minPrice) {
-        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
+        if (entryPrice - value < 1 || entryPrice - value > 200) {
           ctx.reply(
             `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
           );
           return;
         }
-        if (value > signal.entryPrice - signal.maxPrice + signal.entryPrice) {
+        if (value > entryPrice - signal.maxPrice + entryPrice) {
           ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
           return;
         }
         signal.minPrice = value;
       }
     } else {
+      const entryPrice = instantEntry ? this.ouncePriceService.current : signal.entryPrice;
       if (!signal.minPrice) {
-        if (signal.entryPrice - value < 1 || signal.entryPrice - value > 200) {
+        if (entryPrice - value < 1 || entryPrice - value > 200) {
           ctx.reply(
             `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
           );
@@ -307,13 +336,13 @@ export class SignalBotService extends BaseBot {
         signal.minPrice = value;
         ctx.reply(`حد سود را مشخص کنید:`);
       } else if (!signal.maxPrice) {
-        if (value - signal.entryPrice < 1 || value - signal.entryPrice > 200) {
+        if (value - entryPrice < 1 || value - entryPrice > 200) {
           ctx.reply(
             `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
           );
           return;
         }
-        if (value < signal.entryPrice - signal.minPrice + signal.entryPrice) {
+        if (value < entryPrice - signal.minPrice + entryPrice) {
           ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
           return;
         }
@@ -321,7 +350,7 @@ export class SignalBotService extends BaseBot {
       }
     }
 
-    if (signal.entryPrice && signal.maxPrice && signal.minPrice) {
+    if ((signal.entryPrice || signal.instantEntry) && signal.maxPrice && signal.minPrice) {
       const user = await this.getUser(ctx.from.id);
       try {
         const createdSignal = await this.signalsService.addSignal({
@@ -338,7 +367,7 @@ export class SignalBotService extends BaseBot {
                 inline_keyboard: [
                   [
                     {
-                      text: 'تحلیل سیگنال',
+                      text: '✨ تحلیل سیگنال',
                       callback_data: `analyze_signal_${createdSignal.id}`,
                     },
                   ],
@@ -377,43 +406,46 @@ export class SignalBotService extends BaseBot {
     const id = ctx.callbackQuery['data'].split('_')[2];
     ctx.answerCbQuery('از طریق ربات برای شما ارسال می‌شود');
     try {
-    await this.bot.telegram.sendMessage(
-      userId,
-      '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
-    );
-    const signal = await this.signalModel.findById(id).populate('owner').exec();
-    await this.bot.telegram.sendMessage(
-      userId,
-      Signal.getMessage(signal, { showId: false, skipOwner: true }),
-    );
-    try {
-      const result = await this.signalsService.analyzeSignal(signal, user.id);
-
-      await this.bot.telegram.sendMessage(userId, result.analysis, {
-        parse_mode: 'HTML',
-        link_preview_options: {
-          is_disabled: true,
-        },
-      });
       await this.bot.telegram.sendMessage(
         userId,
-        `جم باقیمانده برای شما: ${result.user.gem - 1} 💎`,
+        '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
       );
-    } catch (error) {
-      if (error.status === 404) {
-        await this.bot.telegram.sendMessage(userId, 'کاربر یافت نشد.');
-      } else if (error.status === 406) {
+      const signal = await this.signalModel
+        .findById(id)
+        .populate('owner')
+        .exec();
+      await this.bot.telegram.sendMessage(
+        userId,
+        Signal.getMessage(signal, { showId: false, skipOwner: true }),
+      );
+      try {
+        const result = await this.signalsService.analyzeSignal(signal, user.id);
+
+        await this.bot.telegram.sendMessage(userId, result.analysis, {
+          parse_mode: 'HTML',
+          link_preview_options: {
+            is_disabled: true,
+          },
+        });
         await this.bot.telegram.sendMessage(
           userId,
-          '💎 برای تحلیل سیگنال به جم نیاز دارید',
+          `جم باقیمانده برای شما: ${result.user.gem - 1} 💎`,
         );
-      } else {
-        await this.bot.telegram.sendMessage(
-          userId,
-          'خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.',
-        );
+      } catch (error) {
+        if (error.status === 404) {
+          await this.bot.telegram.sendMessage(userId, 'کاربر یافت نشد.');
+        } else if (error.status === 406) {
+          await this.bot.telegram.sendMessage(
+            userId,
+            '💎 برای تحلیل سیگنال به جم نیاز دارید',
+          );
+        } else {
+          await this.bot.telegram.sendMessage(
+            userId,
+            'خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.',
+          );
+        }
       }
-    }
     } catch (error) {
       console.error('error analyzing signal', error.response, error.status);
       await ctx.answerCbQuery('لطفا ابتدا به ربات اونس24 متصل شوید');

@@ -19,7 +19,6 @@ export class OuncePriceService {
       const price = data;
       if (price != oldPrice) {
         this.currentPrice = price;
-        console.log(price);
         this.eventEmitter.emit(OUNCE_PRICE_UPDATED, price);
       }
     });
