@@ -174,7 +174,9 @@ export class SignalsService {
     }
 
     signal.publishable =
-      owner.alwaysPublish || owner.totalScore >= MIN_SIGNAL_SCORE;
+      owner.alwaysPublish ||
+      owner.totalScore >= MIN_SIGNAL_SCORE ||
+      owner.weekScore >= MIN_SIGNAL_SCORE;
 
     const savedSignal = await this.signalModel.create(signal);
     this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);
@@ -253,7 +255,9 @@ export class SignalsService {
 
   async analyzeSignal(signal: Signal, userId?: string) {
     // Check if user has gems
-    const user = await this.userModel.findById(userId || signal.owner._id).exec();
+    const user = await this.userModel
+      .findById(userId || signal.owner._id)
+      .exec();
     if (!user) {
       throw new NotFoundException({
         translationKey: 'userNotFound',
