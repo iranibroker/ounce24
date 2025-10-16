@@ -14,10 +14,8 @@ FROM node:20.18.0-alpine As production
 
 WORKDIR /backend
 
-COPY package.json .
+COPY --from=development /usr/src/app/node_modules ./node_modules
 
 COPY --from=development /usr/src/app/dist/backend src
-
-RUN yarn --production && yarn cache clean
 
 CMD ["node", "src/main.js"]

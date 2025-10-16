@@ -404,23 +404,22 @@ export class SignalBotService extends BaseBot {
     }
     console.log(`✨ Analyzing signal for user ${user.id}`);
     const id = ctx.callbackQuery['data'].split('_')[2];
-    ctx.answerCbQuery('از طریق ربات برای شما ارسال می‌شود');
     try {
       await this.bot.telegram.sendMessage(
         userId,
         '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
       );
       const signal = await this.signalModel
-        .findById(id)
-        .populate('owner')
-        .exec();
+      .findById(id)
+      .populate('owner')
+      .exec();
       await this.bot.telegram.sendMessage(
         userId,
         Signal.getMessage(signal, { showId: false, skipOwner: true }),
       );
       try {
         const result = await this.signalsService.analyzeSignal(signal, user.id);
-
+        
         await this.bot.telegram.sendMessage(userId, result.analysis, {
           parse_mode: 'HTML',
           link_preview_options: {
@@ -431,6 +430,7 @@ export class SignalBotService extends BaseBot {
           userId,
           `جم باقیمانده برای شما: ${result.user.gem - 1} 💎`,
         );
+        ctx.answerCbQuery('از طریق ربات برای شما ارسال شد');
       } catch (error) {
         if (error.status === 404) {
           await this.bot.telegram.sendMessage(userId, 'کاربر یافت نشد.');
