@@ -23,7 +23,7 @@ export class AiChatService {
   async createResponse(
     message: string,
     conversationId?: string,
-  ): Promise<{ text: string, totalTokens: number }> {
+  ): Promise<{ text: string; totalTokens: number }> {
     const abortController = new AbortController();
     try {
       console.log('💬', message);
@@ -39,7 +39,10 @@ export class AiChatService {
         },
       });
 
-      const cleanedText = response.output_text;
+      const cleanedText = response.output_text.replace(
+        /\[(.*?)\]\((.*?)\)/g,
+        '<a href="$2">$1</a>',
+      );
       return { text: cleanedText, totalTokens: response.usage.total_tokens };
     } catch (error) {
       if (abortController.signal.aborted) {

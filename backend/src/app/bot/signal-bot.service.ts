@@ -352,7 +352,7 @@ export class SignalBotService extends BaseBot {
               ctx.reply(
                 `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز فعلی شما ${user.totalScore.toFixed(
                   2,
-                )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از /my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از /my_signals استفاده کنید.`,
+                )} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از\n/my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از\n/my_signals\n استفاده کنید.`,
               );
               return;
             }
@@ -367,26 +367,45 @@ export class SignalBotService extends BaseBot {
 
   @Action(/^analyze_signal_/)
   async analyzeSignal(@Ctx() ctx: Context) {
+    const userId = ctx.from.id;
+    const user = await this.getUser(ctx.from.id);
     const id = ctx.callbackQuery['data'].split('_')[2];
-    ctx.reply('در حال تحلیل سیگنال...');
+    ctx.answerCbQuery('از طریق ربات برای شما ارسال می‌شود');
+    await this.bot.telegram.sendMessage(
+      userId,
+      '✨ در حال تحلیل سیگنال زیر ...',
+    );
     const signal = await this.signalModel.findById(id).populate('owner').exec();
-    ctx.reply(Signal.getMessage(signal, { showId: false, skipOwner: true }));
+    await this.bot.telegram.sendMessage(
+      userId,
+      Signal.getMessage(signal, { showId: false, skipOwner: true }),
+    );
     try {
-      const result = await this.signalsService.analyzeSignal(signal);
+      const result = await this.signalsService.analyzeSignal(signal, user.id);
 
-      await ctx.reply(result.analysis, {
+      await this.bot.telegram.sendMessage(userId, result.analysis, {
+        parse_mode: 'HTML',
         link_preview_options: {
           is_disabled: true,
         },
       });
-      ctx.reply(`جم باقیمانده برای شما: ${result.user.gem - 1} 💎`);
+      await this.bot.telegram.sendMessage(
+        userId,
+        `جم باقیمانده برای شما: ${result.user.gem - 1} 💎`,
+      );
     } catch (error) {
       if (error.status === 404) {
-        ctx.reply('کاربر یافت نشد.');
+        await this.bot.telegram.sendMessage(userId, 'کاربر یافت نشد.');
       } else if (error.status === 406) {
-        ctx.reply('💎 برای تحلیل سیگنال به جم نیاز دارید');
+        await this.bot.telegram.sendMessage(
+          userId,
+          '💎 برای تحلیل سیگنال به جم نیاز دارید',
+        );
       } else {
-        ctx.reply('خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.');
+        await this.bot.telegram.sendMessage(
+          userId,
+          'خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.',
+        );
       }
     }
   }
@@ -848,6 +867,12 @@ ${Signal.getStatsText(user)}
           .sendMessage(process.env.PUBLISH_CHANNEL_ID, text, {
             reply_markup: {
               inline_keyboard: [
+                [
+                  {
+                    text: '✨ تحلیل سیگنال',
+                    callback_data: `analyze_signal_${signal.id}`,
+                  },
+                ],
                 [
                   {
                     text: 'لیست سیگنال‌ها',

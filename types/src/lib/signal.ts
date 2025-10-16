@@ -134,7 +134,7 @@ export class Signal {
     return `تعداد سیگنال: ${owner.totalSignals}
 وین ریت: ${owner.winRate.toFixed(0)}%
 میانگین ریسک-ریوارد: ${owner.avgRiskReward.toFixed(1)}
-امتیاز: ${owner.score.toFixed(1)}
+⭐️ امتیاز: \n${owner.score.toFixed(1)}
     `;
   }
 
@@ -157,7 +157,7 @@ ${SignalTypeText[signal.type]}
 ریسک-ریوارد: ${signal.riskReward.toFixed(1)}\n`;
 
     if (signal.status === SignalStatus.Closed)
-      text += `امتیاز: ${signal.score.toFixed(1)}\n`;
+      text += `⭐️ امتیاز:\n${signal.score.toFixed(1)}\n`;
 
     text += `\nوضعیت: ${SignalStatusText[signal.status]}\n`;
 

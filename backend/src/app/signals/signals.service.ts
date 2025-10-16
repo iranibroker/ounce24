@@ -190,28 +190,26 @@ export class SignalsService {
       .populate('owner')
       .exec();
 
-    const gemPerScore = Number(process.env.GEM_PER_SCORE) || 10;
+    // const gemPerScore = Number(process.env.GEM_PER_SCORE) || 10;
     const minScore = Number(process.env.MIN_SCORE_FOR_GEM) || 0;
-    if (gemPerScore > 0) {
-      if (savedSignal.score > minScore && savedSignal.score > gemPerScore) {
-        const giftGems = Math.floor(savedSignal.score / gemPerScore);
-        this.userModel
-          .findByIdAndUpdate(savedSignal.owner._id, {
-            $inc: { gem: giftGems },
-          })
-          .exec();
+    if (savedSignal.score > minScore) {
+      const giftGems = 1;
+      this.userModel
+        .findByIdAndUpdate(savedSignal.owner._id, {
+          $inc: { gem: giftGems },
+        })
+        .exec();
 
-        this.gemLogModel.create({
-          user: savedSignal.owner._id,
-          gemsChange: giftGems,
-          gemsBefore: savedSignal.owner.gem,
-          gemsAfter: savedSignal.owner.gem + giftGems,
-          action: GemLogAction.CloseSignal,
-        });
+      this.gemLogModel.create({
+        user: savedSignal.owner._id,
+        gemsChange: giftGems,
+        gemsBefore: savedSignal.owner.gem,
+        gemsAfter: savedSignal.owner.gem + giftGems,
+        action: GemLogAction.CloseSignal,
+      });
 
-        savedSignal.gem = giftGems;
-        savedSignal.save();
-      }
+      savedSignal.gem = giftGems;
+      savedSignal.save();
     }
 
     this.eventEmitter.emit(EVENTS.SIGNAL_CLOSED, savedSignal);
@@ -253,9 +251,9 @@ export class SignalsService {
     }
   }
 
-  async analyzeSignal(signal: Signal) {
+  async analyzeSignal(signal: Signal, userId?: string) {
     // Check if user has gems
-    const user = await this.userModel.findById(signal.owner._id).exec();
+    const user = await this.userModel.findById(userId || signal.owner._id).exec();
     if (!user) {
       throw new NotFoundException({
         translationKey: 'userNotFound',
