@@ -107,8 +107,8 @@ export class SignalBotService extends BaseBot {
         signal.messageId,
       );
 
-      setTimeout(() => {
-        this.signalModel
+    setTimeout(() => {
+      this.signalModel
         .findById(signal._id)
         .populate('owner')
         .exec()
@@ -301,7 +301,9 @@ export class SignalBotService extends BaseBot {
       ctx.reply(`حد ضرر را مشخص کنید:`);
       this.setStateData(ctx.from.id, signal);
     } else if (isSell) {
-      const entryPrice = instantEntry ? this.ouncePriceService.current : signal.entryPrice;
+      const entryPrice = instantEntry
+        ? this.ouncePriceService.current
+        : signal.entryPrice;
       if (!signal.maxPrice) {
         if (value - entryPrice < 1 || value - entryPrice > 200) {
           ctx.reply(
@@ -325,7 +327,9 @@ export class SignalBotService extends BaseBot {
         signal.minPrice = value;
       }
     } else {
-      const entryPrice = instantEntry ? this.ouncePriceService.current : signal.entryPrice;
+      const entryPrice = instantEntry
+        ? this.ouncePriceService.current
+        : signal.entryPrice;
       if (!signal.minPrice) {
         if (entryPrice - value < 1 || entryPrice - value > 200) {
           ctx.reply(
@@ -350,7 +354,11 @@ export class SignalBotService extends BaseBot {
       }
     }
 
-    if ((signal.entryPrice || signal.instantEntry) && signal.maxPrice && signal.minPrice) {
+    if (
+      (signal.entryPrice || signal.instantEntry) &&
+      signal.maxPrice &&
+      signal.minPrice
+    ) {
       const user = await this.getUser(ctx.from.id);
       try {
         const createdSignal = await this.signalsService.addSignal({
@@ -410,16 +418,16 @@ export class SignalBotService extends BaseBot {
         '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
       );
       const signal = await this.signalModel
-      .findById(id)
-      .populate('owner')
-      .exec();
+        .findById(id)
+        .populate('owner')
+        .exec();
       await this.bot.telegram.sendMessage(
         userId,
         Signal.getMessage(signal, { showId: false, skipOwner: true }),
       );
       try {
         const result = await this.signalsService.analyzeSignal(signal, user.id);
-        
+
         await this.bot.telegram.sendMessage(userId, result.analysis, {
           parse_mode: 'HTML',
           link_preview_options: {
@@ -890,6 +898,8 @@ ${Signal.getStatsText(user)}
                       text: `${Signal.getPipString(signal, ouncePrice)}`,
                       callback_data: 'test',
                     },
+                  ],
+                  [
                     {
                       text: 'لیست سیگنال‌ها',
                       url: APP_URL,
