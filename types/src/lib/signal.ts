@@ -130,12 +130,16 @@ export class Signal {
     );
   }
 
-  static getStatsText(owner: User) {
-    return `تعداد سیگنال: ${owner.totalSignals}
+  static getStatsText(owner: User, showGem = false) {
+    let text = `تعداد سیگنال: ${owner.totalSignals}
 وین ریت: ${owner.winRate?.toFixed(0)}%
 میانگین ریسک-ریوارد: ${owner.avgRiskReward?.toFixed(1)}
-⭐️ امتیاز: \n${owner.score?.toFixed(1)}
+\n⭐️ امتیاز: \n${owner.score?.toFixed(1)}
     `;
+
+    if (showGem) text += `\n💎 جم: ${owner.gem}`;
+
+    return text;
   }
 
   static getMessage(

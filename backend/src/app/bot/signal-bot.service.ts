@@ -413,6 +413,7 @@ export class SignalBotService extends BaseBot {
     console.log(`✨ Analyzing signal for user ${user.id}`);
     const id = ctx.callbackQuery['data'].split('_')[2];
     try {
+      await ctx.answerCbQuery('از طریق ربات برای شما ارسال خواهد شد');
       await this.bot.telegram.sendMessage(
         userId,
         '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
@@ -608,42 +609,48 @@ export class SignalBotService extends BaseBot {
     this.myClosedSignals(ctx, 100, 10);
   }
 
+  @Action('profile')
   @Command('profile')
   async profile(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const user = await this.getUser(ctx.from.id);
     await ctx.reply(`👤${user.title} (${user.name})`);
-    await ctx.reply(Signal.getStatsText(user));
+    await ctx.reply(Signal.getStatsText(user, true));
   }
 
+  @Action('leaderboard')
   @Command('leaderboard')
   async leaderboard(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-    const users = await this.usersService.getLeaderboard();
+    const user = await this.getUser(ctx.from.id);
+    const allLeaderboard = await this.usersService.getLeaderboard(
+      0,
+      10,
+      user.id,
+    );
 
-    let text = `⭐ رنکینگ کلی اساتید ⭐\n\n`;
-    text += users
-      .map(
-        (user, index) =>
-          `${index + 1}. ${user.tag} (${user.score.toFixed(1)} امتیاز)`,
-      )
-      .join('\n');
-    await ctx.reply(text);
-  }
+    await ctx.reply(
+      `⭐ رنکینگ کلی اساتید ⭐\n\n${allLeaderboard
+        .map((user) => {
+          return `${user.rank}. استاد ${user.tag} (${user.score.toFixed(0)} امتیاز)`;
+        })
+        .join('\n')}`,
+    );
 
-  @Command('leaderboard_week')
-  async leaderboardWeeks(@Ctx() ctx: Context) {
-    if (!(await this.isValid(ctx))) return;
-    const users = await this.usersService.getLeaderboard();
+    const weekLeaderboard = await this.usersService.getLeaderboard(
+      0,
+      10,
+      user.id,
+      true,
+    );
 
-    let text = `⭐ رنکینگ کلی اساتید ⭐\n\n`;
-    text += users
-      .map(
-        (user, index) =>
-          `${index + 1}. ${user.tag} (${user.score.toFixed(1)} امتیاز)`,
-      )
-      .join('\n');
-    await ctx.reply(text);
+    await ctx.reply(
+      `⭐ رنکینگ هفتگی اساتید ⭐\n\n${weekLeaderboard
+        .map((user) => {
+          return `${user.rank}. استاد ${user.tag} (${user.weekScore.toFixed(0)} امتیاز)`;
+        })
+        .join('\n')}`,
+    );
   }
 
   @Command('leaderboard_admin_prev_week')

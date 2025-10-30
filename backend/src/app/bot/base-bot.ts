@@ -3,8 +3,11 @@ import { Model } from 'mongoose';
 import { Context, Telegraf } from 'telegraf';
 import { PersianNumberService } from '@ounce24/utils';
 import { AuthService } from '../auth/auth.service';
+import { Command, Ctx, Action } from 'nestjs-telegraf';
 
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
+const MAIN_CHANNEL_URL =
+  process.env.MAIN_CHANNEL_URL || 'https://t.me/Ounce24_signal';
 
 export enum UserStateType {
   Login,
@@ -74,6 +77,12 @@ export class BaseBot {
         reply_markup: {
           inline_keyboard: [
             [{ text: '📱 اپلیکیشن', callback_data: 'app' }],
+            [
+              {
+                text: 'کانال تلگرام اونس24',
+                url: MAIN_CHANNEL_URL,
+              },
+            ],
             [{ text: '➕ ایجاد سیگنال جدید', callback_data: 'new_signal' }],
             [
               {
@@ -85,24 +94,22 @@ export class BaseBot {
             [
               {
                 text: 'جدول امتیازات',
-                url: `${APP_URL}/leaderboard`,
+                callback_data: 'leaderboard',
               },
             ],
             [
               {
                 text: 'پروفایل و امتیاز',
-                url: `${APP_URL}/profile`,
+                callback_data: 'profile',
               },
             ],
             [
               {
                 text: '🎙️ پادکست تحلیلی هوش مصنوعی',
-                url: `${APP_URL}/podcast`,
+                callback_data: 'podcast',
               },
             ],
-            [
-              {text: 'نمودار انس طلا', callback_data: 'charts'},
-            ],
+            [{ text: 'نمودار انس طلا', callback_data: 'charts' }],
             [
               {
                 text: 'پشتیبانی',
@@ -281,5 +288,30 @@ export class BaseBot {
     ); // Move to the previous Sunday
     lastSunday.setUTCHours(21, 0, 0, 0); // Set the time to 21:00 (9:00 PM) GMT
     return lastSunday;
+  }
+
+  @Command('podcast')
+  @Action('podcast')
+  async podcast(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    await ctx.reply(
+      `سلام. پادکست‌های هفتگی ما یک فایل صوتی حدود ۲۰ دقیقه‌ای هستند که مروری دقیق بر تحولات هفته گذشته و چشم‌انداز هفته پیشِ‌رو ارائه می‌کنند. 📈
+
+محتوا بر پایه به‌روزترین مقالات معتبر جهان گردآوری می‌شود و با بهره‌گیری از هوش مصنوعی به‌صورت داده‌محور و موشکافانه تحلیل می‌گردد. 🤖
+
+این پادکست‌ها هر هفته در کانال رسمی «اونس ۲۴» منتشر می‌شوند. با ورود به کانال و مراجعه به بخش Music، می‌توانید فهرست کامل قسمت‌ها را مشاهده کنید. 🎧`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'کانال اونس24',
+                url: MAIN_CHANNEL_URL,
+              },
+            ],
+          ],
+        },
+      },
+    );
   }
 }
