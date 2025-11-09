@@ -17,6 +17,7 @@ import { UsersModule } from './users/users.module';
 import { PodcastModule } from './podcast/podcast.module';
 import { HttpModule } from '@nestjs/axios';
 import { AiChatModule } from './ai-chat/ai-chat.module';
+import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AiChatModule } from './ai-chat/ai-chat.module';
     UsersModule,
     PodcastModule,
     AiChatModule,
+    OunceAlarmsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

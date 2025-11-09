@@ -10,17 +10,21 @@ import { ConsultingBotService } from './consulting-bot.service';
 import { SignalsModule } from '../signals/signals.module';
 import { UsersModule } from '../users/users.module';
 import { OuncePriceModule } from '../ounce-price/ounce-price.module';
+import { OunceAlarmsModule } from '../ounce-alarms/ounce-alarms.module';
+import { OunceAlarmBotService } from './ounce-alarm-bot.service';
 
 @Module({
   imports: [
     SchemasModule,
     AuthModule,
     SignalsModule,
+    OunceAlarmsModule,
     UsersModule,
     OuncePriceModule,
   ],
   providers: [
     SignalBotService,
+    OunceAlarmBotService,
     BotService,
     PublishBotsService,
     OuncePublishBotService,

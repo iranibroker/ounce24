@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SignalStatus, User } from '@ounce24/types';
+import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import {
   Action,
@@ -17,6 +17,7 @@ import { SignalBotService } from './signal-bot.service';
 import { AuthService } from '../auth/auth.service';
 import { ConsultingBotService } from './consulting-bot.service';
 import { Public } from '../auth/public.decorator';
+import { OunceAlarmBotService } from './ounce-alarm-bot.service';
 
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 
@@ -30,6 +31,7 @@ export class BotService extends BaseBot {
     private signalBot: SignalBotService,
     private consultingBot: ConsultingBotService,
     private auth: AuthService,
+    private ounceAlarmBot: OunceAlarmBotService,
   ) {
     super(userModel, auth, bot);
   }
@@ -232,6 +234,9 @@ export class BotService extends BaseBot {
         break;
       case UserStateType.SearchUser:
         this.search(ctx);
+        break;
+      case UserStateType.OunceAlarm:
+        await this.ounceAlarmBot.handleTargetPrice(ctx);
         break;
 
       default:

@@ -18,6 +18,7 @@ export enum UserStateType {
   SendMessageToAll,
   SearchUser,
   Consulting,
+  OunceAlarm,
 }
 
 export type UserState<T = any> = {
