@@ -16,9 +16,7 @@ export class OuncePublishBotService {
   prevPublishDatetime = 0;
   publishChannelMessageId = 0;
   redis: Redis = new Redis(
-    process.env.IS_DEV
-      ? 'redis://:X7Y5T2sFNrdcn28h4JLURCKQkgVBynbc@075b5acd-5c6f-4d3e-8682-6f05b1d15743.hsvc.ir:31944/1'
-      : process.env.REDIS_URI,
+    process.env.REDIS_URI + process.env.REDIS_APP_CONFIG_DB,
   );
   constructor(@InjectBot('ounce') private bot: Telegraf<Context>) {
     this.redis.get('publicChannelOuncePriceMessageId', (err, result) => {
