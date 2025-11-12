@@ -106,6 +106,16 @@ export class BaseBot {
             ],
             [
               {
+                text: 'لیست هشدار‌های من',
+                callback_data: 'my_alarms',
+              },
+              {
+                text: '🔔 ایجاد هشدار قیمت',
+                callback_data: 'alarm_me',
+              },
+            ],
+            [
+              {
                 text: '🎙️ پادکست تحلیلی هوش مصنوعی',
                 callback_data: 'podcast',
               },

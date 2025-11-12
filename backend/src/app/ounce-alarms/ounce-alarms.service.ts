@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotAcceptableException,
+  NotFoundException,
   OnModuleDestroy,
 } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -9,10 +11,15 @@ import { Redis } from 'ioredis';
 
 import { EVENTS } from '../consts';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
+import { Cron } from '@nestjs/schedule';
 
 // Sorted-set key used to store all alarms ordered by their target price.
 // We intentionally keep a single key to allow efficient range queries with ZRANGEBYSCORE.
 const ALARMS_KEY = 'ounce:alarms';
+
+const MAX_ALARMS_PER_USER = process.env.MAX_ALARMS_PER_USER
+  ? Number(process.env.MAX_ALARMS_PER_USER)
+  : 2;
 
 /**
  * Runtime representation of a single registered ounce alarm.
@@ -65,12 +72,23 @@ export class OunceAlarmsService implements OnModuleDestroy {
     }
   }
 
+  async isUserHasMaxAlarms(userId: string): Promise<boolean> {
+    const alarms = await this.getAlarmsByUser(userId);
+    return alarms.length >= MAX_ALARMS_PER_USER
+  }
+
   async createAlarm(userId: string, targetPrice: number): Promise<void> {
     if (!userId) {
-      throw new BadRequestException('userId is required to create an alarm');
+      throw new NotFoundException('userId is required to create an alarm');
     }
     if (!Number.isFinite(targetPrice) || targetPrice <= 0) {
       throw new BadRequestException('targetPrice must be greater than 0');
+    }
+
+    if (await this.isUserHasMaxAlarms(userId)) {
+      throw new NotAcceptableException(
+        `You have reached the maximum number of alarms (${MAX_ALARMS_PER_USER})`,
+      );
     }
 
     const payload: OunceAlarmPayload = { userId, targetPrice };
@@ -118,7 +136,7 @@ export class OunceAlarmsService implements OnModuleDestroy {
     }
 
     const previousPrice = this.lastPrice ?? currentPrice;
-    if (previousPrice === currentPrice) {
+    if (previousPrice === currentPrice || previousPrice === 0) {
       return;
     }
 
@@ -181,5 +199,12 @@ export class OunceAlarmsService implements OnModuleDestroy {
       );
     }
     return undefined;
+  }
+
+  @Cron('0 15 0 * * 6', {
+    timeZone: 'UTC',
+  })
+  async resetAlarms() {
+    await this.clearAllAlarms();
   }
 }

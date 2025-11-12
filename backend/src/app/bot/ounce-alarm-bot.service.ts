@@ -16,6 +16,11 @@ import { BaseBot, UserStateType } from './base-bot';
 import { EVENTS } from '../consts';
 import { PersianNumberService } from '@ounce24/utils';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
+import { OuncePriceService } from '../ounce-price/ounce-price.service';
+
+const MAX_ALARMS_PER_USER = process.env.MAX_ALARMS_PER_USER
+  ? Number(process.env.MAX_ALARMS_PER_USER)
+  : 2;
 
 @Public()
 @Injectable()
@@ -28,6 +33,7 @@ export class OunceAlarmBotService extends BaseBot {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly auth: AuthService,
     private readonly ounceAlarmsService: OunceAlarmsService,
+    private readonly ouncePriceService: OuncePriceService,
   ) {
     super(userModel, auth, bot);
   }
@@ -37,9 +43,23 @@ export class OunceAlarmBotService extends BaseBot {
   async handleAlarmCommand(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
 
+    const user = await this.getUser(ctx.from.id);
+    if (!user) {
+      await ctx.reply('کاربر یافت نشد. لطفا دوباره تلاش کنید.');
+      return;
+    }
+
+    if (await this.ounceAlarmsService.isUserHasMaxAlarms(user.id)) {
+      await ctx.reply(
+        `شما به حداکثر تعداد هشدار قیمت مجاز (${MAX_ALARMS_PER_USER}) رسیده اید. برای مدیریت هشدارهای خود، /my_alarms را ارسال کنید`,
+      );
+      return;
+    }
+
     this.setState(ctx.from.id, { state: UserStateType.OunceAlarm });
+
     await ctx.reply(
-      'عدد مورد نظر خود برای ایجاد هشدار را ارسال کنید (مثال: 2450.5)',
+      `عدد مورد نظر خود برای ایجاد هشدار قیمت به دلار وارد کنید (مثال: 2450.5). قیمت فعلی انس طلا ${this.ouncePriceService.current} است\n/cancel`,
       {
         reply_markup: { remove_keyboard: true },
       },
@@ -72,7 +92,7 @@ export class OunceAlarmBotService extends BaseBot {
       await ctx.sendChatAction('typing');
       await this.ounceAlarmsService.createAlarm(user.id, targetPrice);
       await ctx.reply(
-        `هشدار قیمت ${targetPrice} برای شما ثبت شد. به محض رسیدن قیمت به این مقدار به شما اطلاع می‌دهیم.`,
+        `هشدار قیمت ${targetPrice} برای شما ثبت شد. به محض رسیدن قیمت به این مقدار به شما اطلاع می‌دهیم.\n\n/my_alarms - مدیریت هشدارهای خود\n/alarm_me - ایجاد هشدار جدید`,
       );
       this.deleteState(ctx.from.id);
     } catch (error) {
@@ -189,5 +209,27 @@ export class OunceAlarmBotService extends BaseBot {
       },
     ]);
   }
-}
 
+  @Command('temp_alaram_message')
+  @Action('temp_alaram_message')
+  async tempAlaramMessage(@Ctx() ctx: Context) {
+    this.bot.telegram.sendMessage(
+      process.env.PUBLISH_CHANNEL_ID,
+      `فعالسازی هشدار در قیمت دلخواه!
+
+
+با استفاده از قابلیت «هشدار قیمت» در ربات انس24، می‌توانید عدد دلخواه خود را برای قیمت انس طلا تنظیم کنید تا هنگام رسیدن قیمت به آن مقدار، به شما اطلاع داده شود.
+
+ربات انس24 :
+@ounce24_bot
+`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'هشدار قیمت', url: process.env.MAIN_CHANNEL_URL }],
+          ],
+        },
+      },
+    );
+  }
+}
