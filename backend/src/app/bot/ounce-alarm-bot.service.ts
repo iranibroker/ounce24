@@ -59,7 +59,7 @@ export class OunceAlarmBotService extends BaseBot {
     this.setState(ctx.from.id, { state: UserStateType.OunceAlarm });
 
     await ctx.reply(
-      `عدد مورد نظر خود برای ایجاد هشدار قیمت به دلار وارد کنید (مثال: 2450.5). قیمت فعلی انس طلا ${this.ouncePriceService.current} است\n/cancel`,
+      `عدد مورد نظر خود برای ایجاد هشدار قیمت به دلار وارد کنید. قیمت فعلی انس طلا ${this.ouncePriceService.current} است\n/cancel`,
       {
         reply_markup: { remove_keyboard: true },
       },
@@ -214,19 +214,23 @@ export class OunceAlarmBotService extends BaseBot {
   @Action('temp_alaram_message')
   async tempAlaramMessage(@Ctx() ctx: Context) {
     this.bot.telegram.sendMessage(
-      process.env.PUBLISH_CHANNEL_ID,
+      -1001924183136,
       `فعالسازی هشدار در قیمت دلخواه!
 
 
 با استفاده از قابلیت «هشدار قیمت» در ربات انس24، می‌توانید عدد دلخواه خود را برای قیمت انس طلا تنظیم کنید تا هنگام رسیدن قیمت به آن مقدار، به شما اطلاع داده شود.
 
 ربات انس24 :
-@ounce24_bot
-`,
+@ounce24_bot`,
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'هشدار قیمت', url: process.env.MAIN_CHANNEL_URL }],
+            [
+              {
+                text: 'هشدار قیمت',
+                url: process.env.MAIN_CHANNEL_URL + '_bot',
+              },
+            ],
           ],
         },
       },
