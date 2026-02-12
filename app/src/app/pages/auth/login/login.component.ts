@@ -33,7 +33,13 @@ declare global {
           }) => void;
           renderButton: (
             parent: HTMLElement,
-            options: { type?: string; size?: string; theme?: string }
+            options: {
+              type?: string;
+              size?: string;
+              theme?: string;
+              width?: number;
+              locale?: string;
+            }
           ) => void;
         };
       };
@@ -105,11 +111,18 @@ export class LoginComponent implements AfterViewInit {
         this.ngZone.run(() => this.handleGoogleCredential(response.credential));
       },
     });
-    window.google.accounts.id.renderButton(container, {
-      type: 'standard',
-      size: 'large',
-      theme: 'outline',
-    });
+    // Defer so container has layout and width (e.g. 100%); Google allows 40–400px
+    setTimeout(() => {
+      const w = container.clientWidth || (container.parentElement?.clientWidth ?? 0) || 320;
+      const width = Math.min(400, Math.max(200, w));
+      window.google.accounts.id.renderButton(container, {
+        type: 'standard',
+        size: 'large',
+        theme: 'outline',
+        width,
+        locale: 'en',
+      });
+    }, 0);
   }
 
   private async handleGoogleCredential(idToken: string): Promise<void> {
