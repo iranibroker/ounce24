@@ -1,4 +1,4 @@
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../services/auth.service';
+import { TelegramService } from '../../../services/telegram.service';
 import { injectMutation } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
@@ -44,9 +45,21 @@ export class EditUserComponent {
   private snack = inject(MatSnackBar);
   private translate = inject(TranslateService);
   public auth = inject(AuthService);
+  private telegramService = inject(TelegramService);
   private dialog = inject(MatDialog);
 
   loading = signal(false);
+
+  canUseTelegramAvatar = computed(() => {
+    const user = this.auth.userQuery.data();
+    const tgUser = this.telegramService.user;
+    return !!(user?.telegramId || tgUser);
+  });
+
+  hasAvatar(): boolean {
+    const user = this.auth.userQuery.data();
+    return !!(user?.avatar && user.avatar.trim().length > 0);
+  }
   form: FormGroup;
 
   updateUserMutation = injectMutation<User, Error, Partial<User>>(() => ({
@@ -102,5 +115,61 @@ export class EditUserComponent {
         description: this.translate.instant('profile.needGems'),
       },
     });
+  }
+
+  async removeAvatar() {
+    if (this.loading()) return;
+    this.loading.set(true);
+    try {
+      await this.updateUserMutation.mutateAsync({ avatar: null } as any);
+      this.auth.userQuery.refetch();
+      this.snack.open(
+        this.translate.instant('profile.avatar.removed'),
+        '',
+        { duration: 2000 },
+      );
+    } catch {
+      this.snack.open(
+        this.translate.instant('profile.avatar.error'),
+        '',
+        { duration: 2000 },
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async useTelegramAvatar() {
+    if (this.loading()) return;
+    this.loading.set(true);
+    try {
+      const tgUser = this.telegramService.user;
+      if (tgUser?.photo_url) {
+        await this.updateUserMutation.mutateAsync({
+          avatar: tgUser.photo_url,
+        } as any);
+      } else {
+        await this.http
+          .post<User>('/api/auth/me/telegram-avatar', {})
+          .toPromise();
+      }
+      this.auth.userQuery.refetch();
+      this.snack.open(
+        this.translate.instant('profile.avatar.success'),
+        '',
+        { duration: 2000 },
+      );
+    } catch (err: any) {
+      const key = err?.error?.translationKey;
+      this.snack.open(
+        key
+          ? this.translate.instant(key)
+          : this.translate.instant('profile.avatar.error'),
+        '',
+        { duration: 2000 },
+      );
+    } finally {
+      this.loading.set(false);
+    }
   }
 }

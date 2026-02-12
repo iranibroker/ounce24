@@ -37,8 +37,8 @@
         <img [appAvatar]="authService.userQuery.data()" [size]="24" class="nav-profile-avatar" />
       } @else {
         <i class="far fa-user fa-xl"></i>
+        {{ 'bottomNav.profile' | translate }}
       }
-      {{ 'bottomNav.profile' | translate }}
     </div>
   </a>
 </mat-toolbar>

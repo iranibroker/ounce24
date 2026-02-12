@@ -103,7 +103,12 @@
       "success": "Avatar updated successfully",
       "error": "Failed to update avatar",
       "noGems": "You don't have any GEMs to change your profile picture",
-      "useGem": "You need 1 GEM. Do you want to use to change your profile picture?"
+      "useGem": "You need 1 GEM. Do you want to use to change your profile picture?",
+      "remove": "Remove avatar",
+      "useTelegram": "Use my Telegram avatar",
+      "removed": "Avatar removed",
+      "noTelegram": "Telegram account not linked",
+      "telegramFetchFailed": "Could not fetch Telegram profile photo"
     },
     "achievements": "Achievements"
   },

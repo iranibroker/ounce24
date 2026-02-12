@@ -10,6 +10,26 @@
       <div class="avatar-container" routerLink="/profile/avatar">
         <img [appAvatar] alt="Profile Avatar" class="avatar" />
       </div>
+      <div class="avatar-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="removeAvatar()"
+          [disabled]="loading() || !hasAvatar()"
+        >
+          {{ 'profile.avatar.remove' | translate }}
+        </button>
+        @if (canUseTelegramAvatar()) {
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="useTelegramAvatar()"
+            [disabled]="loading()"
+          >
+            {{ 'profile.avatar.useTelegram' | translate }}
+          </button>
+        }
+      </div>
     </div>
 
     <mat-form-field appearance="outline">

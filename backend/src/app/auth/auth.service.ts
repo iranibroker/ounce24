@@ -134,6 +134,30 @@ export class AuthService {
     return user;
   }
 
+  async fetchTelegramAvatarUrl(telegramId: number): Promise<string | null> {
+    const token = process.env.BOT_TOKEN;
+    if (!token) return null;
+    try {
+      const photosRes = await this.http
+        .get(
+          `https://api.telegram.org/bot${token}/getUserProfilePhotos?user_id=${telegramId}&limit=1`,
+        )
+        .toPromise();
+      const photos = photosRes?.data?.result?.photos;
+      if (!photos?.[0]?.[0]?.file_id) return null;
+      const fileRes = await this.http
+        .get(
+          `https://api.telegram.org/bot${token}/getFile?file_id=${photos[0][0].file_id}`,
+        )
+        .toPromise();
+      const filePath = fileRes?.data?.result?.file_path;
+      if (!filePath) return null;
+      return `https://api.telegram.org/file/bot${token}/${filePath}`;
+    } catch {
+      return null;
+    }
+  }
+
   async telegramLogin(initData: string) {
     if (!this.validateTelegramData(initData)) {
       throw new BadRequestException('Invalid Telegram data');
