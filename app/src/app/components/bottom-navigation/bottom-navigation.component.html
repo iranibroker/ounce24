@@ -17,22 +17,28 @@
       {{ 'bottomNav.leaderboard' | translate }}
     </div>
   </a>
+  <!-- Podcast tab hidden
   <a mat-button routerLink="/podcast">
     <div class="nav-item-wrapper">
       <i class="far fa-podcast fa-xl"></i>
       {{ 'bottomNav.podcast' | translate }}
     </div>
   </a>
+  -->
   <!-- <a mat-button>
     <div class="nav-item-wrapper">
       <i class="far fa-bell fa-xl"></i>
       {{ 'bottomNav.notifications' | translate }}
     </div>
   </a> -->
-  <!-- <a mat-button>
-    <div class="nav-item-wrapper" routerLink="/profile">
-      <i class="far fa-user fa-xl"></i>
+  <a mat-button [routerLink]="authService.userQuery.data() ? '/profile' : '/login'">
+    <div class="nav-item-wrapper">
+      @if (authService.userQuery.data()) {
+        <img [appAvatar]="authService.userQuery.data()" [size]="24" class="nav-profile-avatar" />
+      } @else {
+        <i class="far fa-user fa-xl"></i>
+      }
       {{ 'bottomNav.profile' | translate }}
     </div>
-  </a> -->
+  </a>
 </mat-toolbar>

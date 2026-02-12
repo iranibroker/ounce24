@@ -36,9 +36,14 @@ export class AvatarDirective implements OnInit {
   private setImageSource() {
     const img = this.el.nativeElement;
 
-    let src = `https://api.dicebear.com/9.x/bottts-neutral/${this.type() || 'svg'}`;
-
     const user = this.appAvatar() || this.authService.userQuery.data();
+    // Use telegram avatar URL when available (from Telegram login)
+    if (user?.avatar && user.avatar.startsWith('http')) {
+      img.src = user.avatar;
+      return;
+    }
+
+    let src = `https://api.dicebear.com/9.x/bottts-neutral/${this.type() || 'svg'}`;
     if (user) {
       src += `?seed=${user.id}`;
       if (user.avatar) src += `&${user.avatar || user.id}`;
