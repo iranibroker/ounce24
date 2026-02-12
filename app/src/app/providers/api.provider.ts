@@ -11,6 +11,8 @@ import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TelegramService } from '../services/telegram.service';
+
 const JWT_KEY = 'jwtToken';
 const IGNORE_CASES = [new RegExp('^https?:\\/\\/?'), new RegExp('/i18n/')];
 
@@ -19,6 +21,7 @@ class ApiInterceptor implements HttpInterceptor {
   router = inject(Router);
   translate = inject(TranslateService);
   snackBar = inject(MatSnackBar);
+  telegramService = inject(TelegramService);
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     let ignore = false;
     for (const cases of IGNORE_CASES) {
@@ -65,7 +68,9 @@ class ApiInterceptor implements HttpInterceptor {
         ) {
           sessionStorage.removeItem(JWT_KEY);
           localStorage.removeItem(JWT_KEY);
-          this.router.navigateByUrl('/login');
+          this.router.navigateByUrl(
+            this.telegramService.isTelegramApp ? '/login/telegram' : '/login'
+          );
         }
         return throwError(err);
       }),

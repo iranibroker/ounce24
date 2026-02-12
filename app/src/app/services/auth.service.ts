@@ -64,22 +64,21 @@ export class AuthService {
     }),
   );
 
-  // Telegram Login mutation
-  telegramLoginMutation = injectMutation<string, Error, string>(() => ({
+  // Telegram Login mutation – returns { token, user } from backend
+  telegramLoginMutation = injectMutation<
+    { token: string; user: User },
+    Error,
+    string
+  >(() => ({
     mutationFn: (initData) =>
       this.http
-        .post(
-          `/api/auth/telegram-login`,
-          {
-            initData,
-          },
-          {
-            responseType: 'text',
-          },
-        )
-        .toPromise(),
+        .post<{ token: string; user: User }>(`/api/auth/telegram-login`, {
+          initData,
+        })
+        .toPromise()
+        .then((res) => res!),
     onSuccess: async (response) => {
-      await this.saveToken(response);
+      await this.saveToken(response.token);
       return response;
     },
   }));

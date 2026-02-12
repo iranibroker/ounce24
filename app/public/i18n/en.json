@@ -75,7 +75,9 @@
     "tokenExpired": "OTP expired",
     "resendToken": "Resend OTP",
     "telegram": {
-      "text": "Logging in with Telegram..."
+      "text": "Logging in with Telegram...",
+      "logging_in": "Signing you in with Telegram...",
+      "error": "Login failed. Please try again or open from Telegram."
     }
   },
   "profile": {

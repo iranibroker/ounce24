@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { TelegramService } from '../../../services/telegram.service';
 import { SHARED } from '../../../shared';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 
@@ -11,24 +12,58 @@ import { EmptyStateComponent } from '../../../components/empty-state/empty-state
   templateUrl: './telegram.component.html',
   styleUrl: './telegram.component.scss',
 })
-export class TelegramComponent {
-  queryParams = inject(ActivatedRoute).snapshot.queryParams;
-  auth = inject(AuthService);
-  router = inject(Router);
+export class TelegramComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private auth = inject(AuthService);
+  private telegramService = inject(TelegramService);
 
-  constructor() {
-    if (this.queryParams['token']) {
-      this.login();
+  loading = signal(true);
+  error = signal(false);
+
+  ngOnInit() {
+    const token = this.route.snapshot.queryParams['token'];
+    const returnPath =
+      this.route.snapshot.queryParams['returnPath'] || '/';
+
+    if (token) {
+      this.loginWithToken(token, returnPath);
+    } else if (this.telegramService.isTelegramApp && this.telegramService.initData) {
+      this.loginWithTelegramData(returnPath);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/login'], {
+        queryParamsHandling: 'preserve',
+      });
+      this.loading.set(false);
     }
   }
 
-  async login() {
+  private async loginWithToken(token: string, returnPath: string) {
     try {
-      await this.auth.saveToken(this.queryParams['token']);
+      await this.auth.saveToken(token);
+      this.router.navigateByUrl(returnPath);
+    } catch {
+      this.error.set(true);
     } finally {
-      this.router.navigate(['/']);
+      this.loading.set(false);
+    }
+  }
+
+  private async loginWithTelegramData(returnPath: string) {
+    if (this.auth.token()) {
+      this.router.navigateByUrl(returnPath);
+      this.loading.set(false);
+      return;
+    }
+    try {
+      await this.auth.telegramLoginMutation.mutateAsync(
+        this.telegramService.initData
+      );
+      this.router.navigateByUrl(returnPath);
+    } catch {
+      this.error.set(true);
+    } finally {
+      this.loading.set(false);
     }
   }
 }

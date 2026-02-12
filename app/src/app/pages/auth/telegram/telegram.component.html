@@ -1,4 +1,16 @@
-<app-empty-state
-  [text]="'login.telegram.text' | translate"
-  icon="fab fa-telegram"
-/>
+@if (loading()) {
+  <app-empty-state
+    [text]="'login.telegram.logging_in' | translate"
+    icon="fab fa-telegram"
+  />
+} @else if (error()) {
+  <app-empty-state
+    [text]="'login.telegram.error' | translate"
+    icon="fab fa-telegram"
+  />
+} @else {
+  <app-empty-state
+    [text]="'login.telegram.text' | translate"
+    icon="fab fa-telegram"
+  />
+}
