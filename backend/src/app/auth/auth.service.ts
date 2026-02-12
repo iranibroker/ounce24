@@ -306,20 +306,16 @@ export class AuthService {
   }
 
   /**
-   * Fallback when verifyIdToken fails (e.g. 403 fetching certs).
-   * Uses Google's tokeninfo endpoint; works from networks where cert endpoint is blocked.
+   * Uses Google's tokeninfo endpoint to verify the ID token.
    */
   private async verifyGoogleTokenViaTokenInfo(
     idToken: string,
     clientId: string,
   ): Promise<{ sub: string; email?: string; name?: string; picture?: string } | null> {
     try {
-      const proxyUrl = process.env.GOOGLE_HTTP_PROXY || process.env.HTTPS_PROXY;
-      const proxy = proxyUrl ? this.parseProxyUrl(proxyUrl) : undefined;
       const res = await this.http
         .get<{ sub?: string; aud?: string; email?: string; name?: string; picture?: string }>(
           `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
-          proxy ? { proxy } : {},
         )
         .toPromise();
       const data = res?.data;
