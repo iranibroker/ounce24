@@ -3,32 +3,45 @@
     <i class="fa-regular fa-chevron-left fa-sm rtl"></i>
   </button>
 </mat-toolbar>
-<form (ngSubmit)="sendToken(phoneInput.value, $event)">
-  <h1>{{ 'login.phoneTitle' | translate }}</h1>
-  <p>{{ 'login.phoneDescription' | translate }}</p>
-  <mat-form-field appearance="outline">
-    <input
-      #phoneInput
-      [autoFocus]
-      matInput
-      type="number"
-      placeholder="{{ 'login.phonePlaceholder' | translate }}"
-      [readonly]="loading()"
-      minlength="11"
-      maxlength="11"
-      class="mono"
-    />
-    @if (languageService.isRTL()) {
-      <span matTextSuffix>0</span>
-    } @else {
-      <span matTextPrefix>0</span>
-    }
-  </mat-form-field>
 
-  <button id="action" type="submit" [disabled]="loading()" mat-flat-button>
-    {{ 'login.phoneAction' | translate }}
-    @if (loading()) {
-      ...
-    }
-  </button>
-</form>
+<div class="login-page">
+  <h1>{{ 'login.phoneTitle' | translate }}</h1>
+  <p class="description">{{ 'login.phoneDescription' | translate }}</p>
+
+  <form (ngSubmit)="sendToken(phoneInput.value, $event)">
+    <mat-form-field appearance="outline">
+      <input
+        #phoneInput
+        [autoFocus]
+        matInput
+        type="number"
+        placeholder="{{ 'login.phonePlaceholder' | translate }}"
+        [readonly]="loading()"
+        minlength="11"
+        maxlength="11"
+        class="mono"
+      />
+      @if (languageService.isRTL()) {
+        <span matTextSuffix>0</span>
+      } @else {
+        <span matTextPrefix>0</span>
+      }
+    </mat-form-field>
+
+    <button id="action" type="submit" [disabled]="loading()" mat-flat-button>
+      {{ 'login.phoneAction' | translate }}
+      @if (loading()) {
+        ...
+      }
+    </button>
+  </form>
+
+  @if (showGoogleSignIn()) {
+    <span class="divider">{{ 'login.or' | translate }}</span>
+    <div #googleButtonContainer id="google-button-container"></div>
+  }
+
+  @if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() | translate }}</p>
+  }
+</div>

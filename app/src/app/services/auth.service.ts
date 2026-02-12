@@ -1,6 +1,4 @@
 import { Injectable, inject, effect } from '@angular/core';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { AuthModalComponent } from '../components/auth-modal/auth-modal.component';
 import {
   injectMutation,
   injectQuery,
@@ -15,7 +13,6 @@ const JWT_KEY = 'jwtToken';
 })
 export class AuthService {
   token = signal<string | null>(localStorage.getItem(JWT_KEY));
-  private bottomSheet = inject(MatBottomSheet);
   private http = inject(HttpClient);
 
   constructor() {
@@ -26,12 +23,6 @@ export class AuthService {
       } else {
         localStorage.removeItem(JWT_KEY);
       }
-    });
-  }
-
-  openAuthModal(): void {
-    this.bottomSheet.open(AuthModalComponent, {
-      disableClose: true,
     });
   }
 
@@ -63,6 +54,25 @@ export class AuthService {
       },
     }),
   );
+
+  // Google Login mutation – returns { token, user } from backend
+  googleLoginMutation = injectMutation<
+    { token: string; user: User },
+    Error,
+    string
+  >(() => ({
+    mutationFn: (idToken) =>
+      this.http
+        .post<{ token: string; user: User }>(`/api/auth/google-login`, {
+          idToken,
+        })
+        .toPromise()
+        .then((res) => res!),
+    onSuccess: async (response) => {
+      await this.saveToken(response.token);
+      return response;
+    },
+  }));
 
   // Telegram Login mutation – returns { token, user } from backend
   telegramLoginMutation = injectMutation<

@@ -64,6 +64,10 @@
     "phoneDescription": "کد تایید را به شماره تلفن شما ارسال خواهیم کرد",
     "phonePlaceholder": "9123456789",
     "phoneAction": "ارسال کد تایید",
+    "loginWithGoogle": "ورود با گوگل",
+    "loginWithPhone": "ورود با شماره تلفن",
+    "or": "یا",
+    "chooseDescription": "روش ورود را انتخاب کنید",
     "otpTitle": "وارد کردن کد",
     "otpDescription": "کد 4 رقمی ارسال شده به تلفن خود را وارد کنید",
     "otpPlaceholder": "1234",
@@ -74,6 +78,7 @@
     "remainingTime": "زمان باقی‌مانده: {{value}} ثانیه",
     "tokenExpired": "کد تایید منقضی شده",
     "resendToken": "ارسال مجدد کد",
+    "googleError": "ورود با گوگل ناموفق بود. دوباره تلاش کنید.",
     "telegram": {
       "text": "در حال ورود از طریق تلگرام...",
       "logging_in": "در حال ورود با تلگرام...",

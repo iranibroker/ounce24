@@ -13,6 +13,7 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { createHmac } from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 let kavenegarApi;
 
 @Injectable()
@@ -217,6 +218,68 @@ export class AuthService {
     return {
       token: this.login(user),
       user: user
+    };
+  }
+
+  async googleLogin(idToken: string) {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      throw new BadRequestException('Google login is not configured');
+    }
+
+    const client = new OAuth2Client(clientId);
+    let payload: {
+      sub: string;
+      email?: string;
+      email_verified?: boolean;
+      name?: string;
+      picture?: string;
+    };
+
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: clientId,
+      });
+      payload = ticket.getPayload();
+      if (!payload?.sub) {
+        throw new BadRequestException('Invalid Google token');
+      }
+    } catch {
+      throw new BadRequestException('Invalid Google token');
+    }
+
+    const googleId = payload.sub;
+
+    let user = await this.userModel.findOne({ googleId });
+
+    if (!user) {
+      user = await this.userModel.create({
+        googleId,
+        email: payload.email ?? undefined,
+        name: payload.name ?? undefined,
+        avatar: payload.picture ?? undefined,
+      });
+    } else {
+      let updated = false;
+      if (payload.email != null && user.email !== payload.email) {
+        user.email = payload.email;
+        updated = true;
+      }
+      if (payload.name != null && user.name !== payload.name) {
+        user.name = payload.name;
+        updated = true;
+      }
+      if (payload.picture != null && user.avatar !== payload.picture) {
+        user.avatar = payload.picture;
+        updated = true;
+      }
+      if (updated) await user.save();
+    }
+
+    return {
+      token: this.login(user),
+      user,
     };
   }
 

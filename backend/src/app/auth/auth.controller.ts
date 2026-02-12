@@ -34,6 +34,12 @@ export class AuthController {
   }
 
   @Public()
+  @Post('google-login')
+  async googleLogin(@Body() body: { idToken: string }) {
+    return this.auth.googleLogin(body.idToken);
+  }
+
+  @Public()
   @Get('sendToken/:mobile')
   async sendToken(@Param() params) {
     return this.auth.sendToken(PersianNumberService.toEnglish(params.mobile));

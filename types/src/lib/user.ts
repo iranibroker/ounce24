@@ -26,6 +26,10 @@ export class User {
 
   phone?: string;
 
+  email?: string;
+
+  googleId?: string;
+
   resetAt: Date;
 
   iban: string;
