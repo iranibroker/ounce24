@@ -231,34 +231,43 @@ export class AuthService {
       throw new BadRequestException('Invalid Google token: missing or invalid');
     }
 
-    const client = new OAuth2Client(clientId);
+    const trimmedToken = idToken.trim();
     let payload: {
       sub: string;
       email?: string;
       email_verified?: boolean;
       name?: string;
       picture?: string;
-    };
+    } | null = null;
 
-    try {
-      const ticket = await client.verifyIdToken({
-        idToken: idToken.trim(),
-        audience: clientId,
-      });
-      payload = ticket.getPayload();
-      if (!payload?.sub) {
+    // 1) Try tokeninfo first (single GET, no cert fetch) – works when cert endpoint is 403
+    payload = await this.verifyGoogleTokenViaTokenInfo(trimmedToken, clientId);
+
+    // 2) Fallback to verifyIdToken (fetches Google certs; can 403 in restricted networks)
+    if (!payload) {
+      try {
+        const client = new OAuth2Client(clientId);
+        const ticket = await client.verifyIdToken({
+          idToken: trimmedToken,
+          audience: clientId,
+        });
+        const p = ticket.getPayload();
+        if (p?.sub) payload = p;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.includes('audience') || message.includes('Audience')) {
+          throw new BadRequestException(
+            'Invalid Google token: client ID mismatch. Ensure GOOGLE_CLIENT_ID on the server matches the Web client ID used in the app.',
+          );
+        }
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Google verifyIdToken error:', message);
+        }
         throw new BadRequestException('Invalid Google token');
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes('audience') || message.includes('Audience')) {
-        throw new BadRequestException(
-          'Invalid Google token: client ID mismatch. Ensure GOOGLE_CLIENT_ID on the server matches the Web client ID used in the app.',
-        );
-      }
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Google verifyIdToken error:', message);
-      }
+    }
+
+    if (!payload?.sub) {
       throw new BadRequestException('Invalid Google token');
     }
 
@@ -294,6 +303,43 @@ export class AuthService {
       token: this.login(user),
       user,
     };
+  }
+
+  /**
+   * Fallback when verifyIdToken fails (e.g. 403 fetching certs).
+   * Uses Google's tokeninfo endpoint; works from networks where cert endpoint is blocked.
+   */
+  private async verifyGoogleTokenViaTokenInfo(
+    idToken: string,
+    clientId: string,
+  ): Promise<{ sub: string; email?: string; name?: string; picture?: string } | null> {
+    try {
+      const proxyUrl = process.env.GOOGLE_HTTP_PROXY || process.env.HTTPS_PROXY;
+      const proxy = proxyUrl ? this.parseProxyUrl(proxyUrl) : undefined;
+      const res = await this.http
+        .get<{ sub?: string; aud?: string; email?: string; name?: string; picture?: string }>(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
+          proxy ? { proxy } : {},
+        )
+        .toPromise();
+      const data = res?.data;
+      if (!data?.sub) return null;
+      const aud = data.aud;
+      const audienceMatch = Array.isArray(aud) ? aud.includes(clientId) : aud === clientId;
+      if (!audienceMatch) return null;
+      return {
+        sub: data.sub,
+        email: data.email,
+        name: data.name,
+        picture: data.picture,
+      };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Google tokeninfo error:', msg);
+      }
+      return null;
+    }
   }
 
   validateTelegramData(initData: string): boolean {
