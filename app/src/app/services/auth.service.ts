@@ -64,6 +64,26 @@ export class AuthService {
     }),
   );
 
+  // Telegram Login mutation
+  telegramLoginMutation = injectMutation<string, Error, string>(() => ({
+    mutationFn: (initData) =>
+      this.http
+        .post(
+          `/api/auth/telegram-login`,
+          {
+            initData,
+          },
+          {
+            responseType: 'text',
+          },
+        )
+        .toPromise(),
+    onSuccess: async (response) => {
+      await this.saveToken(response);
+      return response;
+    },
+  }));
+
   userQuery = injectQuery<User | null>(() => ({
     queryKey: ['user', this.token()],
     queryFn: () => {

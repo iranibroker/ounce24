@@ -24,7 +24,7 @@ export class User {
 
   alwaysPublish?: boolean;
 
-  phone: string;
+  phone?: string;
 
   resetAt: Date;
 

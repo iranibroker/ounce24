@@ -27,6 +27,12 @@ export class AuthController {
   }
 
   @Public()
+  @Post('telegram-login')
+  async telegramLogin(@Body() body: { initData: string }) {
+    return this.auth.telegramLogin(body.initData);
+  }
+
+  @Public()
   @Get('sendToken/:mobile')
   async sendToken(@Param() params) {
     return this.auth.sendToken(PersianNumberService.toEnglish(params.mobile));

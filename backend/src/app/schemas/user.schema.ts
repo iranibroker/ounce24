@@ -14,7 +14,7 @@ export const UserSchema = new mongoose.Schema<User>(
     totalScore: { type: Number, required: true, default: 0 },
     totalSignals: { type: Number, required: true, default: 0 },
     winRate: { type: Number, required: true, default: 0 },
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String, required: false, unique: true, sparse: true },
     alwaysPublish: { type: Boolean, required: false, default: false },
     resetAt: { type: Date, required: false },
     iban: { type: String, required: false },

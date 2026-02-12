@@ -12,6 +12,7 @@ import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
+import { createHmac } from 'crypto';
 let kavenegarApi;
 
 @Injectable()
@@ -132,4 +133,84 @@ export class AuthService {
     });
     return user;
   }
+
+  async telegramLogin(initData: string) {
+    if (!this.validateTelegramData(initData)) {
+      throw new BadRequestException('Invalid Telegram data');
+    }
+
+    const urlParams = new URLSearchParams(initData);
+    const userStr = urlParams.get('user');
+    if (!userStr) {
+      throw new BadRequestException('User data missing');
+    }
+
+    const telegramUser = JSON.parse(userStr);
+    const telegramId = telegramUser.id;
+
+    let user = await this.userModel.findOne({ telegramId });
+
+    if (!user) {
+      // Try to find by username if available, though telegramId is safer
+      if (telegramUser.username) {
+        user = await this.userModel.findOne({
+          telegramUsername: telegramUser.username,
+        });
+        if (user) {
+          user.telegramId = telegramId;
+          await user.save();
+        }
+      }
+    }
+
+    if (!user) {
+       // Create new user from Telegram data without phone number
+       user = await this.userModel.create({
+         telegramId: telegramId,
+         name: telegramUser.first_name,
+         telegramUsername: telegramUser.username,
+         avatar: telegramUser.photo_url
+       });
+    } else {
+        // Update user info
+        let updated = false;
+        if (user.name !== telegramUser.first_name) {
+            user.name = telegramUser.first_name;
+            updated = true;
+        }
+        if (user.telegramUsername !== telegramUser.username) {
+            user.telegramUsername = telegramUser.username;
+            updated = true;
+        }
+        if (telegramUser.photo_url && user.avatar !== telegramUser.photo_url) {
+            user.avatar = telegramUser.photo_url;
+            updated = true;
+        }
+        if (updated) await user.save();
+    }
+
+    return {
+      token: this.login(user),
+      user: user
+    };
+  }
+
+  validateTelegramData(initData: string): boolean {
+    const urlParams = new URLSearchParams(initData);
+    const hash = urlParams.get('hash');
+    urlParams.delete('hash');
+    urlParams.sort();
+
+    let dataCheckString = '';
+    for (const [key, value] of urlParams.entries()) {
+      dataCheckString += `${key}=${value}\n`;
+    }
+    dataCheckString = dataCheckString.slice(0, -1);
+
+    const secret = createHmac('sha256', 'WebAppData').update(process.env.BOT_TOKEN).digest();
+    const calculatedHash = createHmac('sha256', secret as any).update(dataCheckString).digest('hex');
+
+    return calculatedHash === hash;
+  }
 }
+
