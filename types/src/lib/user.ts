@@ -8,6 +8,9 @@ export class User {
 
   avatar?: string;
 
+  /** Preferred avatar source: custom (BitBots), Telegram, or Google. */
+  avatarSource?: 'bitbots' | 'telegram' | 'google';
+
   defaultScore: number;
 
   totalScore: number;
@@ -29,6 +32,9 @@ export class User {
   email?: string;
 
   googleId?: string;
+
+  /** Google profile picture URL, stored so user can switch back to it. */
+  googlePicture?: string;
 
   resetAt: Date;
 

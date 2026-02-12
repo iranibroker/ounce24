@@ -98,21 +98,31 @@
     "edit": {
       "pageTitle": "Edit Profile",
       "name": "Name",
-      "title": "Title",
+      "nickname": "Nick name",
+      "nicknameHint": "If you want to hide your name, fill in a nickname — others will see your nickname instead.",
       "save": "Save Changes",
       "success": "Profile updated successfully",
       "error": "Failed to update profile"
     },
     "avatar": {
       "edit": "Edit Avatar",
+      "sourceLabel": "Profile picture",
+      "sourceBitbots": "BitBots",
+      "sourceTelegram": "Telegram",
+      "sourceGoogle": "Google",
       "success": "Avatar updated successfully",
       "error": "Failed to update avatar",
       "noGems": "You don't have any GEMs to change your profile picture",
       "useGem": "You need 1 GEM. Do you want to use to change your profile picture?",
       "remove": "Remove avatar",
+      "removeProfilePhoto": "Remove my profile photo",
+      "addFromTelegram": "Add profile photo from Telegram",
+      "addFromGoogle": "Add profile photo from Google",
       "useTelegram": "Use my Telegram avatar",
+      "useGoogle": "Use my Google photo",
       "removed": "Avatar removed",
       "noTelegram": "Telegram account not linked",
+      "noGoogle": "Google account not linked",
       "telegramFetchFailed": "Could not fetch Telegram profile photo"
     },
     "achievements": "Achievements"

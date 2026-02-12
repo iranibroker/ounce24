@@ -160,6 +160,21 @@ export class AuthService {
     }
   }
 
+  async useGoogleAvatar(userId: string): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    const googlePicture = (user as any).googlePicture;
+    if (!googlePicture) {
+      throw new BadRequestException({
+        translationKey: 'profile.avatar.noGoogle',
+      });
+    }
+    return this.updateUser(userId, {
+      avatar: googlePicture,
+      avatarSource: 'google',
+    } as Partial<User>);
+  }
+
   async telegramLogin(initData: string) {
     if (!this.validateTelegramData(initData)) {
       throw new BadRequestException('Invalid Telegram data');
@@ -281,6 +296,7 @@ export class AuthService {
         email: payload.email ?? undefined,
         name: payload.name ?? undefined,
         avatar: payload.picture ?? undefined,
+        googlePicture: payload.picture ?? undefined,
       });
     } else {
       let updated = false;
@@ -292,9 +308,15 @@ export class AuthService {
         user.name = payload.name;
         updated = true;
       }
-      if (payload.picture != null && user.avatar !== payload.picture) {
-        user.avatar = payload.picture;
-        updated = true;
+      if (payload.picture != null) {
+        if (user.avatar !== payload.picture) {
+          user.avatar = payload.picture;
+          updated = true;
+        }
+        if ((user as any).googlePicture !== payload.picture) {
+          (user as any).googlePicture = payload.picture;
+          updated = true;
+        }
       }
       if (updated) await user.save();
     }

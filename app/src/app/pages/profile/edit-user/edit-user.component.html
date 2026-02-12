@@ -2,34 +2,40 @@
   <button mat-icon-button goBack>
     <i class="fa-regular fa-chevron-left fa-xs rtl"></i>
   </button>
-  {{ 'profile.edit.pageTitle' | translate }}
+  <span class="toolbar-title">{{ 'profile.edit.pageTitle' | translate }}</span>
+  <span class="toolbar-spacer"></span>
+  @if (hasAvatarMenuActions()) {
+    <button mat-icon-button [matMenuTriggerFor]="avatarMenu" [disabled]="loading()">
+      <i class="fa-solid fa-ellipsis-vertical"></i>
+    </button>
+  }
+  <mat-menu #avatarMenu="matMenu" xPosition="before">
+    @if (isExternalAvatar()) {
+      <button mat-menu-item (click)="removeProfilePhoto()">
+        {{ 'profile.avatar.removeProfilePhoto' | translate }}
+      </button>
+    } @else {
+      @if (canUseTelegram()) {
+        <button mat-menu-item (click)="addFromTelegram()">
+          {{ 'profile.avatar.addFromTelegram' | translate }}
+        </button>
+      }
+      @if (canUseGoogle()) {
+        <button mat-menu-item (click)="addFromGoogle()">
+          {{ 'profile.avatar.addFromGoogle' | translate }}
+        </button>
+      }
+    }
+  </mat-menu>
 </mat-toolbar>
+
 <div class="container">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
     <div class="avatar-section">
-      <div class="avatar-container" routerLink="/profile/avatar">
-        <img [appAvatar] alt="Profile Avatar" class="avatar" />
-      </div>
-      <div class="avatar-actions">
-        <button
-          mat-stroked-button
-          type="button"
-          (click)="removeAvatar()"
-          [disabled]="loading() || !hasAvatar()"
-        >
-          {{ 'profile.avatar.remove' | translate }}
-        </button>
-        @if (canUseTelegramAvatar()) {
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="useTelegramAvatar()"
-            [disabled]="loading()"
-          >
-            {{ 'profile.avatar.useTelegram' | translate }}
-          </button>
-        }
-      </div>
+      <a class="avatar-container" routerLink="/profile/avatar">
+        <img [appAvatar] alt="" class="avatar" />
+        <span class="avatar-edit-label">{{ 'profile.avatar.edit' | translate }}</span>
+      </a>
     </div>
 
     <mat-form-field appearance="outline">
@@ -38,8 +44,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>{{ 'profile.edit.title' | translate }}</mat-label>
+      <mat-label>{{ 'profile.edit.nickname' | translate }}</mat-label>
       <input matInput formControlName="title" dir="ltr" />
+      <mat-hint>{{ 'profile.edit.nicknameHint' | translate }}</mat-hint>
     </mat-form-field>
 
     <button

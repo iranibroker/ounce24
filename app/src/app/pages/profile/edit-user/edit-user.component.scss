@@ -1,3 +1,7 @@
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
 .container {
   padding: 20px;
   max-width: 600px;
@@ -10,59 +14,38 @@
   gap: 16px;
 }
 
-h2 {
-  margin-bottom: 24px;
-}
-
 .avatar-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.avatar-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+  margin-bottom: 8px;
 }
 
 .avatar-container {
-  position: relative;
   width: 120px;
   height: 120px;
-  border-radius: 16px;
-  cursor: pointer;
+  border-radius: 12px;
   overflow: hidden;
 
-  &:hover .avatar-overlay {
-    opacity: 1;
+  &.avatar-clickable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
   }
+}
+
+.avatar-edit-label {
+  font-size: 12px;
+  color: var(--mat-form-field-supporting-text-color, rgba(0, 0, 0, 0.6));
 }
 
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 12px;
 }
-
-.avatar-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-
-  i {
-    color: white;
-    font-size: 24px;
-  }
-} 

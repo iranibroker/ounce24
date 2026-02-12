@@ -72,6 +72,14 @@ export class AuthController {
         translationKey: 'profile.avatar.telegramFetchFailed',
       });
     }
-    return this.auth.updateUser(user.id, { avatar: photoUrl });
+    return this.auth.updateUser(user.id, {
+      avatar: photoUrl,
+      avatarSource: 'telegram',
+    } as any);
+  }
+
+  @Post('me/google-avatar')
+  async useGoogleAvatar(@LoginUser() user) {
+    return this.auth.useGoogleAvatar(user.id);
   }
 }
