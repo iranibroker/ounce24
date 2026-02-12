@@ -35,8 +35,12 @@ export class AuthController {
 
   @Public()
   @Post('google-login')
-  async googleLogin(@Body() body: { idToken: string }) {
-    return this.auth.googleLogin(body.idToken);
+  async googleLogin(@Body() body: { idToken?: string; credential?: string }) {
+    const token = body.idToken ?? body.credential;
+    if (!token) {
+      throw new BadRequestException('idToken or credential is required');
+    }
+    return this.auth.googleLogin(token);
   }
 
   @Public()

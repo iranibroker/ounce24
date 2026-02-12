@@ -227,6 +227,10 @@ export class AuthService {
       throw new BadRequestException('Google login is not configured');
     }
 
+    if (!idToken || typeof idToken !== 'string' || idToken.length < 100) {
+      throw new BadRequestException('Invalid Google token: missing or invalid');
+    }
+
     const client = new OAuth2Client(clientId);
     let payload: {
       sub: string;
@@ -238,14 +242,23 @@ export class AuthService {
 
     try {
       const ticket = await client.verifyIdToken({
-        idToken,
+        idToken: idToken.trim(),
         audience: clientId,
       });
       payload = ticket.getPayload();
       if (!payload?.sub) {
         throw new BadRequestException('Invalid Google token');
       }
-    } catch {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes('audience') || message.includes('Audience')) {
+        throw new BadRequestException(
+          'Invalid Google token: client ID mismatch. Ensure GOOGLE_CLIENT_ID on the server matches the Web client ID used in the app.',
+        );
+      }
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Google verifyIdToken error:', message);
+      }
       throw new BadRequestException('Invalid Google token');
     }
 
