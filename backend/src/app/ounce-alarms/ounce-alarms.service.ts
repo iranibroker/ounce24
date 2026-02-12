@@ -131,14 +131,12 @@ export class OunceAlarmsService implements OnModuleDestroy {
 
   @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
   async handleOuncePriceUpdated(currentPrice: number): Promise<void> {
-    console.log('currentPrice', currentPrice);
     if (!Number.isFinite(currentPrice) || currentPrice === 0) {
       return;
     }
 
     const previousPrice = this.lastPrice ?? currentPrice;
     this.lastPrice = currentPrice;
-    console.log('previousPrice', previousPrice);
     if (previousPrice === currentPrice || previousPrice === 0) {
       return;
     }
