@@ -36,12 +36,7 @@ export class LanguageService {
 
   private initializeLanguage(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // Get language from localStorage or use default
-      const storedLanguage = this.getStoredLanguage();
-      const language = storedLanguage || this.DEFAULT_LANGUAGE;
-
-      // Set the language
-      this.setLanguage(language, true);
+      this.setLanguage(this.DEFAULT_LANGUAGE, true);
     }
   }
 

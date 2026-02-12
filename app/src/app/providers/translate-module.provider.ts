@@ -25,12 +25,7 @@ class FetchTranslateLoader implements TranslateLoader {
   }
 }
 
-// Get initial language from localStorage
 function getInitialLanguage(): string {
-  if (typeof window !== 'undefined') {
-    const storedLanguage = localStorage.getItem('app_language');
-    return storedLanguage || 'en';
-  }
   return 'en';
 }
 

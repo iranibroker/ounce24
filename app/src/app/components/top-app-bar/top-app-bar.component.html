@@ -27,16 +27,4 @@
     />
     {{ priceService.value() | currency }}
   </a> -->
-  <!-- <button mat-icon-button [matMenuTriggerFor]="menu">
-    <i class="fa-regular fa-ellipsis-vertical fa-sm"></i>
-  </button> -->
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="toggleLanguage()">
-      <span matIcon class="mat-icon">
-        {{ languageService.getCurrentLanguageConfig()?.flag }}
-      </span>
-      {{ languageService.getCurrentLanguageConfig()?.name }}
-    </button>
-  </mat-menu>
-
 </mat-toolbar>
