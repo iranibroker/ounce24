@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ounce24 | Open Source Gold Signals & Price Alarms</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f5f5f5;
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 gold-gradient rounded-lg flex items-center justify-center">
+                        <i data-lucide="trending-up" class="text-black w-5 h-5"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight">Ounce<span class="gold-text">24</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
+                    <a href="#features" class="hover:text-amber-500 transition-colors">Features</a>
+                    <a href="#how-it-works" class="hover:text-amber-500 transition-colors">How it Works</a>
+                    <a href="https://github.com/iranibroker/ounce24" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
+                        <i data-lucide="github" class="w-4 h-4"></i> GitHub
+                    </a>
+                </div>
+                <div>
+                    <a href="https://app.ounce24.com" target="_blank" class="gold-gradient text-black px-5 py-2 rounded-full text-sm font-bold btn-hover inline-block">
+                        Open App
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="flex flex-wrap justify-center gap-3 mb-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-semibold">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    FREE & NO PREMIUM PLANS
+                </div>
+                <a href="https://github.com/iranibroker/ounce24" target="_blank" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-300 text-xs font-semibold hover:bg-white/10 transition-colors">
+                    <i data-lucide="github" class="w-3 h-3 text-white"></i> OPEN SOURCE
+                </a>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+                Trade gold smarter with <span class="gold-text">live signals</span> and alerts.
+            </h1>
+            <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+                Access real-time XAUUSD trading signals from expert traders and set instant price alarms. Transparent, open-source, and free to use.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://app.ounce24.com" target="_blank" class="gold-gradient text-black px-8 py-4 rounded-xl text-lg font-bold w-full sm:w-auto btn-hover flex items-center justify-center gap-2">
+                    Get started free <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </a>
+                <a href="https://t.me/ounce24_bot" target="_blank" class="bg-white/5 border border-white/10 text-white px-8 py-4 rounded-xl text-lg font-bold w-full sm:w-auto btn-hover flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-5 h-5 text-sky-400"></i> Open Telegram Bot
+                </a>
+            </div>
+            <p class="mt-6 text-sm text-gray-500 flex items-center justify-center gap-4">
+                <span>No credit card required</span>
+                <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                <span>Web app & Telegram sync</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- The Idea -->
+    <section class="py-20 px-4 bg-white/[0.02]">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-8 card-glass rounded-3xl">
+                    <div class="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-lucide="bell-off" class="text-red-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Stop Missing Moves</h3>
+                    <p class="text-gray-400">Tired of missing target prices? Get instant XAUUSD alerts on @Ounce24 or via app push the second gold hits your target.</p>
+                </div>
+                <div class="p-8 card-glass rounded-3xl border-amber-500/20">
+                    <div class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-lucide="users" class="text-amber-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Top Signals Only</h3>
+                    <p class="text-gray-400">Join @Ounce24_signal for top signals and expert market analysis. See who's winning on our global leaderboard.</p>
+                </div>
+                <div class="p-8 card-glass rounded-3xl">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-lucide="mic" class="text-blue-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Weekly Podcasts</h3>
+                    <p class="text-gray-400">Get deep market insights every week. We share podcasts on market trends and gold price psychology on @Ounce24_signal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">A Transparent Ecosystem</h2>
+                <p class="text-gray-400">Professional gold trading tools, powered by open-source code and a community of expert traders.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all">
+                    <i data-lucide="zap" class="text-amber-500 w-8 h-8 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Live Gold Signals</h4>
+                    <p class="text-gray-400">Real-time entry, SL, and TP levels shared by the community. Transparency is our core value.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all">
+                    <i data-lucide="code-2" class="text-amber-500 w-8 h-8 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Open Source</h4>
+                    <p class="text-gray-400">Built in public. Verify the code, contribute to features, or see how we handle data on GitHub.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all">
+                    <i data-lucide="smartphone" class="text-amber-500 w-8 h-8 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">App & Telegram</h4>
+                    <p class="text-gray-400">Seamless sync between app.ounce24.com and our Telegram bot for the fastest alerts possible.</p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all">
+                    <i data-lucide="trophy" class="text-amber-500 w-8 h-8 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Leaderboard</h4>
+                    <p class="text-gray-400">Rank signal providers based on real performance data. No fake results, just pure statistics.</p>
+                </div>
+                <!-- Feature 5 -->
+                <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all">
+                    <i data-lucide="mic" class="text-amber-500 w-8 h-8 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Weekly Podcast</h4>
+                    <p class="text-gray-400">Listen to weekly market analysis and educational content hosted on our main signal channel.</p>
+                </div>
+                <!-- Feature 6 -->
+                <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all">
+                    <i data-lucide="bar-chart-3" class="text-amber-500 w-8 h-8 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Live XAU Price</h4>
+                    <p class="text-gray-400">Follow @Ounce24 for the most reliable real-time gold price updates 24/7.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="how-it-works" class="py-20 px-4 bg-amber-500/5">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">Built for the Modern Trader</h2>
+            <div class="space-y-12">
+                <div class="flex items-start gap-6">
+                    <div class="w-10 h-10 rounded-full gold-gradient text-black flex items-center justify-center font-bold shrink-0">1</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-2">Connect your account</h4>
+                        <p class="text-gray-400 text-lg">Visit <a href="https://app.ounce24.com" class="text-amber-500 underline">app.ounce24.com</a> or start the <a href="https://t.me/ounce24_bot" class="text-amber-500 underline">@ounce24_bot</a> to link your data.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-6">
+                    <div class="w-10 h-10 rounded-full gold-gradient text-black flex items-center justify-center font-bold shrink-0">2</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-2">Join the Channels</h4>
+                        <p class="text-gray-400 text-lg">Follow @Ounce24 for prices and @Ounce24_signal for top-tier signals and podcasts.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-6">
+                    <div class="w-10 h-10 rounded-full gold-gradient text-black flex items-center justify-center font-bold shrink-0">3</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-2">Set & Forget</h4>
+                        <p class="text-gray-400 text-lg">Set your price alarms. We'll handle the monitoring and ping you the moment it's time to trade.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Preview -->
+    <section id="preview" class="py-24 px-4 overflow-hidden">
+        <div class="max-w-7xl mx-auto text-center mb-12">
+            <h2 class="text-4xl font-bold mb-4">The Ounce24 Ecosystem</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">Web app simplicity combined with Telegram's speed. Everything you need to master XAUUSD trading.</p>
+        </div>
+        <div class="max-w-5xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Web Preview -->
+                <div class="p-4 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl">
+                    <div class="flex items-center gap-2 mb-4 px-2">
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="bg-white/5 rounded px-2 py-0.5 text-[10px] text-gray-500">app.ounce24.com</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="h-20 w-full bg-white/5 rounded-lg border border-white/5 p-4 flex items-center justify-between">
+                            <div>
+                                <div class="w-20 h-2 bg-white/10 rounded mb-2"></div>
+                                <div class="w-32 h-3 bg-amber-500/20 rounded"></div>
+                            </div>
+                            <div class="w-12 h-8 bg-green-500/10 rounded border border-green-500/20"></div>
+                        </div>
+                        <div class="h-20 w-full bg-white/5 rounded-lg border border-white/5 p-4 flex items-center justify-between">
+                            <div>
+                                <div class="w-24 h-2 bg-white/10 rounded mb-2"></div>
+                                <div class="w-28 h-3 bg-red-500/20 rounded"></div>
+                            </div>
+                            <div class="w-12 h-8 bg-red-500/10 rounded border border-red-500/20"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Telegram Preview -->
+                <div class="p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10 pointer-events-none">
+                        <i data-lucide="send" class="w-full h-full p-10 text-white"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-full gold-gradient"></div>
+                            <div>
+                                <p class="text-sm font-bold">Ounce24 Bot</p>
+                                <p class="text-[10px] text-green-500">bot</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-white/5 p-3 rounded-lg rounded-tl-none max-w-[80%]">
+                                <p class="text-xs">🔔 <b>PRICE ALERT:</b> Gold has reached $2045.00</p>
+                            </div>
+                            <div class="bg-white/5 p-3 rounded-lg rounded-tl-none max-w-[80%]">
+                                <p class="text-xs">📈 <b>NEW SIGNAL:</b> Check @Ounce24_signal for details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-32 px-4 relative overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-amber-500/5 blur-[120px] rounded-full"></div>
+        <div class="max-w-3xl mx-auto text-center relative">
+            <h2 class="text-4xl md:text-6xl font-extrabold mb-8">Ready to trade gold? <span class="gold-text">It's 100% Free.</span></h2>
+            <p class="text-xl text-gray-400 mb-10">Open source, no premium plans, and no hidden costs. Join the community today.</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://app.ounce24.com" target="_blank" class="gold-gradient text-black px-10 py-5 rounded-xl text-xl font-bold w-full sm:w-auto btn-hover">
+                    Open Web App
+                </a>
+                <a href="https://t.me/Ounce24_signal" target="_blank" class="bg-white/5 border border-white/10 text-white px-10 py-5 rounded-xl text-xl font-bold w-full sm:w-auto btn-hover flex items-center justify-center gap-2">
+                    Signal Channel
+                </a>
+            </div>
+            <div class="mt-12 flex justify-center">
+                <a href="https://github.com/iranibroker/ounce24" target="_blank" class="flex items-center gap-2 text-gray-500 hover:text-white transition-colors">
+                    <i data-lucide="github" class="w-6 h-6"></i>
+                    <span class="font-medium">Star us on GitHub</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 border-t border-white/5 bg-black">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-6 h-6 gold-gradient rounded flex items-center justify-center">
+                            <i data-lucide="trending-up" class="text-black w-4 h-4"></i>
+                        </div>
+                        <span class="text-lg font-bold">Ounce<span class="gold-text">24</span></span>
+                    </div>
+                    <p class="text-gray-500 text-sm max-w-xs mb-4">Open-source gold signals platform. No premium plans, just quality trading tools built in public.</p>
+                    <a href="mailto:ketabdar.dev@gmail.com" class="text-gray-400 text-xs hover:text-amber-500 underline flex items-center gap-2">
+                        <i data-lucide="mail" class="w-3 h-3"></i> ketabdar.dev@gmail.com
+                    </a>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold mb-4">Telegram Links</h5>
+                    <ul class="text-gray-500 text-sm space-y-2">
+                        <li><a href="https://t.me/Ounce24" target="_blank" class="hover:text-amber-500 transition-colors">@Ounce24 (Prices)</a></li>
+                        <li><a href="https://t.me/Ounce24_signal" target="_blank" class="hover:text-amber-500 transition-colors">@Ounce24_signal (Signals)</a></li>
+                        <li><a href="https://t.me/ounce24_bot" target="_blank" class="hover:text-amber-500 transition-colors">@ounce24_bot (Bot)</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold mb-4">Open Source</h5>
+                    <ul class="text-gray-500 text-sm space-y-2">
+                        <li><a href="https://github.com/iranibroker/ounce24" target="_blank" class="hover:text-amber-500 transition-colors flex items-center gap-1"><i data-lucide="github" class="w-3 h-3"></i> GitHub Repo</a></li>
+                        <li><a href="https://app.ounce24.com" target="_blank" class="hover:text-amber-500 transition-colors">Web App</a></li>
+                        <li><a href="#features" class="hover:text-amber-500 transition-colors">Weekly Podcast</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-bold mb-4">Support</h5>
+                    <ul class="text-gray-500 text-sm space-y-2">
+                        <li><a href="mailto:ketabdar.dev@gmail.com" class="hover:text-amber-500 transition-colors">Contact Developer</a></li>
+                        <li><a href="#" class="hover:text-amber-500 transition-colors text-gray-700">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-amber-500 transition-colors text-gray-700">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-8 text-gray-600 text-xs gap-4 text-center md:text-left">
+                <p>&copy; 2024 Ounce24. All trading involves risk. Not financial advice.</p>
+                <div class="flex gap-6">
+                    <a href="https://github.com/iranibroker/ounce24" class="hover:text-white transition-colors">GitHub</a>
+                    <a href="https://t.me/Ounce24_signal" class="hover:text-white transition-colors">Telegram</a>
+                    <a href="mailto:ketabdar.dev@gmail.com" class="hover:text-white transition-colors">Email</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
