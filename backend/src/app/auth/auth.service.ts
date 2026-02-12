@@ -94,10 +94,11 @@ export class AuthService {
   checkToken(mobile: string, token): boolean {
     const mobilePhone = PersianNumberService.toEnglish(mobile);
     console.log('checkToken', mobilePhone, token, this.mobilePhoneTokens[mobilePhone]);
+    const defaultOtp = process.env.DEFAULT_OTP_PASSWORD;
     return (
       this.mobilePhoneTokens[mobilePhone]?.toString() ===
         PersianNumberService.toEnglish(token)?.toString() ||
-      token === (process.env.DEFAULT_OTP_PASSWORD || 'cjknwoi2d2d')
+      (defaultOtp != null && defaultOtp !== '' && token === defaultOtp)
     );
   }
 
