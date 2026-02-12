@@ -87,21 +87,21 @@ export class UserStatsService {
     const users = await this.getLeaderBoard(options?.fromDate, options?.toDate);
     const top10 = users.slice(0, options?.length || 9);
 
-    let texts = `⭐ رنکینگ ${
-      options?.fromDate ? 'هفتگی' : 'کلی'
-    } اساتید ⭐\n\n`;
+    let texts = `⭐ ${
+      options?.fromDate ? 'Weekly' : 'Overall'
+    } leaderboard ⭐\n\n`;
     texts += top10
       .map((user, index) => {
-        return `${index + 1}. ${user.tag} (${user.score.toFixed(1)} امتیاز)`;
+        return `${index + 1}. ${user.tag} (${user.score.toFixed(1)} pts)`;
       })
       .join('\n');
 
     if (options?.userId) {
       const userIndex = users.findIndex((user) => user.id === options.userId);
       const user = users.find((user) => user.id === options.userId);
-      texts += `\n--------\n\nشما با امتیاز ${user.score.toFixed(1)} نفر ${
+      texts += `\n--------\n\nYou're #${
         userIndex + 1
-      } در رنکینگ ${options?.fromDate ? 'هفتگی' : 'کلی'} هستید`;
+      } with ${user.score.toFixed(1)} pts (${options?.fromDate ? 'weekly' : 'overall'})`;
     }
 
     return texts;

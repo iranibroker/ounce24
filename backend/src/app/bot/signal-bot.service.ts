@@ -175,7 +175,7 @@ export class SignalBotService extends BaseBot {
 
     if (signals.length >= MAX_ACTIVE_SIGNAL) {
       ctx.reply(
-        `سیگنال‌های فعال و کاشته شده شما نمی‌تواند بیشتر از ${MAX_ACTIVE_SIGNAL} عدد باشد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
+        `You cannot have more than ${MAX_ACTIVE_SIGNAL} active/pending signals. Use /my_signals to manage your signals.`,
       );
       return;
     }
@@ -193,12 +193,12 @@ export class SignalBotService extends BaseBot {
       .exec();
     if (todaySignals.length >= MAX_DAILY_SIGNAL) {
       ctx.reply(
-        `امکان کاشت بیشتر از ${MAX_DAILY_SIGNAL} سیگنال در روز وجود ندارد. با استفاده از /my_signals سیگنال‌های خود را مدیریت کنید.`,
+        `You cannot create more than ${MAX_DAILY_SIGNAL} signals per day. Use /my_signals to manage your signals.`,
       );
       return;
     }
 
-    await ctx.reply('نوع سیگنال رو مشخص کنید', {
+    await ctx.reply('Choose signal type:', {
       reply_markup: {
         inline_keyboard: [
           [
@@ -228,7 +228,7 @@ export class SignalBotService extends BaseBot {
 
     ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
     try {
-      await ctx.editMessageText(`ایجاد سیگنال ${SignalTypeText[signal.type]}:`);
+      await ctx.editMessageText(`Create signal ${SignalTypeText[signal.type]}:`);
     } catch (error) {
       // unhandled
     }
@@ -240,13 +240,13 @@ export class SignalBotService extends BaseBot {
     ctx.answerCbQuery();
 
     await ctx.reply(
-      `قیمت ورود به معامله را وارد کنید: قیمت فعلی انس طلا ${this.ouncePriceService.current} است`,
+      `Enter entry price. Current gold price: ${this.ouncePriceService.current}`,
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: 'ورود با قیمت فعلی بازار',
+                text: 'Enter at current market price',
                 callback_data: 'instant_entry',
               },
             ],
@@ -275,7 +275,7 @@ export class SignalBotService extends BaseBot {
       : Number(PersianNumberService.toEnglish(ctx.message['text']));
     const user = await this.getUser(ctx.from.id);
     if (value && isNaN(Number(value))) {
-      ctx.reply('لطفا یک مقدار عددی وارد کنید. مثلا: 3234.32');
+      ctx.reply('Please enter a number, e.g. 3234.32');
       return;
     }
     if (!signal.entryPrice && !signal.instantEntry) {
@@ -292,13 +292,13 @@ export class SignalBotService extends BaseBot {
         .exec();
       if (nearSignal) {
         ctx.reply(
-          `شما سیگنال کاشته شده دیگری در نزدیکی این نقطه دارید. لطفا نقطه ورود را مجدد وارد کنید:`,
+          `You already have a signal near this level. Please enter a different entry price:`,
         );
         return;
       }
       if (instantEntry) signal.instantEntry = true;
       else signal.entryPrice = value;
-      ctx.reply(`حد ضرر را مشخص کنید:`);
+      ctx.reply(`Set stop loss:`);
       this.setStateData(ctx.from.id, signal);
     } else if (isSell) {
       const entryPrice = instantEntry
@@ -307,21 +307,21 @@ export class SignalBotService extends BaseBot {
       if (!signal.maxPrice) {
         if (value - entryPrice < 1 || value - entryPrice > 200) {
           ctx.reply(
-            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
+            `Value must be $1–$200 above entry price.`,
           );
           return;
         }
         signal.maxPrice = value;
-        ctx.reply(`حد سود را مشخص کنید:`);
+        ctx.reply(`Set take profit:`);
       } else if (!signal.minPrice) {
         if (entryPrice - value < 1 || entryPrice - value > 200) {
           ctx.reply(
-            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
+            `Value must be $1–$200 below entry price.`,
           );
           return;
         }
         if (value > entryPrice - signal.maxPrice + entryPrice) {
-          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
+          ctx.reply(`Take profit must not be less than stop loss`);
           return;
         }
         signal.minPrice = value;
@@ -333,21 +333,21 @@ export class SignalBotService extends BaseBot {
       if (!signal.minPrice) {
         if (entryPrice - value < 1 || entryPrice - value > 200) {
           ctx.reply(
-            `مقدار وارد شده باید ۱ تا ۲۰۰ دلار کوچکتر از قیمت ورود باشد.`,
+            `Value must be $1–$200 below entry price.`,
           );
           return;
         }
         signal.minPrice = value;
-        ctx.reply(`حد سود را مشخص کنید:`);
+        ctx.reply(`Set take profit:`);
       } else if (!signal.maxPrice) {
         if (value - entryPrice < 1 || value - entryPrice > 200) {
           ctx.reply(
-            `مقدار وارد شده باید بین ۱ تا ۲۰۰ دلار بیشتر از قیمت ورود باشد.`,
+            `Value must be $1–$200 above entry price.`,
           );
           return;
         }
         if (value < entryPrice - signal.minPrice + entryPrice) {
-          ctx.reply(`مقدار حد سود نباید کمتر از حد ضرر باشد`);
+          ctx.reply(`Take profit must not be less than stop loss`);
           return;
         }
         signal.maxPrice = value;
@@ -375,8 +375,8 @@ export class SignalBotService extends BaseBot {
                 inline_keyboard: [
                   [
                     {
-                      text: '✨ تحلیل سیگنال',
-                      callback_data: `analyze_signal_${createdSignal.id}`,
+                  text: '✨ Analyze signal',
+                  callback_data: `analyze_signal_${createdSignal.id}`,
                     },
                   ],
                 ],
@@ -387,16 +387,16 @@ export class SignalBotService extends BaseBot {
           if (process.env.PUBLISH_CHANNEL_ID) {
             if (!createdSignal.publishable) {
               ctx.reply(
-                `سیگنال شما با موفقیت ثبت شد اما در کانال منتشر نشد. حداقل امتیاز کل یا هفتگی برای ارسال پیام در کانال ${MIN_SIGNAL_SCORE} امتیاز است. امتیاز کل شما ${user.totalScore.toFixed(
+                `Your signal was saved but not published to the channel. Minimum score (total or weekly) to publish is ${MIN_SIGNAL_SCORE}. Your total: ${user.totalScore.toFixed(
                   2,
-                )} امتیاز است و امتیاز هفتگی شما ${user.weekScore.toFixed(2)} امتیاز است.\nبا ثبت سیگنال‌های صحیح در ربات و دریافت امتیاز بیشتر، سیگنال‌های شما به صورت خودکار در کانال منتشر می‌شود.\nبرای مشاهده امتیاز سیگنال‌های قبلی خود، از\n/my_closed_signals\nو برای مدیریت سیگنال‌های کاشته شده از\n/my_signals\n استفاده کنید.`,
+                )}, weekly: ${user.weekScore.toFixed(2)}.\nWith more correct signals and higher score, your signals will be published automatically.\nUse /my_closed_signals to see past signals and /my_signals to manage active ones.`,
               );
               return;
             }
           }
         }
       } catch (error) {
-        ctx.reply('خطایی رخ داده است. لطفا دوباره تلاش کنید.');
+        ctx.reply('Something went wrong. Please try again.');
         BaseBot.userStates.delete(ctx.from.id);
       }
     }
@@ -407,16 +407,16 @@ export class SignalBotService extends BaseBot {
     const userId = ctx.from.id;
     const user = await this.getUser(ctx.from.id);
     if (!user) {
-      ctx.answerCbQuery('لطفا ابتدا به ربات اونس24 متصل شوید');
+      ctx.answerCbQuery('Please connect to Ounce24 bot first');
       return;
     }
     console.log(`✨ Analyzing signal for user ${user.id}`);
     const id = ctx.callbackQuery['data'].split('_')[2];
     try {
-      await ctx.answerCbQuery('از طریق ربات برای شما ارسال خواهد شد');
+      await ctx.answerCbQuery('Will be sent to you via the bot');
       await this.bot.telegram.sendMessage(
         userId,
-        '✨ در حال تحلیل سیگنال زیر. حدود 30 ثانیه زمان نیاز دارد...',
+        '✨ Analyzing the signal below. This may take about 30 seconds...',
       );
       const signal = await this.signalModel
         .findById(id)
@@ -437,27 +437,27 @@ export class SignalBotService extends BaseBot {
         });
         await this.bot.telegram.sendMessage(
           userId,
-          `جم باقیمانده برای شما: ${result.user.gem - 1} 💎`,
+          `Gems remaining: ${result.user.gem - 1} 💎`,
         );
-        ctx.answerCbQuery('از طریق ربات برای شما ارسال شد');
+        ctx.answerCbQuery('Sent to you via the bot');
       } catch (error) {
         if (error.status === 404) {
-          await this.bot.telegram.sendMessage(userId, 'کاربر یافت نشد.');
+          await this.bot.telegram.sendMessage(userId, 'User not found.');
         } else if (error.status === 406) {
           await this.bot.telegram.sendMessage(
             userId,
-            '💎 برای تحلیل سیگنال به جم نیاز دارید',
+            '💎 You need gems to analyze signals',
           );
         } else {
           await this.bot.telegram.sendMessage(
             userId,
-            'خطایی در تحلیل سیگنال رخ داد. لطفاً دوباره تلاش کنید.',
+            'Something went wrong analyzing the signal. Please try again.',
           );
         }
       }
     } catch (error) {
       console.error('error analyzing signal', error.response, error.status);
-      await ctx.answerCbQuery('لطفا ابتدا به ربات اونس24 متصل شوید');
+      await ctx.answerCbQuery('Please connect to Ounce24 bot first');
     }
   }
 
@@ -487,10 +487,10 @@ export class SignalBotService extends BaseBot {
               signal.status === SignalStatus.Active
                 ? [
                     { text: 'refresh', callback_data: 'refresh_signal' },
-                    { text: 'بستن دستی', callback_data: 'close_signal' },
-                    { text: 'ریسک فری', callback_data: 'risk_free' },
+                    { text: 'Close manually', callback_data: 'close_signal' },
+                    { text: 'Risk free', callback_data: 'risk_free' },
                   ]
-                : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
+                : [{ text: 'Remove signal', callback_data: 'remove_signal' }],
               // [{ text: 'publish', callback_data: 'publish_signal' }],
             ],
           },
@@ -499,42 +499,42 @@ export class SignalBotService extends BaseBot {
     }
 
     if (!signals.length) {
-      ctx.reply('هیچ سیگنال کاشته شده یا فعالی ندارید.');
+      ctx.reply('You have no active or pending signals.');
     }
   }
 
   @Action('charts')
   charts(@Ctx() ctx: Context) {
-    ctx.reply(`تایم فریم نمودار خود را انتخاب کنید:`, {
+    ctx.reply(`Choose chart timeframe:`, {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: 'یک دقیقه‌ای (1M)',
+              text: '1 minute (1M)',
               url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=1`,
             },
           ],
           [
             {
-              text: '۵ دقیقه‌ای (5M)',
+              text: '5 minutes (5M)',
               url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=5`,
             },
           ],
           [
             {
-              text: '۱۵ دقیقه‌ای (15M)',
+              text: '15 minutes (15M)',
               url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=15`,
             },
           ],
           [
             {
-              text: 'یک ساعته (1H)',
+              text: '1 hour (1H)',
               url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=60`,
             },
           ],
           [
             {
-              text: 'چهار ساعته (4H)',
+              text: '4 hours (4H)',
               url: `https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD&interval=240`,
             },
           ],
@@ -583,12 +583,12 @@ export class SignalBotService extends BaseBot {
       );
     }
     if (totalCount > limit && !skip) {
-      await ctx.reply(`تا بحال ${totalCount} سیگنال بسته شده داشته اید.`, {
+      await ctx.reply(`You have ${totalCount} closed signal(s) in total.`, {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: 'مشاهده همه سیگنال های بسته شده',
+                text: 'View all closed signals',
                 callback_data: userId
                   ? `user_closed_signals_all:::${userId}`
                   : 'my_closed_signals_all',
@@ -600,7 +600,7 @@ export class SignalBotService extends BaseBot {
     }
 
     if (!signals.length) {
-      ctx.reply('هیچ سیگنال بسته شده‌ای ندارید.');
+      ctx.reply('You have no closed signals.');
     }
   }
 
@@ -630,9 +630,9 @@ export class SignalBotService extends BaseBot {
     );
 
     await ctx.reply(
-      `⭐ رنکینگ کلی اساتید ⭐\n\n${allLeaderboard
+      `⭐ Overall leaderboard ⭐\n\n${allLeaderboard
         .map((user) => {
-          return `${user.rank}. استاد ${user.tag} (${user.score.toFixed(0)} امتیاز)`;
+          return `${user.rank}. ${user.tag} (${user.score.toFixed(0)} pts)`;
         })
         .join('\n')}`,
     );
@@ -645,9 +645,9 @@ export class SignalBotService extends BaseBot {
     );
 
     await ctx.reply(
-      `⭐ رنکینگ هفتگی اساتید ⭐\n\n${weekLeaderboard
+      `⭐ Weekly leaderboard ⭐\n\n${weekLeaderboard
         .map((user) => {
-          return `${user.rank}. استاد ${user.tag} (${user.weekScore.toFixed(0)} امتیاز)`;
+          return `${user.rank}. ${user.tag} (${user.weekScore.toFixed(0)} pts)`;
         })
         .join('\n')}`,
     );
@@ -668,7 +668,7 @@ export class SignalBotService extends BaseBot {
       }, 0);
       await ctx.reply(`${i + 1}: ${user.name} (${user.title})
 ${Signal.getStatsText(user)}
-برآیند: ${sumPip}
+Total: ${sumPip}
 `);
     }
   }
@@ -688,7 +688,7 @@ ${Signal.getStatsText(user)}
       }, 0);
       await ctx.reply(`${i + 1}: ${user.name} (${user.title})
 ${Signal.getStatsText(user)}
-برآیند: ${sumPip}
+Total: ${sumPip}
 `);
     }
   }
@@ -716,7 +716,7 @@ ${Signal.getStatsText(user)}
     if (signal.status !== SignalStatus.Pending) return;
     await this.signalsService.removeSignal(signal);
     if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
-    if (ctx) ctx.answerCbQuery('سیگنال شما حذف شد');
+    if (ctx) ctx.answerCbQuery('Signal removed');
   }
 
   @Action('close_signal')
@@ -752,7 +752,7 @@ ${Signal.getStatsText(user)}
     await this.userStats.updateUserSignals(signal.owner);
 
     if (ctx) {
-      ctx.answerCbQuery('سیگنال بسته شد');
+      ctx.answerCbQuery('Signal closed');
       ctx.reply(
         Signal.getMessage(updatedSignal, { showId: true, skipOwner: true }),
       );
@@ -772,7 +772,7 @@ ${Signal.getStatsText(user)}
     const id = text.split('^^')[1];
     const signal = await this.signalModel.findById(id).populate('owner').exec();
     if (Signal.getActivePip(signal, this.ouncePriceService.current) < 0) {
-      ctx.answerCbQuery('امکان ریسک فری سیگنال منفی نیست');
+      ctx.answerCbQuery('Cannot risk-free a losing signal');
       return;
     }
 
@@ -789,7 +789,7 @@ ${Signal.getStatsText(user)}
       .exec();
 
     this.refreshBotSignal(ctx, updatedSignal, message.message_id);
-    ctx.answerCbQuery('سیگنال ریسک فری شد');
+    ctx.answerCbQuery('Signal set to risk free');
   }
 
   @Command('reset_all_profile')
@@ -800,11 +800,11 @@ ${Signal.getStatsText(user)}
     );
     const isLessThan15 = user.resetAt && lastResetDiff <= 15;
     ctx.reply(
-      `⚠️با تایید این گزینه تمام امتیازات گذشتت همراه تاریخچه سیگنال هات پاک میشه.
-و میتونی از صفر به عنوان کاربر جدید شروع به کار کنی.
+      `⚠️ Confirming will clear all your past scores and signal history.
+You can start over as a new user.
 
-در هر 15 روز یکبار ازین فرصت میتونی استفاده کنی. ${
-        isLessThan15 ? `شما به تازگی حساب خود را ریست کرده اید` : ''
+You can do this once every 15 days. ${
+        isLessThan15 ? `You recently reset your account` : ''
       }.`,
       {
         reply_markup: {
@@ -813,10 +813,10 @@ ${Signal.getStatsText(user)}
               ? []
               : [
                   {
-                    text: 'تایید و حذف',
+                    text: 'Confirm & delete',
                     callback_data: 'accept_reset_all_profile',
                   },
-                  { text: 'انصراف', callback_data: 'cancel_reset_all_profile' },
+                  { text: 'Cancel', callback_data: 'cancel_reset_all_profile' },
                 ],
           ],
         },
@@ -842,7 +842,7 @@ ${Signal.getStatsText(user)}
     });
     const message = ctx.callbackQuery.message;
     ctx.deleteMessage(message.message_id);
-    await ctx.answerCbQuery('امتیاز شما صفر و سیگنال‌های شما پاک شد.');
+    await ctx.answerCbQuery('Your score was reset and signals cleared.');
     this.welcome(ctx);
   }
 
@@ -870,10 +870,10 @@ ${Signal.getStatsText(user)}
               signal.status === SignalStatus.Active
                 ? [
                     { text: 'refresh', callback_data: 'refresh_signal' },
-                    { text: 'بستن دستی', callback_data: 'close_signal' },
-                    { text: 'ریسک فری', callback_data: 'risk_free' },
+                    { text: 'Close manually', callback_data: 'close_signal' },
+                    { text: 'Risk free', callback_data: 'risk_free' },
                   ]
-                : [{ text: 'حذف سیگنال', callback_data: 'remove_signal' }],
+                : [{ text: 'Remove signal', callback_data: 'remove_signal' }],
               // [{ text: 'publish', callback_data: 'publish_signal' }],
             ],
           },
@@ -908,7 +908,7 @@ ${Signal.getStatsText(user)}
                   ],
                   [
                     {
-                      text: 'لیست سیگنال‌ها',
+                      text: 'Signal list',
                       url: APP_URL,
                     },
                   ],
@@ -928,13 +928,13 @@ ${Signal.getStatsText(user)}
               inline_keyboard: [
                 [
                   {
-                    text: '✨ تحلیل سیگنال',
+                    text: '✨ Analyze signal',
                     callback_data: `analyze_signal_${signal.id}`,
                   },
                 ],
                 [
                   {
-                    text: 'لیست سیگنال‌ها',
+                    text: 'Signal list',
                     url: APP_URL,
                   },
                 ],

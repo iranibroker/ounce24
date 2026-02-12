@@ -66,64 +66,64 @@ export class BaseBot {
     BaseBot.userStates.delete(ctx.from.id);
     ctx.reply(
       `
-سلام من انس 24 ام
-از گزینه های زیر میتونی استفاده کنی
-هرجا گیرکردی از گزینه menu کنار استفاده کن
+Hi, I'm Ounce24
+Use the options below to get started.
+If you get stuck, use the menu button.
 
-ما به تازگی یک اپلیکیشن جدید تولید کردیم که میتونی ازش راحتتر استفاده کنی.
+We've launched a new app for a better experience.
 
-تعداد اعضای متصل به ربات: ${count} نفر
+Bot members: ${count}
 `,
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '📱 اپلیکیشن', callback_data: 'app' }],
+            [{ text: '📱 App', callback_data: 'app' }],
             [
               {
-                text: 'کانال تلگرام اونس24',
+                text: 'Ounce24 Telegram Channel',
                 url: MAIN_CHANNEL_URL,
               },
             ],
-            [{ text: '➕ ایجاد سیگنال جدید', callback_data: 'new_signal' }],
+            [{ text: '➕ New signal', callback_data: 'new_signal' }],
             [
               {
-                text: '🎯 بسته شده',
+                text: '🎯 Closed',
                 callback_data: 'my_closed_signals',
               },
-              { text: '⛳️▶️ سیگنال‌های من', callback_data: 'my_signals' },
+              { text: '⛳️▶️ My signals', callback_data: 'my_signals' },
             ],
             [
               {
-                text: 'جدول امتیازات',
+                text: 'Leaderboard',
                 callback_data: 'leaderboard',
               },
             ],
             [
               {
-                text: 'پروفایل و امتیاز',
+                text: 'Profile & score',
                 callback_data: 'profile',
               },
             ],
             [
               {
-                text: 'لیست هشدار‌های من',
+                text: 'My alarms',
                 callback_data: 'my_alarms',
               },
               {
-                text: '🔔 ایجاد هشدار قیمت',
+                text: '🔔 Price alarm',
                 callback_data: 'alarm_me',
               },
             ],
             [
               {
-                text: '🎙️ پادکست تحلیلی هوش مصنوعی',
+                text: '🎙️ AI analysis podcast',
                 callback_data: 'podcast',
               },
             ],
-            [{ text: 'نمودار انس طلا', callback_data: 'charts' }],
+            [{ text: 'Gold chart', callback_data: 'charts' }],
             [
               {
-                text: 'پشتیبانی',
+                text: 'Support',
                 callback_data: 'support',
               },
             ],
@@ -138,25 +138,25 @@ export class BaseBot {
     BaseBot.userStates.delete(ctx.from.id);
     ctx.reply(
       `
-/new_signal ایجاد سیگنال جدید
+/new_signal Create new signal
 
-/my_signals مدیریت سیگنال‌های ثبت شده
+/my_signals Manage your signals
 
-/my_closed_signals لیست سیگنال‌های بسته شده
+/my_closed_signals Closed signals list
 
-/charts نمودار اونس
+/charts Gold chart
 
-/leaderboard رنکینگ کلی اساتید
+/leaderboard Overall leaderboard
 
-/leaderboard_week رنکینگ هفتگی اساتید
+/leaderboard_week Weekly leaderboard
 
-/support پشتیبانی و ارسال نظر
+/support Support & feedback
 
-/bank - ثبت شماره شبا بانکی
+/bank - Register bank IBAN
 
-/profile مشاهده اطلاعات کاربری و امتیاز
+/profile View profile & score
 
-/reset_all_profile پاک کردن تاریخچه سیگنال ها (شروع دوباره)
+/reset_all_profile Reset signal history (start over)
 `,
       {
         reply_markup: {
@@ -179,17 +179,17 @@ export class BaseBot {
       const token = PersianNumberService.toEnglish(text);
       const isOk = this.authService.checkToken(dto.phone, token);
       if (!isOk) {
-        ctx.reply('کد وارد شده نادرست است. لطفا کد صحیح را وارد کنید');
+        ctx.reply('Invalid code. Please enter the correct code.');
         return;
       } else {
         state.state = UserStateType.Login;
         this.setState(ctx.from.id, state);
         if (!dto.name) {
-          ctx.reply(`لطفا نام و نام خانوادگی خود را وارد کنید`);
+          ctx.reply(`Please enter your full name`);
           return;
         }
         if (!dto.title) {
-          ctx.reply(`نام مستعار جهت نمایش به کاربران را وارد کنید`);
+          ctx.reply(`Enter a display name for other users`);
           return;
         }
       }
@@ -197,7 +197,7 @@ export class BaseBot {
 
     if (state?.state !== UserStateType.Login) {
       this.setState(ctx.from.id, { state: UserStateType.Login });
-      ctx.reply('شماره تلفن همراه خود را وارد کنید');
+      ctx.reply('Enter your phone number');
     } else if (!dto?.phone) {
       const phone = PersianNumberService.toEnglish(text);
       if (
@@ -206,7 +206,7 @@ export class BaseBot {
         phone.search('09') !== 0
       ) {
         ctx.reply(
-          'شماره همراه وارد شده صحیح نیست. لطفا به صورت کامل وارد کنید. مثلا: 09123456789',
+          'Invalid phone number. Please enter the full number, e.g. 09123456789',
         );
         return;
       }
@@ -217,19 +217,19 @@ export class BaseBot {
         dto.name = user.name;
         dto.title = user.title;
       }
-      ctx.reply('یک کد عددی برای شما پیامک شد لطفا آن را وارد کنید');
+      ctx.reply('A code was sent to your phone. Please enter it.');
       state.state = UserStateType.Otp;
       state.data = dto;
       this.setState(ctx.from.id, state);
       return;
     } else if (!dto?.name) {
       dto.name = text;
-      ctx.reply('نام مستعار جهت نمایش به کاربران را وارد کنید');
+      ctx.reply('Enter a display name for other users');
     } else if (!dto?.title) {
       const exist = await this.usersModel.findOne({ title: text }).exec();
       if (exist) {
         ctx.reply(
-          'نام انتخاب شده به شخص دیگری متعلق است. لطفا یک نام مستعار جدید انتخاب کنید',
+          'This display name is already taken. Please choose another.',
         );
         return;
       }
@@ -264,7 +264,7 @@ export class BaseBot {
       chatMember?.status != 'administrator'
     ) {
       ctx.reply(`
-برای استفاده از خدمات ربات ابتدا در کانال زیر عضو شوید.
+Please join the channel below to use the bot.
 
 @Ounce24_signal
   `);
@@ -306,17 +306,17 @@ export class BaseBot {
   async podcast(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     await ctx.reply(
-      `پادکست‌های هفتگی ما یک فایل صوتی حدود ۲۰ دقیقه‌ای هستند که مروری دقیق بر تحولات هفته گذشته و چشم‌انداز هفته پیشِ‌رو ارائه می‌کنند. 📈
+      `Our weekly podcasts are ~20 minute audio files with a detailed review of the past week and outlook for the week ahead. 📈
       
-      محتوا بر پایه به‌روزترین مقالات معتبر جهان گردآوری می‌شود و با بهره‌گیری از هوش مصنوعی به‌صورت داده‌محور و موشکافانه تحلیل می‌گردد. 🤖
+      Content is based on the latest trusted sources and analyzed with AI in a data-driven way. 🤖
       
-      این پادکست‌ها هر هفته در کانال رسمی «اونس ۲۴» منتشر می‌شوند. با ورود به کانال و مراجعه به بخش Music، می‌توانید فهرست کامل قسمت‌ها را مشاهده کنید. 🎧`,
+      Podcasts are published weekly on the official Ounce24 channel. Join the channel and check the Music section for the full list. 🎧`,
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: 'کانال اونس24',
+                text: 'Ounce24 Channel',
                 url: MAIN_CHANNEL_URL,
               },
             ],

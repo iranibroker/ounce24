@@ -50,22 +50,22 @@ export class BotService extends BaseBot {
   @Command('temp_link')
   tempLink(@Ctx() ctx: Context) {
     ctx.reply(
-      `📍 مشاهده پوزیشن سایر معامله‌گران
+      `📍 See other traders' positions
 
-📊 معامله‌گر انس هستی؟
-با انس۲۴ می‌تونی هم سیگنال بدی، هم از سیگنال بقیه استفاده کنی!
+📊 Trading gold?
+With Ounce24 you can share signals and use others' signals too!
 
-ما اینجا بهترین ایده‌های معاملاتی رو از دل بازار جمع کردیم؛ کاملاً رایگان، کاملاً کاربردی.
+We gather the best trading ideas from the market—free and practical.
 
-✅ سیگنال‌های اعضای فعال کانال
-✅ مقایسه تحلیل‌ها و استراتژی‌ها
-✅ فرصتی برای دیده شدن و یاد گرفتن
+✅ Active channel members' signals
+✅ Compare analyses and strategies
+✅ Get noticed and learn
 
-🎯 فقط کافیه روی دکمه زیر بزنی تا آخرین سیگنال‌های فعال انس طلا رو ببینی 👇`,
+🎯 Tap the button below to see the latest gold signals 👇`,
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'سیگنال‌های فعال', url: `${APP_URL}?utm_source=telegram&utm_medium=pin&utm_campaign=introduce&utm_id=start` }],
+            [{ text: 'Active signals', url: `${APP_URL}?utm_source=telegram&utm_medium=pin&utm_campaign=introduce&utm_id=start` }],
           ],
         },
       },
@@ -76,10 +76,10 @@ export class BotService extends BaseBot {
   async app(@Ctx() ctx: Context) {
     const token = await this.auth.createAlternativeTelegramToken(ctx.from.id);
     if (token) {
-      ctx.reply(`برای ورود به اپلیکیشن از دکمه زیر استفاده کنید 👇`, {
+      ctx.reply(`Use the button below to open the app 👇`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'ورود به اپلیکیشن', url: `${APP_URL}/login/telegram?token=${token}` }],
+            [{ text: 'Open app', url: `${APP_URL}/login/telegram?token=${token}` }],
           ],
         },
       }).then((message) => {
@@ -88,15 +88,15 @@ export class BotService extends BaseBot {
         }, 20000);
       });
     } else {
-      ctx.reply('خطایی رخ داده است. لطفا دوباره تلاش کنید.');
+      ctx.reply('Something went wrong. Please try again.');
     }
   }
 
   @Action('support')
   support(@Ctx() ctx: Context) {
-    ctx.reply(`من یک رباتم نمیتونم پشتیبانی بدم!
-ولی نظراتت رو میتونم بررسی کنم و کارم رو بهبود بدم
-پس اگه نظری داری برام بنویس`);
+    ctx.reply(`I'm a bot and can't provide live support!
+But I can read your feedback and improve.
+So if you have any feedback, just write it here`);
     this.setState(ctx.from.id, {
       state: UserStateType.Support,
     });
@@ -104,7 +104,7 @@ export class BotService extends BaseBot {
 
   @Command('bank')
   onIban(@Ctx() ctx: Context) {
-    ctx.reply(`لطفا جهت دریافت جوایز یک شماره شبا وارد کنید:`, {
+    ctx.reply(`Please enter your IBAN for rewards:`, {
       reply_markup: { remove_keyboard: true },
     });
     this.setState(ctx.from.id, {
@@ -125,7 +125,7 @@ export class BotService extends BaseBot {
       }
     }
     await ctx.reply(
-      'پیام شما با موفقیت به مدیریت ارسال شد. ممنون از ثبت نظر شما',
+      'Your message was sent to the team. Thanks for your feedback.',
     );
     await ctx.sendChatAction('typing');
     this.welcome(ctx);
@@ -141,11 +141,11 @@ export class BotService extends BaseBot {
     await ctx.sendChatAction('typing');
     if (iban.length !== 24) {
       ctx.reply(
-        `شماره شبا وارد شده صحیح نیست. لطفا شماره شبای صحیح را وارد کنید:`,
+        `Invalid IBAN. Please enter a valid 24-digit IBAN:`,
       );
     } else {
       await this.userModel.findByIdAndUpdate(user.id, { iban }).exec();
-      ctx.reply('✅ شماره شبای شما ثبت شد');
+      ctx.reply('✅ Your IBAN has been saved');
       this.deleteState(fromId);
     }
   }
@@ -158,7 +158,7 @@ export class BotService extends BaseBot {
       state: UserStateType.SearchUser,
       data: ctx.message['text'],
     });
-    ctx.reply(`لطفا عبارت جستجو خود را وارد کنید\n/cancel`);
+    ctx.reply(`Please enter your search term\n/cancel`);
   }
 
   async search(ctx: Context) {
@@ -175,7 +175,7 @@ export class BotService extends BaseBot {
     const count = users.length;
     const first5 = users.slice(0, 5);
     this.deleteState(ctx.from.id);
-    ctx.reply(`کاربران یافت شده ${count} نفر:`, {
+    ctx.reply(`Found ${count} user(s):`, {
       reply_markup: {
         inline_keyboard: first5.map((x) => [
           {
@@ -192,7 +192,7 @@ export class BotService extends BaseBot {
     if (!(await this.isValid(ctx))) return;
 
     this.setState(ctx.from.id, { state: UserStateType.SendMessageToAll });
-    ctx.reply(`لطفا پیام مورد نظر خود را وارد کنید\n/cancel`);
+    ctx.reply(`Please enter your message\n/cancel`);
   }
 
   async sendMessage(ctx: Context) {

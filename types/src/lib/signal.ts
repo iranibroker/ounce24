@@ -18,15 +18,15 @@ export enum SignalSource {
 }
 
 export const SignalStatusText = {
-  [SignalStatus.Pending]: '⛳️ کاشته شده',
-  [SignalStatus.Active]: '▶️ فعال',
-  [SignalStatus.Closed]: '🎯 بسته',
-  [SignalStatus.Canceled]: '🚫 لغو شده',
+  [SignalStatus.Pending]: '⛳️ Pending',
+  [SignalStatus.Active]: '▶️ Active',
+  [SignalStatus.Closed]: '🎯 Closed',
+  [SignalStatus.Canceled]: '🚫 Canceled',
 };
 
 export const SignalTypeText = {
-  [SignalType.Buy]: '🔵 خرید (buy)',
-  [SignalType.Sell]: '🔴 فروش (sell)',
+  [SignalType.Buy]: '🔵 Buy',
+  [SignalType.Sell]: '🔴 Sell',
 };
 
 export class Signal {
@@ -112,7 +112,7 @@ export class Signal {
     const diff = ouncePrice
       ? Signal.getActivePip(signal, ouncePrice)
       : signal.pip;
-    return `${diff < 0 ? '🟥' : '🟩'} ${diff} pip ${diff < 0 ? 'ضرر' : 'سود'}`;
+    return `${diff < 0 ? '🟥' : '🟩'} ${diff} pip ${diff < 0 ? 'loss' : 'profit'}`;
   }
 
   static filterWinSignals(signals: Signal[]) {
@@ -131,13 +131,13 @@ export class Signal {
   }
 
   static getStatsText(owner: User, showGem = false) {
-    let text = `تعداد سیگنال: ${owner.totalSignals}
-وین ریت: ${owner.winRate?.toFixed(0)}%
-میانگین ریسک-ریوارد: ${owner.avgRiskReward?.toFixed(1)}
-\n⭐️ امتیاز: \n${owner.score?.toFixed(1)}
+    let text = `Signals: ${owner.totalSignals}
+Win rate: ${owner.winRate?.toFixed(0)}%
+Avg risk-reward: ${owner.avgRiskReward?.toFixed(1)}
+\n⭐️ Score: \n${owner.score?.toFixed(1)}
     `;
 
-    if (showGem) text += `\n💎 جم: ${owner.gem}`;
+    if (showGem) text += `\n💎 Gems: ${owner.gem}`;
 
     return text;
   }
@@ -151,24 +151,24 @@ export class Signal {
       skipOwner?: boolean;
     },
   ) {
-    let text = `سیگنال
+    let text = `Signal
 ${SignalTypeText[signal.type]}
-به قیمت: ${signal.entryPrice}
+Entry price: ${signal.entryPrice}
 
-❌ حد ضرر: ${signal.loss}
-✅ حد سود: ${signal.profit}
+❌ Stop loss: ${signal.loss}
+✅ Take profit: ${signal.profit}
 
-ریسک-ریوارد: ${signal.riskReward.toFixed(1)}\n`;
+Risk-reward: ${signal.riskReward.toFixed(1)}\n`;
 
     if (signal.status === SignalStatus.Closed)
-      text += `⭐️ امتیاز:\n${signal.score.toFixed(1)}\n`;
+      text += `⭐️ Score:\n${signal.score.toFixed(1)}\n`;
 
-    text += `\nوضعیت: ${SignalStatusText[signal.status]}\n`;
+    text += `\nStatus: ${SignalStatusText[signal.status]}\n`;
 
-    if (signal.riskFree) text += `🚧 ریسک فری\n`;
+    if (signal.riskFree) text += `🚧 Risk free\n`;
 
     if (signal.status === SignalStatus.Closed && signal.closedOuncePrice) {
-      text += `قیمت لحظه بسته شدن: ${signal.closedOuncePrice}`;
+      text += `Close price: ${signal.closedOuncePrice}`;
     }
 
     if (options?.ouncePrice && signal.status === SignalStatus.Active) {

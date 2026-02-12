@@ -45,13 +45,13 @@ export class OunceAlarmBotService extends BaseBot {
 
     const user = await this.getUser(ctx.from.id);
     if (!user) {
-      await ctx.reply('کاربر یافت نشد. لطفا دوباره تلاش کنید.');
+      await ctx.reply('User not found. Please try again.');
       return;
     }
 
     if (await this.ounceAlarmsService.isUserHasMaxAlarms(user.id)) {
       await ctx.reply(
-        `شما به حداکثر تعداد هشدار قیمت مجاز (${MAX_ALARMS_PER_USER}) رسیده اید. برای مدیریت هشدارهای خود، /my_alarms را ارسال کنید`,
+        `You've reached the max number of price alarms (${MAX_ALARMS_PER_USER}). Use /my_alarms to manage them`,
       );
       return;
     }
@@ -59,7 +59,7 @@ export class OunceAlarmBotService extends BaseBot {
     this.setState(ctx.from.id, { state: UserStateType.OunceAlarm });
 
     await ctx.reply(
-      `عدد مورد نظر خود برای ایجاد هشدار قیمت به دلار وارد کنید. قیمت فعلی انس طلا ${this.ouncePriceService.current} است\n/cancel`,
+      `Enter the price (in USD) for your alarm. Current gold price: ${this.ouncePriceService.current}\n/cancel`,
       {
         reply_markup: { remove_keyboard: true },
       },
@@ -77,14 +77,14 @@ export class OunceAlarmBotService extends BaseBot {
 
     if (!Number.isFinite(targetPrice) || targetPrice <= 0) {
       await ctx.reply(
-        'عدد وارد شده معتبر نیست. لطفا یک مقدار مثبت مانند 2405 یا 2500.75 ارسال کنید.',
+        'Invalid value. Please send a positive number, e.g. 2405 or 2500.75',
       );
       return;
     }
 
     const user = await this.getUser(ctx.from.id);
     if (!user) {
-      await ctx.reply('کاربر یافت نشد. لطفا دوباره تلاش کنید.');
+      await ctx.reply('User not found. Please try again.');
       return;
     }
 
@@ -92,12 +92,12 @@ export class OunceAlarmBotService extends BaseBot {
       await ctx.sendChatAction('typing');
       await this.ounceAlarmsService.createAlarm(user.id, targetPrice);
       await ctx.reply(
-        `هشدار قیمت ${targetPrice} برای شما ثبت شد. به محض رسیدن قیمت به این مقدار به شما اطلاع می‌دهیم.\n\n/my_alarms - مدیریت هشدارهای خود\n/alarm_me - ایجاد هشدار جدید`,
+        `Price alarm set at ${targetPrice}. We'll notify you when price reaches it.\n\n/my_alarms - Manage alarms\n/alarm_me - New alarm`,
       );
       this.deleteState(ctx.from.id);
     } catch (error) {
       await ctx.reply(
-        'در ثبت هشدار مشکلی پیش آمد. لطفا دوباره تلاش کنید یا کمی بعد امتحان کنید.',
+        'Something went wrong saving the alarm. Please try again later.',
       );
     }
   }
@@ -113,18 +113,18 @@ export class OunceAlarmBotService extends BaseBot {
 
     const user = await this.getUser(ctx.from.id);
     if (!user) {
-      await ctx.reply('کاربر یافت نشد. لطفا دوباره تلاش کنید.');
+      await ctx.reply('User not found. Please try again.');
       return;
     }
 
     const alarms = await this.ounceAlarmsService.getAlarmsByUser(user.id);
     if (alarms.length === 0) {
-      await ctx.reply('هیچ هشداری برای شما ثبت نشده است.');
+      await ctx.reply('You have no price alarms set.');
       return;
     }
 
     const inline_keyboard = this.buildAlarmsKeyboard(alarms);
-    await ctx.reply('لیست هشدارهای شما:', {
+    await ctx.reply('Your alarms:', {
       reply_markup: {
         inline_keyboard,
       },
@@ -135,7 +135,7 @@ export class OunceAlarmBotService extends BaseBot {
   async handleAlarmRemoval(@Ctx() ctx: Context) {
     const callbackQuery = ctx.callbackQuery;
     if (!callbackQuery || !('data' in callbackQuery)) {
-      await ctx.answerCbQuery('داده هشدار یافت نشد.');
+      await ctx.answerCbQuery('Alarm data not found.');
       return;
     }
 
@@ -144,13 +144,13 @@ export class OunceAlarmBotService extends BaseBot {
     const targetPrice = Number(targetPart);
 
     if (!Number.isFinite(targetPrice)) {
-      await ctx.answerCbQuery('فرمت هشدار نامعتبر است.');
+      await ctx.answerCbQuery('Invalid alarm format.');
       return;
     }
 
     const user = await this.getUser(ctx.from.id);
     if (!user) {
-      await ctx.answerCbQuery('کاربر یافت نشد.');
+      await ctx.answerCbQuery('User not found.');
       return;
     }
 
@@ -159,7 +159,7 @@ export class OunceAlarmBotService extends BaseBot {
       targetPrice,
     );
     if (!removed) {
-      await ctx.answerCbQuery('حذف هشدار با خطا مواجه شد.');
+      await ctx.answerCbQuery('Failed to remove alarm.');
       return;
     }
 
@@ -167,8 +167,8 @@ export class OunceAlarmBotService extends BaseBot {
       user.id,
     );
     if (updatedAlarms.length === 0) {
-      await ctx.editMessageText('همه هشدارهای شما حذف شدند.');
-      await ctx.answerCbQuery('هشدار حذف شد.');
+      await ctx.editMessageText('All your alarms have been removed.');
+      await ctx.answerCbQuery('Alarm removed.');
       return;
     }
 
@@ -176,7 +176,7 @@ export class OunceAlarmBotService extends BaseBot {
     await ctx.editMessageReplyMarkup({
       inline_keyboard,
     });
-    await ctx.answerCbQuery('هشدار حذف شد.');
+    await ctx.answerCbQuery('Alarm removed.');
   }
 
   @OnEvent(EVENTS.OUNCE_ALARM_TRIGGERED)
@@ -189,7 +189,7 @@ export class OunceAlarmBotService extends BaseBot {
 
       await this.bot.telegram.sendMessage(
         user.telegramId,
-        `🎯 هشدار قیمت شما فعال شد!\nقیمت اونس به ${payload.targetPrice} رسید.`,
+        `🎯 Your price alarm triggered!\nGold reached ${payload.targetPrice}.`,
       );
     } catch (error) {
       this.logger.error(
@@ -204,7 +204,7 @@ export class OunceAlarmBotService extends BaseBot {
   ): InlineKeyboardButton[][] {
     return alarms.map((alarm) => [
       {
-        text: `🎯 ${alarm.targetPrice} - حذف هشدار`,
+        text: `🎯 ${alarm.targetPrice} - Remove alarm`,
         callback_data: `alarm_delete::${alarm.targetPrice}`,
       },
     ]);
@@ -215,19 +215,19 @@ export class OunceAlarmBotService extends BaseBot {
   async tempAlaramMessage(@Ctx() ctx: Context) {
     this.bot.telegram.sendMessage(
       -1001924183136,
-      `فعالسازی هشدار در قیمت دلخواه!
+      `Set a price alarm!
 
 
-با استفاده از قابلیت «هشدار قیمت» در ربات انس24، می‌توانید عدد دلخواه خود را برای قیمت انس طلا تنظیم کنید تا هنگام رسیدن قیمت به آن مقدار، به شما اطلاع داده شود.
+Use the "Price alarm" feature in Ounce24 bot to set your target gold price. We'll notify you when price reaches it.
 
-ربات انس24 :
+Ounce24 bot:
 @ounce24_bot`,
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: 'هشدار قیمت',
+                text: 'Price alarm',
                 url: process.env.MAIN_CHANNEL_URL + '_bot',
               },
             ],

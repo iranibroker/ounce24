@@ -19,17 +19,17 @@ export class ConsultingBotService extends BaseBot {
   }
 
   onConsulting(@Ctx() ctx: Context) {
-    ctx.reply(`این سرویس به شما کمک می‌کند تا با بررسی شرایط فعلی بازار، پوزیشن معاملاتی بهتری را برای نماد مورد نظر خود انتخاب کنید.
+    ctx.reply(`This service helps you choose better trading positions based on current market conditions.
 
-لطفاً موارد زیر را در یک پیام برای ما ارسال کنید:
--توضیحات کامل پوزیشنی که قصد دارید روی آن نماد فارکسی بگیرید.
--دلایل یا استراتژی‌های مورد نظر شما برای این پوزیشن (در صورت وجود).
+Please send us in one message:
+- Full description of the position you plan to take.
+- Your reasons or strategy for this position (if any).
 
-تیم تحلیلی ما با بررسی بازار و تحلیل شرایط، به شما پیشنهاداتی ارائه خواهد داد تا بتوانید در راستای بهبود تصمیمات معاملاتی خود عمل کنید.
+Our team will review the market and send you suggestions to improve your trading decisions.
 
-توجه:
-این تحلیل تنها یک پیشنهاد مشاوره‌ای است و مسئولیت نهایی و ریسک‌های مرتبط با معاملات کاملاً بر عهده خود شماست. پیشنهادات ارائه‌شده صرفاً توصیه‌ای هستند و باید با در نظر گرفتن تمام جوانب و بررسی‌های دقیق شما انجام شود.
-با آرزوی موفقیت برای شما در معاملات! 
+Note:
+This is advisory only. Final responsibility and trading risk are yours. Suggestions are recommendations and should be considered with your own analysis.
+Good luck with your trades!
 
 /cancel
 `);
@@ -50,9 +50,9 @@ export class ConsultingBotService extends BaseBot {
       }
     }
     await ctx.sendChatAction('typing');
-    await ctx.reply('پیام شما ارسال شد. منتظر پاسخ باشید...', {
+    await ctx.reply('Your message was sent. Waiting for reply...', {
       reply_markup: {
-        inline_keyboard: [[{ text: 'بستن گفتگو', callback_data: 'start' }]],
+        inline_keyboard: [[{ text: 'Close chat', callback_data: 'start' }]],
       },
     });
   }

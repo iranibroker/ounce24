@@ -39,13 +39,13 @@ export class OuncePublishBotService {
           process.env.PUBLISH_CHANNEL_ID,
           this.publishChannelMessageId,
           undefined,
-          `🟡 قیمت لحظه‌ای انس طلا: ${price}`,
+          `🟡 Gold price: ${price}`,
           {
             reply_markup: {
               inline_keyboard: [
                 [
                   {
-                    text: 'لیست سیگنال‌ها',
+                    text: 'Signal list',
                     url: APP_URL,
                   },
                 ],
@@ -75,13 +75,13 @@ export class OuncePublishBotService {
       this.bot.telegram
         .sendMessage(
           process.env.PUBLISH_CHANNEL_ID,
-          `قیمت لحظه‌ای انس طلا: ${price}`,
+          `Gold price: ${price}`,
           {
             reply_markup: {
               inline_keyboard: [
                 [
                   {
-                    text: 'لیست سیگنال‌ها',
+                    text: 'Signal list',
                     url: APP_URL,
                   },
                 ],
