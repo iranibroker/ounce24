@@ -56,20 +56,35 @@ export class AuthService {
     return token;
   }
 
-  async createAlternativeTelegramToken(telegramId: number) {
-    const user = await this.userModel.findOne({ telegramId });
-    if (user) {
-      const payload = {
-        id: user.id,
-        phone: user.phone,
-      };
+  /**
+   * Find or create a user by Telegram ID. Creates user from Telegram data when not found (no phone required).
+   */
+  async findOrCreateUserByTelegram(
+    telegramId: number,
+    data?: { first_name?: string; last_name?: string; username?: string },
+  ): Promise<User> {
+    let user = await this.userModel.findOne({ telegramId });
+    if (user) return user;
 
-      const token = this.jwtService.sign(payload as any, {
-        secret: process.env.JWT_ACCESS_SECRET!,
-        expiresIn: '3d',
-      } as any);
-      return token;
+    if (data?.username) {
+      user = await this.userModel.findOne({ telegramUsername: data.username });
+      if (user) {
+        user.telegramId = telegramId;
+        if (data.first_name) user.name = [data.first_name, data.last_name].filter(Boolean).join(' ');
+        if (data.username) user.telegramUsername = data.username;
+        await user.save();
+        return user;
+      }
     }
+
+    const name = [data?.first_name, data?.last_name].filter(Boolean).join(' ') || `User ${telegramId}`;
+    const title = data?.username ? `@${data.username}` : `tg_${telegramId}`;
+    return this.userModel.create({
+      telegramId,
+      name,
+      telegramUsername: data?.username,
+      title,
+    });
   }
 
   async sendToken(mobilePhone: string, validateTime = 70000) {

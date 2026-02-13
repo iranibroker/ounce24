@@ -22,29 +22,15 @@ export class TelegramComponent implements OnInit {
   error = signal(false);
 
   ngOnInit() {
-    const token = this.route.snapshot.queryParams['token'];
     const returnPath =
       this.route.snapshot.queryParams['returnPath'] || '/';
 
-    if (token) {
-      this.loginWithToken(token, returnPath);
-    } else if (this.telegramService.isTelegramApp && this.telegramService.initData) {
+    if (this.telegramService.isTelegramApp && this.telegramService.initData) {
       this.loginWithTelegramData(returnPath);
     } else {
       this.router.navigate(['/login'], {
         queryParamsHandling: 'preserve',
       });
-      this.loading.set(false);
-    }
-  }
-
-  private async loginWithToken(token: string, returnPath: string) {
-    try {
-      await this.auth.saveToken(token);
-      this.router.navigateByUrl(returnPath);
-    } catch {
-      this.error.set(true);
-    } finally {
       this.loading.set(false);
     }
   }

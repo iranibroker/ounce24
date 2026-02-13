@@ -1,7 +1,6 @@
 import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Context, Telegraf } from 'telegraf';
-import { PersianNumberService } from '@ounce24/utils';
 import { AuthService } from '../auth/auth.service';
 import { Command, Ctx, Action } from 'nestjs-telegraf';
 
@@ -77,7 +76,6 @@ Bot members: ${count}
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '📱 App', callback_data: 'app' }],
             [
               {
                 text: 'Ounce24 Telegram Channel',
@@ -168,84 +166,9 @@ Bot members: ${count}
   }
 
   async login(ctx: Context) {
-    const state = this.getState<Partial<User>>(ctx.from.id);
-    const dto = state?.data || {
-      telegramId: ctx.from.id,
-      telegramUsername: ctx.from.username,
-    };
-    const text = ctx.message['text'];
-
-    if (state?.state === UserStateType.Otp && dto.phone) {
-      const token = PersianNumberService.toEnglish(text);
-      const isOk = this.authService.checkToken(dto.phone, token);
-      if (!isOk) {
-        ctx.reply('Invalid code. Please enter the correct code.');
-        return;
-      } else {
-        state.state = UserStateType.Login;
-        this.setState(ctx.from.id, state);
-        if (!dto.name) {
-          ctx.reply(`Please enter your full name`);
-          return;
-        }
-        if (!dto.title) {
-          ctx.reply(`Enter a display name for other users`);
-          return;
-        }
-      }
-    }
-
-    if (state?.state !== UserStateType.Login) {
-      this.setState(ctx.from.id, { state: UserStateType.Login });
-      ctx.reply('Enter your phone number');
-    } else if (!dto?.phone) {
-      const phone = PersianNumberService.toEnglish(text);
-      if (
-        isNaN(Number(phone)) ||
-        phone.length !== 11 ||
-        phone.search('09') !== 0
-      ) {
-        ctx.reply(
-          'Invalid phone number. Please enter the full number, e.g. 09123456789',
-        );
-        return;
-      }
-      dto.phone = phone;
-      const user = await this.authService.sendToken(phone);
-      if (user) {
-        dto.id = user.id;
-        dto.name = user.name;
-        dto.title = user.title;
-      }
-      ctx.reply('A code was sent to your phone. Please enter it.');
-      state.state = UserStateType.Otp;
-      state.data = dto;
-      this.setState(ctx.from.id, state);
-      return;
-    } else if (!dto?.name) {
-      dto.name = text;
-      ctx.reply('Enter a display name for other users');
-    } else if (!dto?.title) {
-      const exist = await this.usersModel.findOne({ title: text }).exec();
-      if (exist) {
-        ctx.reply(
-          'This display name is already taken. Please choose another.',
-        );
-        return;
-      }
-      dto.title = text;
-    }
-    if ((dto.name, dto.phone, dto.title)) {
-      if (dto.id) {
-        await this.usersModel.findByIdAndUpdate(dto.id, dto).exec();
-      } else {
-        const createdData = new this.usersModel(dto);
-        await createdData.save();
-      }
-      this.welcome(ctx);
-      return;
-    }
-    this.setStateData(ctx.from.id, dto);
+    // Create user from Telegram ID (no phone required)
+    await this.authService.findOrCreateUserByTelegram(ctx.from.id, ctx.from);
+    this.welcome(ctx);
   }
 
   async isValid(ctx: Context) {

@@ -72,26 +72,6 @@ We gather the best trading ideas from the market—free and practical.
     );
   }
 
-  @Action('app')
-  async app(@Ctx() ctx: Context) {
-    const token = await this.auth.createAlternativeTelegramToken(ctx.from.id);
-    if (token) {
-      ctx.reply(`Use the button below to open the app 👇`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Open app', url: `${APP_URL}/login/telegram?token=${token}` }],
-          ],
-        },
-      }).then((message) => {
-        setTimeout(() => {
-          this.bot.telegram.deleteMessage(ctx.from.id, message.message_id);
-        }, 20000);
-      });
-    } else {
-      ctx.reply('Something went wrong. Please try again.');
-    }
-  }
-
   @Action('support')
   support(@Ctx() ctx: Context) {
     ctx.reply(`I'm a bot and can't provide live support!
