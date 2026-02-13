@@ -34,11 +34,13 @@
   <a mat-button [routerLink]="authService.userQuery.data() ? '/profile' : '/login'">
     <div class="nav-item-wrapper">
       @if (authService.userQuery.data()) {
-        <img [appAvatar]="authService.userQuery.data()" [size]="24" class="nav-profile-avatar" />
+        <span class="nav-icon-slot">
+          <img [appAvatar]="authService.userQuery.data()" [size]="18" class="nav-profile-avatar" />
+        </span>
       } @else {
         <i class="far fa-user fa-xl"></i>
-        {{ 'bottomNav.profile' | translate }}
       }
+      {{ 'bottomNav.profile' | translate }}
     </div>
   </a>
 </mat-toolbar>

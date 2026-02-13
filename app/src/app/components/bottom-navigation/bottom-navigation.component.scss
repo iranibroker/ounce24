@@ -22,15 +22,27 @@ mat-toolbar {
   font-size: 11px;
   line-height: 14px;
 
+  i,
+  .nav-icon-slot {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   i {
     line-height: 24px;
   }
 }
 
+.nav-icon-slot {
+  flex-shrink: 0;
+}
+
 .nav-profile-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   object-fit: cover;
-  line-height: 24px;
+  display: block;
 }
