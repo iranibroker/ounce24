@@ -30,7 +30,9 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.telegramService.isTelegramApp && !this.authService.token()) {
+    // Always re-authenticate when in Telegram Mini App - user may have switched
+    // accounts; localStorage would still have the previous JWT otherwise.
+    if (this.telegramService.isTelegramApp) {
       this.authService.telegramLoginMutation.mutate(this.telegramService.initData, {
         onSuccess: () => {
           // Reload or navigate to refresh state if needed, but auth service should handle token

@@ -36,11 +36,8 @@ export class TelegramComponent implements OnInit {
   }
 
   private async loginWithTelegramData(returnPath: string) {
-    if (this.auth.token()) {
-      this.router.navigateByUrl(returnPath);
-      this.loading.set(false);
-      return;
-    }
+    // Always re-authenticate with current initData - when user switches Telegram
+    // accounts, localStorage still has the previous JWT, so we must not skip login.
     try {
       await this.auth.telegramLoginMutation.mutateAsync(
         this.telegramService.initData
