@@ -82,4 +82,5 @@ export class AuthController {
   async useGoogleAvatar(@LoginUser() user) {
     return this.auth.useGoogleAvatar(user.id);
   }
+
 }

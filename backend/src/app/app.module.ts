@@ -18,6 +18,7 @@ import { PodcastModule } from './podcast/podcast.module';
 import { HttpModule } from '@nestjs/axios';
 import { AiChatModule } from './ai-chat/ai-chat.module';
 import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
+import { AppTokenModule } from './app-token/app-token.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
     PodcastModule,
     AiChatModule,
     OunceAlarmsModule,
+    AppTokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
