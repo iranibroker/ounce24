@@ -1,0 +1,27 @@
+@if (auth.userQuery.data()) {
+  <div class="octo-banner" (click)="goToOctopus($event)">
+    <!-- Background Bubbles -->
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="bubble b4"></div>
+
+    <!-- Decorative Arrows -->
+    <div class="chart-arrow arrow-up">▲</div>
+    <div class="chart-arrow arrow-down">▼</div>
+
+    <!-- Text Content -->
+    <div class="banner-content">
+      <h2 class="banner-title">OCTOPUS<br />GOLD TRADER</h2>
+      <p class="banner-subtitle">PREDICT THE MARKET. WIN XP.</p>
+      <div>
+        <span class="cta-badge">PLAY NOW ►</span>
+      </div>
+    </div>
+
+    <!-- Mascot -->
+    <div class="mascot-wrapper">
+      <div class="pixel-octopus"></div>
+    </div>
+  </div>
+}

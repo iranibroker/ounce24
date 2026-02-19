@@ -12,6 +12,7 @@ import { DataLoadingComponent } from '../../../components/data-loading/data-load
 import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { OctopusBannerComponent } from '../../../components/octopus-banner/octopus-banner.component';
 
 const PAGE_SIZE = 20;
 
@@ -21,6 +22,7 @@ const PAGE_SIZE = 20;
   imports: [
     CommonModule,
     RouterModule,
+    OctopusBannerComponent,
     MatButtonToggleModule,
     MatButtonModule,
     FormsModule,

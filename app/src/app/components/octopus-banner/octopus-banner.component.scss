@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.octo-banner {
+  /* 16:4 Aspect Ratio (4:1) */
+  aspect-ratio: 5/2;
+  width: 100%;
+  background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+  box-sizing: border-box;
+  border: 4px solid #000;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  color: white;
+  transition: transform 0.2s;
+}
+
+.octo-banner:hover {
+  transform: scale(1.01);
+  border-color: #fbbf24; /* Gold border on hover */
+}
+
+/* --- Background Animation (Bubbles) --- */
+.bubble {
+  position: absolute;
+  bottom: -20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: rise infinite linear;
+}
+
+.b1 { left: 10%; width: 10px; height: 10px; animation-duration: 4s; }
+.b2 { left: 30%; width: 15px; height: 15px; animation-duration: 7s; animation-delay: 1s; }
+.b3 { left: 70%; width: 8px; height: 8px; animation-duration: 5s; animation-delay: 2s; }
+.b4 { left: 90%; width: 12px; height: 12px; animation-duration: 6s; }
+
+@keyframes rise {
+  0% { transform: translateY(0); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-200px); opacity: 0; }
+}
+
+/* --- Text Section --- */
+.banner-content {
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.banner-title {
+  font-size: clamp(12px, 2.5vw, 24px); /* Responsive font */
+  color: #fbbf24;
+  text-shadow: 2px 2px #000;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.banner-subtitle {
+  font-size: clamp(8px, 1.5vw, 12px);
+  color: #94a3b8;
+  margin: 0;
+}
+
+.cta-badge {
+  display: inline-block;
+  background: #ef4444;
+  color: white;
+  padding: 8px 12px;
+  font-size: clamp(8px, 1.2vw, 10px);
+  border: 2px solid black;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  margin-top: 5px;
+  text-transform: uppercase;
+  animation: pulse-btn 2s infinite;
+}
+
+@keyframes pulse-btn {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* --- Pixel Art Octopus (Scaled for Banner) --- */
+.mascot-wrapper {
+  position: relative;
+  width: 30%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+.pixel-octopus {
+  /* Using a smaller pixel size for the banner */
+  --p-size: clamp(2px, 0.6vw, 4px); 
+  width: var(--p-size);
+  height: var(--p-size);
+  background: transparent;
+  color: #ff4757; 
+  position: relative;
+  transform: translateY(-20px); /* Center optically */
+  
+  /* CSS Drawing */
+  box-shadow: 
+      24px 0, 30px 0, 36px 0, 42px 0,
+      18px 6px, 24px 6px, 30px 6px, 36px 6px, 42px 6px, 48px 6px,
+      12px 12px, 18px 12px, 24px 12px, 30px 12px, 36px 12px, 42px 12px, 48px 12px, 54px 12px,
+      6px 18px, 12px 18px, 24px 18px, 30px 18px, 36px 18px, 42px 18px, 54px 18px, 60px 18px,
+      6px 24px, 12px 24px, 18px 24px, 24px 24px, 30px 24px, 36px 24px, 42px 24px, 48px 24px, 54px 24px, 60px 24px,
+      12px 30px, 18px 30px, 24px 30px, 30px 30px, 36px 30px, 42px 30px, 48px 30px, 54px 30px,
+      6px 36px, 12px 36px, 24px 36px, 30px 36px, 36px 36px, 42px 36px, 54px 36px, 60px 36px,
+      0px 42px, 6px 42px, 18px 42px, 24px 42px, 42px 42px, 48px 42px, 60px 42px, 66px 42px,
+      -6px 36px, 18px 36px, 48px 36px, 72px 36px;
+}
+
+.pixel-octopus::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: var(--p-size); height: var(--p-size);
+  background: white;
+  box-shadow: 18px 18px 0 0 white, 48px 18px 0 0 white;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* --- Arrows Decoration --- */
+.chart-arrow {
+  position: absolute;
+  font-size: clamp(16px, 4vw, 32px);
+  opacity: 0.2;
+}
+.arrow-up { right: 25%; top: 10%; color: #22c55e; }
+.arrow-down { right: 35%; bottom: 10%; color: #ef4444; }
