@@ -140,9 +140,11 @@ or
 ```
 
 **Errors:**
-- `400` – Already voted today
 - `400` – Price not available
+- `400` – Cannot change prediction after 2 PM Iran time (when updating)
 - `401` – Invalid or expired token
+
+**Note:** Users can change their prediction by calling vote again with a new direction, as long as it is before 2 PM Iran time on that date. After 2 PM Iran time, the vote is locked.
 
 ---
 
@@ -191,9 +193,11 @@ Check if the current user has voted today and get details.
   "direction": "up",
   "votePrice": 2650.42,
   "voteDate": "2025-02-19T00:00:00.000Z",
-  "settled": false
+  "settled": false,
+  "canChange": true
 }
 ```
+- `canChange`: `true` if user can change prediction (before 2 PM Iran time on that date).
 
 **Response (voted and settled):**
 ```json
@@ -204,7 +208,8 @@ Check if the current user has voted today and get details.
   "voteDate": "2025-02-19T00:00:00.000Z",
   "closePrice": 2655.10,
   "points": 1,
-  "settled": true
+  "settled": true,
+  "canChange": false
 }
 ```
 - `points`: `1` if correct, `0` if incorrect.

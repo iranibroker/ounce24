@@ -8,6 +8,10 @@ import { OuncePriceService } from '../ounce-price/ounce-price.service';
 /** Gold market close: 22:00 UTC (after NY session, COMEX daily break) */
 const MARKET_CLOSE_HOUR_UTC = 22;
 
+/** Iran timezone: UTC+3:30. Users can change prediction until 2 PM Iran time. */
+const IRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
+const IRAN_CHANGE_CUTOFF_HOUR = 14;
+
 @Injectable()
 export class OctopusService {
   constructor(
@@ -23,19 +27,64 @@ export class OctopusService {
     return d;
   }
 
+  /** True if user can change prediction: same calendar day in Iran, before 2 PM Iran time. */
+  private canChangePrediction(voteDate: Date): boolean {
+    const now = new Date();
+    const iranNow = new Date(now.getTime() + IRAN_OFFSET_MS);
+    const iranVoteDate = new Date(voteDate.getTime() + IRAN_OFFSET_MS);
+
+    const iranNowY = iranNow.getUTCFullYear();
+    const iranNowM = iranNow.getUTCMonth();
+    const iranNowD = iranNow.getUTCDate();
+    const iranVoteY = iranVoteDate.getUTCFullYear();
+    const iranVoteM = iranVoteDate.getUTCMonth();
+    const iranVoteD = iranVoteDate.getUTCDate();
+
+    if (
+      iranNowY !== iranVoteY ||
+      iranNowM !== iranVoteM ||
+      iranNowD !== iranVoteD
+    ) {
+      return false;
+    }
+
+    const iranHour = iranNow.getUTCHours();
+    const iranMin = iranNow.getUTCMinutes();
+    return iranHour < IRAN_CHANGE_CUTOFF_HOUR;
+  }
+
   async vote(userId: string, direction: OctopusDirection) {
     const voteDate = this.startOfDayUTC(new Date());
     const existing = await this.predictionModel
       .findOne({ user: userId, voteDate })
       .exec();
 
-    if (existing) {
-      throw new BadRequestException('Already voted today');
-    }
-
     const price = this.ouncePriceService.current;
     if (!price || price <= 0) {
       throw new BadRequestException('Price not available');
+    }
+
+    if (existing) {
+      if (!this.canChangePrediction(existing.voteDate)) {
+        throw new BadRequestException(
+          'Cannot change prediction after 2 PM Iran time',
+        );
+      }
+
+      await this.predictionModel
+        .updateOne(
+          { _id: existing._id },
+          { $set: { direction, votePrice: price } },
+        )
+        .exec();
+
+      return {
+        id: existing._id,
+        direction,
+        votePrice: price,
+        voteDate,
+        changed: true,
+      };
     }
 
     const prediction = await this.predictionModel.create({
@@ -273,6 +322,10 @@ export class OctopusService {
       return { voted: false };
     }
 
+    const settled = prediction.points != null;
+    const canChange =
+      !settled && this.canChangePrediction(prediction.voteDate);
+
     return {
       voted: true,
       direction: prediction.direction,
@@ -280,7 +333,8 @@ export class OctopusService {
       voteDate: prediction.voteDate,
       closePrice: prediction.closePrice,
       points: prediction.points,
-      settled: prediction.points != null,
+      settled,
+      canChange,
     };
   }
 }
