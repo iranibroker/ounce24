@@ -19,6 +19,7 @@ import { HttpModule } from '@nestjs/axios';
 import { AiChatModule } from './ai-chat/ai-chat.module';
 import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
 import { AppTokenModule } from './app-token/app-token.module';
+import { OctopusModule } from './octopus/octopus.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { AppTokenModule } from './app-token/app-token.module';
     AiChatModule,
     OunceAlarmsModule,
     AppTokenModule,
+    OctopusModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,5 @@
 export * from './lib/achievement';
+export * from './lib/octopus-prediction';
 export * from './lib/signal';
 export * from './lib/signal-analyze';
 export * from './lib/user';
