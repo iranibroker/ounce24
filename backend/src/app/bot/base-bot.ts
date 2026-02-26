@@ -78,6 +78,12 @@ Bot members: ${count}
           inline_keyboard: [
             [
               {
+                text: '📱 Web App',
+                web_app: { url: APP_URL },
+              },
+            ],
+            [
+              {
                 text: 'Ounce24 Telegram Channel',
                 url: MAIN_CHANNEL_URL,
               },
