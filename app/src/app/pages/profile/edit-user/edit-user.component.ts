@@ -1,6 +1,7 @@
 import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
@@ -20,6 +21,13 @@ import { signal } from '@angular/core';
 import { User } from '@ounce24/types';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { SHARED } from '../../../shared';
+import { isValidUserTitle } from '@ounce24/utils';
+
+function titleValidator(control: AbstractControl): { [key: string]: boolean } | null {
+  const v = control.value;
+  if (v == null || (typeof v === 'string' && !v.trim())) return null;
+  return isValidUserTitle(v) ? null : { titleInvalid: true };
+}
 
 @Component({
   selector: 'app-edit-user',
@@ -94,7 +102,7 @@ export class EditUserComponent {
   constructor() {
     this.form = this.fb.group({
       name: ['', Validators.required],
-      title: [''],
+      title: ['', [Validators.required, titleValidator]],
       iban: ['', Validators.pattern('^[0-9]{24}$')],
     });
 

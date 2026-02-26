@@ -100,9 +100,13 @@
       "name": "Name",
       "nickname": "Nick name",
       "nicknameHint": "If you want to hide your name, fill in a nickname — others will see your nickname instead.",
+      "nicknameRequired": "Nickname is required",
       "save": "Save Changes",
       "success": "Profile updated successfully",
       "error": "Failed to update profile"
+    },
+    "title": {
+      "invalid": "Nickname must use only English letters, numbers and spaces. Maximum 10 characters."
     },
     "avatar": {
       "edit": "Edit Avatar",
@@ -199,6 +203,11 @@
   "apiError": {
     "auth": {
       "duplicate": "Phone number already exists"
+    },
+    "profile": {
+      "title": {
+        "invalid": "Nickname must use only English letters, numbers and spaces. Maximum 10 characters."
+      }
     },
     "userNotFound": "User not found",
     "insufficientGems": "Insufficient gems",

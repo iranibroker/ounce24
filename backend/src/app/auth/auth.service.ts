@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as Kavenegar from 'kavenegar';
-import { PersianNumberService } from '@ounce24/utils';
+import { isValidUserTitle, PersianNumberService, sanitizeUserTitle } from '@ounce24/utils';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
@@ -78,7 +78,8 @@ export class AuthService {
     }
 
     const name = [data?.first_name, data?.last_name].filter(Boolean).join(' ') || `User ${telegramId}`;
-    const title = data?.username ? `@${data.username}` : `tg_${telegramId}`;
+    const rawTitle = data?.username ? `@${data.username}` : `tg_${telegramId}`;
+    const title = sanitizeUserTitle(rawTitle) || `u${String(telegramId).slice(-6)}`;
     return this.userModel.create({
       telegramId,
       name,
@@ -145,7 +146,16 @@ export class AuthService {
   }
 
   async updateUser(userId: string, body: Partial<User>) {
-    const user = await this.userModel.findByIdAndUpdate(userId, body, {
+    const updates = { ...body };
+    if (updates.title != null) {
+      if (!isValidUserTitle(updates.title)) {
+        throw new BadRequestException({
+          translationKey: 'profile.title.invalid',
+        });
+      }
+      updates.title = sanitizeUserTitle(updates.title);
+    }
+    const user = await this.userModel.findByIdAndUpdate(userId, updates, {
       new: true,
     });
     return user;

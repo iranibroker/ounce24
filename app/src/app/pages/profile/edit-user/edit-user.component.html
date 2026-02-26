@@ -45,8 +45,14 @@
 
     <mat-form-field appearance="outline">
       <mat-label>{{ 'profile.edit.nickname' | translate }}</mat-label>
-      <input matInput formControlName="title" dir="ltr" />
+      <input matInput formControlName="title" dir="ltr" maxlength="10" />
       <mat-hint>{{ 'profile.edit.nicknameHint' | translate }}</mat-hint>
+      @if (form.get('title')?.hasError('required')) {
+        <mat-error>{{ 'profile.edit.nicknameRequired' | translate }}</mat-error>
+      }
+      @if (form.get('title')?.hasError('titleInvalid')) {
+        <mat-error>{{ 'profile.title.invalid' | translate }}</mat-error>
+      }
     </mat-form-field>
 
     <button
