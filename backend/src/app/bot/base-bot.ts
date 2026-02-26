@@ -3,6 +3,7 @@ import { Model } from 'mongoose';
 import { Context, Telegraf } from 'telegraf';
 import { AuthService } from '../auth/auth.service';
 import { Command, Ctx, Action } from 'nestjs-telegraf';
+import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 const MAIN_CHANNEL_URL =
@@ -79,8 +80,9 @@ Bot members: ${count}
             [
               {
                 text: '📱 Web App',
+                style: 'primary',
                 web_app: { url: APP_URL },
-              },
+              } as InlineKeyboardButton,
             ],
             [
               {
