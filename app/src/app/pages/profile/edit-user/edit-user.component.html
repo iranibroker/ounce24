@@ -4,38 +4,40 @@
   </button>
   <span class="toolbar-title">{{ 'profile.edit.pageTitle' | translate }}</span>
   <span class="toolbar-spacer"></span>
-  @if (hasAvatarMenuActions()) {
-    <button mat-icon-button [matMenuTriggerFor]="avatarMenu" [disabled]="loading()">
-      <i class="fa-solid fa-ellipsis-vertical"></i>
-    </button>
-  }
-  <mat-menu #avatarMenu="matMenu" xPosition="before">
-    @if (isExternalAvatar()) {
-      <button mat-menu-item (click)="removeProfilePhoto()">
-        {{ 'profile.avatar.removeProfilePhoto' | translate }}
-      </button>
-    } @else {
-      @if (canUseTelegram()) {
-        <button mat-menu-item (click)="addFromTelegram()">
-          {{ 'profile.avatar.addFromTelegram' | translate }}
-        </button>
-      }
-      @if (canUseGoogle()) {
-        <button mat-menu-item (click)="addFromGoogle()">
-          {{ 'profile.avatar.addFromGoogle' | translate }}
-        </button>
-      }
-    }
-  </mat-menu>
 </mat-toolbar>
 
 <div class="container">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
     <div class="avatar-section">
-      <a class="avatar-container" routerLink="/profile/avatar">
-        <img [appAvatar] alt="" class="avatar" />
-        <span class="avatar-edit-label">{{ 'profile.avatar.edit' | translate }}</span>
-      </a>
+      @if (isExternalAvatar()) {
+        <div class="avatar-container">
+          <img [appAvatar] alt="" class="avatar" />
+        </div>
+      } @else {
+        <a class="avatar-container" routerLink="/profile/avatar">
+          <img [appAvatar] alt="" class="avatar" />
+          <span class="avatar-edit-label">{{ 'profile.avatar.edit' | translate }}</span>
+        </a>
+      }
+      
+      <div class="avatar-actions">
+        @if (isExternalAvatar()) {
+          <button mat-button type="button" color="warn" (click)="removeProfilePhoto()">
+            {{ 'profile.avatar.removeProfilePhoto' | translate }}
+          </button>
+        } @else {
+          @if (canUseTelegram()) {
+            <button mat-button type="button" color="primary" (click)="addFromTelegram()">
+              {{ 'profile.avatar.addFromTelegram' | translate }}
+            </button>
+          }
+          @if (canUseGoogle()) {
+            <button mat-button type="button" color="primary" (click)="addFromGoogle()">
+              {{ 'profile.avatar.addFromGoogle' | translate }}
+            </button>
+          }
+        }
+      </div>
     </div>
 
     <mat-form-field appearance="outline">

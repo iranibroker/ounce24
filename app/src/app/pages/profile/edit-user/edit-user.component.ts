@@ -10,7 +10,6 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../services/auth.service';
@@ -38,7 +37,6 @@ function titleValidator(control: AbstractControl): { [key: string]: boolean } | 
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatMenuModule,
     MatSnackBarModule,
     TranslateModule,
     MatToolbarModule,
@@ -74,10 +72,6 @@ export class EditUserComponent {
       avatar.includes('googleusercontent.com')
     );
   };
-
-  /** Show menu when there is at least one action (remove or add from Telegram/Google). */
-  hasAvatarMenuActions = (): boolean =>
-    this.isExternalAvatar() || this.canUseTelegram() || this.canUseGoogle();
 
   private updateUserMutation = injectMutation<User, Error, Partial<User>>(() => ({
     mutationFn: (body) =>
