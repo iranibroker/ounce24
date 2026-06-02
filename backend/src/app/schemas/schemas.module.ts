@@ -8,6 +8,7 @@ import { GemLogSchema } from './gem-log.schema';
 import { PodcastSchema } from './podcast.schema';
 import { AchievementSchema } from './achievement.schema';
 import { OctopusPredictionSchema } from './octopus-prediction.schema';
+import { PushSubscription, PushSubscriptionSchema } from './push-subscription.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OctopusPredictionSchema } from './octopus-prediction.schema';
       { name: Podcast.name, schema: PodcastSchema },
       { name: Achievement.name, schema: AchievementSchema },
       { name: OctopusPrediction.name, schema: OctopusPredictionSchema },
+      { name: PushSubscription.name, schema: PushSubscriptionSchema },
     ]),
   ],
   exports: [MongooseModule],

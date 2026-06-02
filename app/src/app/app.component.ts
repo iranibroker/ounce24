@@ -7,6 +7,9 @@ import { TelegramService } from './services/telegram.service';
 import { AuthService } from './services/auth.service';
 import { inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { PushNotificationService } from './services/push-notification.service';
+import { PushSubscriptionDialogComponent } from './components/push-subscription-dialog/push-subscription-dialog.component';
 
 @Component({
   imports: [ShellComponent],
@@ -19,6 +22,8 @@ export class AppComponent implements OnInit {
   private telegramService = inject(TelegramService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private pushNotificationService = inject(PushNotificationService);
 
   constructor(
     private languageService: LanguageService,
@@ -44,5 +49,27 @@ export class AppComponent implements OnInit {
         }
       });
     }
+
+    // Prompt user for push notifications after 20 seconds
+    setTimeout(() => {
+      if (
+        !this.pushNotificationService.isSubscribed() &&
+        !this.pushNotificationService.hasAskedBefore()
+      ) {
+        const dialogRef = this.dialog.open(PushSubscriptionDialogComponent, {
+          width: '400px',
+          maxWidth: '95vw',
+          panelClass: 'push-notification-dialog-panel',
+        });
+
+        dialogRef.afterClosed().subscribe((accept: boolean) => {
+          if (accept) {
+            this.pushNotificationService.subscribeToNotifications();
+          } else {
+            this.pushNotificationService.markAsAsked();
+          }
+        });
+      }
+    }, 20000);
   }
 }

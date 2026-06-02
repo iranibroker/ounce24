@@ -237,5 +237,18 @@
     "type": {
       "WEEK_WIN": "Week Winner"
     }
+  },
+  "pushNotifications": {
+    "dialog": {
+      "title": "Receive Ounce Price Notifications",
+      "description": "Would you like to receive real-time gold/ounce price (XAUUSD) updates as a notification on your device every 5 seconds?",
+      "subtext": "These notifications are updated silently so they won't disturb you.",
+      "decline": "Not Now",
+      "accept": "Enable"
+    },
+    "bell": {
+      "enable": "Enable Ounce Notifications",
+      "disable": "Disable Ounce Notifications"
+    }
   }
 }

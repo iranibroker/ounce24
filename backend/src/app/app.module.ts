@@ -20,6 +20,7 @@ import { AiChatModule } from './ai-chat/ai-chat.module';
 import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
 import { AppTokenModule } from './app-token/app-token.module';
 import { OctopusModule } from './octopus/octopus.module';
+import { WebPushModule } from './web-push/web-push.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { OctopusModule } from './octopus/octopus.module';
     OunceAlarmsModule,
     AppTokenModule,
     OctopusModule,
+    WebPushModule,
   ],
   controllers: [AppController],
   providers: [AppService],
