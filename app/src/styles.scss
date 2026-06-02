@@ -190,9 +190,10 @@ app-ounce-price-banner mat-toolbar,
 app-ounce-price-banner .mat-mdc-toolbar {
   height: 32px !important;
   min-height: 32px !important;
-  background-color: var(--mat-sys-inverse-surface) !important;
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
   backdrop-filter: none !important;
-  border-bottom: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 0 8px !important;
 }
 
@@ -551,17 +552,24 @@ mat-tab-group {
 mat-card-header {
   display: flex !important;
   align-items: center !important;
-  padding: 12px 16px !important;
+  padding: 8px 12px !important;
   
   .mat-mdc-card-header-text {
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    margin: 0 12px !important;
+    align-self: center !important;
+    margin: 0 10px !important;
+    gap: 2px !important;
   }
 
   img.mat-mdc-card-avatar {
     margin-right: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    object-fit: cover;
+    align-self: center !important;
   }
 }
 

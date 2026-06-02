@@ -1,9 +1,22 @@
 mat-toolbar {
-  padding: 0;
-  background-color: transparent;
+  padding: 16px 20px !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  height: 60px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
 
-  span:first-child {
+  .ai-sparkles-icon-header {
+    fill: #c084fc;
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.6));
+  }
+
+  span:nth-child(2) {
     flex: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f1f5f9;
   }
 }
 .analysis-section {
@@ -59,9 +72,15 @@ mat-toolbar {
     text-align: center;
 
     .ai-icon {
-      font-size: 3rem;
-      color: var(--mat-sys-primary);
-      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+
+      .ai-sparkles-icon-large {
+        fill: #c084fc;
+        filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.7));
+      }
     }
 
     h3 {

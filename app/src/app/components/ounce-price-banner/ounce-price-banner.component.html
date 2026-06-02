@@ -11,13 +11,13 @@
     />
     <span>
       XAUUSD .
-      <span [style.color]="color()">
+      <span class="price-value" [style.color]="color()">
         @if (price > 0) {
           {{ price | currency }}
         }
       </span>
     </span>
     <span style="flex: 1"></span>
-    <ng-icon name="saxExportOutline" size="16px"></ng-icon>
+    <ng-icon name="saxExport3Outline" size="16px"></ng-icon>
   </mat-toolbar>
 </a>
