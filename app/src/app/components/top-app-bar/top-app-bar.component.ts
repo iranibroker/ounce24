@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxCrownOutline, saxUserOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SHARED } from '../../shared';
@@ -9,13 +11,12 @@ import { OuncePriceService } from '../../services/ounce-price.service';
 
 @Component({
   selector: 'app-top-app-bar',
-  imports: [
-    CommonModule,
+  imports: [NgIcon, CommonModule,
     MatToolbarModule,
     SHARED,
     MatButtonModule,
-    MatDividerModule,
-  ],
+    MatDividerModule,],
+  providers: [provideIcons({ saxCrownOutline, saxUserOutline })],
   templateUrl: './top-app-bar.component.html',
   styleUrl: './top-app-bar.component.scss',
 })

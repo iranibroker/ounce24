@@ -1,7 +1,7 @@
 <mat-toolbar>
   <span>{{ 'signalAnalyze.analysis' | translate }}</span>
   <button mat-icon-button (click)="close()">
-    <i class="fa-solid fa-xmark"></i>
+    <ng-icon name="saxCloseCircleOutline"></ng-icon>
   </button>
 </mat-toolbar>
 
@@ -21,7 +21,7 @@
   } @else {
     <div class="initial-state">
       <div class="ai-icon">
-        <i class="fas fa-sparkles"></i>
+        <ng-icon name="saxStarOutline" size="48px"></ng-icon>
       </div>
       <h3>{{ 'signalAnalyze.getAnalysis' | translate }}</h3>
       <p>{{ 'signalAnalyze.description' | translate }}</p>

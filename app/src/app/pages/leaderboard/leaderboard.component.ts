@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxInfoCircleOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '@ounce24/types';
@@ -19,8 +21,7 @@ import { LeaderboardTableComponent } from './table/table.component';
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [CommonModule,
     TranslateModule,
     RouterModule,
     SHARED,
@@ -29,7 +30,8 @@ import { LeaderboardTableComponent } from './table/table.component';
     MatToolbarModule,
     MatTabsModule,
     LeaderboardTableComponent,
-  ],
+    NgIcon],
+  providers: [provideIcons({ saxInfoCircleOutline })],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })

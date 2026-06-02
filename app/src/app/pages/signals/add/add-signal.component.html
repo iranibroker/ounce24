@@ -1,13 +1,13 @@
 <mat-toolbar color="primary">
   <button mat-icon-button (click)="goBack()">
-    <i class="fas fa-chevron-left fa-xs rtl"></i>
+    <ng-icon name="saxArrowLeftOutline" class="rtl"></ng-icon>
   </button>
   <span>{{ 'addSignal.title' | translate }}</span>
 </mat-toolbar>
 
 <div class="form-container">
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <mat-button-toggle-group formControlName="type" class="signal-type-toggle">
+    <mat-button-toggle-group formControlName="type" class="signal-type-toggle" hideSingleSelectionIndicator>
       <mat-button-toggle [value]="signalType.Buy">{{
         'addSignal.type.buy' | translate
       }}</mat-button-toggle>
@@ -20,72 +20,78 @@
       {{ 'addSignal.byMarket' | translate }}
     </mat-checkbox>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>{{ 'addSignal.entryPrice.label' | translate }}</mat-label>
-      <input
-        matInput
-        type="number"
-        formControlName="entryPrice"
-        [disabled]="form.get('instantEntry')?.value"
-        [placeholder]="'addSignal.entryPrice.placeholder' | translate"
-      />
-      <mat-error *ngIf="form.get('entryPrice')?.hasError('required')">{{
-        'addSignal.entryPrice.required' | translate
-      }}</mat-error>
-      <mat-error *ngIf="form.get('entryPrice')?.hasError('min')">{{
-        'addSignal.entryPrice.min' | translate
-      }}</mat-error>
-    </mat-form-field>
+    <div class="form-row">
+      <div class="input-label">{{ 'addSignal.entryPrice.label' | translate }}</div>
+      <mat-form-field appearance="outline" class="full-width">
+        <input
+          matInput
+          type="number"
+          formControlName="entryPrice"
+          [disabled]="form.get('instantEntry')?.value"
+          [placeholder]="'addSignal.entryPrice.placeholder' | translate"
+        />
+        <mat-error *ngIf="form.get('entryPrice')?.hasError('required')">{{
+          'addSignal.entryPrice.required' | translate
+        }}</mat-error>
+        <mat-error *ngIf="form.get('entryPrice')?.hasError('min')">{{
+          'addSignal.entryPrice.min' | translate
+        }}</mat-error>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>{{ 'addSignal.takeProfit.label' | translate }}</mat-label>
-      <input
-        matInput
-        type="number"
-        formControlName="takeProfit"
-        [placeholder]="'addSignal.takeProfit.placeholder' | translate"
-      />
-      <i matIconSuffix class="fa-regular fa-arrow-trend-up green"></i>
-      <mat-error *ngIf="form.get('takeProfit')?.hasError('required')"
-        >{{ 'addSignal.takeProfit.required' | translate }}
-      </mat-error>
-      <mat-error *ngIf="form.get('takeProfit')?.hasError('min')">{{
-        'addSignal.takeProfit.min' | translate
-      }}</mat-error>
-      <mat-hint>
-        <span *ngIf="form.get('type')?.value === signalType.Buy"
-          >{{ 'addSignal.takeProfit.hint.buy' | translate }}
-        </span>
-        <span *ngIf="form.get('type')?.value === signalType.Sell"
-          >{{ 'addSignal.takeProfit.hint.sell' | translate }}
-        </span>
-      </mat-hint>
-    </mat-form-field>
+    <div class="form-row">
+      <div class="input-label">{{ 'addSignal.takeProfit.label' | translate }}</div>
+      <mat-form-field appearance="outline">
+        <input
+          matInput
+          type="number"
+          formControlName="takeProfit"
+          [placeholder]="'addSignal.takeProfit.placeholder' | translate"
+        />
+        <ng-icon matIconSuffix name="saxTrendUpOutline" class="green"></ng-icon>
+        <mat-error *ngIf="form.get('takeProfit')?.hasError('required')"
+          >{{ 'addSignal.takeProfit.required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="form.get('takeProfit')?.hasError('min')">{{
+          'addSignal.takeProfit.min' | translate
+        }}</mat-error>
+        <mat-hint>
+          <span *ngIf="form.get('type')?.value === signalType.Buy"
+            >{{ 'addSignal.takeProfit.hint.buy' | translate }}
+          </span>
+          <span *ngIf="form.get('type')?.value === signalType.Sell"
+            >{{ 'addSignal.takeProfit.hint.sell' | translate }}
+          </span>
+        </mat-hint>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>{{ 'addSignal.stopLoss.label' | translate }}</mat-label>
-      <input
-        matInput
-        type="number"
-        formControlName="stopLoss"
-        [placeholder]="'addSignal.stopLoss.placeholder' | translate"
-      />
-      <i matIconSuffix class="fa-regular fa-arrow-trend-down red"></i>
-      <mat-hint>
-        <span *ngIf="form.get('type')?.value === signalType.Buy"
-          >{{ 'addSignal.stopLoss.hint.buy' | translate }}
-        </span>
-        <span *ngIf="form.get('type')?.value === signalType.Sell"
-          >{{ 'addSignal.stopLoss.hint.sell' | translate }}
-        </span>
-      </mat-hint>
-      <mat-error *ngIf="form.get('stopLoss')?.hasError('required')">{{
-        'addSignal.stopLoss.required' | translate
-      }}</mat-error>
-      <mat-error *ngIf="form.get('stopLoss')?.hasError('min')">{{
-        'addSignal.stopLoss.min' | translate
-      }}</mat-error>
-    </mat-form-field>
+    <div class="form-row">
+      <div class="input-label">{{ 'addSignal.stopLoss.label' | translate }}</div>
+      <mat-form-field appearance="outline">
+        <input
+          matInput
+          type="number"
+          formControlName="stopLoss"
+          [placeholder]="'addSignal.stopLoss.placeholder' | translate"
+        />
+        <ng-icon matIconSuffix name="saxTrendDownOutline" class="red"></ng-icon>
+        <mat-hint>
+          <span *ngIf="form.get('type')?.value === signalType.Buy"
+            >{{ 'addSignal.stopLoss.hint.buy' | translate }}
+          </span>
+          <span *ngIf="form.get('type')?.value === signalType.Sell"
+            >{{ 'addSignal.stopLoss.hint.sell' | translate }}
+          </span>
+        </mat-hint>
+        <mat-error *ngIf="form.get('stopLoss')?.hasError('required')">{{
+          'addSignal.stopLoss.required' | translate
+        }}</mat-error>
+        <mat-error *ngIf="form.get('stopLoss')?.hasError('min')">{{
+          'addSignal.stopLoss.min' | translate
+        }}</mat-error>
+      </mat-form-field>
+    </div>
 
     <button
       mat-flat-button
@@ -103,7 +109,7 @@
         (click)="analyzeWithAI()"
         class="analyze-button"
       >
-        <i class="fas fa-sparkles fa-lg"></i>
+        <ng-icon name="saxStarOutline" size="18px"></ng-icon>
         {{ 'addSignal.analyzeWithAI' | translate }}
       </button>
     }

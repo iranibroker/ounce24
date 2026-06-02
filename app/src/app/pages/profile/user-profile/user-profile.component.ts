@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline, saxEditOutline, saxCrownOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -27,8 +29,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [NgIcon, CommonModule,
     MatCardModule,
     MatDividerModule,
     MatButtonModule,
@@ -40,8 +41,8 @@ const PAGE_SIZE = 20;
     EmptyStateComponent,
     MatTabsModule,
     SHARED,
-    AchievementCardComponent,
-  ],
+    AchievementCardComponent,],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxCrownOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })

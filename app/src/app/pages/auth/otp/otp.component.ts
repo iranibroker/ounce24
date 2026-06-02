@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline, saxEditOutline } from '@ng-icons/iconsax/outline';
 import {
   Component,
   ElementRef,
@@ -24,8 +26,7 @@ import { AnalyticsService } from '../../../services/analytics.service';
 @Component({
   selector: 'app-otp',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [CommonModule,
     SHARED,
     MatInputModule,
     MatFormFieldModule,
@@ -35,7 +36,8 @@ import { AnalyticsService } from '../../../services/analytics.service';
     MatSnackBarModule,
     MatButtonModule,
     MatToolbarModule,
-  ],
+    NgIcon],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline })],
   templateUrl: './otp.component.html',
   styleUrl: './otp.component.scss',
 })

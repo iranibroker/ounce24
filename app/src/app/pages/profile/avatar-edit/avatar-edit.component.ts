@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -18,16 +20,15 @@ import { AnalyticsService } from '../../../services/analytics.service';
 @Component({
   selector: 'app-avatar-edit',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [NgIcon, CommonModule,
     MatTabsModule,
     MatButtonModule,
     SHARED,
     MatGridListModule,
     MatToolbarModule,
     TranslateModule,
-    MatSnackBarModule,
-  ],
+    MatSnackBarModule,],
+  providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './avatar-edit.component.html',
   styleUrls: ['./avatar-edit.component.scss'],
 })

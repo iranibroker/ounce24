@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxCrownOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
@@ -14,13 +16,13 @@ import { CommonModule } from '@angular/common';
   templateUrl: './gem-required-dialog.component.html',
   styleUrls: ['./gem-required-dialog.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [CommonModule,
     MatDialogModule,
     MatButtonModule,
     TranslateModule,
     SHARED,
-  ],
+    NgIcon],
+  providers: [provideIcons({ saxCrownOutline })],
 })
 export class GemRequiredDialogComponent {
   constructor(

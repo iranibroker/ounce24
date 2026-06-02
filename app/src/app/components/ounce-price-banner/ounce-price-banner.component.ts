@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxExportOutline } from '@ng-icons/iconsax/outline';
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OuncePriceService } from '../../services/ounce-price.service';
@@ -7,7 +9,8 @@ import { MatRippleModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-ounce-price-banner',
-  imports: [CommonModule, MatToolbarModule, MatDividerModule, MatRippleModule],
+  imports: [NgIcon, CommonModule, MatToolbarModule, MatDividerModule, MatRippleModule],
+  providers: [provideIcons({ saxExportOutline })],
   templateUrl: './ounce-price-banner.component.html',
   styleUrl: './ounce-price-banner.component.scss',
 })

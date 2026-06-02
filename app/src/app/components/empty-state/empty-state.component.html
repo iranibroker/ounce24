@@ -1,9 +1,9 @@
 <div class="empty-state">
   @if (iconName()) {
-    <i class="fa-solid fa-{{ iconName() }}" class="empty-state__icon"></i>
+    <ng-icon [name]="iconName()" size="48px" class="empty-state__icon"></ng-icon>
   }
   @if (icon()) {
-    <i class="{{ icon() }}" class="empty-state__icon"></i>
+    <ng-icon [name]="icon()" size="48px" class="empty-state__icon"></ng-icon>
   }
   @if (text()) {
     <p class="empty-state__text">{{ text() }}</p>

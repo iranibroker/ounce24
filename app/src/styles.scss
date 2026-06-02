@@ -1,10 +1,4 @@
 @use '@angular/material' as mat;
-@use '../public/fonts/fontawesome/scss/fontawesome.scss';
-@use '../public/fonts/fontawesome/scss/regular.scss';
-@use '../public/fonts/fontawesome/scss/brands.scss';
-@use '../public/fonts/fontawesome/scss/solid.scss';
-@use '../public/fonts/fontawesome/scss/light.scss';
-@use '../public/fonts/fontawesome/scss/thin.scss';
 @use 'theme-colors.scss' as theme;
 
 html {
@@ -12,7 +6,7 @@ html {
   @include mat.theme(
     (
       color: theme.$primary,
-      typography: Vazirmatn,
+      typography: 'Vazir Code',
       density: -2,
     )
   );
@@ -21,7 +15,7 @@ html {
     @include mat.theme(
       (
         color: theme.$tertiary,
-        typography: Vazirmatn,
+        typography: 'Vazir Code',
         density: -2,
       )
     );
@@ -31,7 +25,7 @@ html {
     @include mat.theme(
       (
         color: theme.$error,
-        typography: Vazirmatn,
+        typography: 'Vazir Code',
         density: -2,
       )
     );
@@ -45,19 +39,30 @@ body {
 }
 body {
   margin: 0;
-  font-family: Vazirmatn, 'Helvetica Neue', sans-serif;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  font-family: 'Vazir Code', monospace;
+  background: #090d16 !important;
+  color: #f1f5f9 !important;
 }
 
 html[dir='rtl'] {
-  i.rtl {
-    transform: rotate(180deg);
+  i.rtl,
+  ng-icon.rtl,
+  .rtl {
+    transform: rotate(180deg) !important;
   }
 }
 
 input::placeholder {
-  opacity: 0.3 !important;
+  opacity: 0.35 !important;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: -6px;
+  margin-top: 8px;
 }
 
 .fa-gem {
@@ -109,8 +114,517 @@ input::placeholder {
 
 .signal-analyze-bottom-sheet {
   .mat-mdc-bottom-sheet-container {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
+    border-top-left-radius: 24px !important;
+    border-top-right-radius: 24px !important;
     padding: 0 !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
+}
+
+// ====================================================
+// Modern Premium Slate & Glassmorphic Design System
+// ====================================================
+
+// 1. Smooth, Sophisticated Glassmorphic Cards
+.mat-mdc-card,
+.mat-card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background-color: rgba(30, 41, 59, 0.45) !important;
+  backdrop-filter: blur(16px) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+
+  &:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+// 2. Glassmorphic Navigation & Toolbars
+.mat-mdc-toolbar,
+mat-toolbar {
+  background: rgba(9, 13, 22, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 56px !important;
+  min-height: 56px !important;
+
+  .mat-mdc-icon-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    
+    ng-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+  }
+
+  .toolbar-title, h1 {
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+}
+
+app-bottom-navigation mat-toolbar {
+  border-bottom: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  height: 64px !important;
+  min-height: 64px !important;
+}
+
+// Price banner has its own compact 32px toolbar — don't let the global rule crush it
+app-ounce-price-banner mat-toolbar,
+app-ounce-price-banner .mat-mdc-toolbar {
+  height: 32px !important;
+  min-height: 32px !important;
+  background-color: var(--mat-sys-inverse-surface) !important;
+  backdrop-filter: none !important;
+  border-bottom: none !important;
+  padding: 0 8px !important;
+}
+
+// Global Font Awesome and NG Icon alignment inside nav items and inline text
+.nav-item-wrapper i,
+ng-icon,
+i.fas, i.far, i.fab, i.fal, i.fat, i.fa-solid, i.fa-regular, i.fa-brands {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+// 3. Elegant Rounded Inputs & Modern Focus Glows
+.mat-mdc-form-field {
+  // Use native MDC tokens for borders
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.08) !important;
+  --mdc-outlined-text-field-focus-outline-color: var(--mat-sys-primary, #ffd700) !important;
+  --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.2) !important;
+  --mdc-outlined-text-field-outline-width: 1px !important;
+  --mdc-outlined-text-field-focus-outline-width: 2px !important;
+  
+  font-size: 0.95rem !important; // Increase default form-field text size
+
+  .mat-mdc-text-field-wrapper {
+    background-color: rgba(15, 23, 42, 0.45) !important;
+    border-radius: 12px !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mdc-notched-outline {
+    .mdc-notched-outline__leading {
+      border-start-start-radius: 12px !important;
+      border-end-start-radius: 12px !important;
+    }
+    .mdc-notched-outline__trailing {
+      border-start-end-radius: 12px !important;
+      border-end-end-radius: 12px !important;
+    }
+  }
+
+  &.mat-focused {
+    .mat-mdc-text-field-wrapper {
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.18) !important;
+      background-color: rgba(30, 41, 59, 0.55) !important;
+    }
+    .mdc-floating-label {
+      color: var(--mat-sys-primary, #ffd700) !important;
+    }
+  }
+
+  .mdc-floating-label {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 0.95rem !important;
+  }
+
+  // Align Prefix & Suffix icons and add margin from edges
+  [matSuffix],
+  [matPrefix],
+  [matIconSuffix],
+  [matIconPrefix],
+  ng-icon[matIconSuffix],
+  ng-icon[matSuffix] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-inline-end: 12px !important;
+    margin-inline-start: 8px !important;
+  }
+
+  // Errors font size and readability improvements
+  .mat-mdc-form-field-error,
+  .mat-error,
+  mat-error {
+    font-size: 0.88rem !important; // Larger error font size
+    font-weight: 500 !important;
+    margin-top: 4px !important;
+    display: block !important;
+  }
+
+  // Hints font size improvement
+  .mat-mdc-form-field-hint,
+  .mat-hint,
+  mat-hint {
+    font-size: 0.85rem !important;
+    opacity: 0.6 !important;
+  }
+}
+
+// 4. Premium Interactive Buttons (Rounding & Micro-Animations)
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-flat-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important; // Larger button font size
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+
+  .mdc-button__label,
+  .mdc-fab__label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  ng-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    svg {
+      display: block !important;
+    }
+  }
+
+  &:active {
+    transform: scale(0.96) !important;
+  }
+}
+
+.mat-mdc-icon-button {
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  ng-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    svg {
+      display: block !important;
+    }
+  }
+
+  &:active {
+    transform: scale(0.96) !important;
+  }
+}
+
+// Custom gold-yellow gradient for primary call-to-action buttons
+.mat-mdc-flat-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background: linear-gradient(135deg, #ffd700 0%, #e5a900 100%) !important;
+  color: #020617 !important;
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.25) !important;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4) !important;
+    transform: scale(1.02) !important;
+  }
+}
+
+// Custom slate styling for stroked/outlined buttons
+.mat-mdc-outlined-button {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #f1f5f9 !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
+// 5. Rounded Avatars and Images
+img.mat-mdc-card-avatar,
+.user-button__avatar,
+.nav-profile-avatar,
+.avatar,
+.toolbar-avatar,
+.toolbar-avatar img,
+img[appAvatar] {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+// 6. Pill-Shaped Modern Chips
+.mat-mdc-chip,
+.mat-chip {
+  border-radius: 20px !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+// 7. Glassmorphic Dialogs & Popovers
+.mat-mdc-dialog-container {
+  border-radius: 20px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden !important;
+}
+
+// 8. Flat CSS loading spinner
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50% !important;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 9. Modern Premium Segmented Switchers (Toggles)
+.mat-mdc-button-toggle-group,
+mat-button-toggle-group {
+  background: rgba(15, 23, 42, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 30px !important;
+  padding: 3px !important;
+  display: flex !important;
+  width: 100% !important;
+  height: 40px !important;
+  align-items: center !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
+
+  .mat-mdc-button-toggle-checkmark,
+  .mat-button-toggle-checkmark,
+  .mdc-button-toggle__checkmark {
+    display: none !important;
+  }
+
+  .mat-mdc-button-toggle,
+  mat-button-toggle {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 26px !important;
+    color: rgba(241, 245, 249, 0.5) !important;
+    font-weight: 500 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+    button,
+    .mat-mdc-button-toggle-button {
+      padding: 0 !important;
+      padding-inline: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .mat-button-toggle-label-content {
+      line-height: 34px !important;
+      padding: 0 12px !important;
+      font-size: 0.82rem !important;
+      text-align: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 100% !important;
+      gap: 4px !important;
+    }
+
+    &.mat-button-toggle-checked {
+      background: rgba(255, 255, 255, 0.09) !important;
+      color: #ffd700 !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    &:hover:not(.mat-button-toggle-checked) {
+      color: rgba(241, 245, 249, 0.8) !important;
+    }
+  }
+}
+
+// 10. Modern Premium Tab Group Switchers (Leaderboard & Profile)
+.mat-mdc-tab-group,
+mat-tab-group {
+  .mat-mdc-tab-header {
+    border-bottom: none !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .mat-mdc-tab-labels {
+    background: rgba(15, 23, 42, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 30px !important;
+    padding: 3px !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 8px 16px !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .mat-mdc-tab {
+    flex: 1 !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border-radius: 26px !important;
+    color: rgba(241, 245, 249, 0.5) !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 0 12px !important;
+
+    .mdc-tab__text-label {
+      color: inherit !important;
+      font-size: 0.82rem !important;
+      font-weight: inherit !important;
+    }
+
+    &.mdc-tab--active {
+      background: rgba(255, 255, 255, 0.09) !important;
+      color: #ffd700 !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  .mat-mdc-tab-ink-bar,
+  .mat-tab-ink-bar,
+  .mdc-tab-indicator,
+  .mdc-tab-indicator__content,
+  .mdc-tab-indicator__content--underline {
+    display: none !important;
+    height: 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  
+  .mat-mdc-tab-header-pagination {
+    display: none !important;
+  }
+}
+
+// 11. Vertically Aligned Card Headers
+.mat-mdc-card-header,
+mat-card-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  
+  .mat-mdc-card-header-text {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    margin: 0 12px !important;
+  }
+
+  img.mat-mdc-card-avatar {
+    margin-right: 0 !important;
+  }
+}
+
+// 12. Global Toggle Checkmark & Tab Underline Hides
+// Target every possible class name Angular Material uses for the selection checkmark SVG
+.mat-mdc-button-toggle-checkmark,
+.mat-button-toggle-checkmark,
+.mdc-button-toggle__checkmark,
+.mat-mdc-button-toggle-checkmark-path,
+svg.mat-mdc-button-toggle-checkmark,
+.mat-pseudo-checkbox,
+.mat-pseudo-checkbox-minimal {
+  display: none !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+}
+
+// Ensure toggle label content is always centered (regardless of checkmark presence)
+.mat-button-toggle-label-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+}
+
+.mdc-tab-indicator__content--underline,
+.mdc-tab-indicator__content,
+.mdc-tab__indicator,
+.mdc-tab-indicator,
+.mat-mdc-tab-ink-bar,
+.mat-tab-ink-bar {
+  display: none !important;
+  height: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+// Hide any border-bottom on tab group headers globally
+.mat-mdc-tab-group,
+mat-tab-group,
+.mat-tab-group,
+.mat-mdc-tab-header,
+.mat-tab-header,
+.mat-mdc-tab-label-container,
+.mat-tab-label-container,
+.mat-mdc-tab-list,
+.mat-tab-list,
+.mdc-tab-bar {
+  border-bottom: none !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
 }

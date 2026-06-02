@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -31,8 +33,7 @@ function titleValidator(control: AbstractControl): { [key: string]: boolean } | 
 @Component({
   selector: 'app-edit-user',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [NgIcon, CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -40,8 +41,8 @@ function titleValidator(control: AbstractControl): { [key: string]: boolean } | 
     MatSnackBarModule,
     TranslateModule,
     MatToolbarModule,
-    SHARED,
-  ],
+    SHARED,],
+  providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
 })

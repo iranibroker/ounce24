@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -17,8 +19,7 @@ import { DataLoadingComponent } from '../../../components/data-loading/data-load
 @Component({
   selector: 'app-signal-info',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [NgIcon, CommonModule,
     MatToolbarModule,
     MatButtonModule,
     MatDividerModule,
@@ -26,8 +27,8 @@ import { DataLoadingComponent } from '../../../components/data-loading/data-load
     SHARED,
     SignalCardComponent,
     MatListModule,
-    DataLoadingComponent,
-  ],
+    DataLoadingComponent,],
+  providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './signal-info.component.html',
   styleUrls: ['./signal-info.component.scss'],
 })

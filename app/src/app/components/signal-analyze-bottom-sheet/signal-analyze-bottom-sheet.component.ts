@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxCloseCircleOutline, saxActivityOutline, saxStarOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -33,8 +35,7 @@ interface SignalAnalyzeData {
 @Component({
   selector: 'app-signal-analyze-bottom-sheet',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [CommonModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
@@ -42,7 +43,8 @@ interface SignalAnalyzeData {
     SHARED,
     DataLoadingComponent,
     MatToolbarModule,
-  ],
+    NgIcon],
+  providers: [provideIcons({ saxCloseCircleOutline, saxActivityOutline, saxStarOutline })],
   templateUrl: './signal-analyze-bottom-sheet.component.html',
   styleUrls: ['./signal-analyze-bottom-sheet.component.scss'],
 })

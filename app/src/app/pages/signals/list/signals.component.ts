@@ -13,6 +13,8 @@ import { SignalCardComponent } from '../../../components/signal-card/signal-card
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { OctopusBannerComponent } from '../../../components/octopus-banner/octopus-banner.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxAddOutline } from '@ng-icons/iconsax/outline';
 
 const PAGE_SIZE = 20;
 
@@ -20,6 +22,7 @@ const PAGE_SIZE = 20;
   selector: 'app-signals-list',
   standalone: true,
   imports: [
+    NgIcon,
     CommonModule,
     RouterModule,
     OctopusBannerComponent,
@@ -31,6 +34,7 @@ const PAGE_SIZE = 20;
     DataLoadingComponent,
     EmptyStateComponent
   ],
+  providers: [provideIcons({ saxAddOutline })],
   templateUrl: './signals.component.html',
   styleUrls: ['./signals.component.scss']
 })

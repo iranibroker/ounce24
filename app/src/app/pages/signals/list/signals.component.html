@@ -1,6 +1,6 @@
 <div class="signals-container">
   <app-octopus-banner />
-  <mat-button-toggle-group [(ngModel)]="status">
+  <mat-button-toggle-group [(ngModel)]="status" hideSingleSelectionIndicator>
     <mat-button-toggle [value]="SignalStatus.Active">
       {{ 'signal.status.ACTIVE' | translate }}
     </mat-button-toggle>
@@ -18,7 +18,7 @@
     }
   } @else if (data() && data()?.length === 0) {
     <app-empty-state
-      iconName="face-frown"
+      iconName="saxEmojiSadOutline"
       [text]="'signal.emptyState' | translate"
     />
   }
@@ -39,7 +39,7 @@
     class="add-signal-fab"
     routerLink="/signals/add"
   >
-    <i class="fas fa-plus"></i>
+    <ng-icon name="saxAddOutline" size="24px"></ng-icon>
     {{ 'signal.add' | translate }}
   </button>
 </div>

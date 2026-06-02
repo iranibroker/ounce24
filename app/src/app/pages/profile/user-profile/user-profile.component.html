@@ -4,29 +4,27 @@
   <mat-toolbar>
     <mat-toolbar-row>
       <button mat-icon-button goBack>
-        <i class="fa-solid fa-chevron-left fa-xs rtl"></i>
+        <ng-icon name="saxArrowLeftOutline" class="rtl" size="20px"></ng-icon>
       </button>
       @if (isOwnProfile()) {
         <h1>{{ 'profile.yourProfile' | translate }}</h1>
         <span class="spacer"></span>
         <button mat-button routerLink="/profile/edit">
           {{ 'profile.edit.pageTitle' | translate }}
-          <i class="fa-regular fa-edit"></i>
+          <ng-icon name="saxEditOutline" size="18px"></ng-icon>
         </button>
-      } @else {}
-    </mat-toolbar-row>
-    @if (!isOwnProfile()) {
-      <mat-toolbar-row>
+      } @else {
+        <h1 class="toolbar-title">
+          {{ userQuery.data().title || userQuery.data().name }}
+        </h1>
+        <span class="spacer"></span>
         <img
           [appAvatar]="userQuery.data()"
           [alt]="userQuery.data().title || userQuery.data().name"
           class="toolbar-avatar"
         />
-        <h1 class="toolbar-title">
-          {{ userQuery.data().title || userQuery.data().name }}
-        </h1>
-      </mat-toolbar-row>
-    }
+      }
+    </mat-toolbar-row>
   </mat-toolbar>
   <div class="profile-container">
     <mat-card class="user-info-card">
@@ -34,35 +32,35 @@
         <div class="stats-row">
           @if (isOwnProfile()) {
             <div class="stat-item">
-              <i class="fas fa-gem"></i>
+              <ng-icon name="saxCrownOutline" size="24px"></ng-icon>
               <span>{{ 'profile.yourGems' | translate }}</span>
               <strong>{{ userQuery.data().gem | number }}</strong>
             </div>
           }
           <div class="stat-item">
-            <i class="fas fa-trophy"></i>
+            <ng-icon name="saxCupOutline" size="24px"></ng-icon>
             <span>{{ 'profile.rank' | translate }}</span>
             <strong>{{ userQuery.data().rank | number }}</strong>
           </div>
           <div class="stat-item">
-            <i class="fas fa-star"></i>
+            <ng-icon name="saxStarOutline" size="24px"></ng-icon>
             <span>{{ 'profile.score' | translate }}</span>
             <strong>{{ userQuery.data().score?.toFixed(1) | number }}</strong>
           </div>
         </div>
         <div class="stats-row">
           <div class="stat-item">
-            <i class="fas fa-wave-square"></i>
+            <ng-icon name="saxActivityOutline" size="24px"></ng-icon>
             <span>{{ 'profile.signals' | translate }}</span>
             <strong>{{ userQuery.data().totalSignals }}</strong>
           </div>
           <div class="stat-item">
-            <i class="fas fa-percentage"></i>
+            <ng-icon name="saxPercentageCircleOutline" size="24px"></ng-icon>
             <span>{{ 'profile.winRate' | translate }}</span>
             <strong>{{ userQuery.data().winRate?.toFixed(1) }}%</strong>
           </div>
           <div class="stat-item">
-            <i class="fas fa-scale-balanced"></i>
+            <ng-icon name="saxJudgeOutline" size="24px"></ng-icon>
             <span>{{ 'profile.avgRiskReward' | translate }}</span>
             <strong>{{ userQuery.data().avgRiskReward?.toFixed(1) }}</strong>
           </div>
@@ -79,7 +77,7 @@
             }
           } @else if (signals() && signals()?.length === 0) {
             <app-empty-state
-              iconName="face-frown"
+              iconName="saxEmojiSadOutline"
               [text]="'signal.emptyState' | translate"
             />
           }
@@ -102,7 +100,7 @@
             }
           } @else if (achievements() && achievements()?.length === 0) {
             <app-empty-state
-              iconName="face-frown"
+              iconName="saxEmojiSadOutline"
               [text]="'achievement.emptyState' | translate"
             />
           }

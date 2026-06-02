@@ -1,44 +1,24 @@
 <mat-toolbar dir="ltr">
-  <!-- <a mat-button routerLink="/">
-    <div class="nav-item-wrapper">
-      <i class="far fa-house fa-xl"></i>
-      {{ 'bottomNav.home' | translate }}
-    </div>
-  </a> -->
   <a mat-button routerLink="/signals">
     <div class="nav-item-wrapper">
-      <i class="far fa-wave-square fa-xl"></i>
+      <ng-icon name="saxActivityOutline" size="24px"></ng-icon>
       {{ 'bottomNav.signals' | translate }}
     </div>
   </a>
   <a mat-button routerLink="/leaderboard">
     <div class="nav-item-wrapper">
-      <i class="far fa-trophy fa-xl"></i>
+      <ng-icon name="saxCupOutline" size="24px"></ng-icon>
       {{ 'bottomNav.leaderboard' | translate }}
     </div>
   </a>
-  <!-- Podcast tab hidden
-  <a mat-button routerLink="/podcast">
-    <div class="nav-item-wrapper">
-      <i class="far fa-podcast fa-xl"></i>
-      {{ 'bottomNav.podcast' | translate }}
-    </div>
-  </a>
-  -->
-  <!-- <a mat-button>
-    <div class="nav-item-wrapper">
-      <i class="far fa-bell fa-xl"></i>
-      {{ 'bottomNav.notifications' | translate }}
-    </div>
-  </a> -->
   <a mat-button [routerLink]="authService.userQuery.data() ? '/profile' : '/login'">
     <div class="nav-item-wrapper">
       @if (authService.userQuery.data()) {
         <span class="nav-icon-slot">
-          <img [appAvatar]="authService.userQuery.data()" [size]="18" class="nav-profile-avatar" />
+          <img [appAvatar]="authService.userQuery.data()" [size]="24" class="nav-profile-avatar" />
         </span>
       } @else {
-        <i class="far fa-user fa-xl"></i>
+        <ng-icon name="saxUserOutline" size="24px"></ng-icon>
       }
       {{ 'bottomNav.profile' | translate }}
     </div>

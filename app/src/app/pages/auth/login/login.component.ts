@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
 import {
   Component,
   ElementRef,
@@ -50,8 +52,7 @@ declare global {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [CommonModule,
     MatInputModule,
     MatFormFieldModule,
     FormsModule,
@@ -59,7 +60,8 @@ declare global {
     SHARED,
     MatButtonModule,
     MatToolbarModule,
-  ],
+    NgIcon],
+  providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })

@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxCloseCircleOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -8,7 +10,8 @@ import { Achievement } from '@ounce24/types';
 
 @Component({
   selector: 'app-new-achievement-bottom-sheet',
-  imports: [CommonModule, MatToolbarModule, MatButtonModule, SHARED],
+  imports: [CommonModule, MatToolbarModule, MatButtonModule, SHARED, NgIcon],
+  providers: [provideIcons({ saxCloseCircleOutline })],
   templateUrl: './new-achievement-bottom-sheet.component.html',
   styleUrl: './new-achievement-bottom-sheet.component.scss',
 })

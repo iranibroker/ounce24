@@ -1,10 +1,18 @@
 .wrapper {
-  padding: 4px 8px;
-  display: inline-block;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   border-radius: 24px;
   font-size: 0.8rem;
-  height: 14px;
-  line-height: 14px;
+  font-weight: 600;
+  line-height: 1;
+
+  ng-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 
   &.sell {
     background: var(--mat-sys-error-container);

@@ -6,6 +6,15 @@ mat-card-subtitle {
   font-size: 0.8rem;
   margin-top: 6px;
   color: var(--mat-sys-outline);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  ng-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .signal-header {
@@ -15,13 +24,9 @@ mat-card-subtitle {
   gap: 8px;
 
   & > span {
-    display: inline-block;
-    margin-bottom: -6px;
+    display: inline-flex;
+    align-items: center;
   }
-}
-
-img.mat-mdc-card-avatar {
-  border-radius: 4px !important;
 }
 
 .red {
@@ -38,11 +43,23 @@ img.mat-mdc-card-avatar {
   justify-content: space-between;
   font-size: 0.8rem;
 
-  .fa-arrow-trend-down {
+  & > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  ng-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  ng-icon[name="saxTrendDownOutline"] {
     color: var(--mat-sys-error);
   }
 
-  .fa-arrow-trend-up {
+  ng-icon[name="saxTrendUpOutline"] {
     color: var(--mat-sys-secondary);
   }
 
@@ -50,6 +67,33 @@ img.mat-mdc-card-avatar {
     display: flex;
     align-items: center;
     flex-direction: column;
+  }
+}
+
+mat-chip {
+  ::ng-deep .mdc-evolution-chip__text-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  ng-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+.status-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  .green, .red {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 100% !important;
   }
 }
 

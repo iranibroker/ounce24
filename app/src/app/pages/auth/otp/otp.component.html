@@ -1,6 +1,6 @@
 <mat-toolbar>
   <button mat-icon-button goBack>
-    <i class="fa-regular fa-chevron-left fa-sm rtl"></i>
+    <ng-icon name="saxArrowLeftOutline" class="rtl"></ng-icon>
   </button>
 </mat-toolbar>
 <form fxLayout="column" fxLayoutGap="16" p-md>
@@ -22,7 +22,7 @@
   <br />
 
   <a mat-stroked-button class="edit-phone-button" goBack type="button">
-    <i class="fa-regular fa-pencil-alt"></i>
+    <ng-icon name="saxEditOutline" size="18px"></ng-icon>
     {{ phone }}
   </a>
   @if (time()) {

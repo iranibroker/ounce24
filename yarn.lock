@@ -3322,6 +3322,27 @@
   dependencies:
     tslib "2.6.2"
 
+"@ng-icons/core@^33.2.3":
+  version "33.2.3"
+  resolved "https://registry.npmjs.org/@ng-icons/core/-/core-33.2.3.tgz#cd8c3f1484610d01b7901c0fb078421adb3e1057"
+  integrity sha512-W7QesmRRlLbjsJfb0DRzyZPxdXjo/m4drCk48vysir1KRDNhfN+6f43T5GW1y3vAmrOIF7kuXzad6Vr1c0LqHA==
+  dependencies:
+    tslib "^2.3.0"
+
+"@ng-icons/iconsax@^33.2.3":
+  version "33.2.3"
+  resolved "https://registry.npmjs.org/@ng-icons/iconsax/-/iconsax-33.2.3.tgz#1cd8f64493704735595b8a73a3b6ee07cebf480f"
+  integrity sha512-D/u4p1CtZQOS2Rt+V0TDFr7zHzPoFJBPq3EczWJBdlyuaTybalbTcpWAwdp0wNTh4+tmpfTKd6OSpz5bGaBRxg==
+  dependencies:
+    tslib "^2.3.0"
+
+"@ng-icons/simple-icons@^33.2.3":
+  version "33.2.3"
+  resolved "https://registry.npmjs.org/@ng-icons/simple-icons/-/simple-icons-33.2.3.tgz#b36733b93a109a7d96d70e7de73f2fd208a939a8"
+  integrity sha512-WaEBdTtx22pBmglf9/4YX+mPdkIj8ScxS0pnbsPo+6RmT07BSIQobURyzId4zFoH3YL+KqW3lg4yAIiT5xSqpA==
+  dependencies:
+    tslib "^2.3.0"
+
 "@ngtools/webpack@19.1.5":
   version "19.1.5"
   resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-19.1.5.tgz#3ed3a1770e280214760c2564f1cf6209161b0531"

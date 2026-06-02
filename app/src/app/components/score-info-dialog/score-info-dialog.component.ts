@@ -1,3 +1,6 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxStarOutline, saxJudgeOutline, saxActivityOutline, saxTrendUpOutline } from '@ng-icons/iconsax/outline';
+import { saxTrendUpBold } from '@ng-icons/iconsax/bold';
 import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
@@ -14,13 +17,12 @@ import { CommonModule } from '@angular/common';
   templateUrl: './score-info-dialog.component.html',
   styleUrls: ['./score-info-dialog.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
+  imports: [NgIcon, CommonModule,
     MatDialogModule,
     MatButtonModule,
     TranslateModule,
-    SHARED,
-  ],
+    SHARED,],
+  providers: [provideIcons({ saxStarOutline, saxJudgeOutline, saxActivityOutline, saxTrendUpOutline, saxTrendUpBold })],
 })
 export class ScoreInfoDialogComponent {
   constructor(

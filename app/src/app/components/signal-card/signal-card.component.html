@@ -15,7 +15,7 @@
         {{ ownerTitle }}
       </mat-card-title>
       <mat-card-subtitle>
-        <i class="fa-solid fa-star"></i>
+        <ng-icon name="saxStarOutline" size="14px"></ng-icon>
         {{ signal().owner.score.toFixed(1) }}
       </mat-card-subtitle>
       <button
@@ -24,7 +24,7 @@
         (click)="openSignalAnalyze($event)"
         matTooltip="{{ 'signalAnalyze.title' | translate }}"
       >
-        <i class="fas fa-sparkles fa-xs"></i>
+        <ng-icon name="saxActivityOutline" size="14px"></ng-icon>
       </button>
     </mat-card-header>
     <mat-divider />
@@ -37,22 +37,22 @@
     <span style="flex: 1"></span>
     @switch (signal().status) {
       @case (SignalStatus.Pending) {
-        <mat-chip [disabled]="true" id="status-chip">
-          <i class="fas fa-clock-rotate-left"></i>
+        <mat-chip [disabled]="true" class="status-chip">
+          <ng-icon name="saxClockOutline" size="16px"></ng-icon>
           {{ 'signal.status.' + signal().status | translate }}
         </mat-chip>
       }
       @case (SignalStatus.Active) {
-        <mat-chip id="status-chip">
+        <mat-chip class="status-chip">
           <span [class.red]="pip() < 0" [class.green]="pip() > 0">
             {{ pip() }} {{ 'signal.pip' | translate }}
-            <i class="fa-solid fa-play fa-sm"></i>
+            <ng-icon name="saxPlayOutline" size="12px"></ng-icon>
           </span>
         </mat-chip>
       }
       @case (SignalStatus.Closed) {
-        <mat-chip id="status-chip" [disabled]="true">
-          <i class="fa-solid fa-stop fa-sm"></i>
+        <mat-chip class="status-chip" [disabled]="true">
+          <ng-icon name="saxStopOutline" size="12px"></ng-icon>
           {{ 'signal.status.' + signal().status | translate }}
           @if (Signal.isManualClose(signal())) {
             ({{
@@ -69,7 +69,7 @@
   </mat-card-actions>
   <mat-card-actions class="signal-props">
     <span>
-      <i class="fa-regular fa-arrow-trend-up"></i>
+      <ng-icon name="saxTrendUpOutline" size="14px"></ng-icon>
       {{ 'signal.profit' | translate }}:
       {{ signal().profit | currency: 'USD' : 'symbol' : '1.0-0' }}
     </span>
@@ -78,7 +78,7 @@
       {{ signal().riskReward | number: '1.0-2' }}
     </span>
     <span>
-      <i class="fa-regular fa-arrow-trend-down"></i>
+      <ng-icon name="saxTrendDownOutline" size="14px"></ng-icon>
       {{ 'signal.loss' | translate }}:
       {{ signal().loss | currency: 'USD' : 'symbol' : '1.0-0' }}
     </span>
@@ -89,7 +89,7 @@
       @if (showScore()) {
         <mat-chip-set>
           <mat-chip (click)="openScoreInfo()">
-            <i class="fa-solid fa-star"></i>
+            <ng-icon name="saxStarOutline" size="14px"></ng-icon>
             <span
               [class.red]="signal().score < 0"
               [class.green]="signal().score > 0"
@@ -102,7 +102,7 @@
           </mat-chip>
           @if (signal().gem > 0) {
             <mat-chip (click)="openScoreInfo()">
-              <i class="fa-solid fa-gem"></i>
+              <ng-icon name="saxCrownOutline" size="14px"></ng-icon>
               +{{ signal().gem | number }}
             </mat-chip>
           }
