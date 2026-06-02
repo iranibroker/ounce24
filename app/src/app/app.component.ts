@@ -52,7 +52,12 @@ export class AppComponent implements OnInit {
 
     // Prompt user for push notifications after 20 seconds
     setTimeout(() => {
+      const isLoginPage = this.router.url.includes('/login');
+      const isLoggedIn = !!this.authService.token();
+
       if (
+        isLoggedIn &&
+        !isLoginPage &&
         !this.pushNotificationService.isSubscribed() &&
         !this.pushNotificationService.hasAskedBefore()
       ) {
@@ -60,6 +65,7 @@ export class AppComponent implements OnInit {
           width: '400px',
           maxWidth: '95vw',
           panelClass: 'push-notification-dialog-panel',
+          disableClose: true,
         });
 
         dialogRef.afterClosed().subscribe((accept: boolean) => {

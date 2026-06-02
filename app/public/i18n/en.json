@@ -240,9 +240,8 @@
   },
   "pushNotifications": {
     "dialog": {
-      "title": "Receive Ounce Price Notifications",
-      "description": "Would you like to receive real-time gold/ounce price (XAUUSD) updates as a notification on your device every 5 seconds?",
-      "subtext": "These notifications are updated silently so they won't disturb you.",
+      "title": "Live Gold Price",
+      "description": "Have the live gold price on your phone screen, even when the site is closed.",
       "decline": "Not Now",
       "accept": "Enable"
     },

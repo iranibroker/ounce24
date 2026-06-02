@@ -1,16 +1,17 @@
-<h2 mat-dialog-title class="dialog-header">
-  <ng-icon name="saxNotificationOutline" size="24px" class="gold-icon"></ng-icon>
-  <span>{{ 'pushNotifications.dialog.title' | translate }}</span>
-</h2>
-<mat-dialog-content class="dialog-content">
-  <p>{{ 'pushNotifications.dialog.description' | translate }}</p>
-  <p class="sub-text">{{ 'pushNotifications.dialog.subtext' | translate }}</p>
-</mat-dialog-content>
-<mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-button class="cancel-btn" (click)="onClose()">
-    {{ 'pushNotifications.dialog.decline' | translate }}
-  </button>
-  <button mat-flat-button class="confirm-btn" (click)="onAccept()">
-    {{ 'pushNotifications.dialog.accept' | translate }}
-  </button>
-</mat-dialog-actions>
+<div class="dialog-wrapper">
+  <h2 class="dialog-header">
+    <ng-icon name="saxNotificationOutline" size="24px" class="gold-icon"></ng-icon>
+    <span>{{ 'pushNotifications.dialog.title' | translate }}</span>
+  </h2>
+  <div class="dialog-content">
+    <p>{{ 'pushNotifications.dialog.description' | translate }}</p>
+  </div>
+  <div class="dialog-actions">
+    <button mat-button class="cancel-btn" (click)="onClose()">
+      {{ 'pushNotifications.dialog.decline' | translate }}
+    </button>
+    <button mat-flat-button class="confirm-btn" (click)="onAccept()">
+      {{ 'pushNotifications.dialog.accept' | translate }}
+    </button>
+  </div>
+</div>

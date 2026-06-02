@@ -9,7 +9,6 @@ self.addEventListener('push', function (event) {
   }
 
   const price = data.price || '---';
-  const title = 'قیمت لحظه‌ای اونس طلا';
 
   // Format the price as USD (e.g. $2,450.50)
   let formattedPrice = price;
@@ -20,10 +19,11 @@ self.addEventListener('push', function (event) {
     }).format(Number(price));
   }
 
+  const title = `XAUUSD: ${formattedPrice}`;
   const options = {
     body: `قیمت اونس طلا: ${formattedPrice}`,
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/images/logo-icon.png',
+    badge: '/images/logo-icon-bw.png',
     tag: 'ounce-price-alert', // Updates existing notification instead of creating a new one
     renotify: false, // Prevents subsequent sound/vibration alerts when replacing notification
     silent: true, // Completely silent for frequent 5-second updates (crucial for user comfort)

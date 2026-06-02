@@ -1,3 +1,10 @@
+.dialog-wrapper {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
 .dialog-header {
   display: flex;
   align-items: center;
@@ -6,6 +13,8 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 16px;
   margin: 0 !important;
+  font-size: 1.25rem;
+  font-weight: 600;
 
   .gold-icon {
     color: #fbbf24;
@@ -14,22 +23,16 @@
 }
 
 .dialog-content {
-  color: var(--text-secondary, #b3b3b3);
+  color: var(--text-secondary, #cbd5e1);
   line-height: 1.6;
   font-size: 0.95rem;
   padding: 20px 0 !important;
   margin: 0 !important;
-
-  .sub-text {
-    font-size: 0.8rem;
-    color: #7c7c7c;
-    margin-top: 8px;
-    font-style: italic;
-  }
 }
 
 .dialog-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 16px !important;
