@@ -44,7 +44,7 @@
     text-align: center;
     gap: 8px;
 
-    i, ng-icon {
+    i, ng-icon:not(.tonal-icon) {
       font-size: 1.5rem;
       color: var(--mat-sys-primary);
     }

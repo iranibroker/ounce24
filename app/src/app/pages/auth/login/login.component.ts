@@ -105,21 +105,25 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       title: 'login.onboarding.signalsTitle',
       description: 'login.onboarding.signalsDesc',
       icon: 'saxActivityOutline',
+      color: 'green',
     },
     {
       title: 'login.onboarding.aiTitle',
       description: 'login.onboarding.aiDesc',
       icon: 'saxDiamondsBold',
+      color: 'blue',
     },
     {
       title: 'login.onboarding.leaderboardTitle',
       description: 'login.onboarding.leaderboardDesc',
       icon: 'saxCupOutline',
+      color: 'amber',
     },
     {
       title: 'login.onboarding.podcastTitle',
       description: 'login.onboarding.podcastDesc',
       icon: 'saxMicrophoneOutline',
+      color: 'purple',
     },
   ];
 

@@ -57,7 +57,6 @@
       }
       @case (SignalStatus.Closed) {
         <mat-chip class="status-chip" [disabled]="true">
-          <ng-icon name="saxStopOutline" size="12px"></ng-icon>
           {{ 'signal.status.' + signal().status | translate }}
           @if (Signal.isManualClose(signal())) {
             ({{

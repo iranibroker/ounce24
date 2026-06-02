@@ -1,3 +1,9 @@
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .login-page {
   display: flex;
   flex-direction: column;
@@ -6,23 +12,26 @@
   gap: 32px;
   padding: 24px;
   min-height: 80vh;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .onboarding-carousel {
   width: 100%;
   max-width: 400px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: none !important;
+  border-radius: 16px !important;
   padding: 32px 24px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
   text-align: center;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  box-sizing: border-box;
   
   .slides-container {
     min-height: 180px;
@@ -30,6 +39,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .slide-card {
@@ -38,18 +48,11 @@
     align-items: center;
     gap: 12px;
     animation: fadeIn 0.4s ease-out;
+    box-sizing: border-box;
+    width: 100%;
 
-    .icon-container {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--mat-sys-primary, #6200ee), var(--mat-sys-secondary, #03dac6));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
+    ng-icon.tonal-icon {
       margin-bottom: 8px;
-      box-shadow: 0 4px 15px rgba(98, 0, 238, 0.35);
     }
 
     h2 {
@@ -83,7 +86,7 @@
       &.active {
         width: 24px;
         border-radius: 4px;
-        background: var(--mat-sys-primary, #6200ee);
+        background: #fbbf24 !important;
       }
     }
   }

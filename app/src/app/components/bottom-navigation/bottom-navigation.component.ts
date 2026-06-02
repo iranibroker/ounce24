@@ -1,5 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxHomeOutline, saxActivityOutline, saxCupOutline, saxMicrophoneOutline, saxNotificationOutline, saxUserOutline } from '@ng-icons/iconsax/outline';
+import { saxActivityBold, saxCupBold, saxUserBold } from '@ng-icons/iconsax/bold';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -10,7 +11,19 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-bottom-navigation',
   imports: [NgIcon, CommonModule, MatToolbarModule, MatButtonModule, SHARED],
-  providers: [provideIcons({ saxHomeOutline, saxActivityOutline, saxCupOutline, saxMicrophoneOutline, saxNotificationOutline, saxUserOutline })],
+  providers: [
+    provideIcons({
+      saxHomeOutline,
+      saxActivityOutline,
+      saxCupOutline,
+      saxMicrophoneOutline,
+      saxNotificationOutline,
+      saxUserOutline,
+      saxActivityBold,
+      saxCupBold,
+      saxUserBold,
+    }),
+  ],
   templateUrl: './bottom-navigation.component.html',
   styleUrl: './bottom-navigation.component.scss',
 })

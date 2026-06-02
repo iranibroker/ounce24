@@ -1,19 +1,19 @@
 <mat-toolbar dir="ltr">
-  <a mat-button routerLink="/signals">
+  <a mat-button routerLink="/signals" routerLinkActive #rlaSignals="routerLinkActive">
     <div class="nav-item-wrapper">
-      <ng-icon name="saxActivityOutline" size="24px"></ng-icon>
+      <ng-icon [name]="rlaSignals.isActive ? 'saxActivityBold' : 'saxActivityOutline'" size="24px"></ng-icon>
       {{ 'bottomNav.signals' | translate }}
     </div>
   </a>
-  <a mat-button routerLink="/leaderboard">
+  <a mat-button routerLink="/leaderboard" routerLinkActive #rlaLeaderboard="routerLinkActive">
     <div class="nav-item-wrapper">
-      <ng-icon name="saxCupOutline" size="24px"></ng-icon>
+      <ng-icon [name]="rlaLeaderboard.isActive ? 'saxCupBold' : 'saxCupOutline'" size="24px"></ng-icon>
       {{ 'bottomNav.leaderboard' | translate }}
     </div>
   </a>
-  <a mat-button [routerLink]="authService.userQuery.data() ? '/profile' : '/login'">
+  <a mat-button [routerLink]="authService.userQuery.data() ? '/profile' : '/login'" routerLinkActive #rlaProfile="routerLinkActive">
     <div class="nav-item-wrapper">
-      <ng-icon name="saxUserOutline" size="24px"></ng-icon>
+      <ng-icon [name]="rlaProfile.isActive ? 'saxUserBold' : 'saxUserOutline'" size="24px"></ng-icon>
       {{ 'bottomNav.profile' | translate }}
     </div>
   </a>

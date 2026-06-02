@@ -11,9 +11,7 @@
       @for (slide of slides; track slide.title; let i = $index) {
         @if (activeSlide() === i) {
           <div class="slide-card">
-            <div class="icon-container">
-              <ng-icon [name]="slide.icon" size="32px"></ng-icon>
-            </div>
+            <ng-icon [name]="slide.icon" [class]="'tonal-icon icon-lg ' + slide.color" size="20px"></ng-icon>
             <h2>{{ slide.title | translate }}</h2>
             <p>{{ slide.description | translate }}</p>
           </div>

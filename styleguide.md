@@ -4,14 +4,14 @@ This guide documents the design system, custom components, overrides, and layout
 
 ---
 
-## 1. Design Philosophy: Slate Glassmorphism
+## 1. Design Philosophy: Dark Premium Glassmorphism
 
-The application utilizes a dark slate glassmorphic aesthetic to create a premium, modern feel. 
+The application utilizes a premium, dark glassmorphic aesthetic to align exactly with the landing page design at `https://ounce24.com/`.
 
-*   **Primary Theme Accent:** Gold/Yellow (`#FFD700` / `var(--mat-sys-primary)`) — used selectively for active states, primary CTA buttons, and highlighted metrics.
-*   **Body Background:** Deep Rich Black/Slate (`#090d16`).
-*   **Card & Surface Container Background:** Translucent slate with blur (`rgba(30, 41, 59, 0.45)` with `backdrop-filter: blur(16px)`).
-*   **Border Styling:** Avoid heavy borders. Use thin, semi-transparent white borders (`1px solid rgba(255, 255, 255, 0.07)`) to define glass boundaries.
+*   **Primary Theme Accent:** Amber/Gold Gradient (`linear-gradient(135deg, #fbbf24 0%, #d97706 100%)`) — used for primary CTA buttons and active states. The solid primary accent color is `#fbbf24`.
+*   **Body Background:** Deep Rich Black (`#0a0a0a`).
+*   **Card & Surface Container Background:** Semi-transparent white glass (`rgba(255, 255, 255, 0.03)` with `backdrop-filter: blur(10px)`).
+*   **Border Styling:** Avoid heavy borders. Use thin, semi-transparent white borders (`1px solid rgba(255, 255, 255, 0.1)`) to define glass boundaries.
 *   **Border Radius System:**
     *   **Standard Cards/Inputs/Buttons/Avatars:** `12px`
     *   **Dialogs/Modals/Chips:** `20px`
@@ -265,14 +265,29 @@ Add interactive click feedbacks to make elements feel responsive:
 Primary actions must stand out with a polished gold gradient.
 ```scss
 .mat-mdc-flat-button.mat-primary,
-.mat-mdc-unelevated-button.mat-primary {
-  background: linear-gradient(135deg, #ffd700 0%, #e5a900 100%) !important;
-  color: #020617 !important;
-  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.25) !important;
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary,
+.add-signal-fab,
+.mat-primary-gradient {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.25) !important;
 
   &:hover {
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4) !important;
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4) !important;
     transform: scale(1.02) !important;
   }
 }
+```
+
+### D. Tonal and Simple Icons
+For dashboard stats and status layouts, use the `.tonal-icon` helper classes:
+*   **Base style:** `.tonal-icon` (applies inline-flex layout, 40px width/height, 12px border radius, centers inner icon).
+*   **Sizes:** `.icon-sm` (32px / 8px radius) or `.icon-lg` (48px / 16px radius).
+*   **Colors:** `.primary` / `.amber`, `.blue`, `.green`, `.red`, `.purple`, `.slate`.
+
+**HTML Template:**
+```html
+<ng-icon name="saxStarOutline" class="tonal-icon amber" size="20px"></ng-icon>
 ```
