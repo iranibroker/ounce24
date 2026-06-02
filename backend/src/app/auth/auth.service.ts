@@ -200,6 +200,26 @@ export class AuthService {
     } as Partial<User>);
   }
 
+  async useTelegramAvatar(userId: string): Promise<User> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.telegramId) {
+      throw new BadRequestException({
+        translationKey: 'profile.avatar.noTelegram',
+      });
+    }
+    const photoUrl = await this.fetchTelegramAvatarUrl(user.telegramId);
+    if (!photoUrl) {
+      throw new BadRequestException({
+        translationKey: 'profile.avatar.telegramFetchFailed',
+      });
+    }
+    return this.updateUser(userId, {
+      avatar: photoUrl,
+      avatarSource: 'telegram',
+    } as Partial<User>);
+  }
+
   verifyTelegramWidgetData(data: any, botToken: string): boolean {
     const { hash, ...fields } = data;
 

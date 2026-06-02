@@ -67,21 +67,7 @@ export class AuthController {
 
   @Post('me/telegram-avatar')
   async useTelegramAvatar(@LoginUser() user) {
-    if (!user.telegramId) {
-      throw new BadRequestException({
-        translationKey: 'profile.avatar.noTelegram',
-      });
-    }
-    const photoUrl = await this.auth.fetchTelegramAvatarUrl(user.telegramId);
-    if (!photoUrl) {
-      throw new BadRequestException({
-        translationKey: 'profile.avatar.telegramFetchFailed',
-      });
-    }
-    return this.auth.updateUser(user.id, {
-      avatar: photoUrl,
-      avatarSource: 'telegram',
-    } as any);
+    return this.auth.useTelegramAvatar(user.id);
   }
 
   @Post('me/google-avatar')
