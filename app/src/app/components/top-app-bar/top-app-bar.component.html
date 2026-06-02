@@ -6,10 +6,10 @@
         <img [src]="user.avatar" [appAvatar]="user" [size]="24" class="user-button__avatar" />
         <div class="user-button__texts">
           {{ user | fullname }}
-          <!-- <span ltr class="user-button__gem">
-            <i class="fa-solid fa-gem"></i>
+          <span ltr class="user-button__gem">
+            <ng-icon name="saxDiamondsOutline" class="blue"></ng-icon>
             {{ user.gem || 0 | number }}
-          </span> -->
+          </span>
         </div>
       </div>
     </button>
