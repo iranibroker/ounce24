@@ -68,6 +68,29 @@
       </mat-card-content>
     </mat-card>
 
+    @if (isOwnProfile()) {
+      <mat-card class="settings-card">
+        <mat-card-content>
+          <div class="settings-row">
+            <div class="settings-info">
+              <div class="icon-container">
+                <ng-icon name="saxNotificationOutline" size="20px"></ng-icon>
+              </div>
+              <div class="settings-texts">
+                <h3>{{ 'pushNotifications.settings.title' | translate }}</h3>
+                <p>{{ 'pushNotifications.settings.description' | translate }}</p>
+              </div>
+            </div>
+            <mat-slide-toggle
+              [checked]="pushService.isSubscribed()"
+              (change)="toggleNotifications($event.checked)"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
     <mat-tab-group>
       <mat-tab label="{{ 'profile.signals' | translate }}">
         <div class="list-container">

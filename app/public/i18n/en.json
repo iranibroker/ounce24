@@ -248,6 +248,10 @@
     "bell": {
       "enable": "Enable Ounce Notifications",
       "disable": "Disable Ounce Notifications"
+    },
+    "settings": {
+      "title": "Live Ounce Price Alerts",
+      "description": "Get instant notifications when gold ounce price changes"
     }
   }
 }

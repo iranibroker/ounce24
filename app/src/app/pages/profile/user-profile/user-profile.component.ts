@@ -1,7 +1,9 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline } from '@ng-icons/iconsax/outline';
+import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, inject, computed } from '@angular/core';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { PushNotificationService } from '../../../services/push-notification.service';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -42,8 +44,9 @@ const PAGE_SIZE = 20;
     EmptyStateComponent,
     MatTabsModule,
     SHARED,
-    AchievementCardComponent,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline })],
+    AchievementCardComponent,
+    MatSlideToggleModule,],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
@@ -53,6 +56,15 @@ export class UserProfileComponent {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
+  readonly pushService = inject(PushNotificationService);
+
+  async toggleNotifications(checked: boolean) {
+    if (checked) {
+      await this.pushService.subscribeToNotifications();
+    } else {
+      await this.pushService.unsubscribeFromNotifications();
+    }
+  }
 
   isOwnProfile = computed(() => {
     const currentUser = this.auth.userQuery.data();
