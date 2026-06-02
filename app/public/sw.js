@@ -1,3 +1,11 @@
+self.addEventListener('install', function (event) {
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker
+});
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(self.clients.claim()); // Force active service worker to take control of all open clients
+});
+
 self.addEventListener('push', function (event) {
   let data = {};
   if (event.data) {

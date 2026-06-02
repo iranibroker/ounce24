@@ -241,7 +241,7 @@
   "pushNotifications": {
     "dialog": {
       "title": "Live Gold Price",
-      "description": "Have the live gold price on your phone screen, even when the site is closed.",
+      "description": "Have the live gold price on your phone screen, even when the site is closed. Please also allow the notification permission request that appears next.",
       "decline": "Not Now",
       "accept": "Enable"
     },
