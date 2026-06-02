@@ -93,6 +93,23 @@ export class AuthService {
     },
   }));
 
+  // Telegram Widget Login mutation – returns { token, user } from backend
+  telegramWidgetLoginMutation = injectMutation<
+    { token: string; user: User },
+    Error,
+    any
+  >(() => ({
+    mutationFn: (widgetData) =>
+      this.http
+        .post<{ token: string; user: User }>(`/api/auth/telegram-widget-login`, widgetData)
+        .toPromise()
+        .then((res) => res!),
+    onSuccess: async (response) => {
+      await this.saveToken(response.token);
+      return response;
+    },
+  }));
+
   userQuery = injectQuery<User | null>(() => ({
     queryKey: ['user', this.token()],
     queryFn: () => {

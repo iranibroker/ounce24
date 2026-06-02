@@ -20,17 +20,23 @@ import { LoginUser } from './user.decorator';
 export class AuthController {
   constructor(private auth: AuthService) {}
 
-  @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login(@Request() req) {
-    return this.auth.login(req.user);
-  }
+  // @Public()
+  // @UseGuards(LocalAuthGuard)
+  // @Post('login')
+  // async login(@Request() req) {
+  //   return this.auth.login(req.user);
+  // }
 
   @Public()
   @Post('telegram-login')
   async telegramLogin(@Body() body: { initData: string }) {
     return this.auth.telegramLogin(body.initData);
+  }
+
+  @Public()
+  @Post('telegram-widget-login')
+  async telegramWidgetLogin(@Body() body: any) {
+    return this.auth.telegramWidgetLogin(body);
   }
 
   @Public()

@@ -5,41 +5,48 @@
 </mat-toolbar>
 
 <div class="login-page">
-  <h1>{{ 'login.phoneTitle' | translate }}</h1>
-  <p class="description">{{ 'login.phoneDescription' | translate }}</p>
-
-  <form (ngSubmit)="sendToken(phoneInput.value, $event)">
-    <mat-form-field appearance="outline">
-      <input
-        #phoneInput
-        [autoFocus]
-        matInput
-        type="number"
-        placeholder="{{ 'login.phonePlaceholder' | translate }}"
-        [readonly]="loading()"
-        minlength="11"
-        maxlength="11"
-        class="mono"
-      />
-      @if (languageService.isRTL()) {
-        <span matTextSuffix>0</span>
-      } @else {
-        <span matTextPrefix>0</span>
+  <!-- Onboarding Carousel -->
+  <div class="onboarding-carousel">
+    <div class="slides-container">
+      @for (slide of slides; track slide.title; let i = $index) {
+        @if (activeSlide() === i) {
+          <div class="slide-card">
+            <div class="icon-container">
+              <ng-icon [name]="slide.icon" size="32px"></ng-icon>
+            </div>
+            <h2>{{ slide.title | translate }}</h2>
+            <p>{{ slide.description | translate }}</p>
+          </div>
+        }
       }
-    </mat-form-field>
-
-    <button id="action" type="submit" [disabled]="loading()" mat-flat-button>
-      {{ 'login.phoneAction' | translate }}
-      @if (loading()) {
-        ...
+    </div>
+    
+    <!-- Dots indicator -->
+    <div class="carousel-dots">
+      @for (slide of slides; track slide.title; let i = $index) {
+        <span 
+          class="dot" 
+          [class.active]="activeSlide() === i"
+          (click)="setSlide(i)"
+        ></span>
       }
-    </button>
-  </form>
+    </div>
+  </div>
 
-  @if (showGoogleSignIn()) {
-    <span class="divider">{{ 'login.or' | translate }}</span>
-    <div #googleButtonContainer id="google-button-container"></div>
-  }
+  <!-- Sign In Methods -->
+  <div class="auth-methods">
+    <h3>{{ 'login.chooseDescription' | translate }}</h3>
+    
+    <div class="buttons-layout">
+      <!-- Google Button -->
+      @if (showGoogleSignIn()) {
+        <div #googleButtonContainer id="google-button-container"></div>
+      }
+      
+      <!-- Telegram Button -->
+      <div #telegramButtonContainer id="telegram-button-container"></div>
+    </div>
+  </div>
 
   @if (errorMessage()) {
     <p class="error-message">{{ errorMessage() | translate }}</p>

@@ -12,7 +12,7 @@ import { User } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
-import { createHmac } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 let kavenegarApi;
 
@@ -78,7 +78,7 @@ export class AuthService {
     }
 
     const name = [data?.first_name, data?.last_name].filter(Boolean).join(' ') || `User ${telegramId}`;
-    const rawTitle = data?.username ? `@${data.username}` : `tg_${telegramId}`;
+    const rawTitle = data?.first_name || data?.username || `tg_${telegramId}`;
     const title = sanitizeUserTitle(rawTitle) || `u${String(telegramId).slice(-6)}`;
     return this.userModel.create({
       telegramId,
@@ -200,6 +200,83 @@ export class AuthService {
     } as Partial<User>);
   }
 
+  verifyTelegramWidgetData(data: any, botToken: string): boolean {
+    const { hash, ...fields } = data;
+
+    const dataCheckArr: string[] = [];
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined && value !== null) {
+        dataCheckArr.push(`${key}=${value}`);
+      }
+    }
+    dataCheckArr.sort();
+    const dataCheckString = dataCheckArr.join('\n');
+
+    const secretKey = createHash('sha256').update(botToken).digest();
+    const calculatedHash = createHmac('sha256', secretKey)
+      .update(dataCheckString)
+      .digest('hex');
+
+    return calculatedHash === hash;
+  }
+
+  async telegramWidgetLogin(data: any) {
+    const botToken = process.env.BOT_TOKEN;
+    if (!botToken) {
+      throw new BadRequestException('Telegram Bot token is not configured');
+    }
+
+    if (!this.verifyTelegramWidgetData(data, botToken)) {
+      throw new BadRequestException('Invalid Telegram signature');
+    }
+
+    const telegramId = Number(data.id);
+    let user = await this.userModel.findOne({ telegramId });
+
+    const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ');
+
+    if (!user) {
+      if (data.username) {
+        user = await this.userModel.findOne({ telegramUsername: data.username });
+        if (user) {
+          user.telegramId = telegramId;
+          await user.save();
+        }
+      }
+    }
+
+    if (!user) {
+      const title = sanitizeUserTitle(data.first_name) || `u${String(telegramId).slice(-6)}`;
+      user = await this.userModel.create({
+        telegramId,
+        name: fullName || `User ${telegramId}`,
+        telegramUsername: data.username,
+        avatar: data.photo_url,
+        title,
+      });
+    } else {
+      let updated = false;
+      if (fullName && user.name !== fullName) {
+        user.name = fullName;
+        updated = true;
+      }
+      if (data.username && user.telegramUsername !== data.username) {
+        user.telegramUsername = data.username;
+        updated = true;
+      }
+      if (data.photo_url && user.avatar !== data.photo_url) {
+        user.avatar = data.photo_url;
+        updated = true;
+      }
+      if (updated) await user.save();
+    }
+
+    return {
+      token: this.login(user),
+      user,
+    };
+  }
+
   async telegramLogin(initData: string) {
     if (!this.validateTelegramData(initData)) {
       throw new BadRequestException('Invalid Telegram data');
@@ -231,11 +308,13 @@ export class AuthService {
 
     if (!user) {
        // Create new user from Telegram data without phone number
+       const title = sanitizeUserTitle(telegramUser.first_name) || `u${String(telegramId).slice(-6)}`;
        user = await this.userModel.create({
          telegramId: telegramId,
          name: telegramUser.first_name,
          telegramUsername: telegramUser.username,
-         avatar: telegramUser.photo_url
+         avatar: telegramUser.photo_url,
+         title,
        });
     } else {
         // Update user info
@@ -316,12 +395,17 @@ export class AuthService {
     let user = await this.userModel.findOne({ googleId });
 
     if (!user) {
+      const firstName = payload.name ? payload.name.split(' ')[0] : '';
+      const emailPrefix = payload.email ? payload.email.split('@')[0] : '';
+      const title = sanitizeUserTitle(firstName || emailPrefix) || `u${googleId.slice(-6)}`;
+
       user = await this.userModel.create({
         googleId,
         email: payload.email ?? undefined,
         name: payload.name ?? undefined,
         avatar: payload.picture ?? undefined,
         googlePicture: payload.picture ?? undefined,
+        title,
       });
     } else {
       let updated = false;

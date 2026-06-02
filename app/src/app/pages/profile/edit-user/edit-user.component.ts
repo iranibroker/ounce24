@@ -12,6 +12,7 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../services/auth.service';
@@ -21,6 +22,7 @@ import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { User } from '@ounce24/types';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SHARED } from '../../../shared';
 import { isValidUserTitle } from '@ounce24/utils';
 
@@ -33,15 +35,19 @@ function titleValidator(control: AbstractControl): { [key: string]: boolean } | 
 @Component({
   selector: 'app-edit-user',
   standalone: true,
-  imports: [NgIcon, CommonModule,
+  imports: [
+    NgIcon,
+    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatSnackBarModule,
     TranslateModule,
     MatToolbarModule,
-    SHARED,],
+    SHARED,
+  ],
   providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.scss'],
@@ -53,6 +59,8 @@ export class EditUserComponent {
   private translate = inject(TranslateService);
   auth = inject(AuthService);
   private telegram = inject(TelegramService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = signal(false);
   form: FormGroup;
@@ -73,6 +81,21 @@ export class EditUserComponent {
       avatar.includes('googleusercontent.com')
     );
   };
+
+  currentAvatarSource = () => {
+    const user = this.auth.userQuery.data();
+    return user?.avatarSource || 'bitbots';
+  };
+
+  async onAvatarSourceChange(source: 'bitbots' | 'telegram' | 'google'): Promise<void> {
+    if (source === 'google') {
+      await this.addFromGoogle();
+    } else if (source === 'telegram') {
+      await this.addFromTelegram();
+    } else {
+      await this.removeProfilePhoto();
+    }
+  }
 
   private updateUserMutation = injectMutation<User, Error, Partial<User>>(() => ({
     mutationFn: (body) =>
@@ -118,7 +141,13 @@ export class EditUserComponent {
     this.loading.set(true);
     try {
       await this.updateUserMutation.mutateAsync(this.form.value);
-      this.auth.userQuery.refetch();
+      await this.auth.userQuery.refetch();
+      const returnPath = this.route.snapshot.queryParams['returnPath'];
+      if (returnPath) {
+        this.router.navigateByUrl(returnPath);
+      } else {
+        this.router.navigate(['/profile']);
+      }
     } catch (err: unknown) {
       const e = err as { error?: { translationKey?: string } };
       this.snack.open(
