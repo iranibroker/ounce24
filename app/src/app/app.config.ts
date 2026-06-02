@@ -13,6 +13,11 @@ import {
 } from '@tanstack/angular-query-experimental';
 import { provideIcons } from '@ng-icons/core';
 import {
+  saxDiamondsBold,
+  saxTrendUpBold,
+  saxTrendDownBold,
+} from '@ng-icons/iconsax/bold';
+import {
   saxHomeOutline,
   saxActivityOutline,
   saxCupOutline,
@@ -33,7 +38,6 @@ import {
   saxEditOutline,
   saxInfoCircleOutline,
   saxNotificationOutline,
-  saxDiamondsOutline,
   saxEmojiSadOutline,
   saxMicrophoneOutline,
   saxAddOutline,
@@ -72,7 +76,7 @@ export const appConfig: ApplicationConfig = {
       saxEditOutline,
       saxInfoCircleOutline,
       saxNotificationOutline,
-      saxDiamondsOutline,
+      saxDiamondsBold,
       saxEmojiSadOutline,
       saxMicrophoneOutline,
       saxAddOutline,

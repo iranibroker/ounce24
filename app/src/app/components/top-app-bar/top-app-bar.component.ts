@@ -1,5 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxDiamondsOutline, saxUserOutline } from '@ng-icons/iconsax/outline';
+import { saxUserOutline } from '@ng-icons/iconsax/outline';
+import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SHARED } from '../../shared';
@@ -16,7 +17,7 @@ import { OuncePriceService } from '../../services/ounce-price.service';
     SHARED,
     MatButtonModule,
     MatDividerModule,],
-  providers: [provideIcons({ saxDiamondsOutline, saxUserOutline })],
+  providers: [provideIcons({ saxDiamondsBold, saxUserOutline })],
   templateUrl: './top-app-bar.component.html',
   styleUrl: './top-app-bar.component.scss',
 })

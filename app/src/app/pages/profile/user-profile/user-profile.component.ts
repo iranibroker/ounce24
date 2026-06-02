@@ -1,5 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxEditOutline, saxDiamondsOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline } from '@ng-icons/iconsax/outline';
+import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline } from '@ng-icons/iconsax/outline';
+import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -42,7 +43,7 @@ const PAGE_SIZE = 20;
     MatTabsModule,
     SHARED,
     AchievementCardComponent,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline })],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
