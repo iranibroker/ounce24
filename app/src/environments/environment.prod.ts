@@ -3,6 +3,7 @@ export const environment = {
   apiUrl: 'https://api.ounce24.com',
   clarityProjectId: 'rnirxugcfc',
   /** Google OAuth 2.0 Web client ID (from Google Cloud Console). Leave empty to hide Google sign-in. */
-  googleClientId: '11344143099-c1mu2t5lfk04ifi4shnnsohf9u84vtu3.apps.googleusercontent.com',
-  telegramBotName: 'my_iiniit_bot',
+  googleClientId:
+    '11344143099-c1mu2t5lfk04ifi4shnnsohf9u84vtu3.apps.googleusercontent.com',
+  telegramBotName: 'ounce24_bot',
 };
