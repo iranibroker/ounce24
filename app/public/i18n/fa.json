@@ -240,10 +240,10 @@
   },
   "pushNotifications": {
     "dialog": {
-      "title": "قیمت لحظه‌ای طلا",
-      "description": "قیمت لحظه‌ای طلا رو روی صفحه گوشی داشته باش، حتی وقتی سایت بسته هست.",
-      "decline": "فعلاً نه",
-      "accept": "فعال‌سازی"
+      "title": "Live Gold Price",
+      "description": "Have the live gold price on your phone screen, even when the site is closed.",
+      "decline": "Not Now",
+      "accept": "Enable"
     },
     "bell": {
       "enable": "فعال‌سازی اعلان‌های اونس",

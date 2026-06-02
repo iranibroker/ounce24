@@ -21,9 +21,9 @@ self.addEventListener('push', function (event) {
 
   const title = `XAUUSD: ${formattedPrice}`;
   const options = {
-    body: `قیمت اونس طلا: ${formattedPrice}`,
-    icon: '/images/logo-icon.png',
-    badge: '/images/logo-icon-bw.png',
+    body: 'Signal profitability stats coming soon.',
+    icon: '/favicon.ico',
+    badge: '/favicon.ico',
     tag: 'ounce-price-alert', // Updates existing notification instead of creating a new one
     renotify: false, // Prevents subsequent sound/vibration alerts when replacing notification
     silent: true, // Completely silent for frequent 5-second updates (crucial for user comfort)

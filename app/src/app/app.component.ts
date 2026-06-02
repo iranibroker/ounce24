@@ -5,7 +5,7 @@ import { AnalyticsService } from './services/analytics.service';
 import { AchievementService } from './services/achievement.service';
 import { TelegramService } from './services/telegram.service';
 import { AuthService } from './services/auth.service';
-import { inject, OnInit } from '@angular/core';
+import { inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { PushNotificationService } from './services/push-notification.service';
@@ -17,13 +17,15 @@ import { PushSubscriptionDialogComponent } from './components/push-subscription-
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'app';
   private telegramService = inject(TelegramService);
   private authService = inject(AuthService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private pushNotificationService = inject(PushNotificationService);
+  private pushTimer: any = null;
+  private routerSubscription: any = null;
 
   constructor(
     private languageService: LanguageService,
@@ -50,32 +52,59 @@ export class AppComponent implements OnInit {
       });
     }
 
-    // Prompt user for push notifications after 20 seconds
-    setTimeout(() => {
-      const isLoginPage = this.router.url.includes('/login');
-      const isLoggedIn = !!this.authService.token();
+    // Check and start push prompt timer on navigation changes (handles post-login redirects)
+    this.routerSubscription = this.router.events.subscribe(() => {
+      this.checkAndStartPushTimer();
+    });
+    // Trigger initial check in case user is already logged in on startup
+    this.checkAndStartPushTimer();
+  }
 
+  checkAndStartPushTimer() {
+    const isLoggedIn = !!this.authService.token();
+    const isLoginPage = this.router.url.includes('/login');
+
+    if (isLoggedIn && !isLoginPage) {
       if (
-        isLoggedIn &&
-        !isLoginPage &&
+        !this.pushTimer &&
         !this.pushNotificationService.isSubscribed() &&
         !this.pushNotificationService.hasAskedBefore()
       ) {
-        const dialogRef = this.dialog.open(PushSubscriptionDialogComponent, {
-          width: '400px',
-          maxWidth: '95vw',
-          panelClass: 'push-notification-dialog-panel',
-          disableClose: true,
-        });
-
-        dialogRef.afterClosed().subscribe((accept: boolean) => {
-          if (accept) {
-            this.pushNotificationService.subscribeToNotifications();
-          } else {
-            this.pushNotificationService.markAsAsked();
-          }
-        });
+        this.pushTimer = setTimeout(() => {
+          this.showPushNotificationPrompt();
+        }, 20000);
       }
-    }, 20000);
+    } else {
+      if (this.pushTimer) {
+        clearTimeout(this.pushTimer);
+        this.pushTimer = null;
+      }
+    }
+  }
+
+  showPushNotificationPrompt() {
+    const dialogRef = this.dialog.open(PushSubscriptionDialogComponent, {
+      width: '400px',
+      maxWidth: '95vw',
+      panelClass: 'push-notification-dialog-panel',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((accept: boolean) => {
+      if (accept) {
+        this.pushNotificationService.subscribeToNotifications();
+      } else {
+        this.pushNotificationService.markAsAsked();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+    if (this.pushTimer) {
+      clearTimeout(this.pushTimer);
+    }
   }
 }
