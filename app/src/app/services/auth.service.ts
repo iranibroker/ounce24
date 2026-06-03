@@ -6,6 +6,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { User } from '@ounce24/types';
+import { LanguageService } from './language.service';
 const JWT_KEY = 'jwtToken';
 
 @Injectable({
@@ -14,6 +15,7 @@ const JWT_KEY = 'jwtToken';
 export class AuthService {
   token = signal<string | null>(localStorage.getItem(JWT_KEY));
   private http = inject(HttpClient);
+  private languageService = inject(LanguageService);
 
   constructor() {
     effect(() => {
@@ -22,6 +24,17 @@ export class AuthService {
         localStorage.setItem(JWT_KEY, currentToken);
       } else {
         localStorage.removeItem(JWT_KEY);
+        localStorage.removeItem('app_language');
+        this.languageService.setLanguage('en', true);
+      }
+    });
+
+    effect(() => {
+      const user = this.userQuery.data();
+      if (user && user.language) {
+        if (this.languageService.getCurrentLanguage() !== user.language) {
+          this.languageService.setLanguage(user.language, true);
+        }
       }
     });
   }

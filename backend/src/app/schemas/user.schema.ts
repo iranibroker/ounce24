@@ -29,6 +29,7 @@ export const UserSchema = new mongoose.Schema<User>(
     gem: { type: Number, required: true, default: 0 },
     alternativeTelegramToken: { type: String, required: false },
     weekScore: { type: Number, required: true, default: 0 },
+    language: { type: String, required: false, default: 'en' },
   },
   {
     timestamps: true,

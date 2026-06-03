@@ -1,7 +1,8 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, Inject, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export interface LanguageConfig {
   code: string;
@@ -16,6 +17,7 @@ export interface LanguageConfig {
 export class LanguageService {
   private readonly LANGUAGE_KEY = 'app_language';
   private readonly DEFAULT_LANGUAGE = 'en';
+  private http = inject(HttpClient);
 
   private currentLanguageSubject = new BehaviorSubject<string>(
     this.DEFAULT_LANGUAGE,
@@ -79,6 +81,17 @@ export class LanguageService {
 
       // Handle RTL
       this.setRTL(languageConfig.rtl);
+
+      // Sync to backend if logged in and not skipping local storage
+      if (!skipLocalStorage && isPlatformBrowser(this.platformId)) {
+        const token = localStorage.getItem('jwtToken');
+        if (token) {
+          this.http.patch('/api/auth/me', { language: languageCode }).subscribe({
+            next: () => console.log('Language synced to backend'),
+            error: (err) => console.warn('Failed to sync language to backend', err)
+          });
+        }
+      }
     }
   }
 

@@ -344,6 +344,64 @@ export class SignalsService {
         formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
       }
 
+      const userLang = user.language || 'en';
+      const langConfig = {
+        fa: {
+          name: 'Persian (Farsi)',
+          label: '📊 شانس موفقیت سیگنال',
+          high: '🟢 بالا',
+          medium: '🟡 متوسط',
+          low: '🔴 پایین',
+          exampleHigh: '📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با شتاب خریداران در تایم‌فریم کوتاه‌مدت',
+          exampleLow: '📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی ۵ دقیقه‌ای',
+          doubleSidedExample: '"از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"',
+          bluntExamples: '"حد ضرر خیلی پایینه، بهتره رو نقطه فلان باشه"، "این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه" و "بازار کاملا برعکس این میره جلو و کاملا اشتباهه"',
+        },
+        en: {
+          name: 'English',
+          label: '📊 Signal Success Chance',
+          high: '🟢 High',
+          medium: '🟡 Medium',
+          low: '🔴 Low',
+          exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with buyer momentum in the short-term timeframe',
+          exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 5-minute trend',
+          doubleSidedExample: '"on one hand ... and on the other hand ...", "it might go up or it might go down"',
+          bluntExamples: '"The stop loss is too tight, it should be at level X", "It is highly unlikely to touch the entry price this time" and "The market will move completely against this trade and it is totally wrong"',
+        },
+        ar: {
+          name: 'Arabic',
+          label: '📊 فرصة نجاح الإشارة',
+          high: '🟢 مرتفعة',
+          medium: '🟡 متوسطة',
+          low: '🔴 منخفضة',
+          exampleHigh: '📊 فرصة نجاح الإشارة: 🟢 مرتفعة - متوافقة مع زخم المشترين في الإطار الزمني قصير المدى',
+          exampleLow: '📊 فرصة نجاح الإشارة: 🔴 منخفضة - عكس الاتجاه الرئيسي لـ 5 دقائق',
+          doubleSidedExample: '"من ناحية ... ومن ناحية أخرى ...", "قد يكون صعودياً أو هبوطياً"',
+          bluntExamples: '"حد وقف الخسارة قريب جداً، من الأفضل أن يكون عند مستوى X"، "من غير المرجح إطلاقاً أن يلمس سعر الدخول هذه المرة" و"السوق سيسير تماماً عكس ذلك وهو خاطئ تماماً"',
+        },
+        tr: {
+          name: 'Turkish',
+          label: '📊 Sinyal Başarı Şansı',
+          high: '🟢 Yüksek',
+          medium: '🟡 Orta',
+          low: '🔴 Düşük',
+          exampleHigh: '📊 Sinyal Başarı Şansı: 🟢 Yüksek - Kısa vadeli zaman diliminde alıcı ivmesiyle uyumlu',
+          exampleLow: '📊 Sinyal Başarı Şansı: 🔴 Düşük - 5 dakikalık ana trendin tersine',
+          doubleSidedExample: '"bir yandan ... diğer yandan ...", "yükseliş de olabilir düşüş de"',
+          bluntExamples: '"Zarar durdurma çok yakın, X seviyesinde olması daha iyi", "Bu sefer giriş fiyatına ulaşması pek olası değil" ve "Piyasa bunun tamamen aksine gidecek ve bu tamamen yanlış"',
+        }
+      }[userLang as 'fa' | 'en' | 'ar' | 'tr'] || {
+        name: 'English',
+        label: '📊 Signal Success Chance',
+        high: '🟢 High',
+        medium: '🟡 Medium',
+        low: '🔴 Low',
+        exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with buyer momentum in the short-term timeframe',
+        exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 5-minute trend',
+        doubleSidedExample: '"on one hand ... and on the other hand ...", "it might go up or it might go down"',
+        bluntExamples: '"The stop loss is too tight, it should be at level X", "It is highly unlikely to touch the entry price this time" and "The market will move completely against this trade and it is totally wrong"',
+      };
+
       const promptMessage = `
 You are an expert, extremely bold, decisive, and authoritative financial analyst AI for Ounce24.
 Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
@@ -382,24 +440,24 @@ Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Op
 ${formattedHistory5m}
 
 Instructions for Analysis:
-1. Write the analysis strictly in Persian (Farsi).
+1. Write the analysis strictly in ${langConfig.name}.
 2. Do NOT repeat or list the signal details (such as Entry Price, TP, SL, or Current Price) at the top of your response. The user already sees these details on their screen.
 3. Start your response directly with the final success assessment formatted exactly as follows:
-   "📊 شانس موفقیت سیگنال: [High/Medium/Low represented with a matching emoji: 🟢 بالا, 🟡 متوسط, 🔴 پایین] - [1-sentence reason]"
-   For example: "📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی ۵ دقیقه‌ای" or "📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با شتاب خریداران در تایم‌فریم کوتاه‌مدت"
+   "${langConfig.label}: [High/Medium/Low represented with a matching emoji: ${langConfig.high}, ${langConfig.medium}, ${langConfig.low}] - [1-sentence reason]"
+   For example: "${langConfig.exampleLow}" or "${langConfig.exampleHigh}"
 4. Provide a very brief, direct 1-line summary of your analysis right after this indicator.
 5. Provide the rest of your technical analysis in 1 or 2 very short, concise paragraphs. Keep the entire response brief, clean, and to the point.
 6. Prioritize technical analysis approaches by giving the highest priority to Price Action (specifically Support & Resistance levels, key breakout/breakdown levels, and market structure on the 30-day 4-hour price history) and secondary priority to Moving Average trends (using SMA20/SMA50 indicators). RSI and other momentum tools are of much lower priority.
-7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., "از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"). You must be extremely bold, decisive, and opinionated. Provide direct, blunt judgment and suggestions in Persian (Farsi) using your own natural technical analytical vocabulary to fit the context. The phrasings "حد ضرر خیلی پایینه، بهتره رو نقطه فلان باشه", "این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه", and "بازار کاملا برعکس این میره جلو و کاملا اشتباهه" are illustrative examples of the expected level of confidence, directness, and bluntness—not strict templates to copy-paste. Give professional, analytical, and highly confident feedback.
-8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits (e.g. ۲۳۵۰.۵۰).
+7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., ${langConfig.doubleSidedExample}). You must be extremely bold, decisive, and opinionated. Provide direct, blunt judgment and suggestions in ${langConfig.name} using your own natural technical analytical vocabulary to fit the context. The phrasings ${langConfig.bluntExamples} are illustrative examples of the expected level of confidence, directness, and bluntness—not strict templates to copy-paste. Give professional, analytical, and highly confident feedback.
+8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits.
 9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.
 10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
 11. Ensure all price levels, support/resistance levels, and targets you mention are mathematically and logically correct. For a BUY signal, a resistance level ONLY blocks/obstructs the signal's target (TP) if it is located between the Entry Price and the TP (Entry < Resistance < TP). If the resistance is higher than the TP (Resistance > TP), it does NOT block the target, and you must not claim it blocks. Conversely, for a SELL signal, a support level only blocks the TP if it is between the Entry and TP (Entry > Support > TP). Do not hallucinate or make false claims about support/resistance blocking targets if they are outside this mathematical range. Double-check your numeric logic.
-12. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "مقاومت قبلی در 4450.00", and instead of "key support", say "حمایت کلیدی در 4410.00". Never mention a price level or chart concept without including its specific numerical value.
+12. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "resistance level at [price]" or its translation in ${langConfig.name}, and instead of "key support", say "support level at [price]" or its translation in ${langConfig.name}. Never mention a price level or chart concept without including its specific numerical value.
 13. Be highly aware of the Signal Status:
    - If the status is PENDING:
      - Understand that the trade is NOT live yet. The price must first reach/touch the Entry Price.
-     - For a BUY signal where the Entry Price is below the Current Price (e.g. Entry 4426.00 and Current Price 4449.16), the price must first drop (pullback) to trigger the buy entry. Calculate the distance between Current Price and Entry Price. If they are far apart, explain that the price needs to pullback to trigger, and state if it's unlikely to touch the entry ("این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه") based on the current market momentum/consolidation.
+     - For a BUY signal where the Entry Price is below the Current Price (e.g. Entry 4426.00 and Current Price 4449.16), the price must first drop (pullback) to trigger the buy entry. Calculate the distance between Current Price and Entry Price. If they are far apart, explain that the price needs to pullback to trigger, and state if it's unlikely to touch the entry ("It is unlikely to touch the entry price" or its translation in ${langConfig.name}) based on the current market momentum/consolidation.
      - For a SELL signal where the Entry Price is above the Current Price, the price must rise to trigger.
      - Do NOT treat the Take Profit (TP) target level as a "resistance level that must be broken" for the signal to succeed. Reaching the TP is the goal of the trade, not a barrier.
    - If the status is CLOSED or CANCELED:
@@ -408,7 +466,7 @@ Instructions for Analysis:
      - Analyze whether the signal reached its TP (Success) or hit SL (Failure), or remained pending and was canceled without triggering. State clearly in hindsight if the Entry, TP, and SL levels were well-placed or poorly positioned relative to the actual price action. Give honest, blunt, and educational feedback on the trade setup.
 `;
 
-      const result = await this.aiChatService.createResponse(promptMessage);
+      const result = await this.aiChatService.createResponse(promptMessage, userLang);
 
       // // Deduct 1 gem from user
       await this.userModel

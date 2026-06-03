@@ -46,6 +46,7 @@ export class User {
   rank?: number;
   gem?: number;
   alternativeTelegramToken?: string;
+  language?: string;
 
   static getFullName(user?: User): string {
     if (!user) return '';

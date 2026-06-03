@@ -1,0 +1,383 @@
+export interface BotTranslation {
+  welcome: (count: number) => string;
+  welcomeSignalMenu: string;
+  joinChannelRequired: string;
+  languageSelected: (lang: string) => string;
+  selectLanguage: string;
+  supportPrompt: string;
+  supportSent: string;
+  ibanPrompt: string;
+  ibanInvalid: string;
+  ibanSaved: string;
+  searchPrompt: string;
+  sendMessagePrompt: string;
+  podcastText: string;
+  podcastChannel: string;
+  signalChannelPolicy: (minScore: string) => string;
+  joinSignalChannel: string;
+  riskWarning: string;
+  aboutUs: string;
+  buttons: {
+    webApp: string;
+    signalChannel: string;
+    liveMarket: string;
+    newSignal: string;
+    closedSignals: string;
+    mySignals: string;
+    leaderboard: string;
+    profileScore: string;
+    myAlarms: string;
+    priceAlarm: string;
+    aiPodcast: string;
+    goldChart: string;
+    missionRisk: string;
+    aboutUs: string;
+    support: string;
+    language: string;
+  };
+}
+
+export const BOT_TRANSLATIONS: Record<string, BotTranslation> = {
+  en: {
+    welcome: (count: number) => `
+Hi, I'm Ounce24 🥇
+Use the options below to get started.
+If you get stuck, use the menu button.
+
+We've launched a new app for a better experience.
+
+Bot members: ${count}
+`,
+    welcomeSignalMenu: `/new_signal Create new signal
+
+/my_signals Manage your signals
+
+/my_closed_signals Closed signals list
+
+/charts Gold chart
+
+/leaderboard Overall leaderboard
+
+/leaderboard_week Weekly leaderboard
+
+/support Support & feedback
+
+/bank - Register bank IBAN
+
+/profile View profile & score
+
+/language Change language
+
+/reset_all_profile Reset signal history (start over)
+`,
+    joinChannelRequired: `
+Please join the channel below to use the bot.
+
+@Ounce24_signal
+`,
+    languageSelected: (lang: string) => `✅ Language changed to ${lang}`,
+    selectLanguage: '🌐 Select your preferred language:',
+    supportPrompt: `I'm a bot and can't provide live support!\nBut I can read your feedback and improve.\nSo if you have any feedback, just write it here`,
+    supportSent: 'Your message was sent to the team. Thanks for your feedback.',
+    ibanPrompt: 'Please enter your IBAN for rewards:',
+    ibanInvalid: 'Invalid IBAN. Please enter a valid 24-digit IBAN:',
+    ibanSaved: '✅ Your IBAN has been saved',
+    searchPrompt: 'Please enter your search term\n/cancel',
+    sendMessagePrompt: 'Please enter your message\n/cancel',
+    podcastText: `Our weekly podcasts are ~20 minute audio files with a detailed review of the past week and outlook for the week ahead. 📈
+      
+Content is based on the latest trusted sources and analyzed with AI in a data-driven way. 🤖
+      
+Podcasts are published weekly on the official Ounce24 channel. Join the channel and check the Music section for the full list. 🎧`,
+    podcastChannel: 'Ounce24 Channel',
+    signalChannelPolicy: (minScore: string) =>
+      `<b>📢 Signal Channel Policy</b>\n\nSignals from users with a score above <b>${minScore} points</b> (either total or weekly) are automatically published to our channel.\n\nFollow successful traders to copy their signals and improve your results. You can also build your performance to reach this level and have your signals published!`,
+    joinSignalChannel: 'Join Signal Channel',
+    riskWarning:
+      `<b>⚠️ Risk Warning & Mission</b>\n\n` +
+      `• <b>Risk Warning:</b> Please use this bot strictly for educational purposes and demo trading. Do <b>NOT</b> trade on a live/real account based on these signals.\n\n` +
+      `• <b>Our Mission:</b> We aim to gather top-tier traders in one place to compete, share strategies, and learn from one another.`,
+    aboutUs:
+      `<b>ℹ️ About Us</b>\n\n` +
+      `Ounce24 is a platform dedicated to gold trading analysis, competition, and education. We help traders share ideas, track performance, and grow in a data-driven environment.\n\n` +
+      `Visit our website for more details: https://ounce24.com`,
+    buttons: {
+      webApp: '📱 Web App',
+      signalChannel: '📢 Signal channel',
+      liveMarket: '📈 Live market',
+      newSignal: '➕ New signal',
+      closedSignals: '🎯 Closed',
+      mySignals: '⛳️▶️ My signals',
+      leaderboard: 'Leaderboard',
+      profileScore: 'Profile & score',
+      myAlarms: 'My alarms',
+      priceAlarm: '🔔 Price alarm',
+      aiPodcast: '🎙️ AI analysis podcast',
+      goldChart: 'Gold chart',
+      missionRisk: '🎯 Mission & Risk',
+      aboutUs: 'ℹ️ About us',
+      support: 'Support',
+      language: '🌐 Language',
+    },
+  },
+
+  fa: {
+    welcome: (count: number) => `
+سلام، من اونس۲۴ هستم 🥇
+برای شروع از گزینه‌های زیر استفاده کن.
+اگر گیر کردی، از دکمه منو استفاده کن.
+
+اپ جدیدی برای تجربه بهتر راه‌اندازی کردیم.
+
+تعداد اعضا: ${count}
+`,
+    welcomeSignalMenu: `/new_signal ثبت سیگنال جدید
+
+/my_signals مدیریت سیگنال‌های من
+
+/my_closed_signals لیست سیگنال‌های بسته شده
+
+/charts نمودار طلا
+
+/leaderboard جدول امتیازات کلی
+
+/leaderboard_week جدول امتیازات هفتگی
+
+/support پشتیبانی و بازخورد
+
+/bank ثبت شماره شبا
+
+/profile مشاهده پروفایل و امتیاز
+
+/language تغییر زبان
+
+/reset_all_profile بازنشانی سابقه سیگنال (شروع مجدد)
+`,
+    joinChannelRequired: `
+لطفاً برای استفاده از ربات، کانال زیر را جوین کن.
+
+@Ounce24_signal
+`,
+    languageSelected: (lang: string) => `✅ زبان به ${lang} تغییر کرد`,
+    selectLanguage: '🌐 زبان مورد نظر خود را انتخاب کنید:',
+    supportPrompt: `من یک ربات هستم و نمی‌توانم پشتیبانی زنده ارائه دهم!\nاما می‌توانم بازخورد شما را بخوانم و بهتر شوم.\nپس اگر نظری داری، همین‌جا بنویس`,
+    supportSent: 'پیام شما به تیم ارسال شد. ممنون از بازخوردت.',
+    ibanPrompt: 'لطفاً شماره شبای خود را برای دریافت جوایز وارد کنید:',
+    ibanInvalid: 'شبا نامعتبر است. لطفاً یک شبای ۲۴ رقمی معتبر وارد کنید:',
+    ibanSaved: '✅ شبا ذخیره شد',
+    searchPrompt: 'لطفاً عبارت جستجو را وارد کنید\n/cancel',
+    sendMessagePrompt: 'لطفاً پیام خود را وارد کنید\n/cancel',
+    podcastText: `پادکست‌های هفتگی ما فایل‌های صوتی ~۲۰ دقیقه‌ای هستند با مرور دقیق هفته گذشته و چشم‌انداز هفته آینده. 📈
+      
+محتوا بر اساس آخرین منابع معتبر تحلیل شده با هوش مصنوعی است. 🤖
+      
+پادکست‌ها به صورت هفتگی در کانال رسمی اونس۲۴ منتشر می‌شوند. کانال را جوین کنید و برای لیست کامل قسمت موزیک را بررسی کنید. 🎧`,
+    podcastChannel: 'کانال اونس۲۴',
+    signalChannelPolicy: (minScore: string) =>
+      `<b>📢 قوانین کانال سیگنال</b>\n\nسیگنال‌های کاربرانی که امتیاز بالاتر از <b>${minScore} امتیاز</b> دارند (کل یا هفتگی) به صورت خودکار در کانال ما منتشر می‌شوند.\n\nتریدرهای موفق را دنبال کنید تا سیگنال‌هایشان را کپی کنید. شما هم می‌توانید به این سطح برسید!`,
+    joinSignalChannel: 'عضویت در کانال سیگنال',
+    riskWarning:
+      `<b>⚠️ هشدار ریسک و ماموریت</b>\n\n` +
+      `• <b>هشدار ریسک:</b> لطفاً از این ربات فقط برای اهداف آموزشی و تریدینگ دمو استفاده کنید. بر اساس این سیگنال‌ها با حساب واقعی معامله <b>نکنید</b>.\n\n` +
+      `• <b>ماموریت ما:</b> هدف ما جمع‌آوری بهترین تریدرها در یک مکان برای رقابت، اشتراک استراتژی و یادگیری از یکدیگر است.`,
+    aboutUs:
+      `<b>ℹ️ درباره ما</b>\n\n` +
+      `اونس۲۴ پلتفرمی است برای تحلیل تریدینگ طلا، رقابت و آموزش. به تریدرها کمک می‌کنیم ایده‌ها را به اشتراک بگذارند، عملکرد را پیگیری کنند و در محیطی داده‌محور رشد کنند.\n\n` +
+      `برای اطلاعات بیشتر وب‌سایت ما را ببینید: https://ounce24.com`,
+    buttons: {
+      webApp: '📱 وب اپ',
+      signalChannel: '📢 کانال سیگنال',
+      liveMarket: '📈 بازار زنده',
+      newSignal: '➕ سیگنال جدید',
+      closedSignals: '🎯 بسته شده',
+      mySignals: '⛳️▶️ سیگنال‌های من',
+      leaderboard: 'جدول امتیازات',
+      profileScore: 'پروفایل و امتیاز',
+      myAlarms: 'آلارم‌های من',
+      priceAlarm: '🔔 آلارم قیمت',
+      aiPodcast: '🎙️ پادکست تحلیل هوش مصنوعی',
+      goldChart: 'نمودار طلا',
+      missionRisk: '🎯 ماموریت و ریسک',
+      aboutUs: 'ℹ️ درباره ما',
+      support: 'پشتیبانی',
+      language: '🌐 زبان',
+    },
+  },
+
+  ar: {
+    welcome: (count: number) => `
+مرحباً، أنا Ounce24 🥇
+استخدم الخيارات أدناه للبدء.
+إذا واجهت مشكلة، استخدم زر القائمة.
+
+لقد أطلقنا تطبيقاً جديداً لتجربة أفضل.
+
+أعضاء البوت: ${count}
+`,
+    welcomeSignalMenu: `/new_signal إنشاء إشارة جديدة
+
+/my_signals إدارة إشاراتي
+
+/my_closed_signals قائمة الإشارات المغلقة
+
+/charts مخطط الذهب
+
+/leaderboard لوحة الصدارة العامة
+
+/leaderboard_week لوحة الصدارة الأسبوعية
+
+/support الدعم والملاحظات
+
+/bank تسجيل رقم IBAN
+
+/profile عرض الملف الشخصي والنقاط
+
+/language تغيير اللغة
+
+/reset_all_profile إعادة تعيين سجل الإشارات (بدء من جديد)
+`,
+    joinChannelRequired: `
+يرجى الانضمام إلى القناة أدناه لاستخدام البوت.
+
+@Ounce24_signal
+`,
+    languageSelected: (lang: string) => `✅ تم تغيير اللغة إلى ${lang}`,
+    selectLanguage: '🌐 اختر لغتك المفضلة:',
+    supportPrompt: `أنا بوت ولا أستطيع تقديم دعم مباشر!\nلكن يمكنني قراءة ملاحظاتك والتحسين.\nلذا إذا كان لديك أي ملاحظة، اكتبها هنا`,
+    supportSent: 'تم إرسال رسالتك إلى الفريق. شكراً على ملاحظاتك.',
+    ibanPrompt: 'يرجى إدخال رقم IBAN الخاص بك للمكافآت:',
+    ibanInvalid: 'IBAN غير صالح. يرجى إدخال IBAN صالح مكون من 24 رقماً:',
+    ibanSaved: '✅ تم حفظ IBAN الخاص بك',
+    searchPrompt: 'يرجى إدخال مصطلح البحث\n/cancel',
+    sendMessagePrompt: 'يرجى إدخال رسالتك\n/cancel',
+    podcastText: `بودكاستاتنا الأسبوعية هي ملفات صوتية مدتها ~20 دقيقة مع مراجعة مفصلة للأسبوع الماضي وتوقعات الأسبوع القادم. 📈
+      
+المحتوى مبني على أحدث المصادر الموثوقة ويُحلَّل بالذكاء الاصطناعي. 🤖
+      
+تُنشر البودكاستات أسبوعياً على القناة الرسمية لـ Ounce24. انضم إلى القناة وتحقق من قسم الموسيقى للحصول على القائمة الكاملة. 🎧`,
+    podcastChannel: 'قناة Ounce24',
+    signalChannelPolicy: (minScore: string) =>
+      `<b>📢 سياسة قناة الإشارات</b>\n\nتُنشر إشارات المستخدمين الذين لديهم نقاط أعلى من <b>${minScore} نقطة</b> (إجمالية أو أسبوعية) تلقائياً على قناتنا.\n\nتابع المتداولين الناجحين لنسخ إشاراتهم وتحسين نتائجك. يمكنك أيضاً بناء أدائك للوصول إلى هذا المستوى!`,
+    joinSignalChannel: 'الانضمام إلى قناة الإشارات',
+    riskWarning:
+      `<b>⚠️ تحذير المخاطر والمهمة</b>\n\n` +
+      `• <b>تحذير المخاطر:</b> يرجى استخدام هذا البوت فقط للأغراض التعليمية والتداول التجريبي. لا <b>تتداول</b> بحساب حقيقي بناءً على هذه الإشارات.\n\n` +
+      `• <b>مهمتنا:</b> نهدف إلى جمع أفضل المتداولين في مكان واحد للتنافس ومشاركة الاستراتيجيات والتعلم من بعضهم البعض.`,
+    aboutUs:
+      `<b>ℹ️ عن Ounce24</b>\n\n` +
+      `Ounce24 هي منصة مخصصة لتحليل تداول الذهب والمنافسة والتعليم. نساعد المتداولين على مشاركة الأفكار وتتبع الأداء والنمو في بيئة قائمة على البيانات.\n\n` +
+      `زوروا موقعنا لمزيد من التفاصيل: https://ounce24.com`,
+    buttons: {
+      webApp: '📱 تطبيق الويب',
+      signalChannel: '📢 قناة الإشارات',
+      liveMarket: '📈 السوق المباشر',
+      newSignal: '➕ إشارة جديدة',
+      closedSignals: '🎯 المغلقة',
+      mySignals: '⛳️▶️ إشاراتي',
+      leaderboard: 'لوحة الصدارة',
+      profileScore: 'الملف الشخصي والنقاط',
+      myAlarms: 'تنبيهاتي',
+      priceAlarm: '🔔 تنبيه السعر',
+      aiPodcast: '🎙️ بودكاست تحليل الذكاء الاصطناعي',
+      goldChart: 'مخطط الذهب',
+      missionRisk: '🎯 المهمة والمخاطر',
+      aboutUs: 'ℹ️ عن Ounce24',
+      support: 'الدعم',
+      language: '🌐 اللغة',
+    },
+  },
+
+  tr: {
+    welcome: (count: number) => `
+Merhaba, ben Ounce24 🥇
+Başlamak için aşağıdaki seçenekleri kullan.
+Takıldıysan menü düğmesini kullan.
+
+Daha iyi bir deneyim için yeni bir uygulama başlattık.
+
+Bot üyeleri: ${count}
+`,
+    welcomeSignalMenu: `/new_signal Yeni sinyal oluştur
+
+/my_signals Sinyallerimi yönet
+
+/my_closed_signals Kapalı sinyaller listesi
+
+/charts Altın grafiği
+
+/leaderboard Genel liderlik tablosu
+
+/leaderboard_week Haftalık liderlik tablosu
+
+/support Destek ve geri bildirim
+
+/bank Banka IBAN kaydı
+
+/profile Profil ve puanı görüntüle
+
+/language Dil değiştir
+
+/reset_all_profile Sinyal geçmişini sıfırla (yeniden başla)
+`,
+    joinChannelRequired: `
+Botu kullanmak için aşağıdaki kanala katıl.
+
+@Ounce24_signal
+`,
+    languageSelected: (lang: string) => `✅ Dil ${lang} olarak değiştirildi`,
+    selectLanguage: '🌐 Tercih ettiğiniz dili seçin:',
+    supportPrompt: `Ben bir botum ve canlı destek sağlayamam!\nAma geri bildirimlerinizi okuyup gelişebilirim.\nEğer bir geri bildiriminiz varsa, buraya yazın`,
+    supportSent: 'Mesajınız ekibe iletildi. Geri bildiriminiz için teşekkürler.',
+    ibanPrompt: 'Lütfen ödüller için IBAN numaranızı girin:',
+    ibanInvalid: 'Geçersiz IBAN. Lütfen geçerli bir 24 haneli IBAN girin:',
+    ibanSaved: '✅ IBAN\'ınız kaydedildi',
+    searchPrompt: 'Lütfen arama teriminizi girin\n/cancel',
+    sendMessagePrompt: 'Lütfen mesajınızı girin\n/cancel',
+    podcastText: `Haftalık podcast\'lerimiz geçen haftanın ayrıntılı değerlendirmesi ve önümüzdeki haftanın görünümünü içeren ~20 dakikalık ses dosyalarıdır. 📈
+      
+İçerik, yapay zeka ile analiz edilen en güncel güvenilir kaynaklara dayanmaktadır. 🤖
+      
+Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için kanala katılın ve Müzik bölümüne göz atın. 🎧`,
+    podcastChannel: 'Ounce24 Kanalı',
+    signalChannelPolicy: (minScore: string) =>
+      `<b>📢 Sinyal Kanalı Politikası</b>\n\n<b>${minScore} puanın</b> üzerinde puana sahip kullanıcıların (toplam veya haftalık) sinyalleri otomatik olarak kanalımızda yayınlanır.\n\nSinyallerini kopyalamak ve sonuçlarınızı iyileştirmek için başarılı yatırımcıları takip edin. Bu seviyeye ulaşmak için performansınızı da geliştirebilirsiniz!`,
+    joinSignalChannel: 'Sinyal Kanalına Katıl',
+    riskWarning:
+      `<b>⚠️ Risk Uyarısı ve Misyon</b>\n\n` +
+      `• <b>Risk Uyarısı:</b> Lütfen bu botu yalnızca eğitim amaçlı ve demo işlem için kullanın. Bu sinyallere dayanarak gerçek/canlı hesapta <b>işlem yapmayın</b>.\n\n` +
+      `• <b>Misyonumuz:</b> En iyi yatırımcıları bir araya getirerek rekabet etmelerini, strateji paylaşmalarını ve birbirlerinden öğrenmelerini sağlamayı hedefliyoruz.`,
+    aboutUs:
+      `<b>ℹ️ Hakkımızda</b>\n\n` +
+      `Ounce24, altın işlem analizine, rekabete ve eğitime adanmış bir platformdur. Yatırımcıların fikirleri paylaşmasına, performansı takip etmesine ve veri odaklı bir ortamda büyümesine yardımcı oluyoruz.\n\n` +
+      `Daha fazla ayrıntı için web sitemizi ziyaret edin: https://ounce24.com`,
+    buttons: {
+      webApp: '📱 Web Uygulaması',
+      signalChannel: '📢 Sinyal kanalı',
+      liveMarket: '📈 Canlı piyasa',
+      newSignal: '➕ Yeni sinyal',
+      closedSignals: '🎯 Kapalı',
+      mySignals: '⛳️▶️ Sinyallerim',
+      leaderboard: 'Liderlik tablosu',
+      profileScore: 'Profil ve puan',
+      myAlarms: 'Alarmlarım',
+      priceAlarm: '🔔 Fiyat alarmı',
+      aiPodcast: '🎙️ YZ analiz podcast',
+      goldChart: 'Altın grafiği',
+      missionRisk: '🎯 Misyon ve Risk',
+      aboutUs: 'ℹ️ Hakkımızda',
+      support: 'Destek',
+      language: '🌐 Dil',
+    },
+  },
+};
+
+export const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
+  en: 'English',
+  fa: 'فارسی',
+  ar: 'العربية',
+  tr: 'Türkçe',
+};
+
+export function getTranslation(lang?: string): BotTranslation {
+  return BOT_TRANSLATIONS[lang || 'en'] || BOT_TRANSLATIONS['en'];
+}

@@ -1,4 +1,9 @@
+:host {
+  direction: ltr !important;
+}
+
 .container {
+  direction: ltr !important;
   background-color: rgba(18, 18, 18, 0.75);
   backdrop-filter: blur(10px);
   color: #f5f5f5;

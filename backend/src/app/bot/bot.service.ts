@@ -18,6 +18,7 @@ import { AuthService } from '../auth/auth.service';
 import { ConsultingBotService } from './consulting-bot.service';
 import { Public } from '../auth/public.decorator';
 import { OunceAlarmBotService } from './ounce-alarm-bot.service';
+import { getTranslation, LANGUAGE_DISPLAY_NAMES } from './i18n';
 
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 
@@ -73,18 +74,21 @@ We gather the best trading ideas from the market—free and practical.
   }
 
   @Action('support')
-  support(@Ctx() ctx: Context) {
-    ctx.reply(`I'm a bot and can't provide live support!
-But I can read your feedback and improve.
-So if you have any feedback, just write it here`);
+  async support(@Ctx() ctx: Context) {
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
+    ctx.reply(t.supportPrompt);
     this.setState(ctx.from.id, {
       state: UserStateType.Support,
     });
+    ctx.answerCbQuery?.();
   }
 
   @Command('bank')
-  onIban(@Ctx() ctx: Context) {
-    ctx.reply(`Please enter your IBAN for rewards:`, {
+  async onIban(@Ctx() ctx: Context) {
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
+    ctx.reply(t.ibanPrompt, {
       reply_markup: { remove_keyboard: true },
     });
     this.setState(ctx.from.id, {
@@ -104,9 +108,9 @@ So if you have any feedback, just write it here`);
         );
       }
     }
-    await ctx.reply(
-      'Your message was sent to the team. Thanks for your feedback.',
-    );
+    const lang = user.language || 'en';
+    const t = getTranslation(lang);
+    await ctx.reply(t.supportSent);
     await ctx.sendChatAction('typing');
     this.welcome(ctx);
   }
@@ -114,18 +118,18 @@ So if you have any feedback, just write it here`);
   async setIban(ctx: Context) {
     const fromId = ctx.from.id;
     const user = await this.getUser(fromId);
+    const lang = user?.language || 'en';
+    const t = getTranslation(lang);
     let iban: string = ctx.message['text'];
     iban = iban.replace('IR', '');
     iban = iban.replace('ir', '');
     iban = iban.replace('Ir', '');
     await ctx.sendChatAction('typing');
     if (iban.length !== 24) {
-      ctx.reply(
-        `Invalid IBAN. Please enter a valid 24-digit IBAN:`,
-      );
+      ctx.reply(t.ibanInvalid);
     } else {
       await this.userModel.findByIdAndUpdate(user.id, { iban }).exec();
-      ctx.reply('✅ Your IBAN has been saved');
+      ctx.reply(t.ibanSaved);
       this.deleteState(fromId);
     }
   }
@@ -133,12 +137,13 @@ So if you have any feedback, just write it here`);
   @Command('search_r9')
   async searchCommand(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
     this.setState(ctx.from.id, {
       state: UserStateType.SearchUser,
       data: ctx.message['text'],
     });
-    ctx.reply(`Please enter your search term\n/cancel`);
+    ctx.reply(t.searchPrompt);
   }
 
   async search(ctx: Context) {
@@ -170,9 +175,10 @@ So if you have any feedback, just write it here`);
   @Command('send_message_to_all_d3')
   async sendMessageToAll(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
     this.setState(ctx.from.id, { state: UserStateType.SendMessageToAll });
-    ctx.reply(`Please enter your message\n/cancel`);
+    ctx.reply(t.sendMessagePrompt);
   }
 
   async sendMessage(ctx: Context) {
@@ -226,7 +232,7 @@ So if you have any feedback, just write it here`);
   }
 
   @On('callback_query')
-  onCallback(@Ctx() ctx: Context) {
+  async onCallback(@Ctx() ctx: Context) {
     const key = ctx.callbackQuery['data'].split(':::')[0];
     const value = ctx.callbackQuery['data'].split(':::')[1];
     switch (key) {
@@ -242,10 +248,24 @@ So if you have any feedback, just write it here`);
       case 'start':
         this.start(ctx);
         break;
+      case 'set_bot_lang': {
+        const newLang = value; // e.g. 'en', 'fa', 'ar', 'tr'
+        const user = await this.getUser(ctx.from.id);
+        if (user) {
+          await this.userModel
+            .findByIdAndUpdate(user.id, { language: newLang })
+            .exec();
+        }
+        const t = getTranslation(newLang);
+        const langDisplayName = LANGUAGE_DISPLAY_NAMES[newLang] || newLang;
+        await ctx.answerCbQuery(t.languageSelected(langDisplayName));
+        await this.welcome(ctx);
+        break;
+      }
 
       default:
         break;
     }
-    ctx.answerCbQuery();
+    ctx.answerCbQuery().catch(() => {});
   }
 }

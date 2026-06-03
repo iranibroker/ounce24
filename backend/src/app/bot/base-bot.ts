@@ -4,6 +4,7 @@ import { Context, Telegraf } from 'telegraf';
 import { AuthService } from '../auth/auth.service';
 import { Command, Ctx, Action } from 'nestjs-telegraf';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
+import { getTranslation, LANGUAGE_DISPLAY_NAMES } from './i18n';
 
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 const MAIN_CHANNEL_URL =
@@ -63,90 +64,95 @@ export class BaseBot {
     return state?.data;
   }
 
+  async getUserLang(telegramId: number): Promise<string> {
+    const user = await this.usersModel.findOne({ telegramId }).exec();
+    return user?.language || 'en';
+  }
+
   async welcome(ctx: Context) {
     const count = await this.usersModel.countDocuments().exec();
     BaseBot.userStates.delete(ctx.from.id);
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
     ctx.reply(
-      `
-Hi, I'm Ounce24
-Use the options below to get started.
-If you get stuck, use the menu button.
-
-We've launched a new app for a better experience.
-
-Bot members: ${count}
-`,
+      t.welcome(count),
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: '📱 Web App',
+                text: t.buttons.webApp,
                 style: 'primary',
                 web_app: { url: APP_URL },
               } as InlineKeyboardButton,
             ],
             [
               {
-                text: '📢 Signal channel',
+                text: t.buttons.signalChannel,
                 callback_data: 'signal_channel',
               },
               {
-                text: '📈 Live market',
+                text: t.buttons.liveMarket,
                 url: LIVE_MARKET_URL,
               },
             ],
-            [{ text: '➕ New signal', callback_data: 'new_signal' }],
+            [{ text: t.buttons.newSignal, callback_data: 'new_signal' }],
             [
               {
-                text: '🎯 Closed',
+                text: t.buttons.closedSignals,
                 callback_data: 'my_closed_signals',
               },
-              { text: '⛳️▶️ My signals', callback_data: 'my_signals' },
+              { text: t.buttons.mySignals, callback_data: 'my_signals' },
             ],
             [
               {
-                text: 'Leaderboard',
+                text: t.buttons.leaderboard,
                 callback_data: 'leaderboard',
               },
             ],
             [
               {
-                text: 'Profile & score',
+                text: t.buttons.profileScore,
                 callback_data: 'profile',
               },
             ],
             [
               {
-                text: 'My alarms',
+                text: t.buttons.myAlarms,
                 callback_data: 'my_alarms',
               },
               {
-                text: '🔔 Price alarm',
+                text: t.buttons.priceAlarm,
                 callback_data: 'alarm_me',
               },
             ],
             [
               {
-                text: '🎙️ AI analysis podcast',
+                text: t.buttons.aiPodcast,
                 callback_data: 'podcast',
               },
             ],
-            [{ text: 'Gold chart', callback_data: 'charts' }],
+            [{ text: t.buttons.goldChart, callback_data: 'charts' }],
             [
               {
-                text: '🎯 Mission & Risk',
+                text: t.buttons.missionRisk,
                 callback_data: 'risk_mission',
               },
               {
-                text: 'ℹ️ About us',
+                text: t.buttons.aboutUs,
                 callback_data: 'about_us',
               },
             ],
             [
               {
-                text: 'Support',
+                text: t.buttons.support,
                 callback_data: 'support',
+              },
+            ],
+            [
+              {
+                text: t.buttons.language,
+                callback_data: 'set_language',
               },
             ],
           ],
@@ -158,28 +164,10 @@ Bot members: ${count}
 
   async welcomeSignal(ctx: Context) {
     BaseBot.userStates.delete(ctx.from.id);
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
     ctx.reply(
-      `
-/new_signal Create new signal
-
-/my_signals Manage your signals
-
-/my_closed_signals Closed signals list
-
-/charts Gold chart
-
-/leaderboard Overall leaderboard
-
-/leaderboard_week Weekly leaderboard
-
-/support Support & feedback
-
-/bank - Register bank IBAN
-
-/profile View profile & score
-
-/reset_all_profile Reset signal history (start over)
-`,
+      t.welcomeSignalMenu,
       {
         reply_markup: {
           inline_keyboard: [],
@@ -210,11 +198,9 @@ Bot members: ${count}
       chatMember?.status != 'creator' &&
       chatMember?.status != 'administrator'
     ) {
-      ctx.reply(`
-Please join the channel below to use the bot.
-
-@Ounce24_signal
-  `);
+      const lang = user.language || 'en';
+      const t = getTranslation(lang);
+      ctx.reply(t.joinChannelRequired);
       return false;
     }
     return true;
@@ -252,18 +238,16 @@ Please join the channel below to use the bot.
   @Action('podcast')
   async podcast(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
     await ctx.reply(
-      `Our weekly podcasts are ~20 minute audio files with a detailed review of the past week and outlook for the week ahead. 📈
-      
-      Content is based on the latest trusted sources and analyzed with AI in a data-driven way. 🤖
-      
-      Podcasts are published weekly on the official Ounce24 channel. Join the channel and check the Music section for the full list. 🎧`,
+      t.podcastText,
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: 'Ounce24 Channel',
+                text: t.podcastChannel,
                 url: MAIN_CHANNEL_URL,
               },
             ],
@@ -278,17 +262,17 @@ Please join the channel below to use the bot.
   async signalChannel(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
     const minScore = process.env.MIN_SIGNAL_SCORE || '20';
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
     await ctx.reply(
-      `<b>📢 Signal Channel Policy</b>\n\n` +
-        `Signals from users with a score above <b>${minScore} points</b> (either total or weekly) are automatically published to our channel.\n\n` +
-        `Follow successful traders to copy their signals and improve your results. You can also build your performance to reach this level and have your signals published!`,
+      t.signalChannelPolicy(minScore),
       {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: 'Join Signal Channel',
+                text: t.joinSignalChannel,
                 url: MAIN_CHANNEL_URL,
               },
             ],
@@ -302,28 +286,41 @@ Please join the channel below to use the bot.
   @Action('risk_mission')
   async riskMission(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-    await ctx.reply(
-      `<b>⚠️ Risk Warning & Mission</b>\n\n` +
-        `• <b>Risk Warning:</b> Please use this bot strictly for educational purposes and demo trading. Do <b>NOT</b> trade on a live/real account based on these signals.\n\n` +
-        `• <b>Our Mission:</b> We aim to gather top-tier traders in one place to compete, share strategies, and learn from one another.`,
-      {
-        parse_mode: 'HTML',
-      },
-    );
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
+    await ctx.reply(t.riskWarning, { parse_mode: 'HTML' });
     ctx.answerCbQuery();
   }
 
   @Action('about_us')
   async aboutUs(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
-    await ctx.reply(
-      `<b>ℹ️ About Us</b>\n\n` +
-        `Ounce24 is a platform dedicated to gold trading analysis, competition, and education. We help traders share ideas, track performance, and grow in a data-driven environment.\n\n` +
-        `Visit our website for more details: https://ounce24.com`,
-      {
-        parse_mode: 'HTML',
-      },
-    );
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
+    await ctx.reply(t.aboutUs, { parse_mode: 'HTML' });
     ctx.answerCbQuery();
+  }
+
+  @Command('language')
+  @Action('set_language')
+  async languageSelector(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const lang = await this.getUserLang(ctx.from.id);
+    const t = getTranslation(lang);
+    await ctx.reply(t.selectLanguage, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: '🇺🇸 English', callback_data: 'set_bot_lang:::en' },
+            { text: '🇮🇷 فارسی', callback_data: 'set_bot_lang:::fa' },
+          ],
+          [
+            { text: '🇸🇦 العربية', callback_data: 'set_bot_lang:::ar' },
+            { text: '🇹🇷 Türkçe', callback_data: 'set_bot_lang:::tr' },
+          ],
+        ],
+      },
+    });
+    ctx.answerCbQuery?.();
   }
 }
