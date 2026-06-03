@@ -551,7 +551,10 @@ Instructions for Signal Generation:
 3. Suggest a realistic Entry Price, Take Profit (TP), and Stop Loss (SL). 
 4. The Stop Loss must be calculated logically based on the recent swing low/high or the ATR volatility (e.g. SL distance from entry should be at least 1.5x to 2x ATR).
 5. The Risk-Reward Ratio (Target Move / Risk Move) must be between 1.5 and 3.0.
-6. The Entry Price can be equal to the current price ($${currentPrice.toFixed(2)}) for an instant market order (instantEntry: true), or it can be a pending order (instantEntry: false) placed at a key pullback/breakout level.
+6. Decide whether to use an instant market entry (instantEntry: true) or a pending order (instantEntry: false):
+   - Use "instantEntry: true" ONLY when the current price is already at an ideal technical execution zone (e.g. just breaking out of a key level or bouncing directly off a support/resistance line). In this case, entryPrice must be equal to the current price ($${currentPrice.toFixed(2)}).
+   - Use "instantEntry: false" when the current price is not at an ideal level, and it is wiser to wait for a pullback to a key support/resistance level or a breakout above/below a key level. In this case, specify the target entryPrice at that future level (e.g., for a BUY pending limit order, entryPrice should be lower than the current price; for a SELL pending limit order, entryPrice should be higher than the current price).
+   - Make sure to dynamically generate both instant and pending signals depending on the market structure. Do NOT always generate instant entries.
 7. Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
 {
   "type": "buy" | "sell",
