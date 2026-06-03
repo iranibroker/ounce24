@@ -8,6 +8,8 @@ import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 const MAIN_CHANNEL_URL =
   process.env.MAIN_CHANNEL_URL || 'https://t.me/Ounce24_signal';
+const LIVE_MARKET_URL =
+  process.env.LIVE_MARKET_URL || 'https://t.me/Ounce24';
 
 export enum UserStateType {
   Login,
@@ -86,8 +88,12 @@ Bot members: ${count}
             ],
             [
               {
-                text: 'Ounce24 Telegram Channel',
-                url: MAIN_CHANNEL_URL,
+                text: '📢 Signal channel',
+                callback_data: 'signal_channel',
+              },
+              {
+                text: '📈 Live market',
+                url: LIVE_MARKET_URL,
               },
             ],
             [{ text: '➕ New signal', callback_data: 'new_signal' }],
@@ -127,6 +133,16 @@ Bot members: ${count}
               },
             ],
             [{ text: 'Gold chart', callback_data: 'charts' }],
+            [
+              {
+                text: '🎯 Mission & Risk',
+                callback_data: 'risk_mission',
+              },
+              {
+                text: 'ℹ️ About us',
+                callback_data: 'about_us',
+              },
+            ],
             [
               {
                 text: 'Support',
@@ -253,6 +269,59 @@ Please join the channel below to use the bot.
             ],
           ],
         },
+      },
+    );
+    ctx.answerCbQuery();
+  }
+
+  @Action('signal_channel')
+  async signalChannel(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const minScore = process.env.MIN_SIGNAL_SCORE || '20';
+    await ctx.reply(
+      `<b>📢 Signal Channel Policy</b>\n\n` +
+        `Signals from users with a score above <b>${minScore} points</b> (either total or weekly) are automatically published to our channel.\n\n` +
+        `Follow successful traders to copy their signals and improve your results. You can also build your performance to reach this level and have your signals published!`,
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Join Signal Channel',
+                url: MAIN_CHANNEL_URL,
+              },
+            ],
+          ],
+        },
+      },
+    );
+    ctx.answerCbQuery();
+  }
+
+  @Action('risk_mission')
+  async riskMission(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    await ctx.reply(
+      `<b>⚠️ Risk Warning & Mission</b>\n\n` +
+        `• <b>Risk Warning:</b> Please use this bot strictly for educational purposes and demo trading. Do <b>NOT</b> trade on a live/real account based on these signals.\n\n` +
+        `• <b>Our Mission:</b> We aim to gather top-tier traders in one place to compete, share strategies, and learn from one another.`,
+      {
+        parse_mode: 'HTML',
+      },
+    );
+    ctx.answerCbQuery();
+  }
+
+  @Action('about_us')
+  async aboutUs(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    await ctx.reply(
+      `<b>ℹ️ About Us</b>\n\n` +
+        `Ounce24 is a platform dedicated to gold trading analysis, competition, and education. We help traders share ideas, track performance, and grow in a data-driven environment.\n\n` +
+        `Visit our website for more details: https://ounce24.com`,
+      {
+        parse_mode: 'HTML',
       },
     );
     ctx.answerCbQuery();
