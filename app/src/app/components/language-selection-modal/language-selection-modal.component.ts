@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxGlobalOutline } from '@ng-icons/iconsax/outline';
 import { LanguageService, LanguageConfig } from '../../services/language.service';
 
 @Component({
@@ -15,11 +14,10 @@ import { LanguageService, LanguageConfig } from '../../services/language.service
     CommonModule,
     MatDialogModule,
     MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatListModule,
     TranslateModule,
+    NgIcon,
   ],
+  providers: [provideIcons({ saxGlobalOutline })],
   templateUrl: './language-selection-modal.component.html',
   styleUrls: ['./language-selection-modal.component.scss'],
 })

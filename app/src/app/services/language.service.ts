@@ -25,6 +25,8 @@ export class LanguageService {
   public readonly supportedLanguages: LanguageConfig[] = [
     { code: 'en', name: 'English', rtl: false, flag: '🇺🇸' },
     { code: 'fa', name: 'فارسی', rtl: true, flag: '🇮🇷' },
+    { code: 'ar', name: 'العربية', rtl: true, flag: '🇸🇦' },
+    { code: 'tr', name: 'Türkçe', rtl: false, flag: '🇹🇷' },
   ];
 
   constructor(
@@ -36,7 +38,12 @@ export class LanguageService {
 
   private initializeLanguage(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.setLanguage(this.DEFAULT_LANGUAGE, true);
+      const storedLanguage = this.getStoredLanguage();
+      if (storedLanguage && this.supportedLanguages.some((lang) => lang.code === storedLanguage)) {
+        this.setLanguage(storedLanguage, false);
+      } else {
+        this.setLanguage(this.DEFAULT_LANGUAGE, true);
+      }
     }
   }
 
@@ -93,15 +100,16 @@ export class LanguageService {
     if (isPlatformBrowser(this.platformId)) {
       const htmlElement = document.documentElement;
       const bodyElement = document.body;
+      const currentLang = this.getCurrentLanguage();
+
+      htmlElement.setAttribute('lang', currentLang);
 
       if (isRTL) {
         htmlElement.setAttribute('dir', 'rtl');
-        htmlElement.setAttribute('lang', 'fa');
         bodyElement.classList.add('rtl');
         bodyElement.classList.remove('ltr');
       } else {
         htmlElement.setAttribute('dir', 'ltr');
-        htmlElement.setAttribute('lang', 'en');
         bodyElement.classList.add('ltr');
         bodyElement.classList.remove('rtl');
       }

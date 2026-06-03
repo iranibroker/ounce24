@@ -1,0 +1,330 @@
+{
+  "app": {
+    "loadMore": "Daha Fazla Yükle",
+    "save": "Kaydet",
+    "close": "Kapat",
+    "cancel": "İptal"
+  },
+  "bottomNav": {
+    "home": "Ana Sayfa",
+    "leaderboard": "Liderlik Tablosu",
+    "notifications": "Bildirimler",
+    "profile": "Profil",
+    "signals": "Sinyaller",
+    "podcast": "Podcast"
+  },
+  "podcast": {
+    "comingSoon": {
+      "title": "Podcast şu anda Ounce 24 Telegram kanalında hazırlanmaktadır ve yakında buraya eklenecektir",
+      "button": "@ounce24_signal"
+    }
+  },
+  "signal": {
+    "add": "Ekle",
+    "buy": "Satın Al",
+    "sell": "Sat",
+    "profit": "Kâr Al (TP)",
+    "loss": "Zarar Durdur (SL)",
+    "pip": "pip",
+    "riskReward": "r/r",
+    "closedOuncePrice": "kapanış fiyatı",
+    "riskFree": "risksiz",
+    "status": {
+      "PENDING": "beklemede",
+      "ACTIVE": "aktif",
+      "CLOSED": "kapalı",
+      "CANCELED": "iptal edildi",
+      "PENDING.TITLE": "Bekleyen Sinyaller",
+      "ACTIVE.TITLE": "Aktif Sinyal",
+      "CLOSED.TITLE": "Kapalı Sinyal",
+      "CANCELED.TITLE": "İptal Edilen Sinyal"
+    },
+    "emptyState": "Sinyal bulunamadı",
+    "info": {
+      "title": "Sinyal Bilgisi",
+      "createdAt": "Oluşturulma tarihi",
+      "closedAt": "Kapanış tarihi",
+      "activeAt": "Etkinleştirilme tarihi"
+    }
+  },
+  "signalAnalyze": {
+    "title": "Sinyal Analizi",
+    "analyzing": "Sinyaliniz analiz ediliyor...",
+    "error": "Sinyal analiz edilemedi",
+    "retry": "Tekrar Deneyin",
+    "analysis": "Yapay Zeka Analizi",
+    "currentPrice": "Mevcut Fiyat",
+    "getAnalysis": "Yapay Zeka Analizini Al",
+    "description": "Yapay zeka kullanarak işlem sinyalinizin akıllı bir analizini alın (1 GEM gereklidir)",
+    "analyze": "Sinyali Analiz Et",
+    "noGems": "Sinyalinizi analiz etmek için yeterli GEM'iniz yok"
+  },
+  "login": {
+    "phoneTitle": "Giriş Yap / Üye Ol",
+    "phoneDescription": "Telefon numaranıza bir doğrulama kodu göndereceğiz",
+    "phonePlaceholder": "9123456789",
+    "phoneAction": "Doğrulama Kodu Gönder",
+    "loginWithGoogle": "Google ile Giriş Yap",
+    "loginWithPhone": "Telefon ile Giriş Yap",
+    "or": "veya",
+    "chooseDescription": "Nasıl giriş yapmak istediğinizi seçin",
+    "onboarding": {
+      "signalsTitle": "Premium Sinyaller",
+      "signalsDesc": "Uygulamanızda doğrudan gerçek zamanlı ve yüksek doğrulukta işlem sinyalleri alın.",
+      "aiTitle": "Yapay Zeka Piyasa Analizi",
+      "aiDesc": "Gelişmiş yapay zeka kullanarak işlem tahminleriniz için anında analizler ve trendler alın.",
+      "leaderboardTitle": "Rekabetçi Liderlik Tablosu",
+      "leaderboardDesc": "Sıralamaları tırmanın, seçkin yatırımcılarla rekabet edin ve kazanma oranınızı sergileyin.",
+      "podcastTitle": "Sesli Piyasa Podcast'leri",
+      "podcastDesc": "Hareket halindeyken günlük sesli analizleri ve piyasa tahminlerini dinleyin."
+    },
+    "otpTitle": "Kodu Girin",
+    "otpDescription": "Telefonunuza gönderilen 4 haneli kodu girin",
+    "otpPlaceholder": "1234",
+    "otpAction": "Kodu Doğrula",
+    "otpError": "Geçersiz kod",
+    "otpExpired": "Kodun süresi doldu",
+    "otpResend": "Kodu Tekrar Gönder",
+    "remainingTime": "Kalan süre: {{value}}s",
+    "tokenExpired": "Kodun süresi doldu",
+    "resendToken": "Kodu Tekrar Gönder",
+    "googleError": "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.",
+    "telegram": {
+      "text": "Telegram ile giriş yapılıyor...",
+      "logging_in": "Telegram ile girişiniz yapılıyor...",
+      "error": "Giriş başarısız. Lütfen tekrar deneyin veya Telegram'dan açın."
+    }
+  },
+  "profile": {
+    "pageTitle": "Profil",
+    "yourProfile": "Profiliniz",
+    "logout": "Çıkış Yap",
+    "logoutDescription": "Mevcut hesabınızdan çıkış yapın",
+    "yourGems": "GEM'leriniz",
+    "signals": "Sinyaller",
+    "totalSignals": "Toplam Sinyal",
+    "winRate": "Kazanma Oranı",
+    "avgRiskReward": "Ortalama R/R",
+    "rank": "Derece",
+    "avgProfit": "Ortalama Kâr",
+    "score": "Puan",
+    "edit": {
+      "pageTitle": "Profili Düzenle",
+      "description": "Adınızı, takma adınızı ve profil resminizi güncelleyin",
+      "name": "İsim",
+      "nickname": "Takma Ad",
+      "nicknameHint": "Adınızı gizlemek istiyorsanız bir takma ad girin — diğerleri bunun yerine takma adınızı görecektir.",
+      "nicknameRequired": "Takma ad zorunludur",
+      "save": "Değişiklikleri Kaydet",
+      "success": "Profil başarıyla güncellendi",
+      "error": "Profil güncellenemedi"
+    },
+    "title": {
+      "invalid": "Takma ad yalnızca İngilizce harfler, sayılar ve boşluklar içermelidir. En fazla 10 karakter."
+    },
+    "avatar": {
+      "edit": "Avatarı Düzenle",
+      "sourceLabel": "Profil resmi",
+      "sourceBitbots": "Robot Avatarı",
+      "sourceTelegram": "Telegram",
+      "sourceGoogle": "Google",
+      "success": "Avatar başarıyla güncellendi",
+      "error": "Avatar güncellenemedi",
+      "noGems": "Profil resminizi değiştirmek için GEM'iniz yok",
+      "useGem": "1 GEM gerekiyor. Profil resminizi değiştirmek için kullanmak istiyor musunuz?",
+      "remove": "Avatarı kaldır",
+      "removeProfilePhoto": "Profil fotoğrafımı kaldır",
+      "addFromTelegram": "Telegram'dan profil fotoğrafı ekle",
+      "addFromGoogle": "Google'dan profil fotoğrafı ekle",
+      "useTelegram": "Telegram avatarımı kullan",
+      "useGoogle": "Google fotoğrafımı kullan",
+      "removed": "Avatar kaldırıldı",
+      "noTelegram": "Telegram hesabı bağlı değil",
+      "noGoogle": "Google hesabı bağlı değil",
+      "telegramFetchFailed": "Telegram profil fotoğrafı alınamadı"
+    },
+    "achievements": "Başarılar"
+  },
+  "leaderboard": {
+    "week": "Haftalık",
+    "total": "Toplam",
+    "signalCount": "{{value}} sinyal",
+    "scoreInfo": {
+      "title": "Puan Bilgisi",
+      "tooltip": "Puan hesaplaması hakkında bilgi edinin",
+      "howItWorks": "Puan Nasıl Hesaplanır",
+      "description": "Puanınız, işlem performansınızı ölçen birkaç faktöre göre hesaplanır:",
+      "pip": {
+        "title": "Pip Performansı",
+        "description": "Giriş ve çıkış fiyatları arasındaki fark, pip cinsinden ölçülür. Daha yüksek pip kazançları puanınıza daha fazla katkıda bulunur."
+      },
+      "riskReward": {
+        "title": "Risk/Ödül Oranı",
+        "description": "Potansiyel kâr ile potansiyel zarar arasındaki oran. Daha iyi risk/ödül oranları daha yüksek puanlara yol açar."
+      },
+      "totalSignals": {
+        "title": "Toplam Sinyal",
+        "description": "Sağladığınız sinyal sayısı. İyi performans gösteren daha fazla sinyal genel puanınızı artırır."
+      }
+    }
+  },
+  "gemDialog": {
+    "gemRequired": "GEM Gerekli",
+    "close": "Kapat",
+    "accept": "GEM Kullan"
+  },
+  "addSignal": {
+    "title": "Yeni Sinyal Ekle",
+    "byMarket": "Piyasa Giriş Fiyatına Göre",
+    "type": {
+      "buy": "Satın Al",
+      "sell": "Sat"
+    },
+    "entryPrice": {
+      "label": "Giriş Fiyatı",
+      "placeholder": "Giriş fiyatını girin",
+      "required": "Giriş fiyatı zorunludur",
+      "min": "Giriş fiyatı pozitif olmalıdır"
+    },
+    "takeProfit": {
+      "label": "Kâr Al (TP)",
+      "placeholder": "TP girin",
+      "required": "Kâr al zorunludur",
+      "min": "Kâr al pozitif olmalıdır",
+      "hint": {
+        "buy": "giriş fiyatından büyük olmalıdır",
+        "sell": "giriş fiyatından küçük olmalıdır"
+      }
+    },
+    "stopLoss": {
+      "label": "Zarar Durdur (SL)",
+      "placeholder": "SL girin",
+      "required": "Zarar durdur zorunludur",
+      "min": "Zarar durdur pozitif olmalıdır",
+      "hint": {
+        "buy": "giriş fiyatından küçük olmalıdır",
+        "sell": "giriş fiyatından büyük olmalıdır"
+      }
+    },
+    "submit": "Sinyal Oluştur",
+    "analyzeWithAI": "Yapay Zeka ile Analiz Et",
+    "generateWithAI": "Yapay Zeka ile Sinyal Oluştur (20 GEM)",
+    "generating": "Yapay zekadan sinyal oluşturuluyor...",
+    "gemRequired": "İşlem sinyalinizi yapay zeka ile analiz etmek için gem'lere ihtiyacınız var"
+  },
+  "languageSelection": {
+    "title": "Dil Seçin",
+    "description": "Lütfen uygulamayı kullanmaya devam etmek için tercih ettiğiniz dili seçin."
+  },
+  "apiError": {
+    "auth": {
+      "duplicate": "Telefon numarası zaten mevcut"
+    },
+    "profile": {
+      "title": {
+        "invalid": "Takma ad yalnızca İngilizce harfler, sayılar ve boşluklar içermelidir. En fazla 10 karakter."
+      }
+    },
+    "userNotFound": "Kullanıcı bulunamadı",
+    "insufficientGems": "Yetersiz GEM",
+    "signal": {
+      "invalidEntry": "Geçersiz sinyal girişi",
+      "maxActive": "Maksimum aktif sinyal sayısına ulaştınız ({{value}})",
+      "maxDaily": "Maksimum günlük sinyal sayısına ulaştınız ({{value}})",
+      "near": "Bu giriş fiyatına yakın bir sinyaliniz var"
+    }
+  },
+  "achievement": {
+    "emptyState": "Başarı bulunamadı",
+    "newAchievementDialog": {
+      "title": "Yeni Başarı 🎉"
+    },
+    "type": {
+      "WEEK_WIN": "Haftanın Kazananı"
+    }
+  },
+  "pwa": {
+    "dialog": {
+      "title": "Ounce24 Uygulamasını Yükle",
+      "subtitle": "En üst düzey işlem deneyimi için uygulamayı ana ekranınıza yükleyin:",
+      "feature1": "Çok hızlı başlangıç ve proxy/VPN gereksinimlerini atlama",
+      "feature2": "Pil ve veri tasarrufu (ağ kullanımını %80'e kadar azaltır)",
+      "feature3": "Doğrudan ana ekranınızda anlık canlı fiyat güncellemeleri",
+      "iosTitle": "iOS Safari'ye nasıl yüklenir:",
+      "iosStep1": "Safari tarayıcı araç çubuğundaki Paylaş düğmesine dokunun.",
+      "iosStep2": "Aşağı kaydırın ve 'Ana Ekrana Ekle'yi seçin.",
+      "decline": "Şimdi Değil",
+      "accept": "Yükle"
+    }
+  },
+  "pushNotifications": {
+    "dialog": {
+      "title": "Canlı Ons Fiyat Bildirimlerini Etkinleştir",
+      "description": "Altın fiyatını her 5 saniyede bir güncelliyoruz. Güncellemelerin yüksek sıklığı nedeniyle, telefonunuzun işletim sistemi bu bildirimleri spam olarak işaretleyebilir. Bildirimlerin arka planda düzgün görüntülendiğinden emin olmak için lütfen izin talebinde 'İzin Ver'e tıklayın.",
+      "decline": "Şimdi Değil",
+      "accept": "Anladım ve Etkinleştir"
+    },
+    "bell": {
+      "enable": "Ons Bildirimlerini Etkinleştir",
+      "disable": "Ons Bildirimlerini Devre Dışı Bırak"
+    },
+    "settings": {
+      "title": "Canlı Ons Fiyat Uyarıları",
+      "description": "Altın ons fiyatı değiştiğinde anında bildirim alın"
+    }
+  },
+  "octopus": {
+    "title": "Ahtapot",
+    "subtitle": "Günlük Ons Fiyat Tahmini",
+    "description": "Günün piyasa kapanış fiyatının mevcut fiyattan daha yüksek mi yoksa daha düşük mü olacağını tahmin edin. Doğru tahminler için 1 yıldız ⭐ kazanın.",
+    "cutoffWarning": "Tahminler yalnızca {{time}} tarihinden önce yapılabilir veya düzenlenebilir.",
+    "marketOpen": "Piyasa Açık",
+    "marketClosed": "Piyasa Kapalı",
+    "predictUp": "Daha Yüksek (Boğa)",
+    "predictDown": "Daha Düşük (Ayı)",
+    "votedText": "Tahmininiz kaydedildi:",
+    "editPrediction": "Tahmini Düzenle",
+    "sentimentTitle": "Bugünkü Yatırımcı Hissiyatı",
+    "sentimentLocked": "Bugünün duyarlılık dağılımını açmak için tahmininizi yapın.",
+    "leaderboard": {
+      "title": "Ahtapot Liderlik Tablosu",
+      "weekly": "Haftalık",
+      "total": "Toplam",
+      "starsCount": "{{value}} Yıldız",
+      "empty": "Henüz sıralama yok"
+    },
+    "score": {
+      "weekly": "Bu haftanın yıldızları: {{value}}",
+      "total": "Toplam yıldız: {{value}}"
+    },
+    "status": {
+      "correct": "Doğru tahmin (+1 yıldız) ⭐",
+      "incorrect": "Yanlış tahmin (0 yıldız)",
+      "pending": "Kapanış için bekleniyor"
+    },
+    "success": "Tahmin başarıyla gönderildi."
+  },
+  "calculator": {
+    "title": "İşlem Hesap Makinesi",
+    "volume": "İşlem Hacmi (Lot)",
+    "balance": "Hesap Bakiyesi (USD - İsteğe Bağlı)",
+    "leverage": "Kaldıraç (İsteğe Bağlı)",
+    "entryPrice": "Giriş Fiyatı",
+    "takeProfit": "Kâr Al (TP)",
+    "stopLoss": "Zarar Durdur (SL)",
+    "estimatedProfit": "Tahmini Kâr (TP'de)",
+    "estimatedLoss": "Tahmini Zarar (SL'de)",
+    "currentPnl": "Mevcut K&Z",
+    "finalPnl": "Nihai K&Z",
+    "riskReward": "Gerçek Risk/Ödül",
+    "riskPercent": "Bakiye Riski",
+    "rewardPercent": "Bakiye Ödülü",
+    "buySignal": "AL",
+    "sellSignal": "SAT",
+    "customPricesToggle": "Farklı bir fiyattan mı giriş yaptınız?",
+    "requiredMargin": "Gerekli Teminat",
+    "liquidationPrice": "Tahmini Likidasyon Fiyatı",
+    "liquidationWarning": "Uyarı: Hesap, Zarar Durdur seviyesine ulaşmadan önce tasfiye edilecektir! Hacmi azaltın.",
+    "recommendedVolume": "Önerilen Hacim (%2 Risk)"
+  }
+}

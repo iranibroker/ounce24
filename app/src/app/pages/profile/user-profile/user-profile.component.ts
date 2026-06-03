@@ -1,5 +1,5 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline } from '@ng-icons/iconsax/outline';
+import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline, saxGlobalOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, inject, computed } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -11,6 +11,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
+import { LanguageService } from '../../../services/language.service';
+import { LanguageSelectionModalComponent } from '../../../components/language-selection-modal/language-selection-modal.component';
 import {
   injectQuery,
   injectInfiniteQuery,
@@ -46,7 +49,7 @@ const PAGE_SIZE = 20;
     SHARED,
     AchievementCardComponent,
     MatSlideToggleModule,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline })],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline, saxGlobalOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
@@ -57,6 +60,15 @@ export class UserProfileComponent {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   readonly pushService = inject(PushNotificationService);
+  readonly languageService = inject(LanguageService);
+  private readonly dialog = inject(MatDialog);
+
+  openLanguageSelection() {
+    this.dialog.open(LanguageSelectionModalComponent, {
+      width: '400px',
+      maxWidth: '95vw',
+    });
+  }
 
   logout() {
     this.auth.token.set(null);

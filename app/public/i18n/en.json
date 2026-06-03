@@ -110,6 +110,7 @@
     "score": "Score",
     "edit": {
       "pageTitle": "Edit Profile",
+      "description": "Update your name, nickname and avatar",
       "name": "Name",
       "nickname": "Nick name",
       "nicknameHint": "If you want to hide your name, fill in a nickname — others will see your nickname instead.",
