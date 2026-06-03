@@ -143,6 +143,12 @@
       "noGoogle": "Google account not linked",
       "telegramFetchFailed": "Could not fetch Telegram profile photo"
     },
+    "advancedTools": {
+      "title": "AI Analyst Integration (Advanced)",
+      "description": "Download historical 5-minute gold chart data in CSV or JSON format to feed into your custom AI model (like Gemini, ChatGPT, or Claude) for analysis.",
+      "downloadCsv": "Download CSV",
+      "downloadJson": "Download JSON"
+    },
     "achievements": "Achievements"
   },
   "leaderboard": {

@@ -198,4 +198,8 @@ export class OuncePriceHistoryService implements OnModuleInit {
       console.error('Error saving candle to DB:', error);
     }
   }
+
+  async getHistory(limit = 10000): Promise<OuncePriceCandle[]> {
+    return this.candleModel.find().sort({ timestamp: 1 }).limit(limit).exec();
+  }
 }

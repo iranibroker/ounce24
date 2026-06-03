@@ -1,16 +1,61 @@
-import { Controller, Get, Sse, MessageEvent } from '@nestjs/common';
+import { Controller, Get, Sse, MessageEvent, Query, Res } from '@nestjs/common';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { OuncePriceService } from './ounce-price.service';
+import { OuncePriceHistoryService } from './ounce-price-history.service';
 import { EVENTS } from '../consts';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Public } from '../auth/public.decorator';
+import { Response } from 'express';
 
 @Public()
 @Controller('ounce-price')
 export class OuncePriceController {
   obs = new BehaviorSubject<number>(0);
-  constructor(private readonly ouncePriceService: OuncePriceService) {}
+  constructor(
+    private readonly ouncePriceService: OuncePriceService,
+    private readonly historyService: OuncePriceHistoryService,
+  ) {}
+
+  @Get('history')
+  async getHistory(
+    @Query('format') format: string,
+    @Query('limit') limitStr: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const limit = limitStr ? parseInt(limitStr, 10) : 10000;
+    const history = await this.historyService.getHistory(limit);
+
+    if (format === 'csv') {
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=gold_price_history.csv',
+      );
+
+      const headers = ['Timestamp', 'Open', 'High', 'Low', 'Close'];
+      const rows = history.map((c) =>
+        [
+          c.timestamp instanceof Date
+            ? c.timestamp.toISOString()
+            : new Date(c.timestamp).toISOString(),
+          c.open,
+          c.high,
+          c.low,
+          c.close,
+        ].join(','),
+      );
+      return [headers.join(','), ...rows].join('\n');
+    }
+
+    // Default to JSON
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=gold_price_history.json',
+    );
+    return history;
+  }
 
   @Get('current')
   getCurrentPrice() {

@@ -143,6 +143,12 @@
       "noGoogle": "حساب گوگل متصل نیست",
       "telegramFetchFailed": "دریافت تصویر پروفایل تلگرام ممکن نبود"
     },
+    "advancedTools": {
+      "title": "ابزارهای هوش مصنوعی (پیشرفته)",
+      "description": "دانلود تاریخچه داده‌های ۵ دقیقه‌ای چارت اونس طلا در قالب CSV یا JSON جهت تحلیل در مدل‌های هوش مصنوعی (نظیر Gemini، ChatGPT و Claude).",
+      "downloadCsv": "دانلود فایل CSV",
+      "downloadJson": "دانلود فایل JSON"
+    },
     "achievements": "افتخارات"
   },
   "leaderboard": {
