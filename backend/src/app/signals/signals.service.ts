@@ -320,7 +320,7 @@ export class SignalsService {
     }
 
     const promptMessage = `
-You are a professional financial analyst AI for Ounce24.
+You are an expert, bold, and completely honest financial analyst AI for Ounce24.
 Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
 
 Signal Details:
@@ -346,11 +346,11 @@ ${formattedHistory15m}
 Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
 ${formattedHistory5m}
 
-Instructions:
-1. Provide a professional, concise, short-term technical analysis (1-2 short paragraphs).
-2. Focus on immediate chart-based patterns, levels of support/resistance, RSI conditions, and momentum.
-3. Assess the feasibility of the Take Profit (TP) and Stop Loss (SL) levels relative to the current market volatility (ATR) and recent price action.
-4. Strictly write the analysis in English.
+Instructions for Analysis:
+1. Write the analysis strictly in Persian (Farsi).
+2. Keep it simple, clear, and easy to understand for everyday traders (do not use overly complex or academic jargon).
+3. Focus on exactly 1 or 2 technical analysis approaches (specifically Price Action / Support & Resistance levels, and RSI momentum). Do not analyze it from many conflicting angles.
+4. Be bold, direct, and completely honest. Do not give false optimism or generic flatteries. If the signal is highly risky, illogical, or likely to result in a loss (e.g. SL is too tight, TP is unrealistic, or trading against a strong 5m/15m trend), say it clearly and warn the trader. If it is logical and aligned with the current market structure, confirm it simply.
 5. Use clean HTML tags for styling (e.g. <b>, <ul>, <li>) if needed, but do not use markdown links. Return the HTML directly without any surrounding markdown code blocks (do not wrap in \`\`\`html or similar).
 `;
 
