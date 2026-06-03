@@ -134,6 +134,17 @@ export class PushNotificationService {
 
         // 2. Unsubscribe on browser side
         await subscription.unsubscribe();
+
+        // 3. Close active price notification if any
+        try {
+          const notifications = await this.swRegistration.getNotifications({
+            tag: 'ounce-price-alert',
+          });
+          notifications.forEach((notification) => notification.close());
+        } catch (closeErr) {
+          console.error('Failed to close active notifications on unsubscribe:', closeErr);
+        }
+
         this.isSubscribed.set(false);
         console.log('Successfully unsubscribed from push notifications.');
         return true;

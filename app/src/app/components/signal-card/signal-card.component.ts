@@ -42,6 +42,13 @@ export class SignalCardComponent {
   Signal = Signal;
   SignalStatus = SignalStatus;
 
+  getPriceFormat(value: number | undefined | null): string {
+    if (value === undefined || value === null) {
+      return '1.0-0';
+    }
+    return value % 1 !== 0 ? '1.2-2' : '1.0-0';
+  }
+
   openCalculator(event: Event) {
     event.stopPropagation();
     this.router.navigate(['/signals', this.signal().id], { fragment: 'calculator' });

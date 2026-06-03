@@ -58,7 +58,7 @@
   <mat-card-actions class="signal-header">
     <app-signal-type-chip [type]="signal().type" />
     <span>
-      {{ signal().entryPrice | currency: 'USD' : 'symbol' : '1.0-0' }}
+      {{ signal().entryPrice | currency: 'USD' : 'symbol' : getPriceFormat(signal().entryPrice) }}
     </span>
     <span style="flex: 1"></span>
     @switch (signal().status) {
@@ -79,7 +79,7 @@
           {{ 'signal.status.' + signal().status | translate }}
           @if (Signal.isManualClose(signal())) {
             ({{
-              signal().closedOuncePrice | currency: 'USD' : 'symbol' : '1.0-0'
+              signal().closedOuncePrice | currency: 'USD' : 'symbol' : getPriceFormat(signal().closedOuncePrice)
             }})
           } @else if (signal().pip > 0) {
             (tp)
@@ -94,7 +94,7 @@
     <span>
       <ng-icon name="saxTrendUpOutline" size="14px"></ng-icon>
       {{ 'signal.profit' | translate }}:
-      {{ signal().profit | currency: 'USD' : 'symbol' : '1.0-0' }}
+      {{ signal().profit | currency: 'USD' : 'symbol' : getPriceFormat(signal().profit) }}
     </span>
     <span style="color: var(--mat-sys-outline-variant)">
       {{ 'signal.riskReward' | translate }}:
@@ -103,7 +103,7 @@
     <span>
       <ng-icon name="saxTrendDownOutline" size="14px"></ng-icon>
       {{ 'signal.loss' | translate }}:
-      {{ signal().loss | currency: 'USD' : 'symbol' : '1.0-0' }}
+      {{ signal().loss | currency: 'USD' : 'symbol' : getPriceFormat(signal().loss) }}
     </span>
   </mat-card-actions>
   @if (signal().status === SignalStatus.Closed) {

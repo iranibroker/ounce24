@@ -36,6 +36,7 @@ self.addEventListener('push', function (event) {
     tag: 'ounce-price-alert', // Updates existing notification instead of creating a new one
     renotify: false, // Prevents subsequent sound/vibration alerts when replacing notification
     silent: true, // Completely silent for frequent 5-second updates (crucial for user comfort)
+    requireInteraction: true, // Prevents the OS from auto-dismissing the notification
     data: {
       timestamp: timestamp,
     },
@@ -58,7 +59,7 @@ self.addEventListener('push', function (event) {
         console.error('Error closing notification:', err);
       }
       resolve();
-    }, 30000); // 30 seconds
+    }, 20000); // 20 seconds
   });
 
   event.waitUntil(Promise.all([notificationPromise, closePromise]));
