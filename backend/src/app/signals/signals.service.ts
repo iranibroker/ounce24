@@ -258,8 +258,15 @@ export class SignalsService {
 
   async analyzeSignal(signal: Signal, userId?: string) {
     // Check if user has gems
+    const targetUserId = userId || (signal.owner && (typeof signal.owner === 'object' ? signal.owner._id || (signal.owner as any).id : signal.owner));
+    if (!targetUserId) {
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
+    }
+
     const user = await this.userModel
-      .findById(userId || signal.owner._id)
+      .findById(targetUserId)
       .exec();
     if (!user) {
       throw new NotFoundException({
