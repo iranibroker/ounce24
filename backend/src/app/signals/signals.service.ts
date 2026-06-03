@@ -390,6 +390,7 @@ Instructions for Analysis:
 9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.
 10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
 11. Ensure all price levels, support/resistance levels, and targets you mention are mathematically and logically correct. For a BUY signal, a resistance level ONLY blocks/obstructs the signal's target (TP) if it is located between the Entry Price and the TP (Entry < Resistance < TP). If the resistance is higher than the TP (Resistance > TP), it does NOT block the target, and you must not claim it blocks. Conversely, for a SELL signal, a support level only blocks the TP if it is between the Entry and TP (Entry > Support > TP). Do not hallucinate or make false claims about support/resistance blocking targets if they are outside this mathematical range. Double-check your numeric logic.
+12. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "مقاومت قبلی در 4450.00", and instead of "key support", say "حمایت کلیدی در 4410.00". Never mention a price level or chart concept without including its specific numerical value.
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage);
