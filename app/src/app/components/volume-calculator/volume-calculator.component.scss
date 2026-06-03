@@ -1,0 +1,331 @@
+.volume-calculator-card {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+}
+
+.calculator-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .calculator-header-icon {
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+  }
+}
+
+.calculator-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+.inputs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// Side-by-side compact row design
+.calculator-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 40px;
+
+  .row-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+    flex: 1;
+    text-align: left;
+  }
+
+  // Set input field width and compact sizing
+  .row-input {
+    width: 140px;
+    flex-shrink: 0;
+
+    ::v-deep {
+      .mat-mdc-text-field-wrapper {
+        padding: 0 10px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        background-color: rgba(255, 255, 255, 0.02) !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+      }
+
+      .mat-mdc-form-field-flex {
+        height: 100% !important;
+        align-items: center !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      input.mat-mdc-input-element {
+        height: 20px !important;
+        margin-top: 0 !important;
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        color: #f8fafc !important;
+      }
+    }
+  }
+}
+
+// Support for RTL document flow (for Persian)
+:host-context(html[dir='rtl']) {
+  .calculator-row {
+    .row-label {
+      text-align: right;
+    }
+  }
+}
+
+.toggle-prices-btn {
+  align-self: center;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  color: var(--mat-sys-primary, #fbbf24) !important;
+  background: rgba(251, 191, 36, 0.04) !important;
+  border: 1px solid rgba(251, 191, 36, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 4px 14px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: rgba(251, 191, 36, 0.08) !important;
+    border-color: rgba(251, 191, 36, 0.25) !important;
+  }
+
+  .arrow-indicator {
+    font-size: 0.65rem;
+    line-height: 1;
+    margin-inline-start: 4px;
+    display: inline-block;
+  }
+}
+
+.custom-prices-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.01);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.04);
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calculator-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin: 2px 0;
+}
+
+.results-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Warning banner styling
+.liquidation-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #f87171;
+  font-size: 0.78rem;
+  line-height: 1.4;
+
+  .warning-icon {
+    flex-shrink: 0;
+    color: #f87171;
+  }
+}
+
+.pnl-result-card {
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+
+  .result-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 4px;
+  }
+
+  .result-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .percent-badge {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
+
+  .price-context {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  &.positive {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.02) 0%, rgba(34, 197, 94, 0.06) 100%);
+    border-color: rgba(34, 197, 94, 0.15);
+    
+    .result-value {
+      color: #4ade80;
+    }
+  }
+
+  &.negative {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.02) 0%, rgba(239, 68, 68, 0.06) 100%);
+    border-color: rgba(239, 68, 68, 0.15);
+
+    .result-value {
+      color: #f87171;
+    }
+  }
+}
+
+.estimates-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.estimate-box {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .box-title {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.38);
+  }
+
+  .box-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    .percent-sub {
+      font-size: 0.75rem;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+  }
+
+  &.tp-box {
+    border-inline-start: 3px solid #4ade80;
+  }
+
+  &.sl-box {
+    border-inline-start: 3px solid #f87171;
+  }
+}
+
+.text-green {
+  color: #4ade80;
+}
+
+.text-red {
+  color: #f87171;
+}
+
+.pnl-meta-info {
+  margin-top: 2px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.04);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+
+  .meta-value {
+    font-weight: 600;
+    color: #cbd5e1;
+
+    &.r-r-value {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+  }
+}

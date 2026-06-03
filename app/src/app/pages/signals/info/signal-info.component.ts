@@ -1,6 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,7 @@ import { SHARED } from '../../../shared';
 import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
 import { MatListModule } from '@angular/material/list';
 import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
+import { VolumeCalculatorComponent } from '../../../components/volume-calculator/volume-calculator.component';
 
 @Component({
   selector: 'app-signal-info',
@@ -27,18 +28,32 @@ import { DataLoadingComponent } from '../../../components/data-loading/data-load
     SHARED,
     SignalCardComponent,
     MatListModule,
-    DataLoadingComponent,],
+    DataLoadingComponent,
+    VolumeCalculatorComponent,],
   providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './signal-info.component.html',
   styleUrls: ['./signal-info.component.scss'],
 })
-export class SignalInfoComponent {
+export class SignalInfoComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ouncePrice = inject(OuncePriceService);
   SignalStatus = SignalStatus;
   Signal = Signal;
+
+  ngOnInit() {
+    this.route.fragment.subscribe(fragment => {
+      if (fragment === 'calculator') {
+        setTimeout(() => {
+          const el = document.getElementById('volume-calculator');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+    });
+  }
 
   query = injectQuery(() => ({
     queryKey: ['signal', this.route.snapshot.params['id']],

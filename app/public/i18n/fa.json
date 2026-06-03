@@ -302,5 +302,28 @@
       "pending": "در انتظار بسته شدن بازار جهت تسویه"
     },
     "success": "پیش‌بینی شما با موفقیت ثبت شد."
+  },
+  "calculator": {
+    "title": "ماشین حساب معامله",
+    "volume": "حجم معامله (لات)",
+    "balance": "موجودی حساب (دلار - اختیاری)",
+    "leverage": "اهرم معامله (اختیاری)",
+    "entryPrice": "قیمت ورود",
+    "takeProfit": "حد سود (TP)",
+    "stopLoss": "حد ضرر (SL)",
+    "estimatedProfit": "سود تخمینی (در TP)",
+    "estimatedLoss": "ضرر تخمینی (در SL)",
+    "currentPnl": "سود/زیان فعلی",
+    "finalPnl": "سود/زیان نهایی",
+    "riskReward": "ریسک به ریوارد واقعی",
+    "riskPercent": "درصد ریسک سرمایه",
+    "rewardPercent": "درصد سود سرمایه",
+    "buySignal": "خرید",
+    "sellSignal": "فروش",
+    "customPricesToggle": "نقطه متفاوتی ورود کردید؟",
+    "requiredMargin": "مارجین مورد نیاز",
+    "liquidationPrice": "قیمت لیکوئید شدن",
+    "liquidationWarning": "هشدار: حساب شما پیش از رسیدن قیمت به حد ضرر، لیکوئید خواهد شد! حجم معامله را کاهش دهید.",
+    "recommendedVolume": "حجم پیشنهادی (ریسک ۲٪)"
   }
 }

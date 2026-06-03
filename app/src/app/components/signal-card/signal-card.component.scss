@@ -99,9 +99,15 @@ mat-chip {
   }
 }
 
-.analyze-button {
+.header-actions {
   margin-left: auto;
   margin-right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.analyze-button {
   color: #c084fc !important; // light purple
   background: transparent !important;
   border: none !important;
@@ -123,6 +129,31 @@ mat-chip {
   .ai-sparkles-icon {
     fill: currentColor;
     filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
+  }
+}
+
+.calculator-button {
+  color: rgba(255, 255, 255, 0.7) !important; // white with transparency
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  transition: all 0.25s ease !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08) !important; // subtle white hover glow
+    color: #ffffff !important;
+    transform: scale(1.05);
+  }
+
+  .calculator-icon {
+    // stroke-based SVG
   }
 }
 

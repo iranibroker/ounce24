@@ -302,5 +302,28 @@
       "pending": "Waiting for market close to settle"
     },
     "success": "Prediction submitted successfully."
+  },
+  "calculator": {
+    "title": "Trading Calculator",
+    "volume": "Trade Volume (Lots)",
+    "balance": "Account Balance (USD - Optional)",
+    "leverage": "Leverage (Optional)",
+    "entryPrice": "Entry Price",
+    "takeProfit": "Take Profit (TP)",
+    "stopLoss": "Stop Loss (SL)",
+    "estimatedProfit": "Est. Profit (at TP)",
+    "estimatedLoss": "Est. Loss (at SL)",
+    "currentPnl": "Current P&L",
+    "finalPnl": "Final P&L",
+    "riskReward": "Real Risk/Reward",
+    "riskPercent": "Risk of Balance",
+    "rewardPercent": "Reward of Balance",
+    "buySignal": "BUY",
+    "sellSignal": "SELL",
+    "customPricesToggle": "Entered at a different price?",
+    "requiredMargin": "Required Margin",
+    "liquidationPrice": "Est. Liquidation Price",
+    "liquidationWarning": "Warning: Account will be liquidated before reaching Stop Loss! Reduce volume.",
+    "recommendedVolume": "Recommended Volume (2% Risk)"
   }
 }

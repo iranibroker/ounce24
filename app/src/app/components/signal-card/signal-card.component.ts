@@ -15,6 +15,7 @@ import { ScoreInfoDialogComponent } from '../score-info-dialog/score-info-dialog
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { SignalAnalyzeService } from '../../services/signal-analyze.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-signal-card',
@@ -34,11 +35,17 @@ export class SignalCardComponent {
   private readonly ouncePrice = inject(OuncePriceService);
   private readonly dialog = inject(MatDialog);
   private readonly signalAnalyzeService = inject(SignalAnalyzeService);
+  private readonly router = inject(Router);
   
   signal = input.required<Signal>();
   showScore = input(false);
   Signal = Signal;
   SignalStatus = SignalStatus;
+
+  openCalculator(event: Event) {
+    event.stopPropagation();
+    this.router.navigate(['/signals', this.signal().id], { fragment: 'calculator' });
+  }
 
   pip = computed(() => {
     if (this.signal().status === SignalStatus.Active) {

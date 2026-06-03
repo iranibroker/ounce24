@@ -1,0 +1,208 @@
+<mat-card class="volume-calculator-card" id="volume-calculator">
+  <mat-card-header>
+    <mat-card-title>
+      <div class="calculator-header">
+        <div class="calculator-header-title">
+          <svg viewBox="0 0 24 24" class="calculator-header-icon" width="16px" height="16px" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+            <line x1="8" y1="6" x2="16" y2="6" />
+            <line x1="16" y1="14" x2="16" y2="18" />
+            <circle cx="8" cy="10" r="0.75" fill="currentColor" />
+            <circle cx="12" cy="10" r="0.75" fill="currentColor" />
+            <circle cx="16" cy="10" r="0.75" fill="currentColor" />
+            <circle cx="8" cy="14" r="0.75" fill="currentColor" />
+            <circle cx="12" cy="14" r="0.75" fill="currentColor" />
+            <circle cx="8" cy="18" r="0.75" fill="currentColor" />
+            <circle cx="12" cy="18" r="0.75" fill="currentColor" />
+          </svg>
+          <span>{{ 'calculator.title' | translate }}</span>
+        </div>
+      </div>
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="calculator-container">
+      
+      <!-- Inputs Section -->
+      <div class="inputs-section">
+        <div class="calculator-row">
+          <span class="row-label">{{ 'calculator.volume' | translate }}</span>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-input">
+            <input 
+              matInput 
+              type="number" 
+              step="0.01" 
+              min="0.001" 
+              [ngModel]="volume()" 
+              (ngModelChange)="volume.set($event)" 
+            />
+          </mat-form-field>
+        </div>
+        
+        <div class="calculator-row">
+          <span class="row-label">{{ 'calculator.balance' | translate }}</span>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-input">
+            <input 
+              matInput 
+              type="number" 
+              step="10" 
+              min="0" 
+              [ngModel]="balance()" 
+              (ngModelChange)="balance.set($event)" 
+              placeholder="e.g. 1000" 
+            />
+          </mat-form-field>
+        </div>
+
+        @if (balance() !== null && balance() > 0) {
+          <div class="calculator-row">
+            <span class="row-label">{{ 'calculator.leverage' | translate }}</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-input">
+              <input 
+                matInput 
+                type="number" 
+                step="50" 
+                min="1" 
+                [ngModel]="leverage()" 
+                (ngModelChange)="leverage.set($event)" 
+              />
+            </mat-form-field>
+          </div>
+        }
+
+        <button mat-button class="toggle-prices-btn" type="button" (click)="showCustomPrices.set(!showCustomPrices())">
+          <span class="toggle-text">{{ 'calculator.customPricesToggle' | translate }}</span>
+          <span class="arrow-indicator">{{ showCustomPrices() ? '▲' : '▼' }}</span>
+        </button>
+
+        @if (showCustomPrices()) {
+          <div class="custom-prices-section">
+            <div class="calculator-row">
+              <span class="row-label">{{ 'calculator.entryPrice' | translate }}</span>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-input">
+                <input 
+                  matInput 
+                  type="number" 
+                  step="0.1" 
+                  [ngModel]="entryPrice()" 
+                  (ngModelChange)="customEntryPrice.set($event)" 
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="calculator-row">
+              <span class="row-label">{{ 'calculator.takeProfit' | translate }}</span>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-input">
+                <input 
+                  matInput 
+                  type="number" 
+                  step="0.1" 
+                  [ngModel]="takeProfit()" 
+                  (ngModelChange)="customTakeProfit.set($event)" 
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="calculator-row">
+              <span class="row-label">{{ 'calculator.stopLoss' | translate }}</span>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-input">
+                <input 
+                  matInput 
+                  type="number" 
+                  step="0.1" 
+                  [ngModel]="stopLoss()" 
+                  (ngModelChange)="customStopLoss.set($event)" 
+                />
+              </mat-form-field>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Divider -->
+      <div class="calculator-divider"></div>
+
+      <!-- Results Section -->
+      <div class="results-section">
+        
+        <!-- Liquidation Warning Banner -->
+        @if (balance() !== null && balance() > 0 && isLiquidationBeforeSl()) {
+          <div class="liquidation-warning-banner">
+            <svg class="warning-icon" viewBox="0 0 24 24" width="16px" height="16px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>{{ 'calculator.liquidationWarning' | translate }}</span>
+          </div>
+        }
+
+        <!-- Live/Final PnL -->
+        <div class="pnl-result-card" [class.positive]="currentPnl() >= 0" [class.negative]="currentPnl() < 0">
+          <div class="result-title">
+            {{ (signal().status === 'ACTIVE' ? 'calculator.currentPnl' : 'calculator.finalPnl') | translate }}
+          </div>
+          <div class="result-value">
+            {{ currentPnl() >= 0 ? '+' : '' }}{{ currentPnl() | currency:'USD':'symbol':'1.2-2' }}
+            @if (currentPnlPercent() !== null) {
+              <span class="percent-badge">({{ currentPnlPercent() >= 0 ? '+' : '' }}{{ currentPnlPercent() }}%)</span>
+            }
+          </div>
+          <div class="price-context">
+            {{ 'signalAnalyze.currentPrice' | translate }}: {{ currentPrice() | currency }}
+          </div>
+        </div>
+
+        <!-- TP and SL estimates -->
+        <div class="estimates-grid">
+          <div class="estimate-box tp-box">
+            <div class="box-title">{{ 'calculator.estimatedProfit' | translate }}</div>
+            <div class="box-value text-green">
+              +{{ profitAtTp() | currency:'USD':'symbol':'1.2-2' }}
+              @if (rewardPercent() !== null) {
+                <span class="percent-sub">({{ rewardPercent() }}%)</span>
+              }
+            </div>
+          </div>
+
+          <div class="estimate-box sl-box">
+            <div class="box-title">{{ 'calculator.estimatedLoss' | translate }}</div>
+            <div class="box-value text-red">
+              -{{ lossAtSl() | currency:'USD':'symbol':'1.2-2' }}
+              @if (riskPercent() !== null) {
+                <span class="percent-sub">({{ riskPercent() }}%)</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk to Reward and Margin/Liquidation info -->
+        <div class="pnl-meta-info">
+          <div class="meta-row">
+            <span>{{ 'calculator.riskReward' | translate }}</span>
+            <span class="meta-value r-r-value">{{ riskReward() }}</span>
+          </div>
+
+          @if (balance() !== null && balance() > 0) {
+            <div class="meta-row">
+              <span>{{ 'calculator.requiredMargin' | translate }}</span>
+              <span class="meta-value">{{ requiredMargin() | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+
+            <div class="meta-row">
+              <span>{{ 'calculator.liquidationPrice' | translate }}</span>
+              <span class="meta-value text-red">{{ liquidationPrice() | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+
+            <div class="meta-row">
+              <span>{{ 'calculator.recommendedVolume' | translate }}</span>
+              <span class="meta-value text-green">{{ recommendedVolume() }} Lots</span>
+            </div>
+          }
+        </div>
+      </div>
+      
+    </div>
+  </mat-card-content>
+</mat-card>
