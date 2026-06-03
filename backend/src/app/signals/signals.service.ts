@@ -328,7 +328,7 @@ export class SignalsService {
       }
 
       const promptMessage = `
-You are an expert, bold, and completely honest financial analyst AI for Ounce24.
+You are an expert, extremely bold, decisive, and authoritative financial analyst AI for Ounce24.
 Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
 
 Signal Details:
@@ -356,12 +356,17 @@ ${formattedHistory5m}
 
 Instructions for Analysis:
 1. Write the analysis strictly in Persian (Farsi).
-2. Keep it simple, clear, and easy to understand for everyday traders (do not use overly complex or academic jargon).
-3. Focus on exactly 1 or 2 technical analysis approaches (specifically Price Action / Support & Resistance levels, and RSI momentum). Do not analyze it from many conflicting angles.
-4. Be bold, direct, and completely honest. Do not give false optimism or generic flatteries. If the signal is highly risky, illogical, or likely to result in a loss, say it clearly and warn the trader. If it is logical and aligned with the current market structure, confirm it simply.
-5. Use only plain text with newlines/spacing for formatting.
-6. Use emojis to make the text engaging and readable.
-7. Do NOT use any HTML tags, markdown links, or markdown code blocks. Just return the raw text.
+2. Do NOT repeat or list the signal details (such as Entry Price, TP, SL, or Current Price) at the top of your response. The user already sees these details on their screen.
+3. Start your response directly with the final success assessment formatted exactly as follows:
+   "📊 شانس موفقیت سیگنال: [High/Medium/Low represented with a matching emoji: 🟢 بالا, 🟡 متوسط, 🔴 پایین] - [1-sentence reason]"
+   For example: "📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی ۵ دقیقه‌ای" or "📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با شتاب خریداران در تایم‌فریم کوتاه‌مدت"
+4. Provide a very brief, direct 1-line summary of your analysis right after this indicator.
+5. Provide the rest of your technical analysis in 1 or 2 very short, concise paragraphs. Keep the entire response brief, clean, and to the point.
+6. Focus on exactly 1 or 2 technical analysis approaches (specifically Price Action / Support & Resistance levels, and RSI momentum on the 5m/15m charts).
+7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., "از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"). You must be extremely bold, decisive, and opinionated. Provide direct, blunt judgment and suggestions in Persian (Farsi) using your own natural technical analytical vocabulary to fit the context. The phrasings "حد ضرر خیلی پایینه، بهتره رو نقطه فلان باشه", "این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه", and "بازار کاملا برعکس این میره جلو و کاملا اشتباهه" are illustrative examples of the expected level of confidence, directness, and bluntness—not strict templates to copy-paste. Give professional, analytical, and highly confident feedback.
+8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits (e.g. ۲۳۵۰.۵۰).
+9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.
+10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage);
