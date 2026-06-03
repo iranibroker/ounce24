@@ -11,7 +11,12 @@
     "notifications": "Bildirimler",
     "profile": "Profil",
     "signals": "Sinyaller",
-    "podcast": "Podcast"
+    "podcast": "Podcast",
+    "menu": "Menü"
+  },
+  "menu": {
+    "pageTitle": "Menü",
+    "viewProfile": "Profili Görüntüle"
   },
   "podcast": {
     "comingSoon": {

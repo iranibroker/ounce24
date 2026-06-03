@@ -11,10 +11,10 @@
       {{ 'bottomNav.leaderboard' | translate }}
     </div>
   </a>
-  <a mat-button [routerLink]="authService.userQuery.data() ? '/profile' : '/login'" routerLinkActive #rlaProfile="routerLinkActive">
+  <a mat-button [routerLink]="authService.userQuery.data() ? '/menu' : '/login'" routerLinkActive #rlaMenu="routerLinkActive">
     <div class="nav-item-wrapper">
-      <ng-icon [name]="rlaProfile.isActive ? 'saxUserBold' : 'saxUserOutline'" size="24px"></ng-icon>
-      {{ 'bottomNav.profile' | translate }}
+      <ng-icon [name]="rlaMenu.isActive ? 'saxMenu1Bold' : 'saxMenu1Outline'" size="24px"></ng-icon>
+      {{ 'bottomNav.menu' | translate }}
     </div>
   </a>
 </mat-toolbar>

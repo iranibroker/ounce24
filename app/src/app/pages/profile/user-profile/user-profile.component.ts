@@ -1,19 +1,14 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline, saxGlobalOutline, saxDocumentDownloadOutline } from '@ng-icons/iconsax/outline';
+import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, inject, computed } from '@angular/core';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { PushNotificationService } from '../../../services/push-notification.service';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatDialog } from '@angular/material/dialog';
-import { LanguageService } from '../../../services/language.service';
-import { LanguageSelectionModalComponent } from '../../../components/language-selection-modal/language-selection-modal.component';
 import {
   injectQuery,
   injectInfiniteQuery,
@@ -29,7 +24,6 @@ import { AuthService } from '../../../services/auth.service';
 import { SHARED } from '../../../shared';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AchievementCardComponent } from '../../../components/achievement-card/achievement-card.component';
-import { environment } from '../../../../environments/environment';
 
 const PAGE_SIZE = 20;
 
@@ -48,9 +42,8 @@ const PAGE_SIZE = 20;
     EmptyStateComponent,
     MatTabsModule,
     SHARED,
-    AchievementCardComponent,
-    MatSlideToggleModule,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline, saxGlobalOutline, saxDocumentDownloadOutline })],
+    AchievementCardComponent,],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
@@ -58,41 +51,7 @@ export class UserProfileComponent {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
-  private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
-  readonly pushService = inject(PushNotificationService);
-  readonly languageService = inject(LanguageService);
-  private readonly dialog = inject(MatDialog);
-
-  downloadChartData(format: 'csv' | 'json') {
-    const url = `${environment.apiUrl}/api/ounce-price/history?format=${format}`;
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `gold_price_history.${format}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  openLanguageSelection() {
-    this.dialog.open(LanguageSelectionModalComponent, {
-      width: '400px',
-      maxWidth: '95vw',
-    });
-  }
-
-  logout() {
-    this.auth.token.set(null);
-    this.router.navigate(['/login']);
-  }
-
-  async toggleNotifications(checked: boolean) {
-    if (checked) {
-      await this.pushService.subscribeToNotifications();
-    } else {
-      await this.pushService.unsubscribeFromNotifications();
-    }
-  }
 
   isOwnProfile = computed(() => {
     const currentUser = this.auth.userQuery.data();

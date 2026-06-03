@@ -11,7 +11,12 @@
     "notifications": "الإشعارات",
     "profile": "الملف الشخصي",
     "signals": "الإشارات",
-    "podcast": "البودكاست"
+    "podcast": "البودكاست",
+    "menu": "القائمة"
+  },
+  "menu": {
+    "pageTitle": "القائمة",
+    "viewProfile": "عرض الملف الشخصي"
   },
   "podcast": {
     "comingSoon": {

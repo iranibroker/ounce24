@@ -1,0 +1,108 @@
+
+<div class="menu-container">
+  @let user = auth.userQuery.data();
+  @if (user) {
+    <mat-card class="settings-card clickable-card profile-button-card" routerLink="/profile">
+      <mat-card-content>
+        <div class="profile-card-content">
+          <img [src]="user.avatar" [appAvatar]="user" [size]="48" class="profile-card-avatar" />
+          <div class="profile-card-details">
+            <h2>{{ user | fullname }}</h2>
+            <span class="view-profile-text">{{ 'menu.viewProfile' | translate }}</span>
+          </div>
+          <span class="spacer"></span>
+          <div class="profile-card-gems">
+            <ng-icon name="saxDiamondsBold" class="blue" size="18px"></ng-icon>
+            <span>{{ user.gem || 0 | number }}</span>
+          </div>
+          <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+
+  @if (pushService.isNotificationSupported()) {
+    <mat-card class="settings-card">
+      <mat-card-content>
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="icon-container">
+              <ng-icon name="saxNotificationOutline" size="20px"></ng-icon>
+            </div>
+            <div class="settings-texts">
+              <h3>{{ 'pushNotifications.settings.title' | translate }}</h3>
+              <p>{{ 'pushNotifications.settings.description' | translate }}</p>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="pushService.isSubscribed()"
+            (change)="toggleNotifications($event.checked)"
+            color="primary"
+          ></mat-slide-toggle>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-card class="settings-card">
+    <mat-card-content class="advanced-tools-content">
+      <div class="settings-info">
+        <div class="icon-container">
+          <ng-icon name="saxDocumentDownloadOutline" size="20px"></ng-icon>
+        </div>
+        <div class="settings-texts">
+          <h3>{{ 'profile.advancedTools.title' | translate }}</h3>
+          <p>{{ 'profile.advancedTools.description' | translate }}</p>
+        </div>
+      </div>
+      <div class="advanced-actions-row">
+        <button mat-flat-button color="primary" (click)="downloadChartData('csv')">
+          <ng-icon name="saxDocumentDownloadOutline" size="18px"></ng-icon>
+          {{ 'profile.advancedTools.downloadCsv' | translate }}
+        </button>
+        <button mat-stroked-button color="primary" (click)="downloadChartData('json')">
+          <ng-icon name="saxDocumentDownloadOutline" size="18px"></ng-icon>
+          {{ 'profile.advancedTools.downloadJson' | translate }}
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card clickable-card" (click)="openLanguageSelection()">
+    <mat-card-content>
+      <div class="settings-row">
+        <div class="settings-info">
+          <div class="icon-container">
+            <ng-icon name="saxGlobalOutline" size="20px"></ng-icon>
+          </div>
+          <div class="settings-texts">
+            <h3>{{ 'languageSelection.title' | translate }}</h3>
+            <p>{{ 'languageSelection.description' | translate }}</p>
+          </div>
+        </div>
+        <div class="selected-lang-badge">
+          <span class="flag-text">{{ languageService.getCurrentLanguageConfig()?.flag }}</span>
+          <span class="lang-text">{{ languageService.getCurrentLanguageConfig()?.name }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card logout-card" (click)="logout()">
+    <mat-card-content>
+      <div class="settings-row">
+        <div class="settings-info">
+          <div class="icon-container logout-icon-container">
+            <ng-icon name="saxLogoutOutline" size="20px"></ng-icon>
+          </div>
+          <div class="settings-texts">
+            <h3>{{ 'profile.logout' | translate }}</h3>
+            <p>{{ 'profile.logoutDescription' | translate }}</p>
+          </div>
+        </div>
+        <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

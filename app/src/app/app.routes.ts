@@ -11,6 +11,7 @@ import { LeaderboardComponent } from './pages/leaderboard/leaderboard.component'
 import { UserProfileComponent } from './pages/profile/user-profile/user-profile.component';
 import { AvatarEditComponent } from './pages/profile/avatar-edit/avatar-edit.component';
 import { PodcastListComponent } from './pages/podcast/podcast-list/podcast-list.component';
+import { MenuComponent } from './pages/menu/menu.component';
 
 export const appRoutes: Route[] = [
   {
@@ -79,6 +80,11 @@ export const appRoutes: Route[] = [
             component: UserProfileComponent,
           },
         ],
+      },
+      {
+        path: 'menu',
+        component: MenuComponent,
+        canActivate: [loginActivator],
       },
       {
         path: '',

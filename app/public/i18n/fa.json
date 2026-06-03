@@ -11,7 +11,12 @@
     "notifications": "اعلان‌ها",
     "profile": "پروفایل",
     "signals": "سیگنال‌ها",
-    "podcast": "پادکست تحلیلی"
+    "podcast": "پادکست تحلیلی",
+    "menu": "منو"
+  },
+  "menu": {
+    "pageTitle": "منو",
+    "viewProfile": "مشاهده پروفایل"
   },
   "podcast": {
     "comingSoon": {

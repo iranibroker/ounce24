@@ -11,7 +11,12 @@
     "notifications": "notifications",
     "profile": "profile",
     "signals": "signals",
-    "podcast": "podcast"
+    "podcast": "podcast",
+    "menu": "menu"
+  },
+  "menu": {
+    "pageTitle": "Menu",
+    "viewProfile": "View Profile"
   },
   "podcast": {
     "comingSoon": {
