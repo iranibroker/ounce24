@@ -44,6 +44,7 @@ export class AddSignalComponent {
   signalType = SignalType;
   form: FormGroup;
   isSubmitting = false;
+  isGenerating = false;
   private ounceService = inject(OuncePriceService);
 
   constructor(
@@ -175,5 +176,59 @@ export class AddSignalComponent {
 
   analyzeWithAI(): void {
     this.analyzeService.openSignalAnalyze(this.form.value);
+  }
+
+  generateWithAI(): void {
+    if (this.isGenerating) return;
+    this.isGenerating = true;
+
+    this.http.post<{
+      signal: {
+        type: 'buy' | 'sell';
+        entryPrice: number;
+        takeProfit: number;
+        stopLoss: number;
+        instantEntry: boolean;
+      } | null;
+      rawText: string;
+      parseError: boolean;
+    }>('/api/signals/generate', {}).subscribe({
+      next: (response) => {
+        this.isGenerating = false;
+        
+        if (response.parseError || !response.signal) {
+          window.alert(
+            'سیگنال توسط هوش مصنوعی تولید شد اما به صورت خودکار قالب‌بندی و بارگذاری نشد. لطفاً مقادیر زیر را به صورت دستی وارد کنید:\n\n' + 
+            response.rawText
+          );
+          return;
+        }
+
+        const generated = response.signal;
+        const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
+        
+        this.form.patchValue({
+          type: type,
+          entryPrice: generated.entryPrice,
+          takeProfit: generated.takeProfit,
+          stopLoss: generated.stopLoss,
+          instantEntry: generated.instantEntry,
+        });
+
+        this.snackBar.open('Signal generated and filled successfully!', 'Close', {
+          duration: 3000,
+        });
+      },
+      error: (err) => {
+        this.isGenerating = false;
+        let errorMessage = 'Failed to generate signal';
+        if (err.error && err.error.translationKey) {
+          errorMessage = err.error.translationKey;
+        }
+        this.snackBar.open(errorMessage, 'Close', {
+          duration: 3000,
+        });
+      }
+    });
   }
 }

@@ -6,6 +6,17 @@
 </mat-toolbar>
 
 <div class="form-container">
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="generateWithAI()"
+    [disabled]="isGenerating"
+    class="ai-generate-button"
+  >
+    <ng-icon name="saxStarOutline" size="18px"></ng-icon>
+    <span>{{ (isGenerating ? 'addSignal.generating' : 'addSignal.generateWithAI') | translate }}</span>
+  </button>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <mat-button-toggle-group formControlName="type" class="signal-type-toggle" hideSingleSelectionIndicator>
       <mat-button-toggle [value]="signalType.Buy">{{

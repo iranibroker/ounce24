@@ -127,4 +127,9 @@ export class SignalsController {
     // Check if user has gems
     return this.signalService.analyzeSignal(signal, user.id || (user as any)._id);
   }
+
+  @Post('generate')
+  async generateSignal(@LoginUser() user: User) {
+    return this.signalService.generateSignal(user.id || (user as any)._id);
+  }
 }

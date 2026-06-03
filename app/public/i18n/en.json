@@ -205,6 +205,8 @@
     },
     "submit": "Create Signal",
     "analyzeWithAI": "Analyze with AI",
+    "generateWithAI": "Generate Signal with AI (20 GEMs)",
+    "generating": "Generating signal from AI...",
     "gemRequired": "You need gems to analyze your trading signal with AI"
   },
   "languageSelection": {

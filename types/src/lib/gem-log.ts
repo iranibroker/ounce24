@@ -4,6 +4,7 @@ export enum GemLogAction {
   SignalAnalyze = 'signal_analyze',
   ChangeAvatar = 'change_avatar',
   CloseSignal = 'close_signal',
+  GenerateSignal = 'generate_signal',
 }
 
 export class GemLog {

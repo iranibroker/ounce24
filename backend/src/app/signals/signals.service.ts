@@ -447,6 +447,164 @@ Instructions for Analysis:
       throw error;
     }
   }
+
+  async generateSignal(userId: string) {
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) {
+        throw new NotFoundException({
+          translationKey: 'userNotFound',
+        });
+      }
+
+      if (!user.gem || user.gem < 20) {
+        throw new NotAcceptableException({
+          translationKey: 'insufficientGems',
+        });
+      }
+
+      const currentPrice = this.ouncePriceService.current;
+
+      // Fetch recent 5m candles from the past 30 days
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const candles5m = await this.candleModel.find({
+        timestamp: { $gte: thirtyDaysAgo }
+      }).sort({ timestamp: 1 }).exec();
+
+      // Prepare default values
+      let formattedHistory4h = 'No historical data available.';
+      let formattedHistory1h = 'No historical data available.';
+      let formattedHistory15m = 'No historical data available.';
+      let formattedHistory5m = 'No historical data available.';
+      let rsi5m = 50;
+      let rsi15m = 50;
+      let rsi1h = 50;
+      let sma20_5m = currentPrice;
+      let sma20_1h = currentPrice;
+      let sma50_1h = currentPrice;
+      let atr5m = 1.5;
+
+      if (candles5m.length > 0) {
+        const closes5m = candles5m.map(c => c.close);
+        rsi5m = calculateRSI(closes5m, 14);
+        sma20_5m = calculateSMA(closes5m, 20);
+        atr5m = calculateATR(candles5m, 14);
+
+        const candles15m = aggregateTo15m(candles5m);
+        const closes15m = candles15m.map(c => c.close);
+        rsi15m = calculateRSI(closes15m, 14);
+
+        const candles1h = aggregateTo1h(candles5m);
+        const closes1h = candles1h.map(c => c.close);
+        rsi1h = calculateRSI(closes1h, 14);
+        sma20_1h = calculateSMA(closes1h, 20);
+        sma50_1h = calculateSMA(closes1h, 50);
+
+        const formatCandle = (c: any) => {
+          const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
+          return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
+        };
+
+        const candles4h = aggregateTo4h(candles5m);
+        if (candles4h.length > 0) {
+          formattedHistory4h = candles4h.map(formatCandle).join('\n');
+        }
+        if (candles1h.length > 0) {
+          formattedHistory1h = candles1h.slice(-72).map(formatCandle).join('\n'); // last 3 days
+        }
+        if (candles15m.length > 0) {
+          formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
+        }
+        formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
+      }
+
+      const promptMessage = `
+You are an expert, bold, and authoritative quantitative trading system for Ounce24.
+Generate a high-probability short-term Gold (XAUUSD) trading signal based on the technical price history and indicators provided below.
+
+Current Price: $${currentPrice.toFixed(2)}
+
+Technical Indicators (Calculated on 5m, 15m, 1h tables):
+- 5m RSI(14): ${rsi5m.toFixed(2)}
+- 15m RSI(14): ${rsi15m.toFixed(2)}
+- 1h RSI(14): ${rsi1h.toFixed(2)}
+- 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
+- 1h SMA(20): $${sma20_1h.toFixed(2)}
+- 1h SMA(50): $${sma50_1h.toFixed(2)}
+- 5m ATR(14) (Volatility): $${atr5m.toFixed(2)}
+
+Recent Price History (4-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory4h}
+
+Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory1h}
+
+Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory15m}
+
+Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory5m}
+
+Instructions for Signal Generation:
+1. Analyze the trend and key Support/Resistance areas. Decide on a short-term trading setup.
+2. Determine if the setup is a BUY or SELL signal.
+3. Suggest a realistic Entry Price, Take Profit (TP), and Stop Loss (SL). 
+4. The Stop Loss must be calculated logically based on the recent swing low/high or the ATR volatility (e.g. SL distance from entry should be at least 1.5x to 2x ATR).
+5. The Risk-Reward Ratio (Target Move / Risk Move) must be between 1.5 and 3.0.
+6. The Entry Price can be equal to the current price ($${currentPrice.toFixed(2)}) for an instant market order (instantEntry: true), or it can be a pending order (instantEntry: false) placed at a key pullback/breakout level.
+7. Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
+{
+  "type": "buy" | "sell",
+  "entryPrice": number,
+  "takeProfit": number,
+  "stopLoss": number,
+  "instantEntry": boolean
+}
+`;
+
+      const result = await this.aiChatService.createResponse(promptMessage);
+
+      // Clean the AI response in case it returned markdown code block
+      let cleanText = result.text.trim();
+      if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+      }
+
+      let generatedSignal = null;
+      let parseError = false;
+      try {
+        generatedSignal = JSON.parse(cleanText);
+      } catch (e) {
+        parseError = true;
+      }
+
+      // Deduct 20 gems from user
+      await this.userModel
+        .findByIdAndUpdate(user.id, {
+          $inc: { gem: -20 },
+        })
+        .exec();
+
+      this.gemLogModel.create({
+        user: user.id,
+        gemsChange: -20,
+        gemsBefore: user.gem,
+        gemsAfter: user.gem - 20,
+        action: GemLogAction.GenerateSignal,
+      });
+
+      return {
+        signal: generatedSignal,
+        rawText: cleanText,
+        parseError,
+        user,
+        model: result.model,
+      };
+    } catch (error) {
+      console.error('Error in generateSignal service:', error);
+      throw error;
+    }
+  }
 }
 
 // Utility functions for technical analysis calculations
