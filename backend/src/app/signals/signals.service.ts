@@ -291,10 +291,10 @@ export class SignalsService {
 
       const currentPrice = this.ouncePriceService.current;
 
-      // Fetch recent 5m candles from the past 3 days
-      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      // Fetch recent 5m candles from the past 30 days
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const candles5m = await this.candleModel.find({
-        timestamp: { $gte: threeDaysAgo }
+        timestamp: { $gte: thirtyDaysAgo }
       }).sort({ timestamp: 1 }).exec();
 
       // Prepare default values
@@ -305,6 +305,8 @@ export class SignalsService {
       let rsi15m = 50;
       let rsi1h = 50;
       let sma20_5m = currentPrice;
+      let sma20_1h = currentPrice;
+      let sma50_1h = currentPrice;
       let atr5m = 1.5;
 
       if (candles5m.length > 0) {
@@ -320,6 +322,8 @@ export class SignalsService {
         const candles1h = aggregateTo1h(candles5m);
         const closes1h = candles1h.map(c => c.close);
         rsi1h = calculateRSI(closes1h, 14);
+        sma20_1h = calculateSMA(closes1h, 20);
+        sma50_1h = calculateSMA(closes1h, 50);
 
         const formatCandle = (c: any) => {
           const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
@@ -351,9 +355,11 @@ Technical Indicators (Calculated on 5m, 15m, 1h tables):
 - 15m RSI(14): ${rsi15m.toFixed(2)}
 - 1h RSI(14): ${rsi1h.toFixed(2)}
 - 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
+- 1h SMA(20): $${sma20_1h.toFixed(2)}
+- 1h SMA(50): $${sma50_1h.toFixed(2)}
 - 5m ATR(14) (Volatility): $${atr5m.toFixed(2)}
 
-Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+Recent Price History (1-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
 ${formattedHistory1h}
 
 Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
@@ -370,7 +376,7 @@ Instructions for Analysis:
    For example: "📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی ۵ دقیقه‌ای" or "📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با شتاب خریداران در تایم‌فریم کوتاه‌مدت"
 4. Provide a very brief, direct 1-line summary of your analysis right after this indicator.
 5. Provide the rest of your technical analysis in 1 or 2 very short, concise paragraphs. Keep the entire response brief, clean, and to the point.
-6. Focus on exactly 1 or 2 technical analysis approaches (specifically Price Action / Support & Resistance levels, and RSI momentum on the 5m/15m charts).
+6. Prioritize technical analysis approaches by giving the highest priority to Price Action (specifically Support & Resistance levels, key breakout/breakdown levels, and market structure on the 30-day 1-hour price history) and secondary priority to Moving Average trends (using SMA20/SMA50 indicators). RSI and other momentum tools are of much lower priority.
 7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., "از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"). You must be extremely bold, decisive, and opinionated. Provide direct, blunt judgment and suggestions in Persian (Farsi) using your own natural technical analytical vocabulary to fit the context. The phrasings "حد ضرر خیلی پایینه، بهتره رو نقطه فلان باشه", "این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه", and "بازار کاملا برعکس این میره جلو و کاملا اشتباهه" are illustrative examples of the expected level of confidence, directness, and bluntness—not strict templates to copy-paste. Give professional, analytical, and highly confident feedback.
 8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits (e.g. ۲۳۵۰.۵۰).
 9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.

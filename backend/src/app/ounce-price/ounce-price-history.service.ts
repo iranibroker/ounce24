@@ -30,12 +30,22 @@ export class OuncePriceHistoryService implements OnModuleInit {
     console.log('Checking local price history count for backfill...');
     try {
       const count = await this.candleModel.countDocuments().exec();
-      // If we have less than 800 candles (about 2.7 days of 5m data), trigger backfill
-      if (count < 800) {
-        console.log(`Only ${count} candles found in local DB. Backfilling from TwelveData...`);
+      // If we have less than 8000 candles (about 27.7 days of 5m data), trigger backfill
+      if (count < 8000) {
+        console.log(`Only ${count} candles found in local DB. Backfilling up to 30 days from TwelveData...`);
         const apiKey = process.env.TWELVE_DATA_API_KEY || '760ae215f3f94dcea4c2b43d33e4c022';
         
-        const response = await axios.get<{
+        let allValues: {
+          datetime: string;
+          open: string;
+          high: string;
+          low: string;
+          close: string;
+        }[] = [];
+
+        // Fetch first batch of 5000 candles (~17 days)
+        console.log('Fetching first batch of 5000 candles from TwelveData...');
+        const response1 = await axios.get<{
           status: string;
           message?: string;
           values?: {
@@ -46,17 +56,46 @@ export class OuncePriceHistoryService implements OnModuleInit {
             close: string;
           }[];
         }>(
-          `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=5min&outputsize=1000&timezone=UTC&apikey=${apiKey}`
+          `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=5min&outputsize=5000&timezone=UTC&apikey=${apiKey}`
         );
 
-        if (response.data.status !== 'ok') {
-          throw new Error(response.data.message || 'Unknown TwelveData API error');
+        if (response1.data.status !== 'ok') {
+          throw new Error(response1.data.message || 'Unknown TwelveData API error in batch 1');
         }
 
-        const values = response.data.values || [];
-        console.log(`Fetched ${values.length} candles from TwelveData. Writing to DB...`);
+        const values1 = response1.data.values || [];
+        allValues = allValues.concat(values1);
+        console.log(`Fetched ${values1.length} candles in first batch.`);
 
-        const bulkOps = values.map((val) => {
+        // If we got the full outputsize, fetch the second batch prior to the oldest datetime
+        if (values1.length === 5000) {
+          const oldestDatetime = values1[values1.length - 1].datetime;
+          console.log(`Fetching second batch of 5000 candles ending at ${oldestDatetime}...`);
+          const response2 = await axios.get<{
+            status: string;
+            message?: string;
+            values?: {
+              datetime: string;
+              open: string;
+              high: string;
+              low: string;
+              close: string;
+            }[];
+          }>(
+            `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=5min&outputsize=5000&end_date=${oldestDatetime}&timezone=UTC&apikey=${apiKey}`
+          );
+
+          if (response2.data.status === 'ok') {
+            const values2 = response2.data.values || [];
+            allValues = allValues.concat(values2);
+            console.log(`Fetched ${values2.length} candles in second batch.`);
+          } else {
+            console.warn('Failed to fetch second batch of candles:', response2.data.message);
+          }
+        }
+
+        console.log(`Writing total of ${allValues.length} candles to local DB...`);
+        const bulkOps = allValues.map((val) => {
           const timestamp = new Date(val.datetime + 'Z'); // Parse as UTC datetime
           const open = parseFloat(val.open);
           const high = parseFloat(val.high);
