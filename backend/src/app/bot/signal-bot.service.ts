@@ -440,7 +440,8 @@ export class SignalBotService extends BaseBot {
           `Gems remaining: ${result.user.gem - 1} 💎`,
         );
         ctx.answerCbQuery('Sent to you via the bot');
-      } catch (error) {
+      } catch (error: any) {
+        console.error('Error analyzing signal in telegram bot:', error);
         if (error.status === 404) {
           await this.bot.telegram.sendMessage(userId, 'User not found.');
         } else if (error.status === 406) {

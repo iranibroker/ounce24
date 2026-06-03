@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-const PROMPT_ID = 'pmpt_68c8f1e43d388196972aa9fb83407105048f2b7031cf1a02';
 @Injectable()
 export class AiChatService {
   private client: OpenAI;
@@ -14,39 +13,39 @@ export class AiChatService {
   }
 
   async createConversation() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const conversation = await this.client.conversations.create({});
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-    return conversation.id;
+    return 'direct-api-session';
   }
 
   async createResponse(
     message: string,
-    conversationId?: string,
   ): Promise<{ text: string; totalTokens: number }> {
-    const abortController = new AbortController();
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      const response = await this.client.responses.create({
-        input: message,
-        conversation: conversationId,
-        prompt: {
-          id: PROMPT_ID,
-          variables: {
-            date: new Date().toDateString(),
+      const response = await this.client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert, bold, and completely honest financial analyst for Ounce24. 
+Current Date: ${new Date().toDateString()}.
+Always write the analysis in simple and clear Persian (Farsi).
+Use HTML tags like <b>, <ul>, <li>, <br> for formatting. Do not use markdown syntax or markdown links.`,
           },
-        },
+          {
+            role: 'user',
+            content: message,
+          },
+        ],
       });
 
-      const cleanedText = response.output_text.replace(
+      const text = response.choices[0]?.message?.content || '';
+      const totalTokens = response.usage?.total_tokens || 0;
+
+      const cleanedText = text.replace(
         /\[(.*?)\]\((.*?)\)/g,
         '<a href="$2">$1</a>',
       );
-      return { text: cleanedText, totalTokens: response.usage.total_tokens };
+      return { text: cleanedText, totalTokens };
     } catch (error) {
-      if (abortController.signal.aborted) {
-        throw new Error('Request was cancelled');
-      }
       throw error;
     }
   }

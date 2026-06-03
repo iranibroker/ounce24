@@ -257,76 +257,77 @@ export class SignalsService {
   }
 
   async analyzeSignal(signal: Signal, userId?: string) {
-    // Check if user has gems
-    const targetUserId = userId || (signal.owner && (typeof signal.owner === 'object' ? signal.owner._id || (signal.owner as any).id : signal.owner));
-    if (!targetUserId) {
-      throw new NotFoundException({
-        translationKey: 'userNotFound',
-      });
-    }
-
-    const user = await this.userModel
-      .findById(targetUserId)
-      .exec();
-    if (!user) {
-      throw new NotFoundException({
-        translationKey: 'userNotFound',
-      });
-    }
-
-    if (!user.gem || user.gem <= 0) {
-      throw new NotAcceptableException({
-        translationKey: 'insufficientGems',
-      });
-    }
-
-    const currentPrice = this.ouncePriceService.current;
-
-    // Fetch recent 5m candles from the past 3 days
-    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-    const candles5m = await this.candleModel.find({
-      timestamp: { $gte: threeDaysAgo }
-    }).sort({ timestamp: 1 }).exec();
-
-    // Prepare default values
-    let formattedHistory1h = 'No historical data available.';
-    let formattedHistory15m = 'No historical data available.';
-    let formattedHistory5m = 'No historical data available.';
-    let rsi5m = 50;
-    let rsi15m = 50;
-    let rsi1h = 50;
-    let sma20_5m = currentPrice;
-    let atr5m = 1.5;
-
-    if (candles5m.length > 0) {
-      const closes5m = candles5m.map(c => c.close);
-      rsi5m = calculateRSI(closes5m, 14);
-      sma20_5m = calculateSMA(closes5m, 20);
-      atr5m = calculateATR(candles5m, 14);
-
-      const candles15m = aggregateTo15m(candles5m);
-      const closes15m = candles15m.map(c => c.close);
-      rsi15m = calculateRSI(closes15m, 14);
-
-      const candles1h = aggregateTo1h(candles5m);
-      const closes1h = candles1h.map(c => c.close);
-      rsi1h = calculateRSI(closes1h, 14);
-
-      const formatCandle = (c: any) => {
-        const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
-        return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
-      };
-
-      if (candles1h.length > 0) {
-        formattedHistory1h = candles1h.map(formatCandle).join('\n');
+    try {
+      // Check if user has gems
+      const targetUserId = userId || (signal.owner && (typeof signal.owner === 'object' ? signal.owner._id || (signal.owner as any).id : signal.owner));
+      if (!targetUserId) {
+        throw new NotFoundException({
+          translationKey: 'userNotFound',
+        });
       }
-      if (candles15m.length > 0) {
-        formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
-      }
-      formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
-    }
 
-    const promptMessage = `
+      const user = await this.userModel
+        .findById(targetUserId)
+        .exec();
+      if (!user) {
+        throw new NotFoundException({
+          translationKey: 'userNotFound',
+        });
+      }
+
+      if (!user.gem || user.gem <= 0) {
+        throw new NotAcceptableException({
+          translationKey: 'insufficientGems',
+        });
+      }
+
+      const currentPrice = this.ouncePriceService.current;
+
+      // Fetch recent 5m candles from the past 3 days
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const candles5m = await this.candleModel.find({
+        timestamp: { $gte: threeDaysAgo }
+      }).sort({ timestamp: 1 }).exec();
+
+      // Prepare default values
+      let formattedHistory1h = 'No historical data available.';
+      let formattedHistory15m = 'No historical data available.';
+      let formattedHistory5m = 'No historical data available.';
+      let rsi5m = 50;
+      let rsi15m = 50;
+      let rsi1h = 50;
+      let sma20_5m = currentPrice;
+      let atr5m = 1.5;
+
+      if (candles5m.length > 0) {
+        const closes5m = candles5m.map(c => c.close);
+        rsi5m = calculateRSI(closes5m, 14);
+        sma20_5m = calculateSMA(closes5m, 20);
+        atr5m = calculateATR(candles5m, 14);
+
+        const candles15m = aggregateTo15m(candles5m);
+        const closes15m = candles15m.map(c => c.close);
+        rsi15m = calculateRSI(closes15m, 14);
+
+        const candles1h = aggregateTo1h(candles5m);
+        const closes1h = candles1h.map(c => c.close);
+        rsi1h = calculateRSI(closes1h, 14);
+
+        const formatCandle = (c: any) => {
+          const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
+          return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
+        };
+
+        if (candles1h.length > 0) {
+          formattedHistory1h = candles1h.map(formatCandle).join('\n');
+        }
+        if (candles15m.length > 0) {
+          formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
+        }
+        formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
+      }
+
+      const promptMessage = `
 You are an expert, bold, and completely honest financial analyst AI for Ounce24.
 Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
 
@@ -361,38 +362,42 @@ Instructions for Analysis:
 5. Use clean HTML tags for styling (e.g. <b>, <ul>, <li>) if needed, but do not use markdown links. Return the HTML directly without any surrounding markdown code blocks (do not wrap in \`\`\`html or similar).
 `;
 
-    const result = await this.aiChatService.createResponse(promptMessage);
+      const result = await this.aiChatService.createResponse(promptMessage);
 
-    // // Deduct 1 gem from user
-    await this.userModel
-      .findByIdAndUpdate(user.id, {
-        $inc: { gem: -1 },
-      })
-      .exec();
+      // // Deduct 1 gem from user
+      await this.userModel
+        .findByIdAndUpdate(user.id, {
+          $inc: { gem: -1 },
+        })
+        .exec();
 
-    this.gemLogModel.create({
-      user: user.id,
-      gemsChange: -1,
-      gemsBefore: user.gem,
-      gemsAfter: user.gem - 1,
-      action: GemLogAction.SignalAnalyze,
-    });
+      this.gemLogModel.create({
+        user: user.id,
+        gemsChange: -1,
+        gemsBefore: user.gem,
+        gemsAfter: user.gem - 1,
+        action: GemLogAction.SignalAnalyze,
+      });
 
-    this.signalAnalyzeModel.create({
-      signal: signal.id,
-      ouncePrice: currentPrice,
-      totalTokens: result.totalTokens,
-      analyzeText: result.text,
-      creator: user.id,
-    });
+      this.signalAnalyzeModel.create({
+        signal: signal.id,
+        ouncePrice: currentPrice,
+        totalTokens: result.totalTokens,
+        analyzeText: result.text,
+        creator: user.id,
+      });
 
-    return {
-      analysis: result.text,
-      signal,
-      user,
-      currentPrice: currentPrice,
-      totalTokens: result.totalTokens,
-    };
+      return {
+        analysis: result.text,
+        signal,
+        user,
+        currentPrice: currentPrice,
+        totalTokens: result.totalTokens,
+      };
+    } catch (error) {
+      console.error('Error in analyzeSignal service:', error);
+      throw error;
+    }
   }
 }
 
