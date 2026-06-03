@@ -114,6 +114,7 @@ export class UsersController {
         user.id,
         {
           avatar: body.avatar,
+          avatarSource: 'bitbots',
           gem: currentUser.gem - 1,
         },
         { new: true },

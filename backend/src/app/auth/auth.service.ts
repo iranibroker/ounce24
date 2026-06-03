@@ -272,6 +272,7 @@ export class AuthService {
         name: fullName || `User ${telegramId}`,
         telegramUsername: data.username,
         avatar: data.photo_url,
+        avatarSource: data.photo_url ? 'telegram' : 'bitbots',
         title,
       });
     } else {
@@ -284,8 +285,13 @@ export class AuthService {
         user.telegramUsername = data.username;
         updated = true;
       }
-      if (data.photo_url && user.avatar !== data.photo_url) {
+      if (
+        data.photo_url &&
+        (!user.avatarSource || user.avatarSource === 'telegram') &&
+        user.avatar !== data.photo_url
+      ) {
         user.avatar = data.photo_url;
+        user.avatarSource = 'telegram';
         updated = true;
       }
       if (updated) await user.save();
@@ -334,6 +340,7 @@ export class AuthService {
          name: telegramUser.first_name,
          telegramUsername: telegramUser.username,
          avatar: telegramUser.photo_url,
+         avatarSource: telegramUser.photo_url ? 'telegram' : 'bitbots',
          title,
        });
     } else {
@@ -347,8 +354,13 @@ export class AuthService {
             user.telegramUsername = telegramUser.username;
             updated = true;
         }
-        if (telegramUser.photo_url && user.avatar !== telegramUser.photo_url) {
+        if (
+          telegramUser.photo_url &&
+          (!user.avatarSource || user.avatarSource === 'telegram') &&
+          user.avatar !== telegramUser.photo_url
+        ) {
             user.avatar = telegramUser.photo_url;
+            user.avatarSource = 'telegram';
             updated = true;
         }
         if (updated) await user.save();
@@ -425,6 +437,7 @@ export class AuthService {
         name: payload.name ?? undefined,
         avatar: payload.picture ?? undefined,
         googlePicture: payload.picture ?? undefined,
+        avatarSource: payload.picture ? 'google' : 'bitbots',
         title,
       });
     } else {
@@ -438,8 +451,12 @@ export class AuthService {
         updated = true;
       }
       if (payload.picture != null) {
-        if (user.avatar !== payload.picture) {
+        if (
+          (!user.avatarSource || user.avatarSource === 'google') &&
+          user.avatar !== payload.picture
+        ) {
           user.avatar = payload.picture;
+          user.avatarSource = 'google';
           updated = true;
         }
         if ((user as any).googlePicture !== payload.picture) {
