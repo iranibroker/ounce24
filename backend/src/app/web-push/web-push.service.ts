@@ -70,11 +70,7 @@ export class WebPushService implements OnModuleInit {
 
       const options = {
         TTL: 0,
-        urgency: 'high' as const,
-        headers: {
-          'TTL': '0',
-          'Urgency': 'high'
-        }
+        urgency: 'high' as const
       };
 
       return webpush.sendNotification(pushSub, payload, options).catch(async (error) => {
