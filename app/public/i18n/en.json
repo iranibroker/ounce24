@@ -272,7 +272,7 @@
     "title": "Octopus",
     "subtitle": "Daily Ounce Price Guess",
     "description": "Predict whether the day's market closing price will be higher or lower than the current price. Earn 1 star ⭐ for correct predictions.",
-    "cutoffWarning": "Predictions can only be placed or edited before 14:00 (Iran Time).",
+    "cutoffWarning": "Predictions can only be placed or edited before {{time}}.",
     "marketOpen": "Market Open",
     "marketClosed": "Market Closed",
     "predictUp": "Higher (Bullish)",

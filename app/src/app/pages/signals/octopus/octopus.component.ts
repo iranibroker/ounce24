@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
@@ -70,6 +70,24 @@ export class OctopusComponent implements OnInit, OnDestroy {
   isEditing = signal<boolean>(false);
   private timer: any = null;
 
+  // Configuration query for Octopus game parameters
+  configQuery = injectQuery(() => ({
+    queryKey: ['octopusConfig'],
+    queryFn: () => lastValueFrom(this.http.get<{ cutoffHour: number }>('/api/octopus/config')),
+    staleTime: Infinity,
+  }));
+
+  cutoffHour = computed(() => this.configQuery.data()?.cutoffHour ?? 10.5);
+
+  localCutoffTime = computed(() => {
+    const hourVal = this.cutoffHour();
+    const cutoffDate = new Date();
+    const hours = Math.floor(hourVal);
+    const minutes = Math.round((hourVal - hours) * 60);
+    cutoffDate.setUTCHours(hours, minutes, 0, 0);
+    return cutoffDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  });
+
   ngOnInit() {
     this.startCountdown();
   }
@@ -130,27 +148,25 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
   private updateCountdown() {
     const now = new Date();
-    // UTC time
-    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-    // Iran time: UTC+3:30
-    const iranTime = new Date(utcTime + 3.5 * 3600000);
+    const cutoffHour = this.cutoffHour();
 
-    const cutoff = new Date(iranTime);
-    cutoff.setHours(14, 0, 0, 0);
+    const cutoff = new Date(now);
+    const hours = Math.floor(cutoffHour);
+    const minutes = Math.round((cutoffHour - hours) * 60);
+    cutoff.setUTCHours(hours, minutes, 0, 0);
 
-    let diff = cutoff.getTime() - iranTime.getTime();
+    let diff = cutoff.getTime() - now.getTime();
     if (diff < 0) {
-      // If already past 14:00, count down to tomorrow's 14:00 cutoff
-      cutoff.setDate(cutoff.getDate() + 1);
-      diff = cutoff.getTime() - iranTime.getTime();
+      cutoff.setUTCDate(cutoff.getUTCDate() + 1);
+      diff = cutoff.getTime() - now.getTime();
     }
 
-    const hours = Math.floor(diff / 3600000);
+    const hrs = Math.floor(diff / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
     const secs = Math.floor((diff % 60000) / 1000);
 
     const pad = (n: number) => n.toString().padStart(2, '0');
-    this.countdownText.set(`${pad(hours)}:${pad(mins)}:${pad(secs)}`);
+    this.countdownText.set(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
   }
 
   async submitVote(direction: 'up' | 'down') {

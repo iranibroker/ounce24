@@ -17,6 +17,14 @@ import { OctopusDirection } from '@ounce24/types';
 export class OctopusController {
   constructor(private readonly octopusService: OctopusService) {}
 
+  @Public()
+  @Get('config')
+  getConfig() {
+    return {
+      cutoffHour: this.octopusService.getCutoffHourVal(),
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('vote')
   vote(

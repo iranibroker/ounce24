@@ -40,7 +40,7 @@
       
       <!-- Countdown display -->
       <div class="countdown-wrapper" *ngIf="priceService.isMarketOpen()">
-        <span class="countdown-label">{{ 'octopus.cutoffWarning' | translate }}</span>
+        <span class="countdown-label">{{ 'octopus.cutoffWarning' | translate:{ time: localCutoffTime() } }}</span>
         <div class="countdown-timer">
           <span class="time">{{ countdownText() }}</span>
         </div>

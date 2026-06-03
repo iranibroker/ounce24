@@ -15,10 +15,10 @@ const IRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
 function getCutoffHour(): number {
   const envVal = process.env.OCTOPUS_CUTOFF_HOUR;
   if (envVal) {
-    const parsed = parseInt(envVal, 10);
+    const parsed = parseFloat(envVal);
     if (!isNaN(parsed)) return parsed;
   }
-  return 14; // default 2 PM Iran Time
+  return 10.5; // default 10:30 AM UTC (which is 14:00 Tehran Time)
 }
 
 @Injectable()
@@ -30,6 +30,10 @@ export class OctopusService {
     private ouncePriceService: OuncePriceService,
   ) {}
 
+  getCutoffHourVal(): number {
+    return getCutoffHour();
+  }
+
   private getTehranCalendarDate(date: Date): Date {
     const tehranTime = new Date(date.getTime() + IRAN_OFFSET_MS);
     const y = tehranTime.getUTCFullYear();
@@ -38,7 +42,7 @@ export class OctopusService {
     return new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
   }
 
-  /** True if user can change prediction: same calendar day in Iran, before cutoff hour Iran time. */
+  /** True if user can change prediction: same calendar day in Iran, before cutoff hour UTC. */
   private canChangePrediction(voteDate: Date): boolean {
     const now = new Date();
     const currentTehranDate = this.getTehranCalendarDate(now);
@@ -47,9 +51,8 @@ export class OctopusService {
       return false;
     }
 
-    const iranNow = new Date(now.getTime() + IRAN_OFFSET_MS);
-    const iranHour = iranNow.getUTCHours();
-    return iranHour < getCutoffHour();
+    const currentUTCHour = now.getUTCHours() + now.getUTCMinutes() / 60;
+    return currentUTCHour < getCutoffHour();
   }
 
   async vote(userId: string, direction: OctopusDirection) {
@@ -62,8 +65,12 @@ export class OctopusService {
     }
 
     if (!this.canChangePrediction(voteDate)) {
+      const cutoff = getCutoffHour();
+      const hrs = Math.floor(cutoff);
+      const mins = Math.round((cutoff - hrs) * 60);
+      const timeStr = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
       throw new BadRequestException(
-        `Cannot place or change prediction after ${getCutoffHour()}:00 Iran time`,
+        `Cannot place or change prediction after ${timeStr} UTC`,
       );
     }
 
