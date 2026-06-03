@@ -22,4 +22,13 @@ export class WebPushController {
     await this.webPushService.addSubscription(body);
     return { success: true };
   }
+
+  @Post('unsubscribe')
+  async unsubscribe(@Body() body: { endpoint: string }) {
+    if (!body || !body.endpoint) {
+      return { success: false, error: 'Invalid unsubscribe payload' };
+    }
+    await this.webPushService.removeSubscription(body.endpoint);
+    return { success: true };
+  }
 }

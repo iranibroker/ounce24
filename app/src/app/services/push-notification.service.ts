@@ -123,6 +123,16 @@ export class PushNotificationService {
     try {
       const subscription = await this.swRegistration.pushManager.getSubscription();
       if (subscription) {
+        // 1. Notify the backend to remove the subscription
+        try {
+          await lastValueFrom(
+            this.http.post('/api/web-push/unsubscribe', { endpoint: subscription.endpoint })
+          );
+        } catch (backendError) {
+          console.error('Failed to notify backend of unsubscription:', backendError);
+        }
+
+        // 2. Unsubscribe on browser side
         await subscription.unsubscribe();
         this.isSubscribed.set(false);
         console.log('Successfully unsubscribed from push notifications.');
