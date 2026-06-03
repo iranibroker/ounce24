@@ -350,6 +350,11 @@ Analyze the following short-term Gold (XAUUSD) signal based on the technical pri
 
 Signal Details:
 - Action Type: ${signal.type === SignalType.Buy ? 'BUY' : 'SELL'}
+- Signal Status: ${signal.status.toUpperCase()}
+- Placed Time (Created): ${signal.createdAt ? new Date(signal.createdAt).toISOString().replace('T', ' ').substring(5, 16) : 'N/A'}
+${signal.activeAt ? `- Triggered/Activated Time: ${new Date(signal.activeAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}
+${signal.closedAt ? `- Closed/Finished Time: ${new Date(signal.closedAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}
+${signal.closedOuncePrice ? `- Closed Ounce Price: $${signal.closedOuncePrice.toFixed(2)}` : ''}
 - Current Price: $${currentPrice.toFixed(2)}
 - Entry Price: $${signal.entryPrice.toFixed(2)}
 - Take Profit (TP): $${signal.profit.toFixed(2)} (Target Move: $${Math.abs(signal.profit - signal.entryPrice).toFixed(2)})
@@ -391,6 +396,16 @@ Instructions for Analysis:
 10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
 11. Ensure all price levels, support/resistance levels, and targets you mention are mathematically and logically correct. For a BUY signal, a resistance level ONLY blocks/obstructs the signal's target (TP) if it is located between the Entry Price and the TP (Entry < Resistance < TP). If the resistance is higher than the TP (Resistance > TP), it does NOT block the target, and you must not claim it blocks. Conversely, for a SELL signal, a support level only blocks the TP if it is between the Entry and TP (Entry > Support > TP). Do not hallucinate or make false claims about support/resistance blocking targets if they are outside this mathematical range. Double-check your numeric logic.
 12. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "مقاومت قبلی در 4450.00", and instead of "key support", say "حمایت کلیدی در 4410.00". Never mention a price level or chart concept without including its specific numerical value.
+13. Be highly aware of the Signal Status:
+   - If the status is PENDING:
+     - Understand that the trade is NOT live yet. The price must first reach/touch the Entry Price.
+     - For a BUY signal where the Entry Price is below the Current Price (e.g. Entry 4426.00 and Current Price 4449.16), the price must first drop (pullback) to trigger the buy entry. Calculate the distance between Current Price and Entry Price. If they are far apart, explain that the price needs to pullback to trigger, and state if it's unlikely to touch the entry ("این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه") based on the current market momentum/consolidation.
+     - For a SELL signal where the Entry Price is above the Current Price, the price must rise to trigger.
+     - Do NOT treat the Take Profit (TP) target level as a "resistance level that must be broken" for the signal to succeed. Reaching the TP is the goal of the trade, not a barrier.
+   - If the status is CLOSED or CANCELED:
+     - Understand that this is a past, finished trade. Your analysis must be a post-mortem technical review (an educational review of what happened in hindsight). Do NOT write a future forecast.
+     - Look at the Placed Time, Triggered/Activated Time, and Closed/Finished Time. Review how the price moved during this active period based on the price history.
+     - Analyze whether the signal reached its TP (Success) or hit SL (Failure), or remained pending and was canceled without triggering. State clearly in hindsight if the Entry, TP, and SL levels were well-placed or poorly positioned relative to the actual price action. Give honest, blunt, and educational feedback on the trade setup.
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage);
