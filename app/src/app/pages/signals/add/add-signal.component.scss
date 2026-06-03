@@ -64,39 +64,71 @@ button[type='submit'] {
 
 .analyze-button {
   height: 48px;
-  color: #ab47bc;
+  color: #c084fc !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+
+  .ai-sparkles-icon {
+    fill: currentColor;
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    .ai-sparkles-icon {
+      transform: scale(1.15) rotate(15deg);
+    }
+  }
 }
 
 .ai-generate-button {
   width: 100%;
   height: 48px;
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #7b1fa2, #ab47bc);
-  color: #fff !important;
-  border: none !important;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(171, 71, 188, 0.3);
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
+  font-weight: 600;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+  .ai-sparkles-icon {
+    fill: currentColor;
+    color: #c084fc;
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.6));
+    transition: transform 0.3s ease;
+  }
 
   &:hover {
-    background: linear-gradient(135deg, #8e24aa, #ba68c8);
-    box-shadow: 0 6px 16px rgba(171, 71, 188, 0.4);
+    background: rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(168, 85, 247, 0.8) !important;
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2), 0 0 8px rgba(168, 85, 247, 0.1);
+    transform: translateY(-2px);
+
+    .ai-sparkles-icon {
+      transform: scale(1.15) rotate(15deg);
+    }
   }
 
   &[disabled] {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    color: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
     box-shadow: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
+    transform: none !important;
+    cursor: not-allowed;
 
-  ng-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    .ai-sparkles-icon {
+      color: rgba(255, 255, 255, 0.2) !important;
+      filter: none !important;
+      transform: none !important;
+    }
   }
 }

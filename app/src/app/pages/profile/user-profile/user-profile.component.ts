@@ -1,5 +1,5 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline } from '@ng-icons/iconsax/outline';
+import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, inject, computed } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -46,7 +46,7 @@ const PAGE_SIZE = 20;
     SHARED,
     AchievementCardComponent,
     MatSlideToggleModule,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline })],
+  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxNotificationOutline, saxLogoutOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
@@ -57,6 +57,11 @@ export class UserProfileComponent {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   readonly pushService = inject(PushNotificationService);
+
+  logout() {
+    this.auth.token.set(null);
+    this.router.navigate(['/login']);
+  }
 
   async toggleNotifications(checked: boolean) {
     if (checked) {

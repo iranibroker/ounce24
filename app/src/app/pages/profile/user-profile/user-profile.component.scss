@@ -142,3 +142,31 @@
     }
   }
 }
+
+.logout-card {
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high) !important;
+  }
+
+  .logout-icon-container {
+    background: rgba(239, 68, 68, 0.1) !important; /* light red tint */
+    color: #ef4444 !important;
+  }
+
+  .disclosure-arrow {
+    transform: rotate(180deg);
+    transition: transform 0.2s ease;
+  }
+}
+
+:host-context([dir='rtl']) {
+  .logout-card {
+    .disclosure-arrow {
+      transform: rotate(0deg);
+    }
+  }
+}
+

@@ -98,6 +98,8 @@
   "profile": {
     "pageTitle": "Profile",
     "yourProfile": "Your Profile",
+    "logout": "Log Out",
+    "logoutDescription": "Log out of your current account",
     "yourGems": "Your GEMs",
     "signals": "Signals",
     "totalSignals": "Total Signals",

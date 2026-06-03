@@ -13,7 +13,11 @@
     [disabled]="isGenerating"
     class="ai-generate-button"
   >
-    <ng-icon name="saxStarOutline" size="18px"></ng-icon>
+    <svg viewBox="0 0 24 24" class="ai-sparkles-icon" width="18px" height="18px">
+      <path d="M12 3l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z" fill="currentColor" />
+      <path d="M19 8l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" />
+      <path d="M6 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" />
+    </svg>
     <span>{{ (isGenerating ? 'addSignal.generating' : 'addSignal.generateWithAI') | translate }}</span>
   </button>
 
@@ -120,8 +124,12 @@
         (click)="analyzeWithAI()"
         class="analyze-button"
       >
-        <ng-icon name="saxStarOutline" size="18px"></ng-icon>
-        {{ 'addSignal.analyzeWithAI' | translate }}
+        <svg viewBox="0 0 24 24" class="ai-sparkles-icon" width="18px" height="18px">
+          <path d="M12 3l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z" fill="currentColor" />
+          <path d="M19 8l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" />
+          <path d="M6 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor" />
+        </svg>
+        <span>{{ 'addSignal.analyzeWithAI' | translate }}</span>
       </button>
     }
   </form>

@@ -1,5 +1,5 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxStarOutline, saxTrendUpOutline, saxTrendDownOutline } from '@ng-icons/iconsax/outline';
+import { saxArrowLeftOutline, saxTrendUpOutline, saxTrendDownOutline } from '@ng-icons/iconsax/outline';
 import { saxTrendUpBold, saxTrendDownBold } from '@ng-icons/iconsax/bold';
 import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -36,7 +36,7 @@ import { AnalyticsService } from '../../../services/analytics.service';
     ReactiveFormsModule,
     MatCheckboxModule,
     SHARED,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxStarOutline, saxTrendUpBold, saxTrendDownBold, saxTrendUpOutline, saxTrendDownOutline })],
+  providers: [provideIcons({ saxArrowLeftOutline, saxTrendUpBold, saxTrendDownBold, saxTrendUpOutline, saxTrendDownOutline })],
   templateUrl: './add-signal.component.html',
   styleUrls: ['./add-signal.component.scss'],
 })

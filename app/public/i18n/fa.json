@@ -98,6 +98,8 @@
   "profile": {
     "pageTitle": "پروفایل",
     "yourProfile": "پروفایل شما",
+    "logout": "خروج از حساب",
+    "logoutDescription": "خروج از حساب کاربری فعلی",
     "yourGems": "الماسهای شما",
     "signals": "سیگنال‌ها",
     "totalSignals": "کل سیگنال‌ها",
