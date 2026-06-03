@@ -1,0 +1,238 @@
+<div class="octopus-container" [class.rtl]="languageService.isRTL()">
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <ng-icon name="saxArrowLeftOutline" size="24px"></ng-icon>
+    </button>
+    <div class="title-section">
+      <h1>{{ 'octopus.title' | translate }}</h1>
+      <p class="subtitle">{{ 'octopus.subtitle' | translate }}</p>
+    </div>
+    
+    <!-- User Star Scores Capsule -->
+    <div class="user-scores-capsule" *ngIf="myScoresQuery.data()?.total > 0">
+      <ng-icon name="saxStarOutline" class="star-icon"></ng-icon>
+      <span class="score-text">{{ myScoresQuery.data()?.total }}</span>
+    </div>
+  </header>
+
+  <!-- Live Market Status & Price Info -->
+  <section class="info-card glass-panel">
+    <div class="price-header">
+      <span class="label">{{ 'signalAnalyze.currentPrice' | translate }}</span>
+      <span class="live-price" [class.market-closed]="!priceService.isMarketOpen()">
+        ${{ priceService.value() | number:'1.2-2' }}
+      </span>
+    </div>
+    <div class="market-status-badge" [class.open]="priceService.isMarketOpen()">
+      <span class="dot"></span>
+      <span class="status-text">
+        {{ (priceService.isMarketOpen() ? 'octopus.marketOpen' : 'octopus.marketClosed') | translate }}
+      </span>
+    </div>
+  </section>
+
+  <!-- Daily Challenge / Prediction Section -->
+  <section class="prediction-section glass-panel">
+    <!-- Game Description & Countdown -->
+    <div class="challenge-header">
+      <p class="challenge-desc">{{ 'octopus.description' | translate }}</p>
+      
+      <!-- Countdown display -->
+      <div class="countdown-wrapper" *ngIf="priceService.isMarketOpen()">
+        <span class="countdown-label">{{ 'octopus.cutoffWarning' | translate }}</span>
+        <div class="countdown-timer">
+          <span class="time">{{ countdownText() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Voting Mode -->
+    <div class="voting-actions" *ngIf="priceService.isMarketOpen() && (!myVoteQuery.data()?.voted || isEditing())">
+      <button 
+        mat-flat-button 
+        class="vote-btn vote-up" 
+        [disabled]="isSubmitting()" 
+        (click)="submitVote('up')"
+      >
+        <ng-icon name="saxTrendUpBold" size="24px" class="btn-icon"></ng-icon>
+        <span>{{ 'octopus.predictUp' | translate }}</span>
+      </button>
+
+      <button 
+        mat-flat-button 
+        class="vote-btn vote-down" 
+        [disabled]="isSubmitting()" 
+        (click)="submitVote('down')"
+      >
+        <ng-icon name="saxTrendDownBold" size="24px" class="btn-icon"></ng-icon>
+        <span>{{ 'octopus.predictDown' | translate }}</span>
+      </button>
+    </div>
+
+    <!-- Voted / Already Submitted Mode -->
+    <div class="voted-summary-card" *ngIf="myVoteQuery.data() as vote">
+      <div class="summary-details" *ngIf="vote.voted && !isEditing()">
+        <p class="voted-label">{{ 'octopus.votedText' | translate }}</p>
+        <div class="direction-badge" [class.up]="vote.direction === 'up'" [class.down]="vote.direction === 'down'">
+          <ng-icon [name]="vote.direction === 'up' ? 'saxTrendUpBold' : 'saxTrendDownBold'" size="20px"></ng-icon>
+          <span class="dir-text">{{ ('octopus.predict' + (vote.direction === 'up' ? 'Up' : 'Down')) | translate }}</span>
+          <span class="at-price">&#64; ${{ vote.votePrice | number:'1.2-2' }}</span>
+        </div>
+
+        <!-- Settlement details -->
+        <div class="settle-status" [class.settled]="vote.settled">
+          <span class="status-msg" *ngIf="!vote.settled">{{ 'octopus.status.pending' | translate }}</span>
+          <span class="status-msg correct" *ngIf="vote.settled && vote.points > 0">{{ 'octopus.status.correct' | translate }}</span>
+          <span class="status-msg incorrect" *ngIf="vote.settled && vote.points === 0">{{ 'octopus.status.incorrect' | translate }}</span>
+        </div>
+
+        <!-- Edit Button (Active if market open and before cutoff hour) -->
+        <button 
+          mat-stroked-button 
+          class="edit-btn" 
+          *ngIf="vote.canChange"
+          (click)="isEditing.set(true)"
+        >
+          {{ 'octopus.editPrediction' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sentiment Statistics Section (Blurred if user hasn't voted yet) -->
+  <section class="sentiment-section glass-panel">
+    <h3>{{ 'octopus.sentimentTitle' | translate }}</h3>
+    
+    <div class="sentiment-wrapper" [class.blurred]="priceService.isMarketOpen() && !myVoteQuery.data()?.voted">
+      <div class="sentiment-stats" *ngIf="sentimentQuery.data() as sentiment">
+        <!-- Up Sentiment Progress Bar -->
+        <div class="sentiment-row">
+          <div class="row-header">
+            <span class="sentiment-name up">{{ 'octopus.predictUp' | translate }}</span>
+            <span class="sentiment-percentage up">{{ sentiment.upPercent }}%</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar up" [style.width.%]="sentiment.upPercent"></div>
+          </div>
+        </div>
+
+        <!-- Down Sentiment Progress Bar -->
+        <div class="sentiment-row">
+          <div class="row-header">
+            <span class="sentiment-name down">{{ 'octopus.predictDown' | translate }}</span>
+            <span class="sentiment-percentage down">{{ sentiment.downPercent }}%</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar down" [style.width.%]="sentiment.downPercent"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blur Overlay / Locked State -->
+      <div class="blur-overlay" *ngIf="priceService.isMarketOpen() && !myVoteQuery.data()?.voted">
+        <div class="lock-card glass-panel">
+          <span class="lock-icon">🔒</span>
+          <p class="lock-desc">{{ 'octopus.sentimentLocked' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section class="leaderboard-section glass-panel">
+    <div class="lead-header">
+      <h2>{{ 'octopus.leaderboard.title' | translate }}</h2>
+    </div>
+
+    <mat-tab-group animationDuration="200ms" class="leaderboard-tabs">
+      <!-- Weekly Leaderboard Tab -->
+      <mat-tab [label]="'octopus.leaderboard.weekly' | translate">
+        <div class="tab-content">
+          <app-data-loading *ngIf="weeklyLeaderboardQuery.isLoading()"></app-data-loading>
+          
+          <mat-nav-list *ngIf="!weeklyLeaderboardQuery.isLoading() && weeklyLeaderboardQuery.data() as leaderboard">
+            <div class="empty-state" *ngIf="leaderboard.length === 0">
+              {{ 'octopus.leaderboard.empty' | translate }}
+            </div>
+            
+            <a 
+              mat-list-item 
+              *ngFor="let user of leaderboard"
+              [routerLink]="['/profile', user.userId]"
+              [class.current-user]="user.userId === authService.userQuery.data()?.id"
+              class="leader-row"
+            >
+              <!-- Rank -->
+              <span matListItemIcon class="rank-badge" [class]="'rank-' + user.rank">
+                {{ user.rank }}
+              </span>
+
+              <!-- Avatar -->
+              <img 
+                matListItemAvatar 
+                [appAvatar]="mapToUserShape(user)"
+                [alt]="user.title || user.name"
+                class="user-avatar"
+              />
+
+              <!-- Name & Title -->
+              <span matListItemTitle class="user-name">{{ user.title || user.name }}</span>
+
+              <!-- Star Score -->
+              <span matListItemMeta class="user-score">
+                {{ 'octopus.leaderboard.starsCount' | translate:{ value: user.totalPoints } }}
+                <ng-icon name="saxStarOutline" class="row-star-icon"></ng-icon>
+              </span>
+              <mat-divider></mat-divider>
+            </a>
+          </mat-nav-list>
+        </div>
+      </mat-tab>
+
+      <!-- Total/All-time Leaderboard Tab -->
+      <mat-tab [label]="'octopus.leaderboard.total' | translate">
+        <div class="tab-content">
+          <app-data-loading *ngIf="totalLeaderboardQuery.isLoading()"></app-data-loading>
+          
+          <mat-nav-list *ngIf="!totalLeaderboardQuery.isLoading() && totalLeaderboardQuery.data() as leaderboard">
+            <div class="empty-state" *ngIf="leaderboard.length === 0">
+              {{ 'octopus.leaderboard.empty' | translate }}
+            </div>
+
+            <a 
+              mat-list-item 
+              *ngFor="let user of leaderboard"
+              [routerLink]="['/profile', user.userId]"
+              [class.current-user]="user.userId === authService.userQuery.data()?.id"
+              class="leader-row"
+            >
+              <!-- Rank -->
+              <span matListItemIcon class="rank-badge" [class]="'rank-' + user.rank">
+                {{ user.rank }}
+              </span>
+
+              <!-- Avatar -->
+              <img 
+                matListItemAvatar 
+                [appAvatar]="mapToUserShape(user)"
+                [alt]="user.title || user.name"
+                class="user-avatar"
+              />
+
+              <!-- Name & Title -->
+              <span matListItemTitle class="user-name">{{ user.title || user.name }}</span>
+
+              <!-- Star Score -->
+              <span matListItemMeta class="user-score">
+                {{ 'octopus.leaderboard.starsCount' | translate:{ value: user.totalPoints } }}
+                <ng-icon name="saxStarOutline" class="row-star-icon"></ng-icon>
+              </span>
+              <mat-divider></mat-divider>
+            </a>
+          </mat-nav-list>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

@@ -12,7 +12,6 @@ import { DataLoadingComponent } from '../../../components/data-loading/data-load
 import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { OctopusBannerComponent } from '../../../components/octopus-banner/octopus-banner.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxAddOutline } from '@ng-icons/iconsax/outline';
 
@@ -25,7 +24,6 @@ const PAGE_SIZE = 20;
     NgIcon,
     CommonModule,
     RouterModule,
-    OctopusBannerComponent,
     MatButtonToggleModule,
     MatButtonModule,
     FormsModule,

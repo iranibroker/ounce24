@@ -1,15 +1,44 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, OnDestroy } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class OuncePriceService {
+export class OuncePriceService implements OnDestroy {
   value = signal<number>(0);
+  isMarketOpen = signal<boolean>(true);
   private eventSource: EventSource | null = null;
+  private checkInterval: any = null;
 
   constructor() {
     this.connectToStream();
+    this.startLocalMarketCheck();
+  }
+
+  private calculateIsMarketOpen(date: Date = new Date()): boolean {
+    const day = date.getUTCDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+    const hour = date.getUTCHours();
+
+    if (day === 6) { // Saturday
+      return false;
+    }
+    if (day === 0) { // Sunday
+      return hour >= 22;
+    }
+    if (day === 5) { // Friday
+      return hour < 22;
+    }
+    return true; // Mon, Tue, Wed, Thu
+  }
+
+  private startLocalMarketCheck() {
+    // Run initial check
+    this.isMarketOpen.set(this.calculateIsMarketOpen());
+    
+    // Check every 30 seconds to toggle market status dynamically
+    this.checkInterval = setInterval(() => {
+      this.isMarketOpen.set(this.calculateIsMarketOpen());
+    }, 30000);
   }
 
   private connectToStream() {
@@ -18,6 +47,9 @@ export class OuncePriceService {
     this.eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       this.value.set(data.price);
+      if (data.hasOwnProperty('isMarketOpen')) {
+        this.isMarketOpen.set(data.isMarketOpen);
+      }
     };
 
     this.eventSource.onerror = (error) => {
@@ -30,5 +62,8 @@ export class OuncePriceService {
 
   ngOnDestroy() {
     this.eventSource?.close();
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+    }
   }
 }

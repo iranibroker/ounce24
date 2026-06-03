@@ -1,27 +1,33 @@
 @if (auth.userQuery.data()) {
-  <div class="octo-banner" (click)="goToOctopus($event)">
-    <!-- Background Bubbles -->
-    <div class="bubble b1"></div>
-    <div class="bubble b2"></div>
-    <div class="bubble b3"></div>
-    <div class="bubble b4"></div>
+  <div class="octo-banner-modern glass-panel" (click)="goToOctopus($event)">
+    <!-- Decorative background elements -->
+    <div class="glow-bg"></div>
 
-    <!-- Decorative Arrows -->
-    <div class="chart-arrow arrow-up">▲</div>
-    <div class="chart-arrow arrow-down">▼</div>
-
-    <!-- Text Content -->
+    <!-- Left Content (Text and Action) -->
     <div class="banner-content">
-      <h2 class="banner-title">OCTOPUS<br />GOLD TRADER</h2>
-      <p class="banner-subtitle">PREDICT THE MARKET. WIN XP.</p>
-      <div>
-        <span class="cta-badge">PLAY NOW ►</span>
+      <div class="header-group">
+        <span class="game-tag">DAILY GAME</span>
+        <h2 class="banner-title">{{ 'octopus.title' | translate }}</h2>
+      </div>
+      <p class="banner-subtitle">{{ 'octopus.subtitle' | translate }}</p>
+      
+      <div class="play-badge">
+        <span>PLAY NOW</span>
+        <span class="arrow">→</span>
       </div>
     </div>
 
-    <!-- Mascot -->
-    <div class="mascot-wrapper">
-      <div class="pixel-octopus"></div>
+    <!-- Right Content (Visual Concept: Star + Trend Indicators) -->
+    <div class="banner-visual">
+      <div class="visual-card">
+        <div class="star-wrapper">
+          <span class="star-emoji">⭐</span>
+        </div>
+        <div class="trend-lines">
+          <div class="trend-up"><ng-icon name="saxTrendUpBold"></ng-icon></div>
+          <div class="trend-down"><ng-icon name="saxTrendDownBold"></ng-icon></div>
+        </div>
+      </div>
     </div>
   </div>
 }

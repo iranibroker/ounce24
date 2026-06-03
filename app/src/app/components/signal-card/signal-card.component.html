@@ -48,11 +48,9 @@
         </mat-chip>
       }
       @case (SignalStatus.Active) {
-        <mat-chip class="status-chip">
-          <span [class.red]="pip() < 0" [class.green]="pip() > 0">
-            {{ pip() }} {{ 'signal.pip' | translate }}
-            <ng-icon name="saxPlayOutline" size="12px"></ng-icon>
-          </span>
+        <mat-chip class="status-chip" [disabled]="true">
+          <span [class.text-red]="pip() < 0" [class.text-green]="pip() > 0">{{ pip() }}</span>
+          {{ 'signal.pip' | translate }}
         </mat-chip>
       }
       @case (SignalStatus.Closed) {

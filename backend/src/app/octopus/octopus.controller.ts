@@ -52,6 +52,14 @@ export class OctopusController {
     );
   }
 
+  @Public()
+  @Get('leaderboard/total')
+  getTopTotal(@Query('limit') limit?: string) {
+    return this.octopusService.getTopTotal(
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me/scores')
   getUserScores(@LoginUser() user: { id: string }) {

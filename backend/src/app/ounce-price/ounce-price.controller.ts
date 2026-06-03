@@ -16,6 +16,7 @@ export class OuncePriceController {
   getCurrentPrice() {
     return {
       price: this.ouncePriceService.current,
+      isMarketOpen: this.ouncePriceService.isMarketOpen(),
     };
   }
 
@@ -25,7 +26,10 @@ export class OuncePriceController {
       map(
         (price) =>
           ({
-            data: { price },
+            data: {
+              price,
+              isMarketOpen: this.ouncePriceService.isMarketOpen(),
+            },
             type: 'message',
           }) as MessageEvent,
       ),
@@ -35,5 +39,15 @@ export class OuncePriceController {
   @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
   handleOuncePriceUpdated(price: number) {
     this.obs.next(price);
+  }
+
+  @OnEvent(EVENTS.MARKET_CLOSED)
+  handleMarketClosed() {
+    this.obs.next(this.ouncePriceService.current);
+  }
+
+  @OnEvent(EVENTS.MARKET_OPENED)
+  handleMarketOpened() {
+    this.obs.next(this.ouncePriceService.current);
   }
 }

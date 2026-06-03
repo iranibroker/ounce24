@@ -17,11 +17,13 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../services/auth.service';
 import { MatTabsModule } from '@angular/material/tabs';
 import { LeaderboardTableComponent } from './table/table.component';
+import { OctopusBannerComponent } from '../../components/octopus-banner/octopus-banner.component';
 
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
     TranslateModule,
     RouterModule,
     SHARED,
@@ -30,7 +32,9 @@ import { LeaderboardTableComponent } from './table/table.component';
     MatToolbarModule,
     MatTabsModule,
     LeaderboardTableComponent,
-    NgIcon],
+    NgIcon,
+    OctopusBannerComponent
+  ],
   providers: [provideIcons({ saxInfoCircleOutline })],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',

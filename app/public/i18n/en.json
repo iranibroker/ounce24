@@ -267,5 +267,36 @@
       "title": "Live Ounce Price Alerts",
       "description": "Get instant notifications when gold ounce price changes"
     }
+  },
+  "octopus": {
+    "title": "Octopus",
+    "subtitle": "Daily Ounce Price Guess",
+    "description": "Predict whether the day's market closing price will be higher or lower than the current price. Earn 1 star ⭐ for correct predictions.",
+    "cutoffWarning": "Predictions can only be placed or edited before 14:00 (Iran Time).",
+    "marketOpen": "Market Open",
+    "marketClosed": "Market Closed",
+    "predictUp": "Higher (Bullish)",
+    "predictDown": "Lower (Bearish)",
+    "votedText": "Your prediction is registered:",
+    "editPrediction": "Edit Prediction",
+    "sentimentTitle": "Today's Trader Sentiment",
+    "sentimentLocked": "Place your prediction to unlock today's sentiment breakdown.",
+    "leaderboard": {
+      "title": "Octopus Leaderboard",
+      "weekly": "Weekly",
+      "total": "Total",
+      "starsCount": "{{value}} Stars",
+      "empty": "No rankings yet"
+    },
+    "score": {
+      "weekly": "This week's stars: {{value}}",
+      "total": "Total stars: {{value}}"
+    },
+    "status": {
+      "correct": "Correct prediction (+1 star) ⭐",
+      "incorrect": "Incorrect prediction (0 stars)",
+      "pending": "Waiting for market close to settle"
+    },
+    "success": "Prediction submitted successfully."
   }
 }

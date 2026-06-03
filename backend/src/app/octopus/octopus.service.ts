@@ -1,16 +1,25 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { Cron } from '@nestjs/schedule';
+import { OnEvent } from '@nestjs/event-emitter';
 import { OctopusPrediction, OctopusDirection, User } from '@ounce24/types';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
+import { EVENTS } from '../consts';
 
 /** Gold market close: 22:00 UTC (after NY session, COMEX daily break) */
 const MARKET_CLOSE_HOUR_UTC = 22;
 
-/** Iran timezone: UTC+3:30. Users can change prediction until 2 PM Iran time. */
+/** Iran timezone: UTC+3:30. Users can change prediction until a specific cutoff hour Iran time. */
 const IRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
-const IRAN_CHANGE_CUTOFF_HOUR = 14;
+
+function getCutoffHour(): number {
+  const envVal = process.env.OCTOPUS_CUTOFF_HOUR;
+  if (envVal) {
+    const parsed = parseInt(envVal, 10);
+    if (!isNaN(parsed)) return parsed;
+  }
+  return 14; // default 2 PM Iran Time
+}
 
 @Injectable()
 export class OctopusService {
@@ -21,40 +30,43 @@ export class OctopusService {
     private ouncePriceService: OuncePriceService,
   ) {}
 
-  private startOfDayUTC(date: Date): Date {
-    const d = new Date(date);
-    d.setUTCHours(0, 0, 0, 0);
-    return d;
+  private getTehranCalendarDate(date: Date): Date {
+    const tehranTime = new Date(date.getTime() + IRAN_OFFSET_MS);
+    const y = tehranTime.getUTCFullYear();
+    const m = tehranTime.getUTCMonth();
+    const d = tehranTime.getUTCDate();
+    return new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
   }
 
-  /** True if user can change prediction: same calendar day in Iran, before 2 PM Iran time. */
+  /** True if user can change prediction: same calendar day in Iran, before cutoff hour Iran time. */
   private canChangePrediction(voteDate: Date): boolean {
     const now = new Date();
-    const iranNow = new Date(now.getTime() + IRAN_OFFSET_MS);
-    const iranVoteDate = new Date(voteDate.getTime() + IRAN_OFFSET_MS);
+    const currentTehranDate = this.getTehranCalendarDate(now);
 
-    const iranNowY = iranNow.getUTCFullYear();
-    const iranNowM = iranNow.getUTCMonth();
-    const iranNowD = iranNow.getUTCDate();
-    const iranVoteY = iranVoteDate.getUTCFullYear();
-    const iranVoteM = iranVoteDate.getUTCMonth();
-    const iranVoteD = iranVoteDate.getUTCDate();
-
-    if (
-      iranNowY !== iranVoteY ||
-      iranNowM !== iranVoteM ||
-      iranNowD !== iranVoteD
-    ) {
+    if (voteDate.getTime() !== currentTehranDate.getTime()) {
       return false;
     }
 
+    const iranNow = new Date(now.getTime() + IRAN_OFFSET_MS);
     const iranHour = iranNow.getUTCHours();
-    const iranMin = iranNow.getUTCMinutes();
-    return iranHour < IRAN_CHANGE_CUTOFF_HOUR;
+    return iranHour < getCutoffHour();
   }
 
   async vote(userId: string, direction: OctopusDirection) {
-    const voteDate = this.startOfDayUTC(new Date());
+    const now = new Date();
+    const voteDate = this.getTehranCalendarDate(now);
+
+    const isMarketOpen = this.ouncePriceService.isMarketOpen(now);
+    if (!isMarketOpen) {
+      throw new BadRequestException('Market is closed');
+    }
+
+    if (!this.canChangePrediction(voteDate)) {
+      throw new BadRequestException(
+        `Cannot place or change prediction after ${getCutoffHour()}:00 Iran time`,
+      );
+    }
+
     const existing = await this.predictionModel
       .findOne({ user: userId, voteDate })
       .exec();
@@ -65,12 +77,6 @@ export class OctopusService {
     }
 
     if (existing) {
-      if (!this.canChangePrediction(existing.voteDate)) {
-        throw new BadRequestException(
-          'Cannot change prediction after 2 PM Iran time',
-        );
-      }
-
       await this.predictionModel
         .updateOne(
           { _id: existing._id },
@@ -104,8 +110,8 @@ export class OctopusService {
 
   async getSentiment(date?: Date) {
     const voteDate = date
-      ? this.startOfDayUTC(date)
-      : this.startOfDayUTC(new Date());
+      ? this.getTehranCalendarDate(date)
+      : this.getTehranCalendarDate(new Date());
 
     const predictions = await this.predictionModel
       .find({ voteDate })
@@ -128,7 +134,7 @@ export class OctopusService {
 
   /** Settle predictions for the given date (uses close price from market close) */
   async settlePredictions(forDate: Date) {
-    const voteDate = this.startOfDayUTC(forDate);
+    const voteDate = this.getTehranCalendarDate(forDate);
     const unsettled = await this.predictionModel
       .find({ voteDate, points: { $exists: false } })
       .exec();
@@ -160,11 +166,13 @@ export class OctopusService {
     return { settled };
   }
 
-  /** Runs at 22:00 UTC Mon–Fri (gold market close). Settles the day that just ended. */
-  @Cron(`0 ${MARKET_CLOSE_HOUR_UTC} * * 1-5`, { timeZone: 'UTC' })
+  /** Settles predictions for the day when the MARKET_CLOSED event is received. */
+  @OnEvent(EVENTS.MARKET_CLOSED)
   async settleDailyPredictions() {
     const today = new Date();
-    return this.settlePredictions(today);
+    // Adjust by subtracting 4 hours to get the correct trading day's calendar date in Tehran
+    const settleDate = new Date(today.getTime() - 4 * 60 * 60 * 1000);
+    return this.settlePredictions(settleDate);
   }
 
   private getWeekRange(): { start: Date; end: Date } {
@@ -270,12 +278,51 @@ export class OctopusService {
     }));
   }
 
+  async getTopTotal(limit = 10) {
+    const agg = await this.predictionModel
+      .aggregate([
+        {
+          $match: {
+            points: { $exists: true },
+          },
+        },
+        { $group: { _id: '$user', totalPoints: { $sum: '$points' } } },
+        { $sort: { totalPoints: -1 } },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'userDoc',
+          },
+        },
+        { $unwind: '$userDoc' },
+        {
+          $project: {
+            userId: '$_id',
+            totalPoints: 1,
+            name: '$userDoc.name',
+            title: '$userDoc.title',
+            avatar: '$userDoc.avatar',
+            rank: { $literal: 0 },
+          },
+        },
+      ])
+      .exec();
+
+    return agg.map((r, i) => ({
+      ...r,
+      rank: i + 1,
+    }));
+  }
+
   async getUserScores(userId: string) {
     const { start: weekStart, end: weekEnd } = this.getWeekRange();
     const { start: monthStart, end: monthEnd } = this.getMonthRange();
     const userObjId = new mongoose.Types.ObjectId(userId);
 
-    const [week, month] = await Promise.all([
+    const [week, month, total] = await Promise.all([
       this.predictionModel
         .aggregate([
           {
@@ -300,31 +347,48 @@ export class OctopusService {
           { $group: { _id: null, total: { $sum: '$points' } } },
         ])
         .exec(),
+      this.predictionModel
+        .aggregate([
+          {
+            $match: {
+              user: userObjId,
+              points: { $exists: true },
+            },
+          },
+          { $group: { _id: null, total: { $sum: '$points' } } },
+        ])
+        .exec(),
     ]);
 
     return {
       weekly: week[0]?.total ?? 0,
       monthly: month[0]?.total ?? 0,
+      total: total[0]?.total ?? 0,
     };
   }
 
   async getUserVote(userId: string, date?: Date) {
     const voteDate = date
-      ? this.startOfDayUTC(date)
-      : this.startOfDayUTC(new Date());
+      ? this.getTehranCalendarDate(date)
+      : this.getTehranCalendarDate(new Date());
 
     const prediction = await this.predictionModel
       .findOne({ user: userId, voteDate })
       .lean()
       .exec();
 
+    const isMarketOpen = this.ouncePriceService.isMarketOpen();
+
     if (!prediction) {
-      return { voted: false };
+      return {
+        voted: false,
+        canVote: isMarketOpen && this.canChangePrediction(voteDate),
+      };
     }
 
     const settled = prediction.points != null;
     const canChange =
-      !settled && this.canChangePrediction(prediction.voteDate);
+      !settled && isMarketOpen && this.canChangePrediction(prediction.voteDate);
 
     return {
       voted: true,

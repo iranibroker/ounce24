@@ -31,11 +31,11 @@ mat-card-subtitle {
   }
 }
 
-.red {
+.red, .text-red {
   color: var(--mat-sys-error) !important;
 }
 
-.green {
+.green, .text-green {
   color: var(--mat-sys-secondary) !important;
 }
 
@@ -91,7 +91,7 @@ mat-chip {
   align-items: center !important;
   justify-content: center !important;
 
-  .green, .red {
+  .green, .red, .text-green, .text-red {
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;

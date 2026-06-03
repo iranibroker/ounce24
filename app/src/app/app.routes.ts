@@ -3,6 +3,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { SignalsComponent } from './pages/signals/list/signals.component';
 import { AddSignalComponent } from './pages/signals/add/add-signal.component';
 import { SignalInfoComponent } from './pages/signals/info/signal-info.component';
+import { OctopusComponent } from './pages/signals/octopus/octopus.component';
 import { loginActivator, translateActivator, languageGuard } from './guards';
 import { authRoutes } from './pages/auth/auth.routes';
 import { EditUserComponent } from './pages/profile/edit-user/edit-user.component';
@@ -34,6 +35,11 @@ export const appRoutes: Route[] = [
           {
             path: '',
             component: SignalsComponent,
+          },
+          {
+            path: 'octopus',
+            component: OctopusComponent,
+            canActivate: [loginActivator],
           },
           {
             path: 'add',

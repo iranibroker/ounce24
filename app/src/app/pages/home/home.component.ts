@@ -6,10 +6,11 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { lastValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { DataLoadingComponent } from '../../components/data-loading/data-loading.component';
+import { OctopusBannerComponent } from '../../components/octopus-banner/octopus-banner.component';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, SignalCardComponent, DataLoadingComponent],
+  imports: [CommonModule, SignalCardComponent, DataLoadingComponent, OctopusBannerComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })

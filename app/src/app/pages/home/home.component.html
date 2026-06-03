@@ -1,4 +1,5 @@
 <div class="signals-container">
+  <app-octopus-banner />
   @if (query.data()) {
     @for (signal of query.data(); track $index) {
       <app-signal-card [signal]="signal" />
