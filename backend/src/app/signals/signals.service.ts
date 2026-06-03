@@ -14,6 +14,7 @@ import {
   SignalStatus,
   SignalType,
   User,
+  OuncePriceCandle,
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -45,6 +46,8 @@ export class SignalsService {
     private aiChatService: AiChatService,
     @InjectModel(SignalAnalyze.name)
     private signalAnalyzeModel: Model<SignalAnalyze>,
+    @InjectModel(OuncePriceCandle.name)
+    private candleModel: Model<OuncePriceCandle>,
   ) {}
 
   @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
@@ -271,14 +274,87 @@ export class SignalsService {
     }
 
     const currentPrice = this.ouncePriceService.current;
-    const dto = {
-      type: signal.type,
-      entryPrice: signal.entryPrice,
-      tp: signal.profit,
-      sl: signal.loss,
-    };
 
-    const result = await this.aiChatService.createResponse(JSON.stringify(dto));
+    // Fetch recent 5m candles from the past 3 days
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    const candles5m = await this.candleModel.find({
+      timestamp: { $gte: threeDaysAgo }
+    }).sort({ timestamp: 1 }).exec();
+
+    // Prepare default values
+    let formattedHistory1h = 'No historical data available.';
+    let formattedHistory15m = 'No historical data available.';
+    let formattedHistory5m = 'No historical data available.';
+    let rsi5m = 50;
+    let rsi15m = 50;
+    let rsi1h = 50;
+    let sma20_5m = currentPrice;
+    let atr5m = 1.5;
+
+    if (candles5m.length > 0) {
+      const closes5m = candles5m.map(c => c.close);
+      rsi5m = calculateRSI(closes5m, 14);
+      sma20_5m = calculateSMA(closes5m, 20);
+      atr5m = calculateATR(candles5m, 14);
+
+      const candles15m = aggregateTo15m(candles5m);
+      const closes15m = candles15m.map(c => c.close);
+      rsi15m = calculateRSI(closes15m, 14);
+
+      const candles1h = aggregateTo1h(candles5m);
+      const closes1h = candles1h.map(c => c.close);
+      rsi1h = calculateRSI(closes1h, 14);
+
+      const formatCandle = (c: any) => {
+        const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
+        return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
+      };
+
+      if (candles1h.length > 0) {
+        formattedHistory1h = candles1h.map(formatCandle).join('\n');
+      }
+      if (candles15m.length > 0) {
+        formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
+      }
+      formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
+    }
+
+    const promptMessage = `
+You are a professional financial analyst AI for Ounce24.
+Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
+
+Signal Details:
+- Action Type: ${signal.type === SignalType.Buy ? 'BUY' : 'SELL'}
+- Current Price: $${currentPrice.toFixed(2)}
+- Entry Price: $${signal.entryPrice.toFixed(2)}
+- Take Profit (TP): $${signal.profit.toFixed(2)} (Target Move: $${Math.abs(signal.profit - signal.entryPrice).toFixed(2)})
+- Stop Loss (SL): $${signal.loss.toFixed(2)} (Risk Move: $${Math.abs(signal.loss - signal.entryPrice).toFixed(2)})
+
+Technical Indicators (Calculated on 5m, 15m, 1h tables):
+- 5m RSI(14): ${rsi5m.toFixed(2)}
+- 15m RSI(14): ${rsi15m.toFixed(2)}
+- 1h RSI(14): ${rsi1h.toFixed(2)}
+- 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
+- 5m ATR(14) (Volatility): $${atr5m.toFixed(2)}
+
+Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory1h}
+
+Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory15m}
+
+Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory5m}
+
+Instructions:
+1. Provide a professional, concise, short-term technical analysis (1-2 short paragraphs).
+2. Focus on immediate chart-based patterns, levels of support/resistance, RSI conditions, and momentum.
+3. Assess the feasibility of the Take Profit (TP) and Stop Loss (SL) levels relative to the current market volatility (ATR) and recent price action.
+4. Strictly write the analysis in English.
+5. Use clean HTML tags for styling (e.g. <b>, <ul>, <li>) if needed, but do not use markdown links. Return the HTML directly without any surrounding markdown code blocks (do not wrap in \`\`\`html or similar).
+`;
+
+    const result = await this.aiChatService.createResponse(promptMessage);
 
     // // Deduct 1 gem from user
     await this.userModel
@@ -311,4 +387,104 @@ export class SignalsService {
       totalTokens: result.totalTokens,
     };
   }
+}
+
+// Utility functions for technical analysis calculations
+
+function calculateRSI(closes: number[], period = 14): number {
+  if (closes.length <= period) return 50;
+  let gains = 0;
+  let losses = 0;
+
+  for (let i = 1; i <= period; i++) {
+    const diff = closes[i] - closes[i - 1];
+    if (diff > 0) gains += diff;
+    else losses -= diff;
+  }
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+
+  for (let i = period + 1; i < closes.length; i++) {
+    const diff = closes[i] - closes[i - 1];
+    avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+  }
+
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+function calculateSMA(closes: number[], period: number): number {
+  if (closes.length < period) return closes[closes.length - 1] || 0;
+  const sum = closes.slice(-period).reduce((a, b) => a + b, 0);
+  return sum / period;
+}
+
+function calculateATR(candles: { high: number; low: number; close: number }[], period = 14): number {
+  if (candles.length < period + 1) return 1.5;
+  const trs: number[] = [];
+  for (let i = 1; i < candles.length; i++) {
+    const h = candles[i].high;
+    const l = candles[i].low;
+    const pc = candles[i - 1].close;
+    const tr = Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc));
+    trs.push(tr);
+  }
+  const sum = trs.slice(-period).reduce((a, b) => a + b, 0);
+  return sum / period;
+}
+
+function aggregateTo15m(candles5m: OuncePriceCandle[]): { timestamp: Date; open: number; high: number; low: number; close: number }[] {
+  const candles15m: { timestamp: Date; open: number; high: number; low: number; close: number }[] = [];
+  const groups: { [key: string]: OuncePriceCandle[] } = {};
+
+  for (const candle of candles5m) {
+    const date = new Date(candle.timestamp);
+    const minutes = date.getMinutes();
+    const alignedMinutes = Math.floor(minutes / 15) * 15;
+    date.setMinutes(alignedMinutes, 0, 0);
+    const key = date.getTime().toString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(candle);
+  }
+
+  for (const key of Object.keys(groups).sort()) {
+    const group = groups[key];
+    const sortedGroup = [...group].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const timestamp = new Date(Number(key));
+    const open = sortedGroup[0].open;
+    const close = sortedGroup[sortedGroup.length - 1].close;
+    const high = Math.max(...sortedGroup.map(c => c.high));
+    const low = Math.min(...sortedGroup.map(c => c.low));
+
+    candles15m.push({ timestamp, open, high, low, close });
+  }
+  return candles15m;
+}
+
+function aggregateTo1h(candles5m: OuncePriceCandle[]): { timestamp: Date; open: number; high: number; low: number; close: number }[] {
+  const candles1h: { timestamp: Date; open: number; high: number; low: number; close: number }[] = [];
+  const groups: { [key: string]: OuncePriceCandle[] } = {};
+
+  for (const candle of candles5m) {
+    const date = new Date(candle.timestamp);
+    date.setMinutes(0, 0, 0);
+    const key = date.getTime().toString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(candle);
+  }
+
+  for (const key of Object.keys(groups).sort()) {
+    const group = groups[key];
+    const sortedGroup = [...group].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const timestamp = new Date(Number(key));
+    const open = sortedGroup[0].open;
+    const close = sortedGroup[sortedGroup.length - 1].close;
+    const high = Math.max(...sortedGroup.map(c => c.high));
+    const low = Math.min(...sortedGroup.map(c => c.low));
+
+    candles1h.push({ timestamp, open, high, low, close });
+  }
+  return candles1h;
 }

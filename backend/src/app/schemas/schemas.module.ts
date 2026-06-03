@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Signal, User, GemLog, Podcast, Achievement, SignalAnalyze, OctopusPrediction } from '@ounce24/types';
+import { Signal, User, GemLog, Podcast, Achievement, SignalAnalyze, OctopusPrediction, OuncePriceCandle } from '@ounce24/types';
 import { UserSchema } from './user.schema';
 import { SignalSchema } from './signal.schema';
 import { SignalAnalyzeSchema } from './signal-analyze.schema';
@@ -9,6 +9,7 @@ import { PodcastSchema } from './podcast.schema';
 import { AchievementSchema } from './achievement.schema';
 import { OctopusPredictionSchema } from './octopus-prediction.schema';
 import { PushSubscription, PushSubscriptionSchema } from './push-subscription.schema';
+import { OuncePriceCandleSchema } from './ounce-price-candle.schema';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PushSubscription, PushSubscriptionSchema } from './push-subscription.sc
       { name: Achievement.name, schema: AchievementSchema },
       { name: OctopusPrediction.name, schema: OctopusPredictionSchema },
       { name: PushSubscription.name, schema: PushSubscriptionSchema },
+      { name: OuncePriceCandle.name, schema: OuncePriceCandleSchema },
     ]),
   ],
   exports: [MongooseModule],
