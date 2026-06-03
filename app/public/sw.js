@@ -28,6 +28,7 @@ self.addEventListener('push', function (event) {
   }
 
   const title = formattedPrice;
+  const timestamp = Date.now();
   const options = {
     body: 'Signal profitability stats coming soon.',
     icon: '/favicon.ico',
@@ -35,9 +36,32 @@ self.addEventListener('push', function (event) {
     tag: 'ounce-price-alert', // Updates existing notification instead of creating a new one
     renotify: false, // Prevents subsequent sound/vibration alerts when replacing notification
     silent: true, // Completely silent for frequent 5-second updates (crucial for user comfort)
+    data: {
+      timestamp: timestamp,
+    },
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  const notificationPromise = self.registration.showNotification(title, options);
+
+  const closePromise = new Promise((resolve) => {
+    setTimeout(async () => {
+      try {
+        const notifications = await self.registration.getNotifications({
+          tag: 'ounce-price-alert',
+        });
+        for (const notification of notifications) {
+          if (notification.data && notification.data.timestamp <= timestamp) {
+            notification.close();
+          }
+        }
+      } catch (err) {
+        console.error('Error closing notification:', err);
+      }
+      resolve();
+    }, 30000); // 30 seconds
+  });
+
+  event.waitUntil(Promise.all([notificationPromise, closePromise]));
 });
 
 self.addEventListener('notificationclick', function (event) {
