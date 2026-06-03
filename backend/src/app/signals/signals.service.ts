@@ -67,8 +67,12 @@ export class SignalsService {
         if (Signal.activeTrigger(signal, price)) {
           signal.status = SignalStatus.Active;
           signal.activeAt = new Date();
-          signal.save().then((savedSignal) => {
-            this.eventEmitter.emit(EVENTS.SIGNAL_ACTIVE, savedSignal);
+          signal.save().then(async (savedSignal) => {
+            const populatedSignal = await this.signalModel
+              .findById(savedSignal._id)
+              .populate('owner')
+              .exec();
+            this.eventEmitter.emit(EVENTS.SIGNAL_ACTIVE, populatedSignal || savedSignal);
           });
         }
       } else {
@@ -182,8 +186,12 @@ export class SignalsService {
       owner.weekScore >= MIN_SIGNAL_SCORE;
 
     const savedSignal = await this.signalModel.create(signal);
-    this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, savedSignal);
-    return savedSignal;
+    const populatedSignal = await this.signalModel
+      .findById(savedSignal._id)
+      .populate('owner')
+      .exec();
+    this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, populatedSignal || savedSignal);
+    return populatedSignal || savedSignal;
   }
 
   async closeSignal(signal: Signal, price: number) {

@@ -70,6 +70,16 @@ export class SignalBotService extends BaseBot {
   @OnEvent(EVENTS.SIGNAL_ACTIVE)
   async handleSignalActive(signal: Signal) {
     if (!signal.owner) return;
+    let populatedSignal = signal;
+    if (typeof (signal.owner as any).tag === 'undefined') {
+      const dbSignal = await this.signalModel
+        .findById(signal.id || (signal as any)._id)
+        .populate('owner')
+        .exec();
+      if (dbSignal) {
+        populatedSignal = dbSignal;
+      }
+    }
     const activeSignals = await this.signalModel
       .find({
         status: { $in: [SignalStatus.Active] },
@@ -77,39 +87,49 @@ export class SignalBotService extends BaseBot {
       })
       .exec();
 
-    if (signal.messageId)
+    if (populatedSignal.messageId)
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
-        signal.messageId,
+        populatedSignal.messageId,
       );
-    signal.telegramBot = getAvailableBot(activeSignals);
-    signal.messageId = null;
-    this.signalModel
-      .findByIdAndUpdate(signal.id, {
-        telegramBot: signal.telegramBot,
+    populatedSignal.telegramBot = getAvailableBot(activeSignals);
+    populatedSignal.messageId = null;
+    await this.signalModel
+      .findByIdAndUpdate(populatedSignal._id, {
+        telegramBot: populatedSignal.telegramBot,
         messageId: null,
       })
       .exec();
 
     this.bot.telegram.sendMessage(
-      signal.owner.telegramId,
-      Signal.getMessage(signal, { showId: true, skipOwner: true }),
+      populatedSignal.owner.telegramId,
+      Signal.getMessage(populatedSignal, { showId: true, skipOwner: true }),
     );
-    this.publishSignal(signal, signal.entryPrice);
+    this.publishSignal(populatedSignal, populatedSignal.entryPrice);
   }
 
   @OnEvent(EVENTS.SIGNAL_CLOSED)
   async handleSignalClosed(signal: Signal) {
     if (!signal.owner) return;
-    if (signal.messageId)
+    let populatedSignal = signal;
+    if (typeof (signal.owner as any).tag === 'undefined') {
+      const dbSignal = await this.signalModel
+        .findById(signal.id || (signal as any)._id)
+        .populate('owner')
+        .exec();
+      if (dbSignal) {
+        populatedSignal = dbSignal;
+      }
+    }
+    if (populatedSignal.messageId)
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
-        signal.messageId,
+        populatedSignal.messageId,
       );
 
     setTimeout(() => {
       this.signalModel
-        .findById(signal._id)
+        .findById(populatedSignal._id)
         .populate('owner')
         .exec()
         .then((signal) => {
@@ -118,45 +138,65 @@ export class SignalBotService extends BaseBot {
         });
     }, 3000);
     this.bot.telegram.sendMessage(
-      signal.owner.telegramId,
-      Signal.getMessage(signal, { showId: true, skipOwner: true }),
+      populatedSignal.owner.telegramId,
+      Signal.getMessage(populatedSignal, { showId: true, skipOwner: true }),
     );
   }
 
   @OnEvent(EVENTS.SIGNAL_CANCELED)
   async handleSignalCanceled(signal: Signal) {
     if (!signal.owner) return;
-    if (signal.messageId) {
+    let populatedSignal = signal;
+    if (typeof (signal.owner as any).tag === 'undefined') {
+      const dbSignal = await this.signalModel
+        .findById(signal.id || (signal as any)._id)
+        .populate('owner')
+        .exec();
+      if (dbSignal) {
+        populatedSignal = dbSignal;
+      }
+    }
+    if (populatedSignal.messageId) {
       this.bot.telegram.deleteMessage(
         process.env.PUBLISH_CHANNEL_ID,
-        signal.messageId,
+        populatedSignal.messageId,
       );
     }
 
     this.bot.telegram.sendMessage(
-      signal.owner.telegramId,
-      Signal.getMessage(signal, { showId: true, skipOwner: true }),
+      populatedSignal.owner.telegramId,
+      Signal.getMessage(populatedSignal, { showId: true, skipOwner: true }),
     );
   }
 
   @OnEvent(EVENTS.SIGNAL_CREATED)
   async handleSignalCreated(signal: Signal) {
     if (!signal.owner) return;
+    let populatedSignal = signal;
+    if (typeof (signal.owner as any).tag === 'undefined') {
+      const dbSignal = await this.signalModel
+        .findById(signal.id || (signal as any)._id)
+        .populate('owner')
+        .exec();
+      if (dbSignal) {
+        populatedSignal = dbSignal;
+      }
+    }
     const activeSignals = await this.signalModel
       .find({
         status: { $in: [SignalStatus.Active] },
         deletedAt: null,
       })
       .exec();
-    signal.telegramBot = getAvailableBot(activeSignals);
-    signal.messageId = null;
-    this.signalModel
-      .findByIdAndUpdate(signal.id, {
-        telegramBot: signal.telegramBot,
+    populatedSignal.telegramBot = getAvailableBot(activeSignals);
+    populatedSignal.messageId = null;
+    await this.signalModel
+      .findByIdAndUpdate(populatedSignal._id, {
+        telegramBot: populatedSignal.telegramBot,
         messageId: null,
       })
       .exec();
-    this.publishSignal(signal, this.ouncePriceService.current);
+    this.publishSignal(populatedSignal, this.ouncePriceService.current);
   }
 
   @Action('new_signal')
@@ -888,7 +928,18 @@ You can do this once every 15 days. ${
   async publishSignal(signal: Signal, ouncePrice?: number) {
     if (!signal.publishable) return;
 
-    const text = Signal.getMessage(signal);
+    let populatedSignal = signal;
+    if (signal.owner && typeof (signal.owner as any).tag === 'undefined') {
+      const dbSignal = await this.signalModel
+        .findById(signal.id || (signal as any)._id)
+        .populate('owner')
+        .exec();
+      if (dbSignal) {
+        populatedSignal = dbSignal;
+      }
+    }
+
+    const text = Signal.getMessage(populatedSignal);
     let func: any;
     if (signal.messageId) {
       func = (telegram: Telegram) => {
