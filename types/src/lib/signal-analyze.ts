@@ -15,6 +15,10 @@ export class SignalAnalyze {
 
   totalTokens: number;
 
+  prompt?: string;
+
+  model?: string;
+
   createdAt: Date;
 }
 

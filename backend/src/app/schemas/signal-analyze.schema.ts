@@ -8,6 +8,8 @@ export const SignalAnalyzeSchema = new mongoose.Schema<SignalAnalyze>(
     analyzeText: { type: String, required: true },
     creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     totalTokens: { type: Number, required: true, default: 0 },
+    prompt: { type: String, required: false },
+    model: { type: String, required: false },
   },
   {
     timestamps: true,

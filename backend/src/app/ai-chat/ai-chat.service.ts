@@ -18,10 +18,11 @@ export class AiChatService {
 
   async createResponse(
     message: string,
-  ): Promise<{ text: string; totalTokens: number }> {
+  ): Promise<{ text: string; totalTokens: number; model: string }> {
     try {
+      const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
       const response = await this.client.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model,
         messages: [
           {
             role: 'system',
@@ -45,7 +46,7 @@ Do NOT use any HTML tags, markdown links, or markdown code blocks. Just return t
         /\[(.*?)\]\((.*?)\)/g,
         '<a href="$2">$1</a>',
       );
-      return { text: cleanedText, totalTokens };
+      return { text: cleanedText, totalTokens, model };
     } catch (error) {
       throw error;
     }

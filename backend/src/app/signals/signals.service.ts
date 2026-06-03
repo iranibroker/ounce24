@@ -298,6 +298,7 @@ export class SignalsService {
       }).sort({ timestamp: 1 }).exec();
 
       // Prepare default values
+      let formattedHistory4h = 'No historical data available.';
       let formattedHistory1h = 'No historical data available.';
       let formattedHistory15m = 'No historical data available.';
       let formattedHistory5m = 'No historical data available.';
@@ -330,8 +331,12 @@ export class SignalsService {
           return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
         };
 
+        const candles4h = aggregateTo4h(candles5m);
+        if (candles4h.length > 0) {
+          formattedHistory4h = candles4h.map(formatCandle).join('\n');
+        }
         if (candles1h.length > 0) {
-          formattedHistory1h = candles1h.map(formatCandle).join('\n');
+          formattedHistory1h = candles1h.slice(-72).map(formatCandle).join('\n'); // last 3 days
         }
         if (candles15m.length > 0) {
           formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
@@ -359,7 +364,10 @@ Technical Indicators (Calculated on 5m, 15m, 1h tables):
 - 1h SMA(50): $${sma50_1h.toFixed(2)}
 - 5m ATR(14) (Volatility): $${atr5m.toFixed(2)}
 
-Recent Price History (1-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+Recent Price History (4-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory4h}
+
+Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
 ${formattedHistory1h}
 
 Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
@@ -376,11 +384,12 @@ Instructions for Analysis:
    For example: "📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی ۵ دقیقه‌ای" or "📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با شتاب خریداران در تایم‌فریم کوتاه‌مدت"
 4. Provide a very brief, direct 1-line summary of your analysis right after this indicator.
 5. Provide the rest of your technical analysis in 1 or 2 very short, concise paragraphs. Keep the entire response brief, clean, and to the point.
-6. Prioritize technical analysis approaches by giving the highest priority to Price Action (specifically Support & Resistance levels, key breakout/breakdown levels, and market structure on the 30-day 1-hour price history) and secondary priority to Moving Average trends (using SMA20/SMA50 indicators). RSI and other momentum tools are of much lower priority.
+6. Prioritize technical analysis approaches by giving the highest priority to Price Action (specifically Support & Resistance levels, key breakout/breakdown levels, and market structure on the 30-day 4-hour price history) and secondary priority to Moving Average trends (using SMA20/SMA50 indicators). RSI and other momentum tools are of much lower priority.
 7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., "از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"). You must be extremely bold, decisive, and opinionated. Provide direct, blunt judgment and suggestions in Persian (Farsi) using your own natural technical analytical vocabulary to fit the context. The phrasings "حد ضرر خیلی پایینه، بهتره رو نقطه فلان باشه", "این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه", and "بازار کاملا برعکس این میره جلو و کاملا اشتباهه" are illustrative examples of the expected level of confidence, directness, and bluntness—not strict templates to copy-paste. Give professional, analytical, and highly confident feedback.
 8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits (e.g. ۲۳۵۰.۵۰).
 9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.
 10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
+11. Ensure all price levels, support/resistance levels, and targets you mention are mathematically and logically correct. For a BUY signal, a resistance level ONLY blocks/obstructs the signal's target (TP) if it is located between the Entry Price and the TP (Entry < Resistance < TP). If the resistance is higher than the TP (Resistance > TP), it does NOT block the target, and you must not claim it blocks. Conversely, for a SELL signal, a support level only blocks the TP if it is between the Entry and TP (Entry > Support > TP). Do not hallucinate or make false claims about support/resistance blocking targets if they are outside this mathematical range. Double-check your numeric logic.
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage);
@@ -406,6 +415,8 @@ Instructions for Analysis:
         totalTokens: result.totalTokens,
         analyzeText: result.text,
         creator: user.id,
+        prompt: promptMessage,
+        model: result.model,
       });
 
       return {
@@ -520,4 +531,32 @@ function aggregateTo1h(candles5m: OuncePriceCandle[]): { timestamp: Date; open: 
     candles1h.push({ timestamp, open, high, low, close });
   }
   return candles1h;
+}
+
+function aggregateTo4h(candles5m: OuncePriceCandle[]): { timestamp: Date; open: number; high: number; low: number; close: number }[] {
+  const candles4h: { timestamp: Date; open: number; high: number; low: number; close: number }[] = [];
+  const groups: { [key: string]: OuncePriceCandle[] } = {};
+
+  for (const candle of candles5m) {
+    const date = new Date(candle.timestamp);
+    const hour = date.getUTCHours();
+    const alignedHour = Math.floor(hour / 4) * 4;
+    date.setUTCHours(alignedHour, 0, 0, 0);
+    const key = date.getTime().toString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(candle);
+  }
+
+  for (const key of Object.keys(groups).sort()) {
+    const group = groups[key];
+    const sortedGroup = [...group].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const timestamp = new Date(Number(key));
+    const open = sortedGroup[0].open;
+    const close = sortedGroup[sortedGroup.length - 1].close;
+    const high = Math.max(...sortedGroup.map(c => c.high));
+    const low = Math.min(...sortedGroup.map(c => c.low));
+
+    candles4h.push({ timestamp, open, high, low, close });
+  }
+  return candles4h;
 }
