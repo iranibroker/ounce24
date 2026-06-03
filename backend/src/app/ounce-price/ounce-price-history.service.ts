@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OuncePriceCandle } from '@ounce24/types';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
+import axios from 'axios';
 
 @Injectable()
-export class OuncePriceHistoryService {
+export class OuncePriceHistoryService implements OnModuleInit {
   private currentCandle: {
     timestamp: number;
     open: number;
@@ -20,6 +21,68 @@ export class OuncePriceHistoryService {
     @InjectModel(OuncePriceCandle.name)
     private candleModel: Model<OuncePriceCandle>,
   ) {}
+
+  async onModuleInit() {
+    await this.backfillHistory();
+  }
+
+  async backfillHistory() {
+    console.log('Checking local price history count for backfill...');
+    try {
+      const count = await this.candleModel.countDocuments().exec();
+      // If we have less than 800 candles (about 2.7 days of 5m data), trigger backfill
+      if (count < 800) {
+        console.log(`Only ${count} candles found in local DB. Backfilling from TwelveData...`);
+        const apiKey = process.env.TWELVE_DATA_API_KEY || '760ae215f3f94dcea4c2b43d33e4c022';
+        
+        const response = await axios.get<{
+          status: string;
+          message?: string;
+          values?: {
+            datetime: string;
+            open: string;
+            high: string;
+            low: string;
+            close: string;
+          }[];
+        }>(
+          `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=5min&outputsize=1000&timezone=UTC&apikey=${apiKey}`
+        );
+
+        if (response.data.status !== 'ok') {
+          throw new Error(response.data.message || 'Unknown TwelveData API error');
+        }
+
+        const values = response.data.values || [];
+        console.log(`Fetched ${values.length} candles from TwelveData. Writing to DB...`);
+
+        const bulkOps = values.map((val) => {
+          const timestamp = new Date(val.datetime + 'Z'); // Parse as UTC datetime
+          const open = parseFloat(val.open);
+          const high = parseFloat(val.high);
+          const low = parseFloat(val.low);
+          const close = parseFloat(val.close);
+
+          return {
+            updateOne: {
+              filter: { timestamp },
+              update: { $set: { open, high, low, close } },
+              upsert: true,
+            },
+          };
+        });
+
+        if (bulkOps.length > 0) {
+          await this.candleModel.bulkWrite(bulkOps);
+          console.log(`Successfully backfilled ${bulkOps.length} price history candles from TwelveData.`);
+        }
+      } else {
+        console.log(`Local price history has ${count} candles. Skipping backfill.`);
+      }
+    } catch (error: any) {
+      console.error('Failed to backfill price history from TwelveData:', error.message || error);
+    }
+  }
 
   @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
   async handleOuncePriceUpdated(price: number) {
