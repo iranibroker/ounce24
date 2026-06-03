@@ -1,6 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { PushSubscriptionDialogComponent } from '../components/push-subscription-dialog/push-subscription-dialog.component';
+import { environment } from '../../environments/environment';
 
 const PROMPT_KEY = 'ounce_push_prompted';
 
@@ -9,8 +12,16 @@ const PROMPT_KEY = 'ounce_push_prompted';
 })
 export class PushNotificationService {
   private http = inject(HttpClient);
+  private dialog = inject(MatDialog);
   isSubscribed = signal<boolean>(false);
   private swRegistration: ServiceWorkerRegistration | null = null;
+
+  isNotificationSupported = computed(() => {
+    if (!environment.production) {
+      return true;
+    }
+    return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+  });
 
   constructor() {
     this.init();
@@ -43,13 +54,34 @@ export class PushNotificationService {
   }
 
   async subscribeToNotifications(): Promise<boolean> {
-    if (!this.swRegistration) {
+    if (!this.swRegistration && environment.production) {
       console.error('Service worker registration is not available.');
       return false;
     }
 
     try {
-      // 1. Request notification permission
+      // 1. Show warning dialog explaining 5-second updates and spam warning
+      const dialogRef = this.dialog.open(PushSubscriptionDialogComponent, {
+        width: '450px',
+        maxWidth: '95vw',
+        panelClass: 'push-notification-dialog-panel',
+        disableClose: true,
+      });
+
+      const accepted = await lastValueFrom(dialogRef.afterClosed());
+      if (!accepted) {
+        return false;
+      }
+
+      // If in development mode and Notification is not supported, simulate success
+      if (!environment.production && (!('Notification' in window) || !this.swRegistration)) {
+        console.log('Simulating notification permission grant in development mode');
+        this.isSubscribed.set(true);
+        this.markAsAsked();
+        return true;
+      }
+
+      // 2. Request notification permission
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         console.warn('Notification permission denied by user.');

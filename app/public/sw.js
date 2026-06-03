@@ -27,7 +27,7 @@ self.addEventListener('push', function (event) {
     }).format(Number(price));
   }
 
-  const title = `XAUUSD: ${formattedPrice}`;
+  const title = formattedPrice;
   const options = {
     body: 'Signal profitability stats coming soon.',
     icon: '/favicon.ico',

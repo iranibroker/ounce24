@@ -238,12 +238,26 @@
       "WEEK_WIN": "Week Winner"
     }
   },
+  "pwa": {
+    "dialog": {
+      "title": "Install Ounce24 App",
+      "subtitle": "Install the app on your home screen for the ultimate trading experience:",
+      "feature1": "Ultra-fast startup and bypassing of proxy/VPN requirements",
+      "feature2": "Battery and data saver (reduces network usage by up to 80%)",
+      "feature3": "Instant live price updates directly on your home screen",
+      "iosTitle": "How to install on iOS Safari:",
+      "iosStep1": "Tap the Share button in the Safari browser toolbar.",
+      "iosStep2": "Scroll down and select 'Add to Home Screen'.",
+      "decline": "Not Now",
+      "accept": "Install"
+    }
+  },
   "pushNotifications": {
     "dialog": {
-      "title": "Live Gold Price",
-      "description": "Have the live gold price on your phone screen, even when the site is closed. Please also allow the notification permission request that appears next.",
+      "title": "Enable Live Ounce Price Notifications",
+      "description": "We update the gold price every 5 seconds. Due to the high frequency of updates, your phone's operating system might flag these notifications as spam. Please click 'Allow' on the permission request to ensure notifications display correctly in the background.",
       "decline": "Not Now",
-      "accept": "Enable"
+      "accept": "I Understand & Enable"
     },
     "bell": {
       "enable": "Enable Ounce Notifications",

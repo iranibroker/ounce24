@@ -238,12 +238,26 @@
       "WEEK_WIN": "برنده هفته"
     }
   },
+  "pwa": {
+    "dialog": {
+      "title": "نصب اپلیکیشن اونس ۲۴",
+      "subtitle": "برای دسترسی سریع‌تر به ابزارها و قیمت زنده، برنامه را روی صفحه اصلی نصب کنید:",
+      "feature1": "سرعت فوق‌العاده بالا و بدون نیاز به فیلترشکن",
+      "feature2": "مصرف بسیار بهینه باتری و کاهش تا ۸۰٪ حجم مصرفی اینترنت",
+      "feature3": "نمایش آنی تغییرات قیمت طلا مستقیماً روی صفحه گوشی",
+      "iosTitle": "راهنمای نصب در آیفون (Safari):",
+      "iosStep1": "دکمه اشتراک‌گذاری (Share) را در پایین مرورگر لمس کنید.",
+      "iosStep2": "صفحه منو را پایین کشیده و گزینه Add to Home Screen را انتخاب کنید.",
+      "decline": "بعداً",
+      "accept": "نصب برنامه"
+    }
+  },
   "pushNotifications": {
     "dialog": {
-      "title": "Live Gold Price",
-      "description": "Have the live gold price on your phone screen, even when the site is closed. Please also allow the notification permission request that appears next.",
-      "decline": "Not Now",
-      "accept": "Enable"
+      "title": "فعال‌سازی اعلان‌های قیمت اونس",
+      "description": "ما هر ۵ ثانیه قیمت اونس را در گوشی شما به‌روزرسانی می‌کنیم. به دلیل تعداد بالای به‌روزرسانی‌ها، ممکن است سیستم‌عامل گوشی این پیام‌ها را به عنوان اسپم تشخیص دهد. لطفاً در پنجره بعد، گزینه Allow را انتخاب کنید تا اعلان‌ها بدون مشکل در پس‌زمینه نمایش داده شوند.",
+      "decline": "فعلاً نه",
+      "accept": "متوجه شدم و فعال‌سازی"
     },
     "bell": {
       "enable": "فعال‌سازی اعلان‌های اونس",

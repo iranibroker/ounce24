@@ -68,7 +68,16 @@ export class WebPushService implements OnModuleInit {
         },
       };
 
-      return webpush.sendNotification(pushSub, payload).catch(async (error) => {
+      const options = {
+        TTL: 0,
+        urgency: 'high' as const,
+        headers: {
+          'TTL': '0',
+          'Urgency': 'high'
+        }
+      };
+
+      return webpush.sendNotification(pushSub, payload, options).catch(async (error) => {
         // If subscription has expired or is invalid, remove it
         if (error.statusCode === 410 || error.statusCode === 404) {
           console.log(`Removing expired subscription: ${sub.endpoint}`);

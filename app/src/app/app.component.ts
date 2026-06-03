@@ -8,8 +8,8 @@ import { AuthService } from './services/auth.service';
 import { inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { PushNotificationService } from './services/push-notification.service';
-import { PushSubscriptionDialogComponent } from './components/push-subscription-dialog/push-subscription-dialog.component';
+import { PwaService } from './services/pwa.service';
+import { PwaInstallDialogComponent } from './components/pwa-install-dialog/pwa-install-dialog.component';
 
 @Component({
   imports: [ShellComponent],
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
-  private pushNotificationService = inject(PushNotificationService);
+  private pwaService = inject(PwaService);
   private pushTimer: any = null;
   private routerSubscription: any = null;
 
@@ -67,11 +67,11 @@ export class AppComponent implements OnInit, OnDestroy {
     if (isLoggedIn && !isLoginPage) {
       if (
         !this.pushTimer &&
-        !this.pushNotificationService.isSubscribed() &&
-        !this.pushNotificationService.hasAskedBefore()
+        this.pwaService.isPwaSupported() &&
+        !this.pwaService.hasAskedBefore()
       ) {
         this.pushTimer = setTimeout(() => {
-          this.showPushNotificationPrompt();
+          this.showPwaInstallPrompt();
         }, 20000);
       }
     } else {
@@ -82,8 +82,8 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  showPushNotificationPrompt() {
-    const dialogRef = this.dialog.open(PushSubscriptionDialogComponent, {
+  showPwaInstallPrompt() {
+    const dialogRef = this.dialog.open(PwaInstallDialogComponent, {
       width: '400px',
       maxWidth: '95vw',
       panelClass: 'push-notification-dialog-panel',
@@ -91,10 +91,9 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe((accept: boolean) => {
+      this.pwaService.markAsAsked();
       if (accept) {
-        this.pushNotificationService.subscribeToNotifications();
-      } else {
-        this.pushNotificationService.markAsAsked();
+        this.pwaService.install();
       }
     });
   }

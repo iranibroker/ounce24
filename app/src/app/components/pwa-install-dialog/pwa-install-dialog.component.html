@@ -1,0 +1,55 @@
+<div class="dialog-wrapper">
+  <h2 class="dialog-header">
+    <ng-icon 
+      [name]="isIOS ? 'saxInfoCircleOutline' : 'saxImportOutline'" 
+      size="24px" 
+      class="gold-icon"
+    ></ng-icon>
+    <span>{{ 'pwa.dialog.title' | translate }}</span>
+  </h2>
+  
+  <div class="dialog-content">
+    <p class="dialog-subtitle">{{ 'pwa.dialog.subtitle' | translate }}</p>
+    
+    <!-- Marketing Features List -->
+    <ul class="features-list">
+      <li>
+        <span class="bullet">✦</span>
+        <span class="feature-text">{{ 'pwa.dialog.feature1' | translate }}</span>
+      </li>
+      <li>
+        <span class="bullet">✦</span>
+        <span class="feature-text">{{ 'pwa.dialog.feature2' | translate }}</span>
+      </li>
+      <li>
+        <span class="bullet">✦</span>
+        <span class="feature-text">{{ 'pwa.dialog.feature3' | translate }}</span>
+      </li>
+    </ul>
+
+    @if (isIOS) {
+      <div class="ios-instructions">
+        <p class="ios-title">{{ 'pwa.dialog.iosTitle' | translate }}</p>
+        <ol>
+          <li>{{ 'pwa.dialog.iosStep1' | translate }}</li>
+          <li>{{ 'pwa.dialog.iosStep2' | translate }}</li>
+        </ol>
+      </div>
+    }
+  </div>
+  
+  <div class="dialog-actions">
+    @if (isIOS) {
+      <button mat-flat-button class="confirm-btn" (click)="onClose()">
+        {{ 'app.close' | translate }}
+      </button>
+    } @else {
+      <button mat-button class="cancel-btn" (click)="onClose()">
+        {{ 'pwa.dialog.decline' | translate }}
+      </button>
+      <button mat-flat-button class="confirm-btn" (click)="onAccept()">
+        {{ 'pwa.dialog.accept' | translate }}
+      </button>
+    }
+  </div>
+</div>

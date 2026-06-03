@@ -20,18 +20,20 @@
     </button>
   }
   <span spacer></span>
-  <button
-    mat-icon-button
-    class="notification-button"
-    (click)="toggleNotifications()"
-    [title]="(pushService.isSubscribed() ? 'pushNotifications.bell.disable' : 'pushNotifications.bell.enable') | translate"
-  >
-    <ng-icon
-      [name]="pushService.isSubscribed() ? 'saxNotificationBold' : 'saxNotificationOutline'"
-      size="20px"
-      [class.gold]="pushService.isSubscribed()"
-    ></ng-icon>
-  </button>
+  @if (pushService.isNotificationSupported()) {
+    <button
+      mat-icon-button
+      class="notification-button"
+      (click)="toggleNotifications()"
+      [title]="(pushService.isSubscribed() ? 'pushNotifications.bell.disable' : 'pushNotifications.bell.enable') | translate"
+    >
+      <ng-icon
+        [name]="pushService.isSubscribed() ? 'saxNotificationBold' : 'saxNotificationOutline'"
+        size="20px"
+        [class.gold]="pushService.isSubscribed()"
+      ></ng-icon>
+    </button>
+  }
   <!-- <a mat-stroked-button class="ounce-price-button" href="https://www.tradingview.com/symbols/XAUUSD" target="_blank">
     <img
     src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"

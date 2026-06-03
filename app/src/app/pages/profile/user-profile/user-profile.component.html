@@ -68,7 +68,7 @@
       </mat-card-content>
     </mat-card>
 
-    @if (isOwnProfile()) {
+    @if (isOwnProfile() && pushService.isNotificationSupported()) {
       <mat-card class="settings-card">
         <mat-card-content>
           <div class="settings-row">
