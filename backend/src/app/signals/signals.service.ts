@@ -358,8 +358,10 @@ Instructions for Analysis:
 1. Write the analysis strictly in Persian (Farsi).
 2. Keep it simple, clear, and easy to understand for everyday traders (do not use overly complex or academic jargon).
 3. Focus on exactly 1 or 2 technical analysis approaches (specifically Price Action / Support & Resistance levels, and RSI momentum). Do not analyze it from many conflicting angles.
-4. Be bold, direct, and completely honest. Do not give false optimism or generic flatteries. If the signal is highly risky, illogical, or likely to result in a loss (e.g. SL is too tight, TP is unrealistic, or trading against a strong 5m/15m trend), say it clearly and warn the trader. If it is logical and aligned with the current market structure, confirm it simply.
-5. Use clean HTML tags for styling (e.g. <b>, <ul>, <li>) if needed, but do not use markdown links. Return the HTML directly without any surrounding markdown code blocks (do not wrap in \`\`\`html or similar).
+4. Be bold, direct, and completely honest. Do not give false optimism or generic flatteries. If the signal is highly risky, illogical, or likely to result in a loss, say it clearly and warn the trader. If it is logical and aligned with the current market structure, confirm it simply.
+5. Use only plain text with newlines/spacing for formatting.
+6. Use emojis to make the text engaging and readable.
+7. Do NOT use any HTML tags, markdown links, or markdown code blocks. Just return the raw text.
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage);

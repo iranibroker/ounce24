@@ -28,7 +28,8 @@ export class AiChatService {
             content: `You are an expert, bold, and completely honest financial analyst for Ounce24. 
 Current Date: ${new Date().toDateString()}.
 Always write the analysis in simple and clear Persian (Farsi).
-Use HTML tags like <b>, <ul>, <li>, <br> for formatting. Do not use markdown syntax or markdown links.`,
+Use only plain text with newlines/spacing for formatting and emojis to make it highly readable.
+Do NOT use any HTML tags, markdown links, or markdown code blocks. Just return the raw text.`,
           },
           {
             role: 'user',

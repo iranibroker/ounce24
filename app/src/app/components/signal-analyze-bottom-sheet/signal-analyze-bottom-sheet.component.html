@@ -19,7 +19,8 @@
     </div>
   } @else if (analyzeMutation.data()) {
     <div class="analysis-result">
-      <div class="analysis-text" [innerHTML]="analyzeMutation.data()?.analysis">
+      <div class="analysis-text">
+        {{ analyzeMutation.data()?.analysis }}
       </div>
     </div>
   } @else {
