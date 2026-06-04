@@ -200,6 +200,11 @@ export class OuncePriceHistoryService implements OnModuleInit {
   }
 
   async getHistory(limit = 10000): Promise<OuncePriceCandle[]> {
-    return this.candleModel.find().sort({ timestamp: 1 }).limit(limit).exec();
+    const candles = await this.candleModel
+      .find()
+      .sort({ timestamp: -1 })
+      .limit(limit)
+      .exec();
+    return candles.reverse();
   }
 }
