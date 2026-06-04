@@ -50,6 +50,17 @@
       "createdAt": "Oluşturulma tarihi",
       "closedAt": "Kapanış tarihi",
       "activeAt": "Etkinleştirilme tarihi"
+    },
+    "actions": {
+      "cancel": "Sinyali İptal Et",
+      "close": "Manuel Kapat",
+      "riskFree": "Risksiz Yap",
+      "cancelConfirm": "Bu bekleyen sinyali iptal etmek istediğinizden emin misiniz?",
+      "closeConfirm": "Bu aktif sinyali mevcut piyasa fiyatından manuel olarak kapatmak istediğinizden emin misiniz?",
+      "riskFreeConfirm": "Bu aktif sinyali risksiz hale getirmek istediğinizden emin misiniz? Fiyat tersine dönerse zarar durdurma giriş fiyatına taşınacaktır.",
+      "cancelSuccess": "Sinyal başarıyla iptal edildi",
+      "closeSuccess": "Sinyal başarıyla kapatıldı",
+      "riskFreeSuccess": "Sinyal başarıyla risksiz hale getirildi"
     }
   },
   "signalAnalyze": {
@@ -103,6 +114,7 @@
   "profile": {
     "pageTitle": "Profil",
     "yourProfile": "Profiliniz",
+    "createdAt": "Katılım tarihi",
     "logout": "Çıkış Yap",
     "logoutDescription": "Mevcut hesabınızdan çıkış yapın",
     "yourGems": "GEM'leriniz",
@@ -283,6 +295,8 @@
     "subtitle": "Günlük Ons Fiyat Tahmini",
     "description": "Günün piyasa kapanış fiyatının mevcut fiyattan daha yüksek mi yoksa daha düşük mü olacağını tahmin edin. Doğru tahminler için 1 yıldız ⭐ kazanın.",
     "cutoffWarning": "Tahminler yalnızca {{time}} tarihinden önce yapılabilir veya düzenlenebilir.",
+    "votingOpensIn": "Tahminler şurada başlayacak:",
+    "votingClosesIn": "Tahminler şurada kapanacak:",
     "marketOpen": "Piyasa Açık",
     "marketClosed": "Piyasa Kapalı",
     "predictUp": "Daha Yüksek (Boğa)",

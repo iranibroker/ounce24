@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Delete, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   GemLog,
@@ -131,5 +131,23 @@ export class SignalsController {
   @Post('generate')
   async generateSignal(@LoginUser() user: User) {
     return this.signalService.generateSignal(user.id || (user as any)._id);
+  }
+
+  @Delete(':id')
+  async cancelSignal(@Param('id') id: string, @LoginUser() user: User) {
+    const userId = user.id || (user as any)._id?.toString();
+    return this.signalService.cancelSignal(id, userId);
+  }
+
+  @Post(':id/close')
+  async manualCloseSignal(@Param('id') id: string, @LoginUser() user: User) {
+    const userId = user.id || (user as any)._id?.toString();
+    return this.signalService.manualCloseSignal(id, userId);
+  }
+
+  @Post(':id/riskfree')
+  async makeSignalRiskFree(@Param('id') id: string, @LoginUser() user: User) {
+    const userId = user.id || (user as any)._id?.toString();
+    return this.signalService.makeSignalRiskFree(id, userId);
   }
 }

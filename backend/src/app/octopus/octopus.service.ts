@@ -21,6 +21,23 @@ function getCutoffHour(): number {
   return 10.5; // default 10:30 AM UTC (which is 14:00 Tehran Time)
 }
 
+function isVotingEnabled(now: Date, cutoffHour: number): boolean {
+  const day = now.getUTCDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+  const timeInHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+
+  if (day === 6) { // Saturday
+    return false;
+  }
+  if (day === 0) { // Sunday
+    return timeInHours >= 23;
+  }
+  if (day === 5) { // Friday
+    return timeInHours < cutoffHour;
+  }
+  // Monday, Tuesday, Wednesday, Thursday
+  return timeInHours < cutoffHour || timeInHours >= 23;
+}
+
 @Injectable()
 export class OctopusService {
   constructor(
@@ -51,8 +68,7 @@ export class OctopusService {
       return false;
     }
 
-    const currentUTCHour = now.getUTCHours() + now.getUTCMinutes() / 60;
-    return currentUTCHour < getCutoffHour();
+    return isVotingEnabled(now, getCutoffHour());
   }
 
   async vote(userId: string, direction: OctopusDirection) {

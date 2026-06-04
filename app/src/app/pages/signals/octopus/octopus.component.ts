@@ -25,6 +25,60 @@ import { LanguageService } from '../../../services/language.service';
 import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
 import { AvatarDirective } from '../../../directives/avatar.directive';
 
+function getVotingState(now: Date, cutoffHour: number): { enabled: boolean; nextTransition: Date } {
+  const day = now.getUTCDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+  const timeInHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+
+  let enabled = false;
+  const nextTransition = new Date(now);
+
+  if (day === 6) { // Saturday
+    enabled = false;
+    nextTransition.setUTCDate(now.getUTCDate() + (7 - day)); // Sunday
+    nextTransition.setUTCHours(23, 0, 0, 0);
+  } else if (day === 0) { // Sunday
+    if (timeInHours < 23) {
+      enabled = false;
+      nextTransition.setUTCHours(23, 0, 0, 0);
+    } else {
+      enabled = true;
+      nextTransition.setUTCDate(now.getUTCDate() + 1); // Monday
+      const hrs = Math.floor(cutoffHour);
+      const mins = Math.round((cutoffHour - hrs) * 60);
+      nextTransition.setUTCHours(hrs, mins, 0, 0);
+    }
+  } else if (day === 5) { // Friday
+    if (timeInHours < cutoffHour) {
+      enabled = true;
+      const hrs = Math.floor(cutoffHour);
+      const mins = Math.round((cutoffHour - hrs) * 60);
+      nextTransition.setUTCHours(hrs, mins, 0, 0);
+    } else {
+      enabled = false;
+      nextTransition.setUTCDate(now.getUTCDate() + 2); // Sunday
+      nextTransition.setUTCHours(23, 0, 0, 0);
+    }
+  } else { // Monday, Tuesday, Wednesday, Thursday
+    if (timeInHours < cutoffHour) {
+      enabled = true;
+      const hrs = Math.floor(cutoffHour);
+      const mins = Math.round((cutoffHour - hrs) * 60);
+      nextTransition.setUTCHours(hrs, mins, 0, 0);
+    } else if (timeInHours >= cutoffHour && timeInHours < 23) {
+      enabled = false;
+      nextTransition.setUTCHours(23, 0, 0, 0);
+    } else { // timeInHours >= 23
+      enabled = true;
+      nextTransition.setUTCDate(now.getUTCDate() + 1); // tomorrow
+      const hrs = Math.floor(cutoffHour);
+      const mins = Math.round((cutoffHour - hrs) * 60);
+      nextTransition.setUTCHours(hrs, mins, 0, 0);
+    }
+  }
+
+  return { enabled, nextTransition };
+}
+
 @Component({
   selector: 'app-signals-octopus',
   standalone: true,
@@ -65,6 +119,7 @@ export class OctopusComponent implements OnInit, OnDestroy {
   public languageService = inject(LanguageService);
   private translate = inject(TranslateService);
 
+  votingState = signal<{ enabled: boolean; nextTransition: Date }>({ enabled: true, nextTransition: new Date() });
   countdownText = signal<string>('00:00:00');
   isSubmitting = signal<boolean>(false);
   isEditing = signal<boolean>(false);
@@ -150,15 +205,21 @@ export class OctopusComponent implements OnInit, OnDestroy {
     const now = new Date();
     const cutoffHour = this.cutoffHour();
 
-    const cutoff = new Date(now);
-    const hours = Math.floor(cutoffHour);
-    const minutes = Math.round((cutoffHour - hours) * 60);
-    cutoff.setUTCHours(hours, minutes, 0, 0);
+    const state = getVotingState(now, cutoffHour);
+    const oldEnabled = this.votingState().enabled;
+    this.votingState.set(state);
 
-    let diff = cutoff.getTime() - now.getTime();
-    if (diff < 0) {
-      cutoff.setUTCDate(cutoff.getUTCDate() + 1);
-      diff = cutoff.getTime() - now.getTime();
+    // If voting status just changed, invalidate queries to get latest backend details
+    if (oldEnabled !== state.enabled) {
+      const user = this.authService.userQuery.data();
+      this.queryClient.invalidateQueries({ queryKey: ['octopusVote', user?.id] });
+      this.queryClient.invalidateQueries({ queryKey: ['octopusSentiment'] });
+    }
+
+    const diff = state.nextTransition.getTime() - now.getTime();
+    if (diff <= 0) {
+      this.countdownText.set('00:00:00');
+      return;
     }
 
     const hrs = Math.floor(diff / 3600000);

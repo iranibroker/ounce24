@@ -50,6 +50,17 @@
       "createdAt": "Created at",
       "closedAt": "Closed at",
       "activeAt": "Active at"
+    },
+    "actions": {
+      "cancel": "Cancel Signal",
+      "close": "Close Manually",
+      "riskFree": "Make Risk Free",
+      "cancelConfirm": "Are you sure you want to cancel this pending signal?",
+      "closeConfirm": "Are you sure you want to close this active signal at the current market price?",
+      "riskFreeConfirm": "Are you sure you want to make this active signal risk-free? This will move the stop loss to the entry price if price reverses.",
+      "cancelSuccess": "Signal canceled successfully",
+      "closeSuccess": "Signal closed successfully",
+      "riskFreeSuccess": "Signal marked risk-free successfully"
     }
   },
   "signalAnalyze": {
@@ -103,6 +114,7 @@
   "profile": {
     "pageTitle": "Profile",
     "yourProfile": "Your Profile",
+    "createdAt": "Member since",
     "logout": "Log Out",
     "logoutDescription": "Log out of your current account",
     "yourGems": "Your GEMs",
@@ -289,6 +301,8 @@
     "subtitle": "Daily Ounce Price Guess",
     "description": "Predict whether the day's market closing price will be higher or lower than the current price. Earn 1 star ⭐ for correct predictions.",
     "cutoffWarning": "Predictions can only be placed or edited before {{time}}.",
+    "votingOpensIn": "Predictions open in:",
+    "votingClosesIn": "Predictions close in:",
     "marketOpen": "Market Open",
     "marketClosed": "Market Closed",
     "predictUp": "Higher (Bullish)",

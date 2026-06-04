@@ -37,22 +37,25 @@
     <!-- Game Description & Countdown -->
     <div class="challenge-header">
       <p class="challenge-desc">{{ 'octopus.description' | translate }}</p>
+      <p class="cutoff-static-warning">{{ 'octopus.cutoffWarning' | translate:{ time: localCutoffTime() } }}</p>
       
       <!-- Countdown display -->
-      <div class="countdown-wrapper" *ngIf="priceService.isMarketOpen()">
-        <span class="countdown-label">{{ 'octopus.cutoffWarning' | translate:{ time: localCutoffTime() } }}</span>
-        <div class="countdown-timer">
+      <div class="countdown-wrapper">
+        <span class="countdown-label">
+          {{ (votingState().enabled ? 'octopus.votingClosesIn' : 'octopus.votingOpensIn') | translate }}
+        </span>
+        <div class="countdown-timer" [class.disabled]="!votingState().enabled">
           <span class="time">{{ countdownText() }}</span>
         </div>
       </div>
     </div>
 
     <!-- Active Voting Mode -->
-    <div class="voting-actions" *ngIf="priceService.isMarketOpen() && (!myVoteQuery.data()?.voted || isEditing())">
+    <div class="voting-actions" *ngIf="!myVoteQuery.data()?.voted || isEditing()">
       <button 
         mat-flat-button 
         class="vote-btn vote-up" 
-        [disabled]="isSubmitting()" 
+        [disabled]="isSubmitting() || !votingState().enabled" 
         (click)="submitVote('up')"
       >
         <ng-icon name="saxTrendUpBold" size="24px" class="btn-icon"></ng-icon>
@@ -62,7 +65,7 @@
       <button 
         mat-flat-button 
         class="vote-btn vote-down" 
-        [disabled]="isSubmitting()" 
+        [disabled]="isSubmitting() || !votingState().enabled" 
         (click)="submitVote('down')"
       >
         <ng-icon name="saxTrendDownBold" size="24px" class="btn-icon"></ng-icon>

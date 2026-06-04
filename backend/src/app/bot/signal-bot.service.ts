@@ -169,6 +169,24 @@ export class SignalBotService extends BaseBot {
     );
   }
 
+  @OnEvent(EVENTS.SIGNAL_RISK_FREE)
+  async handleSignalRiskFree(signal: Signal) {
+    if (!signal.owner) return;
+    let populatedSignal = signal;
+    if (typeof (signal.owner as any).tag === 'undefined') {
+      const dbSignal = await this.signalModel
+        .findById(signal.id || (signal as any)._id)
+        .populate('owner')
+        .exec();
+      if (dbSignal) {
+        populatedSignal = dbSignal;
+      }
+    }
+    if (populatedSignal.messageId) {
+      this.publishSignal(populatedSignal, this.ouncePriceService.current);
+    }
+  }
+
   @OnEvent(EVENTS.SIGNAL_CREATED)
   async handleSignalCreated(signal: Signal) {
     if (!signal.owner) return;
@@ -753,11 +771,14 @@ Total: ${sumPip}
     const message = ctx?.callbackQuery.message;
     const text: string = ctx?.callbackQuery.message['text'];
     const id = text?.split('^^')[1] || signalId;
-    const signal = await this.signalModel.findById(id).exec();
-    if (signal.status !== SignalStatus.Pending) return;
-    await this.signalsService.removeSignal(signal);
-    if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
-    if (ctx) ctx.answerCbQuery('Signal removed');
+    const user = await this.getUser(ctx.from.id);
+    try {
+      await this.signalsService.cancelSignal(id, user.id || (user as any)._id?.toString());
+      if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
+      if (ctx) ctx.answerCbQuery('Signal removed');
+    } catch (error: any) {
+      if (ctx) ctx.answerCbQuery(error.response?.translationKey || 'Error');
+    }
   }
 
   @Action('close_signal')
@@ -766,42 +787,13 @@ Total: ${sumPip}
     const message = ctx?.callbackQuery.message;
     const text: string = ctx?.callbackQuery.message['text'];
     const id = text?.split('^^')[1] || signalId;
-    const signal = await this.signalModel.findById(id).populate('owner').exec();
-    if (signal.status !== SignalStatus.Active) return;
-    const updatedSignal = await this.signalsService.closeSignal(
-      signal,
-      this.ouncePriceService.current,
-    );
-
-    updatedSignal.owner = signal.owner;
-
-    if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
-
-    if (signal.messageId) {
-      this.publishService.addAction(
-        signal.telegramBot,
-        signal.id,
-        (telegram) =>
-          telegram.deleteMessage(
-            process.env.PUBLISH_CHANNEL_ID,
-            signal.messageId,
-          ),
-        true,
-      );
-    }
-
-    await this.userStats.updateUserSignals(signal.owner);
-
-    if (ctx) {
-      ctx.answerCbQuery('Signal closed');
-      ctx.reply(
-        Signal.getMessage(updatedSignal, { showId: true, skipOwner: true }),
-      );
-    } else {
-      this.bot.telegram.sendMessage(
-        signal.owner.telegramId,
-        Signal.getMessage(updatedSignal, { showId: true, skipOwner: true }),
-      );
+    const user = await this.getUser(ctx.from.id);
+    try {
+      await this.signalsService.manualCloseSignal(id, user.id || (user as any)._id?.toString());
+      if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
+      if (ctx) ctx.answerCbQuery('Signal closed');
+    } catch (error: any) {
+      if (ctx) ctx.answerCbQuery(error.response?.translationKey || 'Error');
     }
   }
 
@@ -811,26 +803,14 @@ Total: ${sumPip}
     const message = ctx.callbackQuery.message;
     const text: string = message['text'];
     const id = text.split('^^')[1];
-    const signal = await this.signalModel.findById(id).populate('owner').exec();
-    if (Signal.getActivePip(signal, this.ouncePriceService.current) < 0) {
-      ctx.answerCbQuery('Cannot risk-free a losing signal');
-      return;
+    const user = await this.getUser(ctx.from.id);
+    try {
+      const updatedSignal = await this.signalsService.makeSignalRiskFree(id, user.id || (user as any)._id?.toString());
+      this.refreshBotSignal(ctx, updatedSignal, message.message_id);
+      ctx.answerCbQuery('Signal set to risk free');
+    } catch (error: any) {
+      ctx.answerCbQuery(error.response?.translationKey || 'Error');
     }
-
-    if (signal.status !== SignalStatus.Active) return;
-
-    const updatedSignal = await this.signalModel
-      .findByIdAndUpdate(
-        id,
-        {
-          riskFree: true,
-        },
-        { new: true },
-      )
-      .exec();
-
-    this.refreshBotSignal(ctx, updatedSignal, message.message_id);
-    ctx.answerCbQuery('Signal set to risk free');
   }
 
   @Command('reset_all_profile')

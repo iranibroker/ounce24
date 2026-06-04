@@ -243,6 +243,95 @@ export class SignalsService {
     return signal;
   }
 
+  async cancelSignal(signalId: string, userId: string) {
+    const signal = await this.signalModel.findById(signalId).populate('owner').exec();
+    if (!signal) {
+      throw new HttpException(
+        { translationKey: 'userNotFound' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const ownerId = signal.owner?.id || (signal.owner as any)?._id?.toString();
+    if (ownerId !== userId) {
+      throw new HttpException(
+        { translationKey: 'userNotFound' },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (signal.status !== SignalStatus.Pending) {
+      throw new HttpException(
+        { translationKey: 'signal.invalidEntry' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.removeSignal(signal);
+  }
+
+  async manualCloseSignal(signalId: string, userId: string) {
+    const signal = await this.signalModel.findById(signalId).populate('owner').exec();
+    if (!signal) {
+      throw new HttpException(
+        { translationKey: 'userNotFound' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const ownerId = signal.owner?.id || (signal.owner as any)?._id?.toString();
+    if (ownerId !== userId) {
+      throw new HttpException(
+        { translationKey: 'userNotFound' },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (signal.status !== SignalStatus.Active) {
+      throw new HttpException(
+        { translationKey: 'signal.invalidEntry' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.closeSignal(signal, this.ouncePriceService.current);
+  }
+
+  async makeSignalRiskFree(signalId: string, userId: string) {
+    const signal = await this.signalModel.findById(signalId).populate('owner').exec();
+    if (!signal) {
+      throw new HttpException(
+        { translationKey: 'userNotFound' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const ownerId = signal.owner?.id || (signal.owner as any)?._id?.toString();
+    if (ownerId !== userId) {
+      throw new HttpException(
+        { translationKey: 'userNotFound' },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (signal.status !== SignalStatus.Active) {
+      throw new HttpException(
+        { translationKey: 'signal.invalidEntry' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (Signal.getActivePip(signal, this.ouncePriceService.current) < 0) {
+      throw new HttpException(
+        { translationKey: 'signal.invalidEntry' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
+    const updatedSignal = await this.signalModel
+      .findByIdAndUpdate(
+        signalId,
+        { riskFree: true },
+        { new: true },
+      )
+      .populate('owner')
+      .exec();
+
+    this.eventEmitter.emit(EVENTS.SIGNAL_RISK_FREE, updatedSignal);
+    return updatedSignal;
+  }
+
   @Cron('0 15 0 * * 6', {
     timeZone: 'UTC',
   })

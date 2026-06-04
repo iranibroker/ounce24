@@ -204,6 +204,14 @@
       color: #e0e0e0;
       margin: 0;
     }
+
+    .cutoff-static-warning {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #a0a0a0;
+      margin: 0;
+      opacity: 0.85;
+    }
   }
 
   /* Countdown Display */
@@ -226,6 +234,10 @@
       font-size: 16px;
       font-weight: 700;
       color: #ffd700;
+
+      &.disabled {
+        color: #ff5252;
+      }
     }
   }
 

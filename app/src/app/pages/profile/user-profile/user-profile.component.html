@@ -13,15 +13,7 @@
           <ng-icon name="saxEditOutline" size="20px"></ng-icon>
         </button>
       } @else {
-        <h1 class="toolbar-title">
-          {{ userQuery.data().title || userQuery.data().name }}
-        </h1>
-        <span class="spacer"></span>
-        <img
-          [appAvatar]="userQuery.data()"
-          [alt]="userQuery.data().title || userQuery.data().name"
-          class="toolbar-avatar"
-        />
+        <h1>{{ 'profile.pageTitle' | translate }}</h1>
       }
     </mat-toolbar-row>
   </mat-toolbar>
@@ -30,6 +22,18 @@
 
     <mat-card class="user-info-card">
       <mat-card-content>
+        <div class="profile-header-details">
+          <img [appAvatar]="userQuery.data()" class="profile-avatar-large" />
+          <h2 class="profile-name-large">{{ userQuery.data().title || userQuery.data().name }}</h2>
+          @if (userQuery.data().createdAt) {
+            <p class="profile-joined-date">
+              <ng-icon name="saxCalendarOutline" size="14px"></ng-icon>
+              {{ 'profile.createdAt' | translate }}: {{ userQuery.data().createdAt | date: 'dd/MM/yyyy' }}
+            </p>
+          }
+        </div>
+        <mat-divider style="margin: 16px 0;" />
+
         <div class="stats-row">
           @if (isOwnProfile()) {
             <div class="stat-item">

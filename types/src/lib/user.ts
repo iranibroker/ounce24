@@ -2,6 +2,8 @@ export class User {
   _id: any;
   id: string;
 
+  createdAt?: Date;
+
   name: string;
 
   title: string;

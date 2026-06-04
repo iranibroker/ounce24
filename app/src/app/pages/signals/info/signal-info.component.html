@@ -9,6 +9,32 @@
   @if (data()) {
     @let signal = data();
     <app-signal-card [signal]="signal" [showScore]="true" />
+
+    @if (isOwner()) {
+      <div class="owner-actions-container">
+        @if (signal.status === SignalStatus.Pending) {
+          <button mat-flat-button color="warn" class="action-btn cancel-btn" (click)="cancelSignal()">
+            <ng-icon name="saxCloseCircleOutline" size="18px"></ng-icon>
+            {{ 'signal.actions.cancel' | translate }}
+          </button>
+        }
+        @if (signal.status === SignalStatus.Active) {
+          <div class="active-actions-row">
+            <button mat-flat-button color="warn" class="action-btn close-btn" (click)="closeSignalManually()">
+              <ng-icon name="saxStopOutline" size="18px"></ng-icon>
+              {{ 'signal.actions.close' | translate }}
+            </button>
+            @if (canRiskFree()) {
+              <button mat-flat-button color="primary" class="action-btn risk-free-btn" (click)="makeRiskFree()">
+                <ng-icon name="saxInfoCircleOutline" size="18px"></ng-icon>
+                {{ 'signal.actions.riskFree' | translate }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+
     <mat-list>
       <mat-list-item>
         <span matListItemTitle>{{ 'signal.info.createdAt' | translate }}</span>

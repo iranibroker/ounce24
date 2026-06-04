@@ -29,6 +29,40 @@
   img.mat-mdc-card-avatar {
     border-radius: 4px !important;
   }
+
+  .profile-header-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px 0 8px 0;
+    gap: 8px;
+
+    .profile-avatar-large {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 3px solid var(--mat-sys-primary-container);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-name-large {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--mat-sys-on-surface);
+    }
+
+    .profile-joined-date {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--mat-sys-outline);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
 }
 
 .stats-row {

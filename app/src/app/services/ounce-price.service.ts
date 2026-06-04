@@ -19,11 +19,17 @@ export class OuncePriceService implements OnDestroy {
     const day = date.getUTCDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
     const hour = date.getUTCHours();
 
+    // Daily break: 22:00 to 23:00 UTC is always closed
+    if (hour === 22) {
+      return false;
+    }
+
+    // Weekend close: Friday 22:00 UTC to Sunday 23:00 UTC
     if (day === 6) { // Saturday
       return false;
     }
     if (day === 0) { // Sunday
-      return hour >= 22;
+      return hour >= 23;
     }
     if (day === 5) { // Friday
       return hour < 22;
