@@ -82,9 +82,11 @@ export class UsersService {
 
   async getLeaderboard(skip = 0, limit = 10, userId?: string, week = false) {
     const sort: any = week ? { weekScore: -1 } : { totalScore: -1 };
+    const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore createdAt';
 
     const users = await this.userModel
       .find()
+      .select(publicFields)
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -98,7 +100,10 @@ export class UsersService {
 
     // If userId is provided, find that user's position
     if (userId && !users.some((user) => user.id === userId)) {
-      const user = await this.userModel.findById(userId).exec();
+      const user = await this.userModel
+        .findById(userId)
+        .select(publicFields)
+        .exec();
       const condition = week
         ? {
             weekScore: {

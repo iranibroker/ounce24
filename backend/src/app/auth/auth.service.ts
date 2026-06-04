@@ -127,8 +127,8 @@ export class AuthService {
       .toPromise();
   }
 
-  async getUserInfo(userId: string) {
-    const user = (await this.userModel.findById(userId)).toJSON();
+  async getUserInfo(userId: string, isOwner = false) {
+    let user = (await this.userModel.findById(userId)).toJSON();
 
     if (!user) {
       throw new NotFoundException({
@@ -142,7 +142,61 @@ export class AuthService {
       })
       .exec();
     user.rank = rank + 1;
+
+    if (!isOwner) {
+      user = this.sanitizeUser(user);
+    }
     return user;
+  }
+
+  getUserIdFromToken(token?: string): string | null {
+    if (!token) return null;
+    try {
+      const decoded = this.jwtService.verify(token, {
+        secret: process.env.JWT_ACCESS_SECRET!,
+      });
+      return decoded?.id || null;
+    } catch {
+      return null;
+    }
+  }
+
+  getUserIdFromRequest(req: any): string | null {
+    const authHeader = req?.headers?.authorization;
+    if (!authHeader) return null;
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') return null;
+    return this.getUserIdFromToken(parts[1]);
+  }
+
+  sanitizeUser(user: any): any {
+    if (!user) return user;
+    const publicFields = [
+      'id',
+      '_id',
+      'name',
+      'title',
+      'tag',
+      'defaultScore',
+      'avatar',
+      'avatarSource',
+      'avgRiskReward',
+      'score',
+      'totalScore',
+      'totalSignals',
+      'winRate',
+      'weekScore',
+      'createdAt',
+      'updatedAt',
+      'rank',
+    ];
+    const sanitized: any = {};
+    for (const field of publicFields) {
+      if (user[field] !== undefined) {
+        sanitized[field] = user[field];
+      }
+    }
+    return sanitized;
   }
 
   async updateUser(userId: string, body: Partial<User>) {

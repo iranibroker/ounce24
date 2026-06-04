@@ -7,6 +7,7 @@ import {
   Body,
   NotFoundException,
   NotAcceptableException,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { GemLog, GemLogAction, User } from '@ounce24/types';
@@ -65,8 +66,10 @@ export class UsersController {
 
   @Public()
   @Get(':id')
-  async getUserProfile(@Param('id') id: string) {
-    return this.auth.getUserInfo(id);
+  async getUserProfile(@Param('id') id: string, @Req() req: any) {
+    const loggedInUserId = this.auth.getUserIdFromRequest(req);
+    const isOwner = loggedInUserId === id;
+    return this.auth.getUserInfo(id, isOwner);
   }
 
   @Public()
