@@ -35,6 +35,15 @@ export interface BotTranslation {
     support: string;
     language: string;
   };
+  pushNotifications: {
+    aiShieldTitle: string;
+    signalStatusTitle: string;
+    signalActive: (type: string, price: string) => string;
+    signalClosed: (type: string, result: string) => string;
+    signalCanceled: (type: string) => string;
+    buy: string;
+    sell: string;
+  };
 }
 
 export const BOT_TRANSLATIONS: Record<string, BotTranslation> = {
@@ -119,6 +128,15 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       support: 'Support',
       language: '🌐 Language',
     },
+    pushNotifications: {
+      aiShieldTitle: 'Smart Shield',
+      signalStatusTitle: 'Signal Status Update',
+      signalActive: (type: string, price: string) => `🔔 Gold ${type} signal is now ACTIVE!\nTrigger price: $${price}`,
+      signalClosed: (type: string, result: string) => `🎯 Gold ${type} signal is now CLOSED!\nResult: ${result}`,
+      signalCanceled: (type: string) => `🚫 Gold ${type} signal has been CANCELED.`,
+      buy: 'BUY',
+      sell: 'SELL',
+    },
   },
 
   fa: {
@@ -201,6 +219,15 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       aboutUs: 'ℹ️ درباره ما',
       support: 'پشتیبانی',
       language: '🌐 زبان',
+    },
+    pushNotifications: {
+      aiShieldTitle: 'سپر هوشمند',
+      signalStatusTitle: 'به‌روزرسانی وضعیت سیگنال',
+      signalActive: (type: string, price: string) => `🔔 سیگنال ${type} طلا فعال شد!\nقیمت فعال‌سازی: $${price}`,
+      signalClosed: (type: string, result: string) => `🎯 سیگنال ${type} طلا بسته شد!\nنتیجه: ${result}`,
+      signalCanceled: (type: string) => `🚫 سیگنال ${type} طلا لغو گردید.`,
+      buy: 'خرید',
+      sell: 'فروش',
     },
   },
 
@@ -285,6 +312,15 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       support: 'الدعم',
       language: '🌐 اللغة',
     },
+    pushNotifications: {
+      aiShieldTitle: 'درع الذكاء الاصطناعي الذكي',
+      signalStatusTitle: 'تحديث حالة الإشارة',
+      signalActive: (type: string, price: string) => `🔔 تم تفعيل إشارة الذهب ${type}!\nسعر التفعيل: $${price}`,
+      signalClosed: (type: string, result: string) => `🎯 تم إغلاق إشارة الذهب ${type}!\nالنتيجة: ${result}`,
+      signalCanceled: (type: string) => `🚫 تم إلغاء إشارة الذهب ${type}.`,
+      buy: 'شراء',
+      sell: 'بيع',
+    },
   },
 
   tr: {
@@ -367,6 +403,15 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
       aboutUs: 'ℹ️ Hakkımızda',
       support: 'Destek',
       language: '🌐 Dil',
+    },
+    pushNotifications: {
+      aiShieldTitle: 'Yapay Zeka Akıllı Kalkan',
+      signalStatusTitle: 'Sinyal Durumu Güncellemesi',
+      signalActive: (type: string, price: string) => `🔔 Altın ${type} sinyali artık AKTİF!\nTetikleme fiyatı: $${price}`,
+      signalClosed: (type: string, result: string) => `🎯 Altın ${type} sinyali KAPATILDI!\nSonuç: ${result}`,
+      signalCanceled: (type: string) => `🚫 Altın ${type} sinyali İPTAL EDİLDİ.`,
+      buy: 'AL',
+      sell: 'SAT',
     },
   },
 };

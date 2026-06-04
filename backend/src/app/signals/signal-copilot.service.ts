@@ -19,6 +19,8 @@ import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { AiChatService } from '../ai-chat/ai-chat.service';
 import { WebPushService } from '../web-push/web-push.service';
 import { SignalsService } from './signals.service';
+import { getTranslation } from '../bot/i18n';
+
 
 interface CachedSubscription {
   userId: string;
@@ -481,7 +483,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
         const lang = sub.language || 'fa';
         const message = lang === 'fa' ? copilotResponse.messageFa : copilotResponse.messageEn;
-        const alertTitle = lang === 'fa' ? '🛡️ سپر هوشمند' : '🛡️ Smart Shield';
+        const t = getTranslation(lang);
+        const alertTitle = `🛡️ ${t.pushNotifications.aiShieldTitle}`;
 
         // 1. Send via WebPush
         const pushPayload = JSON.stringify({
@@ -539,27 +542,22 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
         if (!sub.notifSignalFollow) continue;
 
         const lang = sub.language || 'fa';
-        const typeStr = signal.type === SignalType.Buy ? (lang === 'fa' ? 'خرید' : 'BUY') : (lang === 'fa' ? 'فروش' : 'SELL');
+        const t = getTranslation(lang);
+        const typeStr = signal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
         const entryPrice = signal.entryPrice;
 
         let message = '';
         if (state === 'active') {
-          message = lang === 'fa'
-            ? `🔔 سیگنال ${typeStr} طلا فعال شد!\nقیمت فعال‌سازی: $${entryPrice.toFixed(2)}`
-            : `🔔 Gold ${typeStr} signal is now ACTIVE!\nTrigger price: $${entryPrice.toFixed(2)}`;
+          message = t.pushNotifications.signalActive(typeStr, entryPrice.toFixed(2));
         } else if (state === 'closed') {
           const profitPip = signal.pip !== null ? signal.pip : 0;
           const pipStr = profitPip >= 0 ? `+${profitPip} pip` : `${profitPip} pip`;
-          message = lang === 'fa'
-            ? `🎯 سیگنال ${typeStr} طلا بسته شد!\nنتیجه: ${pipStr}`
-            : `🎯 Gold ${typeStr} signal is now CLOSED!\nResult: ${pipStr}`;
+          message = t.pushNotifications.signalClosed(typeStr, pipStr);
         } else if (state === 'canceled') {
-          message = lang === 'fa'
-            ? `🚫 سیگنال ${typeStr} طلا لغو گردید.`
-            : `🚫 Gold ${typeStr} signal has been CANCELED.`;
+          message = t.pushNotifications.signalCanceled(typeStr);
         }
 
-        const title = lang === 'fa' ? '📢 به‌روزرسانی وضعیت سیگنال' : '📢 Signal Status Update';
+        const title = `📢 ${t.pushNotifications.signalStatusTitle}`;
 
         // 1. WebPush
         const pushPayload = JSON.stringify({
