@@ -1,5 +1,12 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxArrowLeftOutline, saxCloseCircleOutline, saxStopOutline, saxInfoCircleOutline } from '@ng-icons/iconsax/outline';
+import { 
+  saxArrowLeftOutline, 
+  saxCloseCircleOutline, 
+  saxStopOutline, 
+  saxInfoCircleOutline,
+  saxNotificationOutline,
+  saxShieldOutline 
+} from '@ng-icons/iconsax/outline';
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -20,13 +27,16 @@ import { AuthService } from '../../../services/auth.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 
 @Component({
   selector: 'app-signal-info',
   standalone: true,
-  imports: [NgIcon, CommonModule,
+  imports: [
+    NgIcon, 
+    CommonModule,
     MatToolbarModule,
     MatButtonModule,
     MatDividerModule,
@@ -38,8 +48,19 @@ import { GemRequiredDialogComponent } from '../../../components/gem-required-dia
     VolumeCalculatorComponent,
     TranslateModule,
     MatSnackBarModule,
-    MatSlideToggleModule,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxCloseCircleOutline, saxStopOutline, saxInfoCircleOutline })],
+    MatSlideToggleModule,
+    MatCardModule,
+  ],
+  providers: [
+    provideIcons({ 
+      saxArrowLeftOutline, 
+      saxCloseCircleOutline, 
+      saxStopOutline, 
+      saxInfoCircleOutline,
+      saxNotificationOutline,
+      saxShieldOutline 
+    })
+  ],
   templateUrl: './signal-info.component.html',
   styleUrls: ['./signal-info.component.scss'],
 })

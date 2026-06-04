@@ -9,7 +9,7 @@ import {
   saxArrowLeftOutline, 
   saxNotificationOutline, 
   saxActivityOutline,
-  saxStarOutline,
+  saxShieldOutline,
   saxInfoCircleOutline
 } from '@ng-icons/iconsax/outline';
 import { PushNotificationService } from '../../services/push-notification.service';
@@ -33,7 +33,7 @@ import { SHARED } from '../../shared';
       saxArrowLeftOutline,
       saxNotificationOutline,
       saxActivityOutline,
-      saxStarOutline,
+      saxShieldOutline,
       saxInfoCircleOutline,
     }),
   ],

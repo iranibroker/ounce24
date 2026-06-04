@@ -11,27 +11,53 @@
     <app-signal-card [signal]="signal" [showScore]="true" />
 
     <!-- Subscription Controls (Follow & Smart Shield) -->
-    <div class="subscription-panel glass-panel">
-      <div class="sub-item">
-        <div class="sub-info">
-          <span class="sub-title">🔔 {{ 'signal.actions.follow' | translate }}</span>
-          <span class="sub-desc">{{ 'signal.actions.followDesc' | translate }}</span>
-        </div>
-        <mat-slide-toggle [checked]="subscription.followStatus" (change)="toggleFollow()"></mat-slide-toggle>
-      </div>
+    <div class="subscription-controls-container">
+      <!-- Follow Signal -->
+      <mat-card class="settings-card">
+        <mat-card-content>
+          <div class="settings-row">
+            <div class="settings-info">
+              <div class="icon-container signal-icon">
+                <ng-icon name="saxNotificationOutline" size="20px"></ng-icon>
+              </div>
+              <div class="settings-texts">
+                <h3>{{ 'signal.actions.follow' | translate }}</h3>
+                <p>{{ 'signal.actions.followDesc' | translate }}</p>
+              </div>
+            </div>
+            <mat-slide-toggle
+              [checked]="subscription.followStatus"
+              (change)="toggleFollow()"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-      <mat-divider></mat-divider>
-
-      <div class="sub-item premium">
-        <div class="sub-info">
-          <span class="sub-title flex-align">
-            🛡️ {{ 'signal.actions.aiShield' | translate }}
-            <span class="premium-badge">{{ 'signal.actions.premium' | translate }}</span>
-          </span>
-          <span class="sub-desc">{{ 'signal.actions.aiShieldDesc' | translate }}</span>
-        </div>
-        <mat-slide-toggle [checked]="subscription.aiShield" (change)="toggleAiShield()"></mat-slide-toggle>
-      </div>
+      <!-- AI Smart Shield -->
+      <mat-card class="settings-card">
+        <mat-card-content>
+          <div class="settings-row">
+            <div class="settings-info">
+              <div class="icon-container shield-icon">
+                <ng-icon name="saxShieldOutline" size="20px"></ng-icon>
+              </div>
+              <div class="settings-texts">
+                <h3>
+                  {{ 'signal.actions.aiShield' | translate }}
+                  <span class="premium-badge">{{ 'signal.actions.premium' | translate }}</span>
+                </h3>
+                <p>{{ 'signal.actions.aiShieldDesc' | translate }}</p>
+              </div>
+            </div>
+            <mat-slide-toggle
+              [checked]="subscription.aiShield"
+              (change)="toggleAiShield()"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     @if (isOwner()) {

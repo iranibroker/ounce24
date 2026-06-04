@@ -330,9 +330,9 @@
       "channelsTitle": "کانال‌های اطلاع‌رسانی",
       "priceTitle": "قیمت لحظه‌ای اونس",
       "priceDesc": "دریافت قیمت اونس طلا هر ۵ ثانیه",
-      "signalFollowTitle": "وضعیت سیگنال‌ها",
+      "signalFollowTitle": "دنبال کردن سیگنال",
       "signalFollowDesc": "اطلاع‌رسانی هنگام فعال یا بسته شدن سیگنال‌های دنبال شده",
-      "aiShieldTitle": "سپر هوشمند (هوش مصنوعی)",
+      "aiShieldTitle": "سپر هوشمند",
       "aiShieldDesc": "توصیه‌های هوش مصنوعی برای مدیریت معامله"
     }
   },

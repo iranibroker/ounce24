@@ -330,9 +330,9 @@
       "channelsTitle": "Notification Channels",
       "priceTitle": "Live Ounce Price",
       "priceDesc": "Receive gold ounce price updates every 5 seconds",
-      "signalFollowTitle": "Signal Status Updates",
+      "signalFollowTitle": "Follow Signal",
       "signalFollowDesc": "Notifications when followed signals open or close",
-      "aiShieldTitle": "AI Smart Shield",
+      "aiShieldTitle": "Smart Shield",
       "aiShieldDesc": "AI recommendations for managing trades"
     }
   },
