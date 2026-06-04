@@ -15,6 +15,7 @@ import {
   SignalType,
   User,
   OuncePriceCandle,
+  SignalSubscription,
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -41,6 +42,8 @@ export class SignalsService {
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
+    @InjectModel(SignalSubscription.name)
+    private signalSubModel: Model<SignalSubscription>,
     private eventEmitter: EventEmitter2,
     private ouncePriceService: OuncePriceService,
     private aiChatService: AiChatService,
@@ -50,38 +53,7 @@ export class SignalsService {
     private candleModel: Model<OuncePriceCandle>,
   ) {}
 
-  @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
-  private async handleOuncePriceUpdated(price: number) {
-    if (!price) return;
 
-    const signals = await this.signalModel
-      .find({
-        status: { $in: [SignalStatus.Active, SignalStatus.Pending] },
-        deletedAt: null,
-      })
-      .populate('owner')
-      .exec();
-
-    for (const signal of signals) {
-      if (signal.status === SignalStatus.Pending) {
-        if (Signal.activeTrigger(signal, price)) {
-          signal.status = SignalStatus.Active;
-          signal.activeAt = new Date();
-          signal.save().then(async (savedSignal) => {
-            const populatedSignal = await this.signalModel
-              .findById(savedSignal._id)
-              .populate('owner')
-              .exec();
-            this.eventEmitter.emit(EVENTS.SIGNAL_ACTIVE, populatedSignal || savedSignal);
-          });
-        }
-      } else {
-        if (Signal.closeTrigger(signal, price)) {
-          this.closeSignal(signal, price);
-        }
-      }
-    }
-  }
 
   async addSignal(signal: Signal) {
     signal.createdOuncePrice = this.ouncePriceService.current;
@@ -186,6 +158,12 @@ export class SignalsService {
       owner.weekScore >= MIN_SIGNAL_SCORE;
 
     const savedSignal = await this.signalModel.create(signal);
+    await this.signalSubModel.create({
+      signal: savedSignal._id,
+      user: owner._id,
+      followStatus: true,
+      aiShield: false,
+    });
     const populatedSignal = await this.signalModel
       .findById(savedSignal._id)
       .populate('owner')
@@ -227,6 +205,19 @@ export class SignalsService {
 
     this.eventEmitter.emit(EVENTS.SIGNAL_CLOSED, savedSignal);
     return signal;
+  }
+
+  async activateSignal(signal: Signal): Promise<Signal> {
+    const saved = await this.signalModel
+      .findByIdAndUpdate(
+        signal._id || (signal as any).id,
+        { status: SignalStatus.Active, activeAt: new Date() },
+        { new: true },
+      )
+      .populate('owner')
+      .exec();
+    this.eventEmitter.emit(EVENTS.SIGNAL_ACTIVE, saved);
+    return saved;
   }
 
   async removeSignal(signal: Signal) {
@@ -780,6 +771,46 @@ Instructions for Signal Generation:
       console.error('Error in generateSignal service:', error);
       throw error;
     }
+  }
+
+  async getSubscription(signalId: string, userId: string): Promise<SignalSubscription | null> {
+    return this.signalSubModel.findOne({ signal: signalId, user: userId }).exec();
+  }
+
+  async updateSubscription(
+    signalId: string,
+    userId: string,
+    subDto: { followStatus?: boolean; aiShield?: boolean },
+  ): Promise<SignalSubscription> {
+    if (subDto.aiShield === true) {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user || !user.gem || user.gem < 100) {
+        throw new NotAcceptableException({
+          translationKey: 'insufficientGems',
+        });
+      }
+    }
+
+    const sub = await this.signalSubModel.findOne({ signal: signalId, user: userId }).exec();
+    let savedSub: SignalSubscription;
+    if (sub) {
+      if (subDto.followStatus !== undefined) sub.followStatus = subDto.followStatus;
+      if (subDto.aiShield !== undefined) sub.aiShield = subDto.aiShield;
+      savedSub = await sub.save();
+    } else {
+      savedSub = await this.signalSubModel.create({
+        signal: signalId,
+        user: userId,
+        followStatus: subDto.followStatus ?? false,
+        aiShield: subDto.aiShield ?? false,
+      });
+    }
+    const populatedSub = await this.signalSubModel
+      .findById(savedSub._id)
+      .populate('user')
+      .exec();
+    this.eventEmitter.emit(EVENTS.SIGNAL_SUBSCRIPTION_UPDATED, populatedSub || savedSub);
+    return populatedSub || savedSub;
   }
 }
 

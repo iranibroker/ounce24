@@ -69,6 +69,20 @@ export class Signal {
 
   deletedAt?: Date;
 
+  lastAiCheckedAt?: Date;
+
+  lastAiCheckedPrice?: number;
+
+  aiCopilotActive?: boolean;
+
+  aiRecommendations?: Array<{
+    type: string;
+    price: number;
+    message: string;
+    applied: boolean;
+    createdAt: Date;
+  }>;
+
   //virtual props
   isSell: boolean;
   profit: number;

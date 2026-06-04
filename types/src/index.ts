@@ -6,3 +6,4 @@ export * from './lib/user';
 export * from './lib/gem-log';
 export * from './lib/podcast';
 export * from './lib/ounce-price-candle';
+export * from './lib/signal-subscription';

@@ -125,4 +125,72 @@
       flex: 1;
     }
   }
+}
+
+.subscription-panel {
+  margin: 16px 0;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+
+  .sub-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+
+    .sub-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      padding-left: 12px;
+
+      .sub-title {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--mat-sys-on-surface);
+      }
+
+      .sub-desc {
+        font-size: 0.8rem;
+        color: var(--mat-sys-outline);
+        line-height: 1.4;
+      }
+    }
+
+    &.premium {
+      .sub-title {
+        color: #ffd700; // Gold color for premium title
+      }
+
+      .premium-badge {
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        color: #000;
+        font-size: 0.7rem;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+      }
+    }
+  }
+
+  .flex-align {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  mat-divider {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
 } 

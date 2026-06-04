@@ -19,6 +19,9 @@ import { VolumeCalculatorComponent } from '../../../components/volume-calculator
 import { AuthService } from '../../../services/auth.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialog } from '@angular/material/dialog';
+import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 
 @Component({
   selector: 'app-signal-info',
@@ -34,7 +37,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     DataLoadingComponent,
     VolumeCalculatorComponent,
     TranslateModule,
-    MatSnackBarModule,],
+    MatSnackBarModule,
+    MatSlideToggleModule,],
   providers: [provideIcons({ saxArrowLeftOutline, saxCloseCircleOutline, saxStopOutline, saxInfoCircleOutline })],
   templateUrl: './signal-info.component.html',
   styleUrls: ['./signal-info.component.scss'],
@@ -47,9 +51,11 @@ export class SignalInfoComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly snack = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   SignalStatus = SignalStatus;
   Signal = Signal;
+  subscription = { followStatus: false, aiShield: false };
 
   currentUser = computed(() => this.auth.userQuery.data());
 
@@ -69,6 +75,16 @@ export class SignalInfoComponent implements OnInit {
   });
 
   ngOnInit() {
+    const signalId = this.route.snapshot.params['id'];
+    this.http.get<any>(`/api/signals/${signalId}/subscription`).subscribe({
+      next: (res) => {
+        this.subscription = res;
+      },
+      error: (err) => {
+        console.error('Error fetching subscription:', err);
+      }
+    });
+
     this.route.fragment.subscribe(fragment => {
       if (fragment === 'calculator') {
         setTimeout(() => {
@@ -77,6 +93,63 @@ export class SignalInfoComponent implements OnInit {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 300);
+      }
+    });
+  }
+
+  toggleFollow() {
+    const signalId = this.route.snapshot.params['id'];
+    const nextVal = !this.subscription.followStatus;
+    this.http.post<any>(`/api/signals/${signalId}/subscribe`, {
+      followStatus: nextVal
+    }).subscribe({
+      next: (res) => {
+        this.subscription.followStatus = res.followStatus;
+        const msg = nextVal
+          ? this.translate.instant('signal.actions.followSuccess')
+          : this.translate.instant('signal.actions.unfollowSuccess');
+        this.snack.open(msg, '', { duration: 3000 });
+      },
+      error: (err) => {
+        this.snack.open(this.translate.instant('apiError.signal.invalidEntry') || 'Error updating status', '', { duration: 3000 });
+      }
+    });
+  }
+
+  toggleAiShield() {
+    const user = this.currentUser();
+    const userGems = user?.gem || 0;
+    const nextVal = !this.subscription.aiShield;
+
+    if (nextVal && userGems < 100) {
+      this.dialog.open(GemRequiredDialogComponent, {
+        width: '400px',
+        data: {
+          description: this.translate.instant('signal.actions.aiShieldPremiumGemsRequired'),
+        },
+      });
+      
+      const current = this.subscription.aiShield;
+      this.subscription.aiShield = !current;
+      setTimeout(() => {
+        this.subscription.aiShield = current;
+      });
+      return;
+    }
+
+    const signalId = this.route.snapshot.params['id'];
+    this.http.post<any>(`/api/signals/${signalId}/subscribe`, {
+      aiShield: nextVal
+    }).subscribe({
+      next: (res) => {
+        this.subscription.aiShield = res.aiShield;
+        const msg = nextVal
+          ? this.translate.instant('signal.actions.aiShieldSuccess')
+          : this.translate.instant('signal.actions.aiShieldDeactivated');
+        this.snack.open(msg, '', { duration: 3000 });
+      },
+      error: (err) => {
+        this.snack.open(this.translate.instant('apiError.signal.invalidEntry') || 'Error updating status', '', { duration: 3000 });
       }
     });
   }

@@ -60,7 +60,17 @@
       "riskFreeConfirm": "Bu aktif sinyali risksiz hale getirmek istediğinizden emin misiniz? Fiyat tersine dönerse zarar durdurma giriş fiyatına taşınacaktır.",
       "cancelSuccess": "Sinyal başarıyla iptal edildi",
       "closeSuccess": "Sinyal başarıyla kapatıldı",
-      "riskFreeSuccess": "Sinyal başarıyla risksiz hale getirildi"
+      "riskFreeSuccess": "Sinyal başarıyla risksiz hale getirildi",
+      "follow": "Sinyali Takip Et",
+      "followDesc": "Bu sinyal için aktivasyon veya kapanış bildirimleri alın",
+      "followSuccess": "Sinyal takip durumu güncellendi",
+      "unfollowSuccess": "Sinyal takibi başarıyla iptal edildi",
+      "aiShield": "Akıllı Kalkan",
+      "aiShieldDesc": "Yapay zeka tabanlı risksiz, takip eden ve erken çıkış uyarıları alın (tavsiye başına 1 GEM)",
+      "aiShieldSuccess": "Akıllı Kalkan etkinleştirildi! 🛡️",
+      "aiShieldDeactivated": "Akıllı Kalkan devre dışı bırakıldı",
+      "aiShieldPremiumGemsRequired": "Bu bölüm premium erişim gerektiriyor. En az 100 GEM'e sahip olmalısınız.",
+      "premium": "Premium"
     }
   },
   "signalAnalyze": {

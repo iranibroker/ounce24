@@ -6,6 +6,7 @@ export const EVENTS = {
   SIGNAL_CREATED: 'signal.created',
   SIGNAL_CANCELED: 'signal.canceled',
   SIGNAL_RISK_FREE: 'signal.riskfree',
+  SIGNAL_SUBSCRIPTION_UPDATED: 'signal.subscription.updated',
   MARKET_CLOSED: 'market.closed',
   MARKET_OPENED: 'market.opened',
 };

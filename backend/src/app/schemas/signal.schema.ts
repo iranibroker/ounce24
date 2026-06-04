@@ -31,6 +31,18 @@ export const SignalSchema = new mongoose.Schema<Signal>(
     deletedAt: { type: Date, required: false },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     gem: { type: Number, required: true, default: 0 },
+    lastAiCheckedAt: { type: Date, required: false },
+    lastAiCheckedPrice: { type: Number, required: false },
+    aiCopilotActive: { type: Boolean, default: false },
+    aiRecommendations: [
+      {
+        type: { type: String, required: true },
+        price: { type: Number, required: true },
+        message: { type: String, required: true },
+        applied: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,

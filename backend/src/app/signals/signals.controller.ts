@@ -199,4 +199,21 @@ export class SignalsController {
     const res = await this.signalService.makeSignalRiskFree(id, userId);
     return this.sanitizeSignal(res);
   }
+
+  @Get(':id/subscription')
+  async getSubscription(@Param('id') id: string, @LoginUser() user: User) {
+    const userId = user.id || (user as any)._id?.toString();
+    const sub = await this.signalService.getSubscription(id, userId);
+    return sub || { signal: id, user: userId, followStatus: false, aiShield: false };
+  }
+
+  @Post(':id/subscribe')
+  async updateSubscription(
+    @Param('id') id: string,
+    @Body() subDto: { followStatus?: boolean; aiShield?: boolean },
+    @LoginUser() user: User,
+  ) {
+    const userId = user.id || (user as any)._id?.toString();
+    return this.signalService.updateSubscription(id, userId, subDto);
+  }
 }

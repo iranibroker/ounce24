@@ -10,6 +10,30 @@
     @let signal = data();
     <app-signal-card [signal]="signal" [showScore]="true" />
 
+    <!-- Subscription Controls (Follow & Smart Shield) -->
+    <div class="subscription-panel glass-panel">
+      <div class="sub-item">
+        <div class="sub-info">
+          <span class="sub-title">🔔 {{ 'signal.actions.follow' | translate }}</span>
+          <span class="sub-desc">{{ 'signal.actions.followDesc' | translate }}</span>
+        </div>
+        <mat-slide-toggle [checked]="subscription.followStatus" (change)="toggleFollow()"></mat-slide-toggle>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="sub-item premium">
+        <div class="sub-info">
+          <span class="sub-title flex-align">
+            🛡️ {{ 'signal.actions.aiShield' | translate }}
+            <span class="premium-badge">{{ 'signal.actions.premium' | translate }}</span>
+          </span>
+          <span class="sub-desc">{{ 'signal.actions.aiShieldDesc' | translate }}</span>
+        </div>
+        <mat-slide-toggle [checked]="subscription.aiShield" (change)="toggleAiShield()"></mat-slide-toggle>
+      </div>
+    </div>
+
     @if (isOwner()) {
       <div class="owner-actions-container">
         @if (signal.status === SignalStatus.Pending) {

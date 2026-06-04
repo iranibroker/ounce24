@@ -87,6 +87,38 @@ export class WebPushService implements OnModuleInit {
     await Promise.all(promises);
   }
 
+  async sendNotificationToUser(userId: string, payload: string) {
+    if (!userId) return;
+    const subscriptions = await this.pushSubModel.find({ userId });
+    if (subscriptions.length === 0) return;
+
+    const promises = subscriptions.map((sub) => {
+      const pushSub = {
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.keys.p256dh,
+          auth: sub.keys.auth,
+        },
+      };
+
+      const options = {
+        TTL: 0,
+        urgency: 'high' as const
+      };
+
+      return webpush.sendNotification(pushSub, payload, options).catch(async (error) => {
+        if (error.statusCode === 410 || error.statusCode === 404) {
+          console.log(`Removing expired subscription: ${sub.endpoint}`);
+          await this.removeSubscription(sub.endpoint);
+        } else {
+          console.error(`Failed to send web push notification to user ${userId} subscription ${sub.endpoint}:`, error);
+        }
+      });
+    });
+
+    await Promise.all(promises);
+  }
+
   @Interval(5000)
   async handlePriceBroadcasting() {
     const price = this.ouncePriceService.current;
