@@ -4,7 +4,8 @@ import { Model } from 'mongoose';
 import * as webpush from 'web-push';
 import { PushSubscription } from '../schemas/push-subscription.schema';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
-import { Interval } from '@nestjs/schedule';
+import { OnEvent } from '@nestjs/event-emitter';
+import { EVENTS } from '../consts';
 import { User } from '@ounce24/types';
 
 @Injectable()
@@ -134,9 +135,8 @@ export class WebPushService implements OnModuleInit {
     await Promise.all(promises);
   }
 
-  @Interval(5000)
-  async handlePriceBroadcasting() {
-    const price = this.ouncePriceService.current;
+  @OnEvent(EVENTS.OUNCE_PRICE_UPDATED)
+  async handlePriceBroadcasting(price: number) {
     if (price > 0) {
       const payload = JSON.stringify({ price });
       await this.sendNotificationToAll(payload);

@@ -1,3 +1,4 @@
+// sw version: 2.0
 self.addEventListener('install', function (event) {
   self.skipWaiting(); // Force the waiting service worker to become the active service worker
 });
@@ -32,7 +33,9 @@ self.addEventListener('push', function (event) {
     return;
   }
 
-  // Otherwise, it is a gold price update notification (existing behavior)
+  // Otherwise, it is a gold price update notification
+  // Using tag + silent + renotify:false ensures each push silently updates
+  // the existing notification in-place without flicker or sound.
   const price = data.price || '---';
 
   // Format the price as USD (e.g. $2,450.50)
@@ -45,53 +48,17 @@ self.addEventListener('push', function (event) {
   }
 
   const title = formattedPrice;
-  const timestamp = Date.now();
   const options = {
     body: 'Signal profitability stats coming soon.',
     icon: '/favicon.ico',
     badge: '/favicon.ico',
     tag: 'ounce-price-alert', // Updates existing notification instead of creating a new one
     renotify: false, // Prevents subsequent sound/vibration alerts when replacing notification
-    silent: true, // Completely silent for frequent 5-second updates (crucial for user comfort)
+    silent: true, // Completely silent — crucial for real-time price updates
     requireInteraction: true, // Prevents the OS from auto-dismissing the notification
-    data: {
-      timestamp: timestamp,
-    },
   };
 
-  // Save the latest push timestamp in Cache Storage to track if a newer push has arrived
-  const saveStatePromise = caches.open('ounce-push-state').then((cache) => {
-    return cache.put('https://state.local/last-push', new Response(timestamp.toString()));
-  });
-
-  const notificationPromise = self.registration.showNotification(title, options);
-
-  const closePromise = new Promise((resolve) => {
-    setTimeout(async () => {
-      try {
-        // Read the last push timestamp from cache
-        const lastPushText = await caches.open('ounce-push-state')
-          .then((cache) => cache.match('https://state.local/last-push'))
-          .then((res) => (res ? res.text() : '0'));
-        const lastPushVal = parseInt(lastPushText, 10);
-
-        // ONLY close if no newer price has been received (lastPushVal is still <= the timestamp of this timeout)
-        if (lastPushVal <= timestamp) {
-          const notifications = await self.registration.getNotifications({
-            tag: 'ounce-price-alert',
-          });
-          for (const notification of notifications) {
-            notification.close();
-          }
-        }
-      } catch (err) {
-        console.error('Error closing notification:', err);
-      }
-      resolve();
-    }, 20000); // 20 seconds
-  });
-
-  event.waitUntil(Promise.all([saveStatePromise, notificationPromise, closePromise]));
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', function (event) {

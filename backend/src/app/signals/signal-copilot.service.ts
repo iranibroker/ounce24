@@ -190,16 +190,16 @@ export class SignalCopilotService implements OnModuleInit {
   async handleCacheSignalClosed(signal: Signal) {
     const signalIdStr = (signal._id || signal.id).toString();
     this.logger.log(`Cache Sync: Removing closed signal ${signalIdStr}`);
-    this.signalCache.delete(signalIdStr);
     await this.notifyFollowers(signal, 'closed');
+    this.signalCache.delete(signalIdStr);
   }
 
   @OnEvent(EVENTS.SIGNAL_CANCELED)
   async handleCacheSignalCanceled(signal: Signal) {
     const signalIdStr = (signal._id || signal.id).toString();
     this.logger.log(`Cache Sync: Removing canceled signal ${signalIdStr}`);
-    this.signalCache.delete(signalIdStr);
     await this.notifyFollowers(signal, 'canceled');
+    this.signalCache.delete(signalIdStr);
   }
 
   @OnEvent(EVENTS.SIGNAL_RISK_FREE)
