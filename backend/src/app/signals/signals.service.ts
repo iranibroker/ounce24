@@ -355,6 +355,32 @@ export class SignalsService {
 
   async analyzeSignal(signal: Signal, userId?: string) {
     try {
+      // Normalize incoming signal properties in case it is a partial or form-based unsaved object.
+      const signalType = signal.type;
+      const isSell = signalType === SignalType.Sell;
+      const status = signal.status || (signal.instantEntry ? SignalStatus.Active : SignalStatus.Pending);
+      const entryPrice = typeof signal.entryPrice === 'string' ? parseFloat(signal.entryPrice) : (signal.entryPrice || 0);
+
+      // Determine profit and loss
+      let profit = 0;
+      if (signal.profit !== undefined && signal.profit !== null) {
+        profit = typeof signal.profit === 'string' ? parseFloat(signal.profit) : signal.profit;
+      } else if ((signal as any).takeProfit !== undefined && (signal as any).takeProfit !== null) {
+        profit = typeof (signal as any).takeProfit === 'string' ? parseFloat((signal as any).takeProfit) : (signal as any).takeProfit;
+      } else {
+        profit = isSell ? (signal.minPrice || 0) : (signal.maxPrice || 0);
+      }
+
+      // loss
+      let loss = 0;
+      if (signal.loss !== undefined && signal.loss !== null) {
+        loss = typeof signal.loss === 'string' ? parseFloat(signal.loss) : signal.loss;
+      } else if ((signal as any).stopLoss !== undefined && (signal as any).stopLoss !== null) {
+        loss = typeof (signal as any).stopLoss === 'string' ? parseFloat((signal as any).stopLoss) : (signal as any).stopLoss;
+      } else {
+        loss = isSell ? (signal.maxPrice || 0) : (signal.minPrice || 0);
+      }
+
       // Check if user has gems
       const targetUserId = userId || (signal.owner && (typeof signal.owner === 'object' ? signal.owner._id || (signal.owner as any).id : signal.owner));
       if (!targetUserId) {
@@ -496,16 +522,16 @@ You are an expert, extremely bold, decisive, and authoritative financial analyst
 Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
 
 Signal Details:
-- Action Type: ${signal.type === SignalType.Buy ? 'BUY' : 'SELL'}
-- Signal Status: ${signal.status.toUpperCase()}
+- Action Type: ${signalType === SignalType.Buy ? 'BUY' : 'SELL'}
+- Signal Status: ${status.toUpperCase()}
 - Placed Time (Created): ${signal.createdAt ? new Date(signal.createdAt).toISOString().replace('T', ' ').substring(5, 16) : 'N/A'}
 ${signal.activeAt ? `- Triggered/Activated Time: ${new Date(signal.activeAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}
 ${signal.closedAt ? `- Closed/Finished Time: ${new Date(signal.closedAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}
 ${signal.closedOuncePrice ? `- Closed Ounce Price: $${signal.closedOuncePrice.toFixed(2)}` : ''}
 - Current Price: $${currentPrice.toFixed(2)}
-- Entry Price: $${signal.entryPrice.toFixed(2)}
-- Take Profit (TP): $${signal.profit.toFixed(2)} (Target Move: $${Math.abs(signal.profit - signal.entryPrice).toFixed(2)})
-- Stop Loss (SL): $${signal.loss.toFixed(2)} (Risk Move: $${Math.abs(signal.loss - signal.entryPrice).toFixed(2)})
+- Entry Price: $${entryPrice.toFixed(2)}
+- Take Profit (TP): $${profit.toFixed(2)} (Target Move: $${Math.abs(profit - entryPrice).toFixed(2)})
+- Stop Loss (SL): $${loss.toFixed(2)} (Risk Move: $${Math.abs(loss - entryPrice).toFixed(2)})
 
 Technical Indicators (Calculated on 5m, 15m, 1h tables):
 - 5m RSI(14): ${rsi5m.toFixed(2)}
@@ -573,7 +599,7 @@ Instructions for Analysis:
       });
 
       this.signalAnalyzeModel.create({
-        signal: signal.id,
+        signal: signal.id || signal._id || null,
         ouncePrice: currentPrice,
         totalTokens: result.totalTokens,
         analyzeText: result.text,
