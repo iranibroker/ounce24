@@ -5,6 +5,7 @@ import * as webpush from 'web-push';
 import { PushSubscription } from '../schemas/push-subscription.schema';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { Interval } from '@nestjs/schedule';
+import { User } from '@ounce24/types';
 
 @Injectable()
 export class WebPushService implements OnModuleInit {
@@ -18,6 +19,8 @@ export class WebPushService implements OnModuleInit {
   constructor(
     @InjectModel(PushSubscription.name)
     private readonly pushSubModel: Model<PushSubscription>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<User>,
     private readonly ouncePriceService: OuncePriceService,
   ) {}
 
@@ -55,34 +58,46 @@ export class WebPushService implements OnModuleInit {
     await this.pushSubModel.deleteOne({ endpoint });
   }
 
+  /** ارسال به همه اشتراک‌هایی که notifPrice = true دارند */
   async sendNotificationToAll(payload: string) {
+    // کاربرانی که notifPrice صریحاً false ندارند
+    const disabledUserIds = await this.userModel
+      .find({ notifPrice: false })
+      .select('_id')
+      .lean()
+      .then((users) => users.map((u) => String(u._id)));
+
     const subscriptions = await this.pushSubModel.find();
     if (subscriptions.length === 0) return;
 
-    const promises = subscriptions.map((sub) => {
-      const pushSub = {
-        endpoint: sub.endpoint,
-        keys: {
-          p256dh: sub.keys.p256dh,
-          auth: sub.keys.auth,
-        },
-      };
+    const promises = subscriptions
+      .filter((sub) => {
+        if (!sub.userId) return true; // اشتراک‌های بدون یوزر همیشه دریافت می‌کنند
+        return !disabledUserIds.includes(sub.userId);
+      })
+      .map((sub) => {
+        const pushSub = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.keys.p256dh,
+            auth: sub.keys.auth,
+          },
+        };
 
-      const options = {
-        TTL: 0,
-        urgency: 'high' as const
-      };
+        const options = {
+          TTL: 0,
+          urgency: 'high' as const,
+        };
 
-      return webpush.sendNotification(pushSub, payload, options).catch(async (error) => {
-        // If subscription has expired or is invalid, remove it
-        if (error.statusCode === 410 || error.statusCode === 404) {
-          console.log(`Removing expired subscription: ${sub.endpoint}`);
-          await this.removeSubscription(sub.endpoint);
-        } else {
-          console.error(`Failed to send web push notification to ${sub.endpoint}:`, error);
-        }
+        return webpush.sendNotification(pushSub, payload, options).catch(async (error) => {
+          if (error.statusCode === 410 || error.statusCode === 404) {
+            console.log(`Removing expired subscription: ${sub.endpoint}`);
+            await this.removeSubscription(sub.endpoint);
+          } else {
+            console.error(`Failed to send web push notification to ${sub.endpoint}:`, error);
+          }
+        });
       });
-    });
 
     await Promise.all(promises);
   }
@@ -103,7 +118,7 @@ export class WebPushService implements OnModuleInit {
 
       const options = {
         TTL: 0,
-        urgency: 'high' as const
+        urgency: 'high' as const,
       };
 
       return webpush.sendNotification(pushSub, payload, options).catch(async (error) => {

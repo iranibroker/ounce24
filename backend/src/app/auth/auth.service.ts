@@ -215,6 +215,19 @@ export class AuthService {
     return user;
   }
 
+  async updateNotificationSettings(
+    userId: string,
+    settings: { notifPrice?: boolean; notifSignalFollow?: boolean; notifAiShield?: boolean },
+  ) {
+    const allowed: Record<string, boolean | undefined> = {};
+    if (settings.notifPrice !== undefined) allowed['notifPrice'] = settings.notifPrice;
+    if (settings.notifSignalFollow !== undefined) allowed['notifSignalFollow'] = settings.notifSignalFollow;
+    if (settings.notifAiShield !== undefined) allowed['notifAiShield'] = settings.notifAiShield;
+
+    const user = await this.userModel.findByIdAndUpdate(userId, allowed, { new: true });
+    return user;
+  }
+
   async fetchTelegramAvatarUrl(telegramId: number): Promise<string | null> {
     const token = process.env.BOT_TOKEN;
     if (!token) return null;

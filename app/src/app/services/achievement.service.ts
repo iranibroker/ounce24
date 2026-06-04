@@ -31,6 +31,8 @@ export class AchievementService {
   );
 
   constructor() {
+    // Bottom sheet disabled for now:
+    /*
     effect(() => {
       const achievements = this.achievementsQuery.data();
       const achievement = achievements?.[0];
@@ -51,6 +53,7 @@ export class AchievementService {
         }
       });
     });
+    */
   }
 
   achievementsQuery = injectQuery(() => ({

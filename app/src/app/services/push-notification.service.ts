@@ -4,6 +4,7 @@ import { lastValueFrom } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { PushSubscriptionDialogComponent } from '../components/push-subscription-dialog/push-subscription-dialog.component';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 const PROMPT_KEY = 'ounce_push_prompted';
 
@@ -13,6 +14,7 @@ const PROMPT_KEY = 'ounce_push_prompted';
 export class PushNotificationService {
   private http = inject(HttpClient);
   private dialog = inject(MatDialog);
+  private authService = inject(AuthService);
   isSubscribed = signal<boolean>(false);
   private swRegistration: ServiceWorkerRegistration | null = null;
 
@@ -152,6 +154,23 @@ export class PushNotificationService {
       return false;
     } catch (error) {
       console.error('Failed to unsubscribe from push notifications:', error);
+      return false;
+    }
+  }
+
+  async updateNotificationSettings(settings: {
+    notifPrice?: boolean;
+    notifSignalFollow?: boolean;
+    notifAiShield?: boolean;
+  }): Promise<boolean> {
+    try {
+      await lastValueFrom(
+        this.http.patch('/api/auth/me/notification-settings', settings)
+      );
+      await this.authService.userQuery.refetch();
+      return true;
+    } catch (error) {
+      console.error('Failed to update notification settings:', error);
       return false;
     }
   }

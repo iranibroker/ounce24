@@ -23,7 +23,7 @@
 
 
   @if (pushService.isNotificationSupported()) {
-    <mat-card class="settings-card">
+    <mat-card class="settings-card clickable-card" routerLink="/notifications">
       <mat-card-content>
         <div class="settings-row">
           <div class="settings-info">
@@ -31,15 +31,11 @@
               <ng-icon name="saxNotificationOutline" size="20px"></ng-icon>
             </div>
             <div class="settings-texts">
-              <h3>{{ 'pushNotifications.settings.title' | translate }}</h3>
+              <h3>{{ 'pushNotifications.page.title' | translate }}</h3>
               <p>{{ 'pushNotifications.settings.description' | translate }}</p>
             </div>
           </div>
-          <mat-slide-toggle
-            [checked]="pushService.isSubscribed()"
-            (change)="toggleNotifications($event.checked)"
-            color="primary"
-          ></mat-slide-toggle>
+          <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>
         </div>
       </mat-card-content>
     </mat-card>

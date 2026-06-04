@@ -30,6 +30,9 @@ export const UserSchema = new mongoose.Schema<User>(
     alternativeTelegramToken: { type: String, required: false },
     weekScore: { type: Number, required: true, default: 0 },
     language: { type: String, required: false, default: 'en' },
+    notifPrice: { type: Boolean, required: false, default: true },
+    notifSignalFollow: { type: Boolean, required: false, default: true },
+    notifAiShield: { type: Boolean, required: false, default: true },
   },
   {
     timestamps: true,

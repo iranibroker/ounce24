@@ -12,6 +12,7 @@ import { UserProfileComponent } from './pages/profile/user-profile/user-profile.
 import { AvatarEditComponent } from './pages/profile/avatar-edit/avatar-edit.component';
 import { PodcastListComponent } from './pages/podcast/podcast-list/podcast-list.component';
 import { MenuComponent } from './pages/menu/menu.component';
+import { NotificationSettingsComponent } from './pages/notifications/notification-settings.component';
 
 export const appRoutes: Route[] = [
   {
@@ -84,6 +85,11 @@ export const appRoutes: Route[] = [
       {
         path: 'menu',
         component: MenuComponent,
+        canActivate: [loginActivator],
+      },
+      {
+        path: 'notifications',
+        component: NotificationSettingsComponent,
         canActivate: [loginActivator],
       },
       {

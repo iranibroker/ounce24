@@ -20,13 +20,6 @@ import { LoginUser } from './user.decorator';
 export class AuthController {
   constructor(private auth: AuthService) {}
 
-  // @Public()
-  // @UseGuards(LocalAuthGuard)
-  // @Post('login')
-  // async login(@Request() req) {
-  //   return this.auth.login(req.user);
-  // }
-
   @Public()
   @Post('telegram-login')
   async telegramLogin(@Body() body: { initData: string }) {
@@ -63,6 +56,14 @@ export class AuthController {
   @Patch('me')
   async updateMe(@LoginUser() user, @Body() body) {
     return this.auth.updateUser(user.id, body);
+  }
+
+  @Patch('me/notification-settings')
+  async updateNotificationSettings(
+    @LoginUser() user,
+    @Body() body: { notifPrice?: boolean; notifSignalFollow?: boolean; notifAiShield?: boolean },
+  ) {
+    return this.auth.updateNotificationSettings(user.id, body);
   }
 
   @Post('me/telegram-avatar')

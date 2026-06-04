@@ -6,8 +6,9 @@ import {
   Signal,
   SignalStatus,
   User,
+  OctopusPrediction,
 } from '@ounce24/types';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
@@ -18,13 +19,15 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(Achievement.name) private achievementModel: Model<Achievement>,
+    @InjectModel(OctopusPrediction.name) private predictionModel: Model<OctopusPrediction>,
   ) {}
 
   @OnEvent(EVENTS.SIGNAL_CLOSED)
   async handleSignalClosed(signal: Signal) {
     if (!signal.owner) return;
 
-    this.calculateUserStats(signal.owner);
+    await this.calculateUserStats(signal.owner);
+    await this.checkIndividualAchievements(signal.owner.toString());
   }
 
   async calculateUserStats(user: User) {
@@ -156,6 +159,10 @@ export class UsersService {
   }
 
   async getUserAchievements(id: string, page: number, limit: number) {
+    // Dynamically backfill individual achievements and Octopus predictions streaks
+    await this.checkIndividualAchievements(id);
+    await this.checkOctopusStreakAchievements(id);
+
     const skip = page * limit;
     return this.achievementModel
       .find({
@@ -165,6 +172,214 @@ export class UsersService {
       .skip(skip)
       .limit(limit)
       .exec();
+  }
+
+  async checkIndividualAchievements(userId: string) {
+    const userSignals = await this.signalModel
+      .find({
+        owner: userId,
+        status: SignalStatus.Closed,
+        deletedAt: null,
+      })
+      .sort({ closedAt: 1 })
+      .exec();
+
+    if (userSignals.length === 0) return;
+
+    const existingAchievements = await this.achievementModel
+      .find({
+        user: userId,
+        type: {
+          $in: [
+            AchievementType.Hatrik20Points,
+            AchievementType.FiftyPoint,
+            AchievementType.FiveStreakR1,
+            AchievementType.Winrate60In30,
+          ],
+        },
+      })
+      .exec();
+
+    const existingCounts = {
+      [AchievementType.Hatrik20Points]: existingAchievements.filter((a) => a.type === AchievementType.Hatrik20Points).length,
+      [AchievementType.FiftyPoint]: existingAchievements.filter((a) => a.type === AchievementType.FiftyPoint).length,
+      [AchievementType.FiveStreakR1]: existingAchievements.filter((a) => a.type === AchievementType.FiveStreakR1).length,
+      [AchievementType.Winrate60In30]: existingAchievements.filter((a) => a.type === AchievementType.Winrate60In30).length,
+    };
+
+    // A. Fifty Points Signal: single signal with score >= 50
+    const fiftyPointCount = userSignals.filter((s) => (s.score || 0) >= 50).length;
+
+    // B. Hatrik 20 points signals: non-overlapping blocks of 3 consecutive signals where each score >= 20
+    let hatrikCount = 0;
+    let i = 0;
+    while (i <= userSignals.length - 3) {
+      if (
+        (userSignals[i].score || 0) >= 20 &&
+        (userSignals[i + 1].score || 0) >= 20 &&
+        (userSignals[i + 2].score || 0) >= 20
+      ) {
+        hatrikCount++;
+        i += 3;
+      } else {
+        i++;
+      }
+    }
+
+    // C. 5 streak signal without lose (R/R upper 1): non-overlapping blocks of 5 consecutive signals where each pip >= 0 and riskReward >= 1
+    let fiveStreakCount = 0;
+    let j = 0;
+    while (j <= userSignals.length - 5) {
+      let validStreak = true;
+      for (let k = 0; k < 5; k++) {
+        const sig = userSignals[j + k];
+        const isWin = (sig.pip || 0) >= 0;
+        const rr = sig.riskReward || 0;
+        if (!isWin || rr < 1) {
+          validStreak = false;
+          break;
+        }
+      }
+      if (validStreak) {
+        fiveStreakCount++;
+        j += 5;
+      } else {
+        j++;
+      }
+    }
+
+    // D. Winrate 60% in 30 signals (If R/R average upper 1): non-overlapping blocks of 30 signals where winrate >= 60% and average riskReward >= 1
+    let winrate60Count = 0;
+    let m = 0;
+    while (m <= userSignals.length - 30) {
+      let wins = 0;
+      let totalRR = 0;
+      for (let k = 0; k < 30; k++) {
+        const sig = userSignals[m + k];
+        if ((sig.pip || 0) >= 0) wins++;
+        totalRR += sig.riskReward || 0;
+      }
+      const winrate = wins / 30;
+      const avgRR = totalRR / 30;
+      if (winrate >= 0.6 && avgRR >= 1) {
+        winrate60Count++;
+        m += 30;
+      } else {
+        m++;
+      }
+    }
+
+    const toInsert: any[] = [];
+    if (fiftyPointCount > existingCounts[AchievementType.FiftyPoint]) {
+      const diff = fiftyPointCount - existingCounts[AchievementType.FiftyPoint];
+      for (let x = 0; x < diff; x++) {
+        toInsert.push({ type: AchievementType.FiftyPoint, user: userId });
+      }
+    }
+    if (hatrikCount > existingCounts[AchievementType.Hatrik20Points]) {
+      const diff = hatrikCount - existingCounts[AchievementType.Hatrik20Points];
+      for (let x = 0; x < diff; x++) {
+        toInsert.push({ type: AchievementType.Hatrik20Points, user: userId });
+      }
+    }
+    if (fiveStreakCount > existingCounts[AchievementType.FiveStreakR1]) {
+      const diff = fiveStreakCount - existingCounts[AchievementType.FiveStreakR1];
+      for (let x = 0; x < diff; x++) {
+        toInsert.push({ type: AchievementType.FiveStreakR1, user: userId });
+      }
+    }
+    if (winrate60Count > existingCounts[AchievementType.Winrate60In30]) {
+      const diff = winrate60Count - existingCounts[AchievementType.Winrate60In30];
+      for (let x = 0; x < diff; x++) {
+        toInsert.push({ type: AchievementType.Winrate60In30, user: userId });
+      }
+    }
+
+    if (toInsert.length > 0) {
+      await this.achievementModel.insertMany(toInsert);
+    }
+  }
+
+  async checkOctopusStreakAchievements(userId: string) {
+    const predictions = await this.predictionModel
+      .find({
+        user: userId,
+        points: { $exists: true },
+      })
+      .sort({ voteDate: 1 })
+      .exec();
+
+    if (predictions.length === 0) return;
+
+    const existingAchievements = await this.achievementModel
+      .find({
+        user: userId,
+        type: {
+          $in: [
+            AchievementType.Octopus5Streak,
+            AchievementType.Octopus10Streak,
+          ],
+        },
+      })
+      .exec();
+
+    const existing5Counts = existingAchievements.filter((a) => a.type === AchievementType.Octopus5Streak).length;
+    const existing10Counts = existingAchievements.filter((a) => a.type === AchievementType.Octopus10Streak).length;
+
+    let fiveStreaks = 0;
+    let tenStreaks = 0;
+
+    let i = 0;
+    while (i <= predictions.length - 5) {
+      let isStreak = true;
+      for (let k = 0; k < 5; k++) {
+        if (predictions[i + k].points !== 1) {
+          isStreak = false;
+          break;
+        }
+      }
+      if (isStreak) {
+        fiveStreaks++;
+        i += 5;
+      } else {
+        i++;
+      }
+    }
+
+    let j = 0;
+    while (j <= predictions.length - 10) {
+      let isStreak = true;
+      for (let k = 0; k < 10; k++) {
+        if (predictions[j + k].points !== 1) {
+          isStreak = false;
+          break;
+        }
+      }
+      if (isStreak) {
+        tenStreaks++;
+        j += 10;
+      } else {
+        j++;
+      }
+    }
+
+    const toInsert: any[] = [];
+    if (fiveStreaks > existing5Counts) {
+      const diff = fiveStreaks - existing5Counts;
+      for (let x = 0; x < diff; x++) {
+        toInsert.push({ type: AchievementType.Octopus5Streak, user: userId });
+      }
+    }
+    if (tenStreaks > existing10Counts) {
+      const diff = tenStreaks - existing10Counts;
+      for (let x = 0; x < diff; x++) {
+        toInsert.push({ type: AchievementType.Octopus10Streak, user: userId });
+      }
+    }
+
+    if (toInsert.length > 0) {
+      await this.achievementModel.insertMany(toInsert);
+    }
   }
 
   @Cron('0 15 0 * * 1', {
@@ -181,12 +396,138 @@ export class UsersService {
     timeZone: 'UTC',
   })
   async weekWinners() {
+    // 1. Week winners signal (Leaderboard weekly winner)
     const leaderboard = await this.getLeaderboard(0, 10, undefined, true);
     const winner = leaderboard[0];
     if (winner) {
       await this.achievementModel.create({
         type: AchievementType.WeekWin,
         user: winner,
+      });
+    }
+
+    // 2. Best signals in week (highest scoring signal closed in the week)
+    const now = new Date();
+    const daysSinceMonday = (now.getUTCDay() + 6) % 7;
+    const startOfPrevWeek = new Date(now);
+    startOfPrevWeek.setUTCDate(now.getUTCDate() - daysSinceMonday - 7);
+    startOfPrevWeek.setUTCHours(0, 0, 0, 0);
+
+    const endOfPrevWeek = new Date(startOfPrevWeek);
+    endOfPrevWeek.setUTCDate(startOfPrevWeek.getUTCDate() + 7);
+
+    const bestSignal = await this.signalModel
+      .findOne({
+        status: SignalStatus.Closed,
+        closedAt: { $gte: startOfPrevWeek, $lt: endOfPrevWeek },
+        deletedAt: null,
+        owner: { $ne: null },
+      })
+      .sort({ score: -1 })
+      .exec();
+
+    if (bestSignal && bestSignal.owner) {
+      await this.achievementModel.create({
+        type: AchievementType.BestSignalWeek,
+        user: bestSignal.owner,
+      });
+    }
+
+    // 3. Octopus weekly winners
+    const topOctopusWeekly = await this.predictionModel.aggregate([
+      {
+        $match: {
+          voteDate: { $gte: startOfPrevWeek, $lt: endOfPrevWeek },
+          points: { $exists: true },
+        },
+      },
+      { $group: { _id: '$user', totalPoints: { $sum: '$points' } } },
+      { $sort: { totalPoints: -1 } },
+      { $limit: 1 },
+    ]).exec();
+
+    if (topOctopusWeekly.length > 0) {
+      const winnerId = topOctopusWeekly[0]._id;
+      await this.achievementModel.create({
+        type: AchievementType.OctopusWeekWin,
+        user: winnerId,
+      });
+    }
+  }
+
+  @Cron('0 45 0 1 * *', {
+    timeZone: 'UTC',
+  })
+  async monthWinners() {
+    const now = new Date();
+    // 1st day of the Gregorian month at 00:45 UTC. Prev month range:
+    const startOfPrevMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0));
+    const endOfPrevMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999));
+
+    // A. Month winners signal (highest score accumulated from signals closed during the Gregorian month)
+    const topUsers = await this.signalModel.aggregate([
+      {
+        $match: {
+          status: SignalStatus.Closed,
+          closedAt: { $gte: startOfPrevMonth, $lte: endOfPrevMonth },
+          deletedAt: null,
+          owner: { $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: '$owner',
+          totalScore: { $sum: '$score' },
+        },
+      },
+      { $sort: { totalScore: -1 } },
+      { $limit: 1 },
+    ]).exec();
+
+    if (topUsers.length > 0) {
+      const winnerId = topUsers[0]._id;
+      await this.achievementModel.create({
+        type: AchievementType.MonthWin,
+        user: winnerId,
+      });
+    }
+
+    // B. Best signals in month (highest scoring signal closed in the Gregorian month)
+    const bestSignalMonth = await this.signalModel
+      .findOne({
+        status: SignalStatus.Closed,
+        closedAt: { $gte: startOfPrevMonth, $lte: endOfPrevMonth },
+        deletedAt: null,
+        owner: { $ne: null },
+      })
+      .sort({ score: -1 })
+      .exec();
+
+    if (bestSignalMonth && bestSignalMonth.owner) {
+      await this.achievementModel.create({
+        type: AchievementType.BestSignalMonth,
+        user: bestSignalMonth.owner,
+      });
+    }
+
+    // C. Octopus monthly winners
+    const topOctopusMonthly = await this.predictionModel.aggregate([
+      {
+        $match: {
+          voteDate: { $gte: startOfPrevMonth, $lte: endOfPrevMonth },
+          points: { $exists: true },
+        },
+      },
+      { $group: { _id: '$user', totalPoints: { $sum: '$points' } } },
+      { $sort: { totalPoints: -1 } },
+      { $limit: 1 },
+    ]).exec();
+
+    if (topOctopusMonthly.length > 0) {
+      const winnerId = topOctopusMonthly[0]._id;
+      await this.achievementModel.create({
+        type: AchievementType.OctopusMonthWin,
+        user: winnerId,
       });
     }
   }

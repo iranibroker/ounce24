@@ -1,0 +1,141 @@
+.notifications-settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settings-card {
+  background: var(--mat-sys-surface-container-low) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: none !important;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .settings-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.1);
+      color: var(--mat-sys-primary);
+
+      ng-icon {
+        display: flex;
+      }
+
+      &.master-icon {
+        background: rgba(33, 150, 243, 0.1);
+        color: var(--mat-sys-primary);
+        width: 48px;
+        height: 48px;
+      }
+
+      &.price-icon {
+        background: rgba(76, 175, 80, 0.1); // Green for price activity
+        color: #4caf50;
+      }
+
+      &.signal-icon {
+        background: rgba(33, 150, 243, 0.1); // Blue for signals
+        color: #2196f3;
+      }
+
+      &.shield-icon {
+        background: rgba(156, 39, 176, 0.1); // Purple for AI Smart Shield
+        color: #9c27b0;
+      }
+    }
+  }
+
+  .settings-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--mat-sys-on-surface);
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--mat-sys-outline);
+    }
+  }
+}
+
+.master-card {
+  border: 1px solid var(--mat-sys-primary);
+  background: var(--mat-sys-surface-container) !important;
+}
+
+.section-title {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--mat-sys-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: opacity 0.3s ease;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+
+    .settings-card {
+      background: var(--mat-sys-surface-container-lowest) !important;
+      border-color: transparent;
+    }
+  }
+}
+
+.warning-card {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.05) !important;
+  
+  .warning-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ef4444;
+
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+  }
+}
+
+:host-context([dir='rtl']) {
+  h1 {
+    font-family: inherit;
+  }
+}

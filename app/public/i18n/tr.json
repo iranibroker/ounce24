@@ -267,8 +267,26 @@
       "title": "Yeni Başarı 🎉"
     },
     "type": {
-      "WEEK_WIN": "Haftanın Kazananı"
-    }
+      "WEEK_WIN": "Haftanın Kazananı",
+      "MONTH_WIN": "Ayın Kazananı",
+      "BEST_SIGNAL_WEEK": "Haftanın En İyi Sinyali",
+      "BEST_SIGNAL_MONTH": "Ayın En İyi Sinyali",
+      "HATRIK_20_POINTS": "20 Puanlık Sinyal Hat-trick'i",
+      "FIFTY_POINT": "50+ Puanlık Sinyal",
+      "FIVE_STREAK_R1": "5 Kapalı Kazanç Sinyali (R/R >= 1)",
+      "WINRATE_60_IN_30": "%60+ Kazanma Oranı (30 Sinyal, R/R >= 1)",
+      "OCTOPUS_WEEK_WIN": "Haftalık Ahtapot Kazananı",
+      "OCTOPUS_MONTH_WIN": "Aylık Ahtapot Kazananı",
+      "OCTOPUS_5_STREAK": "Ahtapot 5 Doğru Tahmin Serisi",
+      "OCTOPUS_10_STREAK": "Ahtapot 10 Doğru Tahmin Serisi"
+    },
+    "category": {
+      "competition": "Yarışma Başarıları",
+      "individual": "Bireysel Başarılar",
+      "octopus": "Ahtapot Başarıları"
+    },
+    "times": "kez",
+    "locked": "Kilitli"
   },
   "pwa": {
     "dialog": {
@@ -298,6 +316,18 @@
     "settings": {
       "title": "Canlı Ons Fiyat Uyarıları",
       "description": "Altın ons fiyatı değiştiğinde anında bildirim alın"
+    },
+    "page": {
+      "title": "Bildirim Ayarları",
+      "masterTitle": "Bildirimleri Al",
+      "masterDesc": "Tüm uygulama bildirimlerini etkinleştirin veya devre dışı bırakın",
+      "channelsTitle": "Bildirim Kanalları",
+      "priceTitle": "Canlı Ons Fiyatı",
+      "priceDesc": "Her 5 saniyede bir altın ons fiyatı güncellemelerini alın",
+      "signalFollowTitle": "Sinyal Durumu Güncellemeleri",
+      "signalFollowDesc": "Takip edilen sinyaller açıldığında veya kapandığında bildirimler",
+      "aiShieldTitle": "Yapay Zeka Akıllı Kalkan",
+      "aiShieldDesc": "İşlemleri yönetmek için yapay zeka önerileri"
     }
   },
   "octopus": {

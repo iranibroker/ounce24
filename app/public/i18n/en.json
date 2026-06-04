@@ -273,8 +273,26 @@
       "title": "New Achievement 🎉"
     },
     "type": {
-      "WEEK_WIN": "Week Winner"
-    }
+      "WEEK_WIN": "Week Winner",
+      "MONTH_WIN": "Month Winner",
+      "BEST_SIGNAL_WEEK": "Best Weekly Signal",
+      "BEST_SIGNAL_MONTH": "Best Monthly Signal",
+      "HATRIK_20_POINTS": "Hattrick of 20pt Signals",
+      "FIFTY_POINT": "50+ Points Signal",
+      "FIVE_STREAK_R1": "5-Win Streak (R/R >= 1)",
+      "WINRATE_60_IN_30": "60%+ Win Rate (30 signals, R/R >= 1)",
+      "OCTOPUS_WEEK_WIN": "Octopus Weekly Winner",
+      "OCTOPUS_MONTH_WIN": "Octopus Monthly Winner",
+      "OCTOPUS_5_STREAK": "5 Correct Predictions Streak",
+      "OCTOPUS_10_STREAK": "10 Correct Predictions Streak"
+    },
+    "category": {
+      "competition": "Competition Achievements",
+      "individual": "Individual Achievements",
+      "octopus": "Octopus Achievements"
+    },
+    "times": "times",
+    "locked": "Locked"
   },
   "pwa": {
     "dialog": {
@@ -304,6 +322,18 @@
     "settings": {
       "title": "Live Ounce Price Alerts",
       "description": "Get instant notifications when gold ounce price changes"
+    },
+    "page": {
+      "title": "Notification Settings",
+      "masterTitle": "Receive Notifications",
+      "masterDesc": "Enable or disable all app notifications",
+      "channelsTitle": "Notification Channels",
+      "priceTitle": "Live Ounce Price",
+      "priceDesc": "Receive gold ounce price updates every 5 seconds",
+      "signalFollowTitle": "Signal Status Updates",
+      "signalFollowDesc": "Notifications when followed signals open or close",
+      "aiShieldTitle": "AI Smart Shield",
+      "aiShieldDesc": "AI recommendations for managing trades"
     }
   },
   "octopus": {

@@ -9,13 +9,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import {
-  injectQuery,
-  injectInfiniteQuery,
-} from '@tanstack/angular-query-experimental';
+import { injectQuery, injectInfiniteQuery } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { Achievement, Signal } from '@ounce24/types';
+import { Achievement, AchievementType, Signal } from '@ounce24/types';
 import { SignalCardComponent } from '../../../components/signal-card/signal-card.component';
 import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
@@ -42,7 +39,7 @@ const PAGE_SIZE = 20;
     EmptyStateComponent,
     MatTabsModule,
     SHARED,
-    AchievementCardComponent,],
+  ],
   providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxCalendarOutline })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
@@ -88,23 +85,20 @@ export class UserProfileComponent {
       lastPageData.length === PAGE_SIZE ? lastPage + 1 : null,
   }));
 
-  achievementsQuery = injectInfiniteQuery(() => ({
-    queryKey: ['user-achievements', this.route.snapshot.params['id']],
-    queryFn: async ({ pageParam }) => {
+  achievementsQuery = injectQuery(() => ({
+    queryKey: ['user-achievements-all', this.route.snapshot.params['id']],
+    queryFn: async () => {
       return lastValueFrom(
         this.http.get<Achievement[]>(
           `/api/users/${this.route.snapshot.params['id'] || this.auth.userQuery.data()?.id}/achievements`,
           {
             params: {
-              page: pageParam,
+              limit: 1000,
             },
           },
         ),
       );
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPageData, allPages, lastPage) =>
-      lastPageData.length === PAGE_SIZE ? lastPage + 1 : null,
   }));
 
   signals = computed(() => {
@@ -112,6 +106,38 @@ export class UserProfileComponent {
   });
 
   achievements = computed(() => {
-    return this.achievementsQuery.data()?.pages?.flat();
+    return this.achievementsQuery.data() || [];
+  });
+
+  AchievementType = AchievementType;
+
+  competitionAchievements = [
+    AchievementType.WeekWin,
+    AchievementType.MonthWin,
+    AchievementType.BestSignalWeek,
+    AchievementType.BestSignalMonth,
+  ];
+
+  individualAchievements = [
+    AchievementType.Hatrik20Points,
+    AchievementType.FiftyPoint,
+    AchievementType.FiveStreakR1,
+    AchievementType.Winrate60In30,
+  ];
+
+  octopusAchievements = [
+    AchievementType.OctopusWeekWin,
+    AchievementType.OctopusMonthWin,
+    AchievementType.Octopus5Streak,
+    AchievementType.Octopus10Streak,
+  ];
+
+  achievementsSummary = computed(() => {
+    const list = this.achievements();
+    const counts: Record<string, number> = {};
+    for (const a of list) {
+      counts[a.type] = (counts[a.type] || 0) + 1;
+    }
+    return counts;
   });
 }

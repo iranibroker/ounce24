@@ -27,6 +27,9 @@ interface CachedSubscription {
   gem: number;
   followStatus: boolean;
   aiShield: boolean;
+  /** User-level notification flags */
+  notifSignalFollow: boolean;
+  notifAiShield: boolean;
 }
 
 interface CachedSignal {
@@ -98,6 +101,8 @@ export class SignalCopilotService implements OnModuleInit {
               gem: userObj.gem || 0,
               followStatus: sub.followStatus,
               aiShield: sub.aiShield,
+              notifSignalFollow: userObj.notifSignalFollow !== false,
+              notifAiShield: userObj.notifAiShield !== false,
             });
           }
         }
@@ -146,6 +151,8 @@ export class SignalCopilotService implements OnModuleInit {
           gem: userObj.gem || 0,
           followStatus: sub.followStatus,
           aiShield: sub.aiShield,
+          notifSignalFollow: userObj.notifSignalFollow !== false,
+          notifAiShield: userObj.notifAiShield !== false,
         });
       }
     }
@@ -219,6 +226,8 @@ export class SignalCopilotService implements OnModuleInit {
         gem: userObj.gem || 0,
         followStatus: sub.followStatus,
         aiShield: sub.aiShield,
+        notifSignalFollow: userObj.notifSignalFollow !== false,
+        notifAiShield: userObj.notifAiShield !== false,
       });
     }
   }
@@ -467,6 +476,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
       for (const sub of subscriptions) {
         // Double check gems in cache
         if (sub.gem < 100) continue;
+        // Skip if user has disabled AI Shield notifications
+        if (!sub.notifAiShield) continue;
 
         const lang = sub.language || 'fa';
         const message = lang === 'fa' ? copilotResponse.messageFa : copilotResponse.messageEn;
@@ -481,7 +492,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
         });
         await this.webPushService.sendNotificationToUser(sub.userId, pushPayload);
 
-        // 2. Send via Telegram Bot
+        // 2. Send via Telegram Bot (Temporarily disabled - only push notification active)
+        /*
         if (sub.telegramId) {
           const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n🔗 <a href="https://app.ounce24.com/signals/${signal._id}">View Signal Detail</a>`;
           await this.bot.telegram
@@ -492,6 +504,7 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
               this.logger.error(`Failed to send Telegram message to user ${sub.userId}:`, err);
             });
         }
+        */
 
         // 3. Deduct 1 Gem
         await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -1 } }).exec();
@@ -522,6 +535,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
       for (const sub of cached.subscriptions.values()) {
         if (!sub.followStatus) continue;
+        // Skip if user has disabled signal-follow notifications
+        if (!sub.notifSignalFollow) continue;
 
         const lang = sub.language || 'fa';
         const typeStr = signal.type === SignalType.Buy ? (lang === 'fa' ? 'خرید' : 'BUY') : (lang === 'fa' ? 'فروش' : 'SELL');
@@ -555,7 +570,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
         });
         await this.webPushService.sendNotificationToUser(sub.userId, pushPayload);
 
-        // 2. Telegram Bot
+        // 2. Telegram Bot (Temporarily disabled - only push notification active)
+        /*
         if (sub.telegramId) {
           const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n🔗 <a href="https://app.ounce24.com/signals/${signalIdStr}">View Signal Detail</a>`;
           await this.bot.telegram
@@ -566,6 +582,7 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
               this.logger.error(`Failed to send follower Telegram alert to user ${sub.userId}:`, err);
             });
         }
+        */
       }
     } catch (error) {
       this.logger.error('Error notifying followers of status change:', error);

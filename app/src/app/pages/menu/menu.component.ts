@@ -4,7 +4,6 @@ import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialog } from '@angular/material/dialog';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { 
@@ -30,7 +29,6 @@ import { SHARED } from '../../shared';
     MatCardModule,
     MatButtonModule,
     MatToolbarModule,
-    MatSlideToggleModule,
     NgIcon,
     SHARED,
   ],
@@ -74,13 +72,5 @@ export class MenuComponent {
   logout() {
     this.auth.token.set(null);
     this.router.navigate(['/login']);
-  }
-
-  async toggleNotifications(checked: boolean) {
-    if (checked) {
-      await this.pushService.subscribeToNotifications();
-    } else {
-      await this.pushService.unsubscribeFromNotifications();
-    }
   }
 }
