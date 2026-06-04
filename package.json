@@ -33,6 +33,7 @@
     "@nestjs/schedule": "^4.0.2",
     "@ng-icons/core": "^33.2.3",
     "@ng-icons/iconsax": "^33.2.3",
+    "@ng-icons/lucide": "^33.2.3",
     "@ng-icons/simple-icons": "^33.2.3",
     "@ngx-translate/core": "^16.0.4",
     "@ngx-translate/http-loader": "^16.0.1",

@@ -1,6 +1,17 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxCalendarOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
+import { 
+  lucideTrophy, 
+  lucideCrown, 
+  lucideAward, 
+  lucideTrendingUp, 
+  lucideZap, 
+  lucideFlame, 
+  lucideTarget, 
+  lucideBadgeCheck, 
+  lucideActivity 
+} from '@ng-icons/lucide';
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -40,7 +51,26 @@ const PAGE_SIZE = 20;
     MatTabsModule,
     SHARED,
   ],
-  providers: [provideIcons({ saxArrowLeftOutline, saxEditOutline, saxDiamondsBold, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxCalendarOutline })],
+  providers: [provideIcons({ 
+    saxArrowLeftOutline, 
+    saxEditOutline, 
+    saxDiamondsBold, 
+    saxCupOutline, 
+    saxStarOutline, 
+    saxActivityOutline, 
+    saxPercentageCircleOutline, 
+    saxJudgeOutline, 
+    saxCalendarOutline,
+    lucideTrophy,
+    lucideCrown,
+    lucideAward,
+    lucideTrendingUp,
+    lucideZap,
+    lucideFlame,
+    lucideTarget,
+    lucideBadgeCheck,
+    lucideActivity
+  })],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
@@ -140,4 +170,59 @@ export class UserProfileComponent {
     }
     return counts;
   });
+
+  getAchievementIcon(type: AchievementType): string {
+    switch (type) {
+      case AchievementType.WeekWin:
+        return 'lucideCrown';
+      case AchievementType.MonthWin:
+        return 'lucideTrophy';
+      case AchievementType.BestSignalWeek:
+        return 'lucideTrendingUp';
+      case AchievementType.BestSignalMonth:
+        return 'lucideZap';
+      case AchievementType.Hatrik20Points:
+        return 'lucideFlame';
+      case AchievementType.FiftyPoint:
+        return 'lucideTarget';
+      case AchievementType.FiveStreakR1:
+        return 'lucideBadgeCheck';
+      case AchievementType.Winrate60In30:
+        return 'lucideActivity';
+      case AchievementType.OctopusWeekWin:
+        return 'lucideCrown';
+      case AchievementType.OctopusMonthWin:
+        return 'lucideTrophy';
+      case AchievementType.Octopus5Streak:
+        return 'lucideFlame';
+      case AchievementType.Octopus10Streak:
+        return 'lucideZap';
+      default:
+        return 'lucideAward';
+    }
+  }
+
+  getAchievementClass(type: AchievementType): string {
+    switch (type) {
+      case AchievementType.WeekWin:
+      case AchievementType.MonthWin:
+      case AchievementType.BestSignalWeek:
+      case AchievementType.BestSignalMonth:
+        return 'gold-achievement';
+      case AchievementType.OctopusWeekWin:
+      case AchievementType.OctopusMonthWin:
+      case AchievementType.Octopus5Streak:
+      case AchievementType.Octopus10Streak:
+        return 'purple-achievement';
+      case AchievementType.FiftyPoint:
+      case AchievementType.Winrate60In30:
+        return 'blue-achievement';
+      case AchievementType.Hatrik20Points:
+        return 'orange-achievement';
+      case AchievementType.FiveStreakR1:
+        return 'green-achievement';
+      default:
+        return 'gold-achievement';
+    }
+  }
 }

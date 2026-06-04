@@ -364,25 +364,112 @@
       font-weight: 500;
     }
   }
+  /* Achievement Icon style override */
+  ng-icon {
+    display: flex;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    
+    &.gold-achievement {
+      color: #FFA751;
+    }
+    &.purple-achievement {
+      color: #F355DA;
+    }
+    &.blue-achievement {
+      color: #4FACFE;
+    }
+    &.orange-achievement {
+      color: #FF930F;
+    }
+    &.green-achievement {
+      color: #28C76F;
+    }
+    &.locked-icon {
+      color: #5A5A5A;
+    }
+  }
 
   /* Unlocked State: Bright, glowing, responds to hover */
   &.unlocked {
     cursor: pointer;
-    border-color: rgba(212, 175, 55, 0.3);
+
+    &.gold-achievement {
+      border-color: rgba(255, 167, 81, 0.2);
+      &:hover {
+        border-color: #FFA751;
+        box-shadow: 0 8px 24px rgba(255, 167, 81, 0.15);
+        .icon-glow-wrapper {
+          background: rgba(255, 167, 81, 0.08);
+          ng-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(255, 167, 81, 0.5));
+          }
+        }
+      }
+    }
+
+    &.purple-achievement {
+      border-color: rgba(243, 85, 218, 0.2);
+      &:hover {
+        border-color: #F355DA;
+        box-shadow: 0 8px 24px rgba(243, 85, 218, 0.15);
+        .icon-glow-wrapper {
+          background: rgba(243, 85, 218, 0.08);
+          ng-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(243, 85, 218, 0.5));
+          }
+        }
+      }
+    }
+
+    &.blue-achievement {
+      border-color: rgba(79, 172, 254, 0.2);
+      &:hover {
+        border-color: #4FACFE;
+        box-shadow: 0 8px 24px rgba(79, 172, 254, 0.15);
+        .icon-glow-wrapper {
+          background: rgba(79, 172, 254, 0.08);
+          ng-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(79, 172, 254, 0.5));
+          }
+        }
+      }
+    }
+
+    &.orange-achievement {
+      border-color: rgba(255, 147, 15, 0.2);
+      &:hover {
+        border-color: #FF930F;
+        box-shadow: 0 8px 24px rgba(255, 147, 15, 0.15);
+        .icon-glow-wrapper {
+          background: rgba(255, 147, 15, 0.08);
+          ng-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(255, 147, 15, 0.5));
+          }
+        }
+      }
+    }
+
+    &.green-achievement {
+      border-color: rgba(40, 199, 111, 0.2);
+      &:hover {
+        border-color: #28C76F;
+        box-shadow: 0 8px 24px rgba(40, 199, 111, 0.15);
+        .icon-glow-wrapper {
+          background: rgba(40, 199, 111, 0.08);
+          ng-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(40, 199, 111, 0.5));
+          }
+        }
+      }
+    }
 
     &:hover {
       transform: translateY(-5px) scale(1.03);
-      border-color: var(--mat-sys-primary);
-      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
-
-      .icon-glow-wrapper {
-        background: rgba(212, 175, 55, 0.08);
-
-        svg {
-          transform: scale(1.1);
-          filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
-        }
-      }
     }
   }
 
@@ -397,5 +484,3 @@
     }
   }
 }
-
-
