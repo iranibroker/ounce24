@@ -57,7 +57,7 @@ export class AuthController {
 
   @Get('me')
   async getMe(@LoginUser() user) {
-    return this.auth.getUserInfo(user.id);
+    return this.auth.getUserInfo(user.id, true);
   }
 
   @Patch('me')
