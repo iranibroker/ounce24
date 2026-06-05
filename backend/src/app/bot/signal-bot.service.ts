@@ -17,7 +17,7 @@ import { BOT_KEYS } from '../configs/publisher-bots.config';
 import { UserStatsService } from './user-stats.service';
 import { AuthService } from '../auth/auth.service';
 import { EVENTS } from '../consts';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { SignalsService } from '../signals/signals.service';
 import { UsersService } from '../users/users.service';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
@@ -63,6 +63,7 @@ export class SignalBotService extends BaseBot {
     private signalsService: SignalsService,
     private usersService: UsersService,
     private ouncePriceService: OuncePriceService,
+    private eventEmitter: EventEmitter2,
   ) {
     super(userModel, auth, bot);
   }
@@ -782,15 +783,31 @@ Total: ${sumPip}
   }
 
   @Action('close_signal')
+  @Action(/^close_signal_(.+)$/)
   async closeSignal(@Ctx() ctx?: Context, signalId?: string) {
     if (ctx && !(await this.isValid(ctx))) return;
-    const message = ctx?.callbackQuery.message;
-    const text: string = ctx?.callbackQuery.message['text'];
-    const id = text?.split('^^')[1] || signalId;
+    const callbackData = ctx?.callbackQuery?.['data'] || '';
+    const message = ctx?.callbackQuery?.message;
+    const text: string = message?.['text'] || '';
+    
+    let id = signalId;
+    if (!id) {
+      if (callbackData.startsWith('close_signal_')) {
+        id = callbackData.split('_')[2];
+      } else {
+        id = text.split('^^')[1];
+      }
+    }
     const user = await this.getUser(ctx.from.id);
     try {
       await this.signalsService.manualCloseSignal(id, user.id || (user as any)._id?.toString());
-      if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
+      if (ctx && message?.message_id) {
+        if (callbackData.startsWith('close_signal_')) {
+          await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+        } else {
+          await ctx.deleteMessage(message.message_id).catch(() => {});
+        }
+      }
       if (ctx) ctx.answerCbQuery('Signal closed');
     } catch (error: any) {
       if (ctx) ctx.answerCbQuery(error.response?.translationKey || 'Error');
@@ -798,18 +815,130 @@ Total: ${sumPip}
   }
 
   @Action('risk_free')
+  @Action(/^risk_free_(.+)$/)
   async riskFree(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
+    const callbackData = ctx.callbackQuery?.['data'] || '';
     const message = ctx.callbackQuery.message;
-    const text: string = message['text'];
-    const id = text.split('^^')[1];
+    const text: string = message?.['text'] || '';
+    
+    let id = '';
+    if (callbackData.startsWith('risk_free_')) {
+      id = callbackData.split('_')[2];
+    } else {
+      id = text.split('^^')[1];
+    }
     const user = await this.getUser(ctx.from.id);
     try {
       const updatedSignal = await this.signalsService.makeSignalRiskFree(id, user.id || (user as any)._id?.toString());
-      this.refreshBotSignal(ctx, updatedSignal, message.message_id);
+      if (callbackData.startsWith('risk_free_')) {
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+      } else {
+        this.refreshBotSignal(ctx, updatedSignal, message.message_id);
+      }
       ctx.answerCbQuery('Signal set to risk free');
     } catch (error: any) {
       ctx.answerCbQuery(error.response?.translationKey || 'Error');
+    }
+  }
+
+  @Action(/^apply_tp_(.+)$/)
+  async applyTp(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const callbackData = ctx.callbackQuery?.['data'] || '';
+    const parts = callbackData.split('_');
+    const signalId = parts[2];
+    const price = Number(parts[3]);
+    const user = await this.getUser(ctx.from.id);
+    try {
+      const signal = await this.signalModel.findById(signalId).populate('owner').exec();
+      if (!signal) {
+        ctx.answerCbQuery('Signal not found');
+        return;
+      }
+      const ownerId = signal.owner?.id || (signal.owner as any)?._id?.toString();
+      if (ownerId !== user.id) {
+        ctx.answerCbQuery('Not authorized');
+        return;
+      }
+      if (signal.status !== SignalStatus.Active) {
+        ctx.answerCbQuery('Signal is not active');
+        return;
+      }
+      
+      let newMax = signal.maxPrice;
+      let newMin = signal.minPrice;
+      if (signal.type === SignalType.Buy) {
+        newMax = price;
+      } else {
+        newMin = price;
+      }
+      if (newMax < newMin) {
+        ctx.answerCbQuery('Invalid price structure');
+        return;
+      }
+
+      signal.maxPrice = newMax;
+      signal.minPrice = newMin;
+      await signal.save();
+      
+      this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, signal);
+      
+      await ctx.answerCbQuery('Take Profit updated');
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+    } catch (error) {
+      console.error(error);
+      ctx.answerCbQuery('Failed to update Take Profit');
+    }
+  }
+
+  @Action(/^apply_sl_(.+)$/)
+  async applySl(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const callbackData = ctx.callbackQuery?.['data'] || '';
+    const parts = callbackData.split('_');
+    const signalId = parts[2];
+    const price = Number(parts[3]);
+    const user = await this.getUser(ctx.from.id);
+    try {
+      const signal = await this.signalModel.findById(signalId).populate('owner').exec();
+      if (!signal) {
+        ctx.answerCbQuery('Signal not found');
+        return;
+      }
+      const ownerId = signal.owner?.id || (signal.owner as any)?._id?.toString();
+      if (ownerId !== user.id) {
+        ctx.answerCbQuery('Not authorized');
+        return;
+      }
+      if (signal.status !== SignalStatus.Active) {
+        ctx.answerCbQuery('Signal is not active');
+        return;
+      }
+      
+      let newMax = signal.maxPrice;
+      let newMin = signal.minPrice;
+      if (signal.type === SignalType.Buy) {
+        newMin = price;
+      } else {
+        newMax = price;
+      }
+      if (newMax < newMin) {
+        ctx.answerCbQuery('Invalid price structure');
+        return;
+      }
+
+      signal.maxPrice = newMax;
+      signal.minPrice = newMin;
+      await signal.save();
+      
+      this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, signal);
+      
+      await ctx.answerCbQuery('Stop Loss updated');
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+    } catch (error) {
+      console.error(error);
+      ctx.answerCbQuery('Failed to update Stop Loss');
     }
   }
 

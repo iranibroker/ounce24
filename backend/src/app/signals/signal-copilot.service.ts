@@ -481,12 +481,19 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
         // Skip if user has disabled AI Shield notifications
         if (!sub.notifAiShield) continue;
 
+        const isPersonal = signal.owner && (
+          (signal.owner as any)._id?.toString() === sub.userId || 
+          (signal.owner as any).id?.toString() === sub.userId || 
+          signal.owner.toString() === sub.userId
+        );
+
         const lang = sub.language || 'fa';
         const message = lang === 'fa' ? copilotResponse.messageFa : copilotResponse.messageEn;
         const t = getTranslation(lang);
         const alertTitle = `🛡️ ${t.pushNotifications.aiShieldTitle}`;
 
-        // 1. Send via WebPush
+        // 1. Send via WebPush (Disabled - Telegram active)
+        /*
         const pushPayload = JSON.stringify({
           title: alertTitle,
           body: `${message}\n\nPrice: $${currentPrice.toFixed(2)}`,
@@ -494,20 +501,26 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
           data: { url: `/signals/${signal._id}` },
         });
         await this.webPushService.sendNotificationToUser(sub.userId, pushPayload);
+        */
 
-        // 2. Send via Telegram Bot (Temporarily disabled - only push notification active)
-        /*
+        // 2. Send via Telegram Bot
         if (sub.telegramId) {
           const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n🔗 <a href="https://app.ounce24.com/signals/${signal._id}">View Signal Detail</a>`;
+          
+          const targetPrice = copilotResponse.price || currentPrice || 0;
+          const inlineKeyboard = isPersonal 
+            ? getCopilotInlineKeyboard(recommendationType, signal._id.toString(), targetPrice, lang)
+            : undefined;
+
           await this.bot.telegram
             .sendMessage(sub.telegramId, telegramMessage, {
               parse_mode: 'HTML',
+              reply_markup: inlineKeyboard ? { inline_keyboard: inlineKeyboard } : undefined,
             })
             .catch((err) => {
               this.logger.error(`Failed to send Telegram message to user ${sub.userId}:`, err);
             });
         }
-        */
 
         // 3. Deduct 1 Gem
         await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -1 } }).exec();
@@ -559,7 +572,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
         const title = `📢 ${t.pushNotifications.signalStatusTitle}`;
 
-        // 1. WebPush
+        // 1. WebPush (Disabled - Telegram active)
+        /*
         const pushPayload = JSON.stringify({
           title,
           body: message,
@@ -567,9 +581,9 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
           data: { url: `/signals/${signalIdStr}` },
         });
         await this.webPushService.sendNotificationToUser(sub.userId, pushPayload);
+        */
 
-        // 2. Telegram Bot (Temporarily disabled - only push notification active)
-        /*
+        // 2. Telegram Bot
         if (sub.telegramId) {
           const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n🔗 <a href="https://app.ounce24.com/signals/${signalIdStr}">View Signal Detail</a>`;
           await this.bot.telegram
@@ -580,7 +594,6 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
               this.logger.error(`Failed to send follower Telegram alert to user ${sub.userId}:`, err);
             });
         }
-        */
       }
     } catch (error) {
       this.logger.error('Error notifying followers of status change:', error);
@@ -631,4 +644,54 @@ function calculateATR(candles: { high: number; low: number; close: number }[], p
   }
   const sum = trs.slice(-period).reduce((a, b) => a + b, 0);
   return sum / period;
+}
+
+function getCopilotInlineKeyboard(
+  recommendationType: string,
+  signalId: string,
+  price: number,
+  lang: string,
+) {
+  const t = getTranslation(lang);
+  if (recommendationType === 'risk_free') {
+    return [
+      [
+        {
+          text: t.pushNotifications.makeRiskFree,
+          callback_data: `risk_free_${signalId}`,
+        },
+      ],
+    ];
+  }
+  if (recommendationType === 'early_exit') {
+    return [
+      [
+        {
+          text: t.pushNotifications.closeSignal,
+          callback_data: `close_signal_${signalId}`,
+        },
+      ],
+    ];
+  }
+  if (recommendationType === 'extend_tp') {
+    return [
+      [
+        {
+          text: t.pushNotifications.applyNewTp(price.toFixed(2)),
+          callback_data: `apply_tp_${signalId}_${price}`,
+        },
+      ],
+    ];
+  }
+  if (recommendationType === 'trailing_sl') {
+    return [
+      [
+        {
+          text: t.pushNotifications.applyNewSl(price.toFixed(2)),
+          callback_data: `apply_sl_${signalId}_${price}`,
+        },
+      ],
+    ];
+  }
+  return undefined;
 }

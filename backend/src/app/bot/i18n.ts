@@ -43,6 +43,10 @@ export interface BotTranslation {
     signalCanceled: (type: string) => string;
     buy: string;
     sell: string;
+    makeRiskFree: string;
+    closeSignal: string;
+    applyNewTp: (price: string) => string;
+    applyNewSl: (price: string) => string;
   };
 }
 
@@ -136,6 +140,10 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       signalCanceled: (type: string) => `🚫 Gold ${type} signal has been CANCELED.`,
       buy: 'BUY',
       sell: 'SELL',
+      makeRiskFree: '🛡️ Make Risk Free',
+      closeSignal: '🎯 Close Signal',
+      applyNewTp: (price: string) => `📈 Apply New TP ($${price})`,
+      applyNewSl: (price: string) => `🛡️ Apply New SL ($${price})`,
     },
   },
 
@@ -228,6 +236,10 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       signalCanceled: (type: string) => `🚫 سیگنال ${type} طلا لغو گردید.`,
       buy: 'خرید',
       sell: 'فروش',
+      makeRiskFree: '🛡️ ریسک فری کردن',
+      closeSignal: '🎯 بستن سیگنال',
+      applyNewTp: (price: string) => `📈 ثبت حد سود جدید ($${price})`,
+      applyNewSl: (price: string) => `🛡️ ثبت حد ضرر جدید ($${price})`,
     },
   },
 
@@ -320,6 +332,10 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       signalCanceled: (type: string) => `🚫 تم إلغاء إشارة الذهب ${type}.`,
       buy: 'شراء',
       sell: 'بيع',
+      makeRiskFree: '🛡️ جعلها خالية من المخاطر',
+      closeSignal: '🎯 إغلاق الإشارة',
+      applyNewTp: (price: string) => `📈 تطبيق حد أرباح جديد ($${price})`,
+      applyNewSl: (price: string) => `🛡️ تطبيق وقف خسارة جديد ($${price})`,
     },
   },
 
@@ -412,6 +428,10 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
       signalCanceled: (type: string) => `🚫 Altın ${type} sinyali İPTAL EDİLDİ.`,
       buy: 'AL',
       sell: 'SAT',
+      makeRiskFree: '🛡️ Risksiz Yap',
+      closeSignal: '🎯 Sinyali Kapat',
+      applyNewTp: (price: string) => `📈 Yeni TP Uygula ($${price})`,
+      applyNewSl: (price: string) => `🛡️ Yeni SL Uygula ($${price})`,
     },
   },
 };

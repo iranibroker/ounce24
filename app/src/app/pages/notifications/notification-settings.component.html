@@ -10,6 +10,65 @@
 <div class="notifications-settings-container">
   @let user = auth.userQuery.data();
 
+  <!-- TELEGRAM ALERTS SECTION (Always visible) -->
+  <h2 class="section-title">{{ 'pushNotifications.page.telegramTitle' | translate }}</h2>
+
+  <mat-card class="settings-card info-card">
+    <mat-card-content class="info-content">
+      <ng-icon name="saxInfoCircleOutline" size="20px" class="info-icon"></ng-icon>
+      <p>{{ 'pushNotifications.page.telegramDesc' | translate }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="channels-list">
+    <!-- Follow Signal Alert -->
+    <mat-card class="settings-card">
+      <mat-card-content>
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="icon-container signal-icon">
+              <ng-icon name="saxNotificationOutline" size="20px"></ng-icon>
+            </div>
+            <div class="settings-texts">
+              <h3>{{ 'pushNotifications.page.signalFollowTitle' | translate }}</h3>
+              <p>{{ 'pushNotifications.page.signalFollowDesc' | translate }}</p>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="user?.notifSignalFollow !== false"
+            (change)="onChannelToggleChange('notifSignalFollow', $event.checked)"
+            color="primary"
+          ></mat-slide-toggle>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- AI Shield Alert -->
+    <mat-card class="settings-card">
+      <mat-card-content>
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="icon-container shield-icon">
+              <ng-icon name="saxShieldOutline" size="20px"></ng-icon>
+            </div>
+            <div class="settings-texts">
+              <h3>{{ 'pushNotifications.page.aiShieldTitle' | translate }}</h3>
+              <p>{{ 'pushNotifications.page.aiShieldDesc' | translate }}</p>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="user?.notifAiShield !== false"
+            (change)="onChannelToggleChange('notifAiShield', $event.checked)"
+            color="primary"
+          ></mat-slide-toggle>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- BROWSER ALERTS SECTION (Conditional) -->
+  <h2 class="section-title">{{ 'pushNotifications.page.masterTitle' | translate }}</h2>
+
   @if (pushService.isNotificationSupported()) {
     <!-- MASTER CARD -->
     <mat-card class="settings-card master-card">
@@ -33,10 +92,7 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- CHANNELS TITLE -->
-    <h2 class="section-title">{{ 'pushNotifications.page.channelsTitle' | translate }}</h2>
-
-    <!-- CHANNELS SECTION -->
+    <!-- PRICE ALERTS LIST (Disabled if master push is off) -->
     <div class="channels-list" [class.disabled]="!pushService.isSubscribed()">
       <!-- Price Alert -->
       <mat-card class="settings-card">
@@ -60,58 +116,12 @@
           </div>
         </mat-card-content>
       </mat-card>
-
-      <!-- Follow Signal Alert -->
-      <mat-card class="settings-card">
-        <mat-card-content>
-          <div class="settings-row">
-            <div class="settings-info">
-              <div class="icon-container signal-icon">
-                <ng-icon name="saxNotificationOutline" size="20px"></ng-icon>
-              </div>
-              <div class="settings-texts">
-                <h3>{{ 'pushNotifications.page.signalFollowTitle' | translate }}</h3>
-                <p>{{ 'pushNotifications.page.signalFollowDesc' | translate }}</p>
-              </div>
-            </div>
-            <mat-slide-toggle
-              [checked]="user?.notifSignalFollow !== false"
-              [disabled]="!pushService.isSubscribed()"
-              (change)="onChannelToggleChange('notifSignalFollow', $event.checked)"
-              color="primary"
-            ></mat-slide-toggle>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- AI Shield Alert -->
-      <mat-card class="settings-card">
-        <mat-card-content>
-          <div class="settings-row">
-            <div class="settings-info">
-              <div class="icon-container shield-icon">
-                <ng-icon name="saxShieldOutline" size="20px"></ng-icon>
-              </div>
-              <div class="settings-texts">
-                <h3>{{ 'pushNotifications.page.aiShieldTitle' | translate }}</h3>
-                <p>{{ 'pushNotifications.page.aiShieldDesc' | translate }}</p>
-              </div>
-            </div>
-            <mat-slide-toggle
-              [checked]="user?.notifAiShield !== false"
-              [disabled]="!pushService.isSubscribed()"
-              (change)="onChannelToggleChange('notifAiShield', $event.checked)"
-              color="primary"
-            ></mat-slide-toggle>
-          </div>
-        </mat-card-content>
-      </mat-card>
     </div>
   } @else {
     <mat-card class="settings-card warning-card">
       <mat-card-content class="warning-content">
         <ng-icon name="saxInfoCircleOutline" size="24px" class="warning-icon"></ng-icon>
-        <p>دریافت اعلان در مرورگر شما پشتیبانی نمی‌شود.</p>
+        <p>{{ 'pushNotifications.page.warningNotSupported' | translate }}</p>
       </mat-card-content>
     </mat-card>
   }

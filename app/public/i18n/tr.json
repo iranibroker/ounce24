@@ -318,16 +318,19 @@
       "description": "Altın ons fiyatı değiştiğinde anında bildirim alın"
     },
     "page": {
-      "title": "Bildirim Ayarları",
-      "masterTitle": "Bildirimleri Al",
-      "masterDesc": "Tüm uygulama bildirimlerini etkinleştirin veya devre dışı bırakın",
-      "channelsTitle": "Bildirim Kanalları",
+      "title": "Bildirimler",
+      "masterTitle": "Tarayıcı Bildirimleri",
+      "masterDesc": "Bu tarayıcıda fiyat alarmlarını etkinleştirin veya devre dışı bırakın",
+      "channelsTitle": "Fiyat Alarmları",
       "priceTitle": "Canlı Ons Fiyatı",
       "priceDesc": "Her 5 saniyede bir altın ons fiyatı güncellemelerini alın",
+      "telegramTitle": "Telegram Bildirimleri",
+      "telegramDesc": "Bu uyarıları doğrudan Ounce24 Telegram Botu aracılığıyla alın. Telegram hesabınızın bota bağlı olduğundan emin olun.",
       "signalFollowTitle": "Sinyal Durumu Güncellemeleri",
       "signalFollowDesc": "Takip edilen sinyaller açıldığında veya kapandığında bildirimler",
       "aiShieldTitle": "Yapay Zeka Akıllı Kalkan",
-      "aiShieldDesc": "İşlemleri yönetmek için yapay zeka önerileri"
+      "aiShieldDesc": "İşlemleri yönetmek için yapay zeka önerileri",
+      "warningNotSupported": "Bu tarayıcıda bildirim alma desteklenmiyor."
     }
   },
   "octopus": {

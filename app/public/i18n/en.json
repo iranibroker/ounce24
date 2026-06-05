@@ -324,16 +324,19 @@
       "description": "Get instant notifications when gold ounce price changes"
     },
     "page": {
-      "title": "Notification Settings",
-      "masterTitle": "Receive Notifications",
-      "masterDesc": "Enable or disable all app notifications",
-      "channelsTitle": "Notification Channels",
+      "title": "Notifications",
+      "masterTitle": "Browser Notifications",
+      "masterDesc": "Enable or disable price alerts in this browser",
+      "channelsTitle": "Price Alerts",
       "priceTitle": "Live Ounce Price",
       "priceDesc": "Receive gold ounce price updates every 5 seconds",
+      "telegramTitle": "Telegram Notifications",
+      "telegramDesc": "Receive these alerts directly via the Ounce24 Telegram Bot. Make sure your Telegram account is connected to the bot.",
       "signalFollowTitle": "Follow Signal",
       "signalFollowDesc": "Notifications when followed signals open or close",
       "aiShieldTitle": "Smart Shield",
-      "aiShieldDesc": "AI recommendations for managing trades"
+      "aiShieldDesc": "AI recommendations for managing trades",
+      "warningNotSupported": "Browser notifications are not supported in this browser."
     }
   },
   "octopus": {
