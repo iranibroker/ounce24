@@ -66,7 +66,7 @@
       "followSuccess": "Signal follow status updated",
       "unfollowSuccess": "Unfollowed signal successfully",
       "aiShield": "Smart Shield",
-      "aiShieldDesc": "Get AI-driven risk-free, trailing and exit alerts (1 GEM per suggestion)",
+      "aiShieldDesc": "Get AI-driven risk-free, trailing and exit alerts (3 GEMs per suggestion)",
       "aiShieldSuccess": "Smart Shield activated! 🛡️",
       "aiShieldDeactivated": "Smart Shield deactivated",
       "aiShieldPremiumGemsRequired": "This section requires premium access. You must have at least 100 gems.",

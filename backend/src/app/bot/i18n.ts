@@ -47,6 +47,11 @@ export interface BotTranslation {
     closeSignal: string;
     applyNewTp: (price: string) => string;
     applyNewSl: (price: string) => string;
+    cancelSignal: string;
+    entryPrice: string;
+    stopLoss: string;
+    takeProfit: string;
+    owner: string;
   };
 }
 
@@ -144,6 +149,11 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       closeSignal: '🎯 Close Signal',
       applyNewTp: (price: string) => `📈 Apply New TP ($${price})`,
       applyNewSl: (price: string) => `🛡️ Apply New SL ($${price})`,
+      cancelSignal: '🚫 Cancel Signal',
+      entryPrice: 'Entry Price',
+      stopLoss: 'Stop Loss',
+      takeProfit: 'Take Profit',
+      owner: 'Trader',
     },
   },
 
@@ -240,6 +250,11 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       closeSignal: '🎯 بستن سیگنال',
       applyNewTp: (price: string) => `📈 ثبت حد سود جدید ($${price})`,
       applyNewSl: (price: string) => `🛡️ ثبت حد ضرر جدید ($${price})`,
+      cancelSignal: '🚫 لغو سیگنال',
+      entryPrice: 'نقطه ورود',
+      stopLoss: 'حد ضرر',
+      takeProfit: 'حد سود',
+      owner: 'تریدر',
     },
   },
 
@@ -336,6 +351,11 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       closeSignal: '🎯 إغلاق الإشارة',
       applyNewTp: (price: string) => `📈 تطبيق حد أرباح جديد ($${price})`,
       applyNewSl: (price: string) => `🛡️ تطبيق وقف خسارة جديد ($${price})`,
+      cancelSignal: '🚫 إلغاء الإشارة',
+      entryPrice: 'سعر الدخول',
+      stopLoss: 'وقف الخسارة',
+      takeProfit: 'أخذ الأرباح',
+      owner: 'المتداول',
     },
   },
 
@@ -393,7 +413,7 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
     podcastChannel: 'Ounce24 Kanalı',
     signalChannelPolicy: (minScore: string) =>
       `<b>📢 Sinyal Kanalı Politikası</b>\n\n<b>${minScore} puanın</b> üzerinde puana sahip kullanıcıların (toplam veya haftalık) sinyalleri otomatik olarak kanalımızda yayınlanır.\n\nSinyallerini kopyalamak ve sonuçlarınızı iyileştirmek için başarılı yatırımcıları takip edin. Bu seviyeye ulaşmak için performansınızı da geliştirebilirsiniz!`,
-    joinSignalChannel: 'Sinyal Kanalına Katıl',
+    joinSignalChannel: 'Sinyal Sorumlusu',
     riskWarning:
       `<b>⚠️ Risk Uyarısı ve Misyon</b>\n\n` +
       `• <b>Risk Uyarısı:</b> Lütfen bu botu yalnızca eğitim amaçlı ve demo işlem için kullanın. Bu sinyallere dayanarak gerçek/canlı hesapta <b>işlem yapmayın</b>.\n\n` +
@@ -432,6 +452,11 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
       closeSignal: '🎯 Sinyali Kapat',
       applyNewTp: (price: string) => `📈 Yeni TP Uygula ($${price})`,
       applyNewSl: (price: string) => `🛡️ Yeni SL Uygula ($${price})`,
+      cancelSignal: '🚫 Sinyali İptal Et',
+      entryPrice: 'Giriş Fiyatı',
+      stopLoss: 'Zarar Durdur',
+      takeProfit: 'Kâr Al',
+      owner: 'Yatırımcı',
     },
   },
 };

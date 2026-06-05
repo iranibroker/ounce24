@@ -767,15 +767,23 @@ Total: ${sumPip}
   }
 
   @Action('remove_signal')
+  @Action(/^remove_signal_(.+)$/)
   async removeSignal(@Ctx() ctx?: Context, signalId?: string) {
     if (ctx && !(await this.isValid(ctx))) return;
-    const message = ctx?.callbackQuery.message;
-    const text: string = ctx?.callbackQuery.message['text'];
-    const id = text?.split('^^')[1] || signalId;
+    const message = ctx?.callbackQuery?.message;
+    const callbackData = ctx?.callbackQuery?.['data'] || '';
+    const text: string = message?.['text'] || '';
+    const id = callbackData.startsWith('remove_signal_') ? callbackData.split('_')[2] : (text?.split('^^')[1] || signalId);
     const user = await this.getUser(ctx.from.id);
     try {
       await this.signalsService.cancelSignal(id, user.id || (user as any)._id?.toString());
-      if (ctx && message?.message_id) await ctx.deleteMessage(message.message_id);
+      if (ctx && message?.message_id) {
+        if (callbackData.startsWith('remove_signal_')) {
+          await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+        } else {
+          await ctx.deleteMessage(message.message_id).catch(() => {});
+        }
+      }
       if (ctx) ctx.answerCbQuery('Signal removed');
     } catch (error: any) {
       if (ctx) ctx.answerCbQuery(error.response?.translationKey || 'Error');

@@ -256,6 +256,39 @@ export class SignalCopilotService implements OnModuleInit {
             if (signalDb) {
               await this.signalsService.activateSignal(signalDb);
             }
+          } else {
+            // Evaluate with AI Shield for Pending signals
+            const validSubs = Array.from(cachedSignal.subscriptions.values()).filter(
+              (sub) => sub.aiShield,
+            );
+
+            if (validSubs.length > 0) {
+              const lastCheck = cachedSignal.lastAiCheckedAt
+                ? new Date(cachedSignal.lastAiCheckedAt).getTime()
+                : 0;
+
+              if (Date.now() - lastCheck >= 15 * 60 * 1000) {
+                const shouldEvaluate = await this.shouldEvaluateSignal(cachedSignal, price);
+                if (shouldEvaluate) {
+                  const verifiedSubs: CachedSubscription[] = [];
+                  for (const sub of validSubs) {
+                    const userDb = await this.userModel.findById(sub.userId).select('gem').exec();
+                    const currentGems = userDb?.gem || 0;
+                    sub.gem = currentGems;
+                    if (currentGems >= 100) {
+                      verifiedSubs.push(sub);
+                    }
+                  }
+
+                  if (verifiedSubs.length > 0) {
+                    const signalDb = await this.signalModel.findById(signalId).populate('owner').exec();
+                    if (signalDb) {
+                      await this.evaluateSignalWithAI(signalDb, price, verifiedSubs);
+                    }
+                  }
+                }
+              }
+            }
           }
         } 
         
@@ -347,6 +380,10 @@ export class SignalCopilotService implements OnModuleInit {
       return false;
     }
 
+    if (signal.status === SignalStatus.Pending) {
+      return true;
+    }
+
     const distanceToTP = isSell ? entryPrice - signal.minPrice : signal.maxPrice - entryPrice;
     const currentProgress = isSell ? entryPrice - currentPrice : currentPrice - entryPrice;
 
@@ -372,9 +409,16 @@ export class SignalCopilotService implements OnModuleInit {
         .sort({ timestamp: 1 })
         .exec();
 
+      let formattedHistory4h = 'No historical data available.';
+      let formattedHistory1h = 'No historical data available.';
+      let formattedHistory15m = 'No historical data available.';
       let formattedHistory5m = 'No historical data available.';
       let rsi5m = 50;
+      let rsi15m = 50;
+      let rsi1h = 50;
       let sma20_5m = currentPrice;
+      let sma20_1h = currentPrice;
+      let sma50_1h = currentPrice;
       let atr5m = 1.5;
 
       if (candles5m.length > 0) {
@@ -383,21 +427,41 @@ export class SignalCopilotService implements OnModuleInit {
         sma20_5m = calculateSMA(closes5m, 20);
         atr5m = calculateATR(candles5m, 14);
 
+        const candles15m = aggregateTo15m(candles5m);
+        const closes15m = candles15m.map((c) => c.close);
+        rsi15m = calculateRSI(closes15m, 14);
+
+        const candles1h = aggregateTo1h(candles5m);
+        const closes1h = candles1h.map((c) => c.close);
+        rsi1h = calculateRSI(closes1h, 14);
+        sma20_1h = calculateSMA(closes1h, 20);
+        sma50_1h = calculateSMA(closes1h, 50);
+
         const formatCandle = (c: any) => {
           const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
           return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
         };
-        formattedHistory5m = candles5m.slice(-36).map(formatCandle).join('\n');
+
+        const candles4h = aggregateTo4h(candles5m);
+        if (candles4h.length > 0) {
+          formattedHistory4h = candles4h.map(formatCandle).join('\n');
+        }
+        if (candles1h.length > 0) {
+          formattedHistory1h = candles1h.slice(-72).map(formatCandle).join('\n'); // last 3 days
+        }
+        if (candles15m.length > 0) {
+          formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
+        }
+        formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
       }
 
       const alreadyRecommendedRiskFree = signal.aiRecommendations?.some((rec) => rec.type === 'risk_free') || signal.riskFree;
 
       const promptMessage = `
 You are the Smart Shield AI Trading Guard for Ounce24.
-You are monitoring an ACTIVE Gold (XAUUSD) signal in real-time.
-Your goal is to suggest dynamic trade adjustments to maximize profits or mitigate risks.
+You are monitoring a Gold (XAUUSD) signal in real-time.
 
-Signal Status: ACTIVE
+Signal Status: ${signal.status.toUpperCase()}
 - Action Type: ${isSell ? 'SELL' : 'BUY'}
 - Entry Price: $${entryPrice.toFixed(2)}
 - Current Price: $${currentPrice.toFixed(2)}
@@ -405,23 +469,42 @@ Signal Status: ACTIVE
 - Stop Loss (SL): $${sl.toFixed(2)}
 - Volatility (ATR 5m): $${atr5m.toFixed(2)}
 - 5m RSI(14): ${rsi5m.toFixed(2)}
-- 5m SMA(20): $${sma20_5m.toFixed(2)}
+- 15m RSI(14): ${rsi15m.toFixed(2)}
+- 1h RSI(14): ${rsi1h.toFixed(2)}
+- 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
+- 1h SMA(20): $${sma20_1h.toFixed(2)}
+- 1h SMA(50): $${sma50_1h.toFixed(2)}
 - Risk-Free setup already suggested/active: ${alreadyRecommendedRiskFree ? 'YES' : 'NO'}
 
-Recent 5m Price History:
+Recent Price History (4-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory4h}
+
+Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory1h}
+
+Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
+${formattedHistory15m}
+
+Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
 ${formattedHistory5m}
 
 Instructions:
-Evaluate whether the user should:
-1. "risk_free": Move SL to Entry (only suggest if price is in decent profit, e.g., >= 1.5x ATR, and it hasn't been done yet).
-2. "extend_tp": Move TP higher (for BUY) or lower (for SELL) because momentum is extremely strong in the trade direction.
-3. "early_exit": Close the trade immediately at current market price because the trend has clearly reversed and keeping the trade is highly risky.
-4. "trailing_sl": Lock in profit by moving SL further into profit territory.
-5. "none": No change needed. Just keep the trade running as is.
+Evaluate the technical gold chart and indicators to suggest trade adjustments.
+- If status is ACTIVE:
+  Evaluate whether the user should:
+  1. "risk_free": Move SL to Entry (only suggest if price is in decent profit, e.g., >= 1.5x ATR, and it hasn't been done yet).
+  2. "extend_tp": Move TP higher (for BUY) or lower (for SELL) because momentum is extremely strong in the trade direction.
+  3. "early_exit": Close the trade immediately at current market price because the trend has clearly reversed and keeping the trade is highly risky.
+  4. "trailing_sl": Lock in profit by moving SL further into profit territory.
+  5. "none": No change needed. Just keep the trade running as is.
+- If status is PENDING:
+  Evaluate whether the user should:
+  1. "cancel": Cancel the pending order immediately because the market structure/trend has changed significantly and the setup is no longer valid or has high risk.
+  2. "none": Keep the pending order as is.
 
 Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
 {
-  "recommendation": "risk_free" | "trailing_sl" | "extend_tp" | "early_exit" | "none",
+  "recommendation": "risk_free" | "trailing_sl" | "extend_tp" | "early_exit" | "cancel" | "none",
   "price": number, // suggest the exact price level if recommendation is extend_tp or trailing_sl, otherwise current price or 0
   "messageFa": "Persian instruction message to the trader, clear, blunt and decisive. e.g. 'طلا مقاومت کلیدی فلان را با شتاب شکسته است؛ حد سود را به ۲۳۶۰ افزایش دهید.'",
   "messageEn": "English version of the message"
@@ -476,7 +559,7 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
       // Dispatch notifications to subscribers
       for (const sub of subscriptions) {
-        // Double check gems in cache
+        // Double check gems in cache (requires 3 gems now)
         if (sub.gem < 100) continue;
         // Skip if user has disabled AI Shield notifications
         if (!sub.notifAiShield) continue;
@@ -505,7 +588,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
         // 2. Send via Telegram Bot
         if (sub.telegramId) {
-          const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n🔗 <a href="https://app.ounce24.com/signals/${signal._id}">View Signal Detail</a>`;
+          const signalInfo = formatSignalDetails(signal, lang);
+          const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n${signalInfo}`;
           
           const targetPrice = copilotResponse.price || currentPrice || 0;
           const inlineKeyboard = isPersonal 
@@ -522,20 +606,20 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
             });
         }
 
-        // 3. Deduct 1 Gem
-        await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -1 } }).exec();
+        // 3. Deduct 3 Gems
+        await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -3 } }).exec();
 
         // 4. Log Gem deduction
         await this.gemLogModel.create({
           user: sub.userId,
-          gemsChange: -1,
+          gemsChange: -3,
           gemsBefore: sub.gem,
-          gemsAfter: sub.gem - 1,
+          gemsAfter: sub.gem - 3,
           action: GemLogAction.SignalAnalyze,
         });
 
         // 5. Deduct from local cache gem count
-        sub.gem = sub.gem - 1;
+        sub.gem = sub.gem - 3;
       }
     } catch (error) {
       this.logger.error(`Error in evaluateSignalWithAI for signal ${signal._id}:`, error);
@@ -549,6 +633,13 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
       const cached = this.signalCache.get(signalIdStr);
       if (!cached) return;
 
+      const populatedSignal = await this.signalModel
+        .findById(signalIdStr)
+        .populate('owner')
+        .exec();
+
+      if (!populatedSignal) return;
+
       for (const sub of cached.subscriptions.values()) {
         if (!sub.followStatus) continue;
         // Skip if user has disabled signal-follow notifications
@@ -556,14 +647,14 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
         const lang = sub.language || 'fa';
         const t = getTranslation(lang);
-        const typeStr = signal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
-        const entryPrice = signal.entryPrice;
+        const typeStr = populatedSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+        const entryPrice = populatedSignal.entryPrice;
 
         let message = '';
         if (state === 'active') {
           message = t.pushNotifications.signalActive(typeStr, entryPrice.toFixed(2));
         } else if (state === 'closed') {
-          const profitPip = signal.pip !== null ? signal.pip : 0;
+          const profitPip = populatedSignal.pip !== null ? populatedSignal.pip : 0;
           const pipStr = profitPip >= 0 ? `+${profitPip} pip` : `${profitPip} pip`;
           message = t.pushNotifications.signalClosed(typeStr, pipStr);
         } else if (state === 'canceled') {
@@ -585,7 +676,8 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
         // 2. Telegram Bot
         if (sub.telegramId) {
-          const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n🔗 <a href="https://app.ounce24.com/signals/${signalIdStr}">View Signal Detail</a>`;
+          const signalInfo = formatSignalDetails(populatedSignal, lang);
+          const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n${signalInfo}`;
           await this.bot.telegram
             .sendMessage(sub.telegramId, telegramMessage, {
               parse_mode: 'HTML',
@@ -673,6 +765,16 @@ function getCopilotInlineKeyboard(
       ],
     ];
   }
+  if (recommendationType === 'cancel') {
+    return [
+      [
+        {
+          text: t.pushNotifications.cancelSignal,
+          callback_data: `remove_signal_${signalId}`,
+        },
+      ],
+    ];
+  }
   if (recommendationType === 'extend_tp') {
     return [
       [
@@ -694,4 +796,105 @@ function getCopilotInlineKeyboard(
     ];
   }
   return undefined;
+}
+
+function formatSignalDetails(signal: Signal, lang: string): string {
+  const t = getTranslation(lang);
+  const typeStr = signal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+  
+  const sl = signal.type === SignalType.Sell ? signal.maxPrice : signal.minPrice;
+  const tp = signal.type === SignalType.Sell ? signal.minPrice : signal.maxPrice;
+
+  let details = `📊 <b>${typeStr} Signal Details</b>\n` +
+         `🔹 ${t.pushNotifications.entryPrice}: <b>$${signal.entryPrice.toFixed(2)}</b>\n` +
+         `🛑 ${t.pushNotifications.stopLoss}: <b>$${sl.toFixed(2)}</b>\n` +
+         `🎯 ${t.pushNotifications.takeProfit}: <b>$${tp.toFixed(2)}</b>`;
+
+  if (signal.owner && (signal.owner as any).tag) {
+    details += `\n👤 ${t.pushNotifications.owner}: <b>${(signal.owner as any).tag}</b>`;
+  }
+
+  return details;
+}
+
+function aggregateTo15m(candles5m: OuncePriceCandle[]): { timestamp: Date; open: number; high: number; low: number; close: number }[] {
+  const candles15m: { timestamp: Date; open: number; high: number; low: number; close: number }[] = [];
+  const groups: { [key: string]: OuncePriceCandle[] } = {};
+
+  for (const candle of candles5m) {
+    const date = new Date(candle.timestamp);
+    const minutes = date.getMinutes();
+    const alignedMinutes = Math.floor(minutes / 15) * 15;
+    date.setMinutes(alignedMinutes, 0, 0);
+    const key = date.getTime().toString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(candle);
+  }
+
+  for (const key of Object.keys(groups).sort()) {
+    const group = groups[key];
+    const sortedGroup = [...group].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const timestamp = new Date(Number(key));
+    const open = sortedGroup[0].open;
+    const close = sortedGroup[sortedGroup.length - 1].close;
+    const high = Math.max(...sortedGroup.map(c => c.high));
+    const low = Math.min(...sortedGroup.map(c => c.low));
+
+    candles15m.push({ timestamp, open, high, low, close });
+  }
+  return candles15m;
+}
+
+function aggregateTo1h(candles5m: OuncePriceCandle[]): { timestamp: Date; open: number; high: number; low: number; close: number }[] {
+  const candles1h: { timestamp: Date; open: number; high: number; low: number; close: number }[] = [];
+  const groups: { [key: string]: OuncePriceCandle[] } = {};
+
+  for (const candle of candles5m) {
+    const date = new Date(candle.timestamp);
+    date.setMinutes(0, 0, 0);
+    const key = date.getTime().toString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(candle);
+  }
+
+  for (const key of Object.keys(groups).sort()) {
+    const group = groups[key];
+    const sortedGroup = [...group].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const timestamp = new Date(Number(key));
+    const open = sortedGroup[0].open;
+    const close = sortedGroup[sortedGroup.length - 1].close;
+    const high = Math.max(...sortedGroup.map(c => c.high));
+    const low = Math.min(...sortedGroup.map(c => c.low));
+
+    candles1h.push({ timestamp, open, high, low, close });
+  }
+  return candles1h;
+}
+
+function aggregateTo4h(candles5m: OuncePriceCandle[]): { timestamp: Date; open: number; high: number; low: number; close: number }[] {
+  const candles4h: { timestamp: Date; open: number; high: number; low: number; close: number }[] = [];
+  const groups: { [key: string]: OuncePriceCandle[] } = {};
+
+  for (const candle of candles5m) {
+    const date = new Date(candle.timestamp);
+    const hour = date.getUTCHours();
+    const alignedHour = Math.floor(hour / 4) * 4;
+    date.setUTCHours(alignedHour, 0, 0, 0);
+    const key = date.getTime().toString();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(candle);
+  }
+
+  for (const key of Object.keys(groups).sort()) {
+    const group = groups[key];
+    const sortedGroup = [...group].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const timestamp = new Date(Number(key));
+    const open = sortedGroup[0].open;
+    const close = sortedGroup[sortedGroup.length - 1].close;
+    const high = Math.max(...sortedGroup.map(c => c.high));
+    const low = Math.min(...sortedGroup.map(c => c.low));
+
+    candles4h.push({ timestamp, open, high, low, close });
+  }
+  return candles4h;
 }
