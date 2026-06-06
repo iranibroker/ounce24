@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit {
     }
     const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
     const state = Math.random().toString(36).substring(2, 15);
-    const scope = encodeURIComponent('openid profile');
+    const scope = encodeURIComponent('openid profile phone');
     const oidcUrl = `https://oauth.telegram.org/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
     window.location.href = oidcUrl;
   }

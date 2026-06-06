@@ -591,12 +591,31 @@ export class AuthService {
       throw new BadRequestException('Invalid Telegram ID token: missing sub');
     }
 
-    const telegramId = Number(payload.sub);
+    const telegramId = payload.id ? Number(payload.id) : Number(payload.sub);
     const fullName = payload.name;
     const username = payload.preferred_username;
     const photo_url = payload.picture;
 
     let user = await this.userModel.findOne({ telegramId });
+
+    // Try matching by phone number if user not found by telegramId
+    const rawPhone = payload.phone_number;
+    let normalizedPhone: string | undefined;
+    if (rawPhone) {
+      const clean = rawPhone.replace(/\D/g, '');
+      normalizedPhone = clean.startsWith('98') && clean.length === 12 ? '0' + clean.slice(2) : clean;
+    }
+
+    if (!user && normalizedPhone) {
+      user = await this.userModel.findOne({ phone: normalizedPhone });
+      if (user && (!user.telegramId || user.telegramId === telegramId)) {
+        user.telegramId = telegramId;
+        if (username) user.telegramUsername = username;
+        await user.save();
+      } else {
+        user = null;
+      }
+    }
 
     if (!user && username) {
       const escapedUsername = username.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -615,6 +634,7 @@ export class AuthService {
       const title = sanitizeUserTitle(fullName || username) || `u${String(telegramId).slice(-6)}`;
       user = await this.userModel.create({
         telegramId,
+        phone: normalizedPhone,
         name: fullName || `User ${telegramId}`,
         telegramUsername: username,
         avatar: photo_url,
@@ -630,6 +650,13 @@ export class AuthService {
       if (username && user.telegramUsername !== username) {
         user.telegramUsername = username;
         updated = true;
+      }
+      if (normalizedPhone && !user.phone) {
+        const existingPhoneUser = await this.userModel.findOne({ phone: normalizedPhone });
+        if (!existingPhoneUser) {
+          user.phone = normalizedPhone;
+          updated = true;
+        }
       }
       if (
         photo_url &&
