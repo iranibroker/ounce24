@@ -204,17 +204,6 @@ app-bottom-navigation .mat-mdc-toolbar {
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3) !important;
 }
 
-// Price banner has its own compact 32px toolbar — glassy styling
-app-ounce-price-banner mat-toolbar,
-app-ounce-price-banner .mat-mdc-toolbar {
-  height: 32px !important;
-  min-height: 32px !important;
-  background-color: rgba(28, 28, 30, 0.85) !important;
-  color: #f5f5f5 !important;
-  backdrop-filter: blur(10px) !important;
-  border-bottom: none !important;
-  padding: 0 8px !important;
-}
 
 // Global Font Awesome and NG Icon alignment inside nav items and inline text
 .nav-item-wrapper i,

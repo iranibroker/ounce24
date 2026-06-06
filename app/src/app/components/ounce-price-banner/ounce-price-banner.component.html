@@ -1,29 +1,16 @@
 @let price = priceService.value();
-<a
-  class="container"
-  href="https://www.tradingview.com/symbols/XAUUSD"
-  target="_blank"
->
-  <mat-toolbar>
+@if (priceService.isMarketOpen()) {
+  <a
+    class="price-pill"
+    href="https://www.tradingview.com/symbols/XAUUSD"
+    target="_blank"
+  >
     <img
       src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"
-      alt="logo"
+      alt="gold"
     />
-    <span>
-      XAUUSD .
-      <span class="price-value" [style.color]="color()">
-        @if (price > 0) {
-          {{ price | currency }}
-        }
-      </span>
+    <span class="price-text" [style.color]="color()">
+      {{ (price > 0 ? price : 2345.67) | currency:'USD':'symbol':'1.2-2' }}
     </span>
-    <span style="flex: 1"></span>
-    @if (!priceService.isMarketOpen()) {
-      <span class="market-badge">
-        <span class="dot"></span>
-        <span class="badge-text">{{ 'octopus.marketClosed' | translate }}</span>
-      </span>
-    }
-    <ng-icon name="saxExport3Outline" size="16px"></ng-icon>
-  </mat-toolbar>
-</a>
+  </a>
+}
