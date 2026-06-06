@@ -1,4 +1,4 @@
-import { Controller, Get, Sse, MessageEvent, Query, Res } from '@nestjs/common';
+import { Controller, Get, Sse, MessageEvent, Query, Res, OnModuleInit } from '@nestjs/common';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { OuncePriceService } from './ounce-price.service';
@@ -10,12 +10,18 @@ import { Response } from 'express';
 
 @Public()
 @Controller('ounce-price')
-export class OuncePriceController {
+export class OuncePriceController implements OnModuleInit {
   obs = new BehaviorSubject<number>(0);
   constructor(
     private readonly ouncePriceService: OuncePriceService,
     private readonly historyService: OuncePriceHistoryService,
   ) {}
+
+  onModuleInit() {
+    if (this.ouncePriceService.current > 0) {
+      this.obs.next(this.ouncePriceService.current);
+    }
+  }
 
   @Get('history')
   async getHistory(

@@ -199,6 +199,11 @@ export class OuncePriceHistoryService implements OnModuleInit {
     }
   }
 
+  async getLatestPrice(): Promise<number | null> {
+    const latest = await this.candleModel.findOne().sort({ timestamp: -1 }).exec();
+    return latest ? latest.close : null;
+  }
+
   async getHistory(limit = 10000): Promise<OuncePriceCandle[]> {
     const candles = await this.candleModel
       .find()
@@ -208,3 +213,4 @@ export class OuncePriceHistoryService implements OnModuleInit {
     return candles.reverse();
   }
 }
+

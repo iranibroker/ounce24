@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron } from '@nestjs/schedule';
 import { TvApiAdapter } from 'tradingview-api-adapter';
 import { QuoteService } from './quote.service';
 import { EVENTS } from '../consts';
+import { OuncePriceHistoryService } from './ounce-price-history.service';
 
 export const OUNCE_PRICE_UPDATED = 'ounce.price';
 
 @Injectable()
-export class OuncePriceService {
+export class OuncePriceService implements OnModuleInit {
   private currentPrice = 0;
   /** Single source of truth for market open/closed state. Initialized on startup, toggled by crons. */
   private marketOpen: boolean;
@@ -17,6 +18,7 @@ export class OuncePriceService {
   constructor(
     private quoteService: QuoteService,
     private eventEmitter: EventEmitter2,
+    private historyService: OuncePriceHistoryService,
   ) {
     // Initialize market state from current UTC time on startup
     this.marketOpen = this.calculateMarketOpen(new Date());
@@ -29,6 +31,18 @@ export class OuncePriceService {
         this.eventEmitter.emit(OUNCE_PRICE_UPDATED, price);
       }
     });
+  }
+
+  async onModuleInit() {
+    try {
+      const latestPrice = await this.historyService.getLatestPrice();
+      if (latestPrice && latestPrice > 0) {
+        this.currentPrice = latestPrice;
+        this.eventEmitter.emit(EVENTS.OUNCE_PRICE_UPDATED, latestPrice);
+      }
+    } catch (error) {
+      console.error('Failed to load initial price from history database:', error);
+    }
   }
 
   get current() {
