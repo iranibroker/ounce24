@@ -10,42 +10,11 @@
     <img src="images/logo.svg" alt="Ounce24 Logo" class="login-logo" />
   </div>
 
-  <!-- Onboarding Carousel -->
-  <div class="onboarding-carousel">
-    <div class="slides-container">
-      @for (slide of slides; track slide.title; let i = $index) {
-        @if (activeSlide() === i) {
-          <div class="slide-card">
-            <ng-icon [name]="slide.icon" [class]="'tonal-icon icon-lg ' + slide.color" size="20px"></ng-icon>
-            <h2>{{ slide.title | translate }}</h2>
-            <p>{{ slide.description | translate }}</p>
-          </div>
-        }
-      }
-    </div>
-    
-    <!-- Dots indicator -->
-    <div class="carousel-dots">
-      @for (slide of slides; track slide.title; let i = $index) {
-        <span 
-          class="dot" 
-          [class.active]="activeSlide() === i"
-          (click)="setSlide(i)"
-        ></span>
-      }
-    </div>
-  </div>
-
   <!-- Sign In Methods -->
   <div class="auth-methods">
     <h3>{{ 'login.chooseDescription' | translate }}</h3>
     
     <div class="buttons-layout">
-      <!-- Google Button -->
-      @if (showGoogleSignIn()) {
-        <div #googleButtonContainer id="google-button-container"></div>
-      }
-      
       <!-- Telegram Button -->
       <div #telegramButtonContainer id="telegram-button-container"></div>
     </div>

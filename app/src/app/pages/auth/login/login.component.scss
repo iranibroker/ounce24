@@ -20,88 +20,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: -8px; // Reduce space between logo and carousel for tighter layout
+  margin-bottom: 16px;
   
   .login-logo {
-    height: 60px;
+    height: 72px;
     width: auto;
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
-  }
-}
-
-.onboarding-carousel {
-  width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.03) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: none !important;
-  border-radius: 16px !important;
-  padding: 32px 24px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-  box-sizing: border-box;
-  
-  .slides-container {
-    min-height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .slide-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    animation: fadeIn 0.4s ease-out;
-    box-sizing: border-box;
-    width: 100%;
-
-    ng-icon.tonal-icon {
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--mat-sys-outline, rgba(255, 255, 255, 0.7));
-    }
-  }
-
-  .carousel-dots {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.25);
-      cursor: pointer;
-      transition: all 0.3s ease;
-
-      &.active {
-        width: 24px;
-        border-radius: 4px;
-        background: #fbbf24 !important;
-      }
-    }
   }
 }
 
@@ -129,7 +53,6 @@
     align-items: center;
     gap: 16px;
 
-    #google-button-container,
     #telegram-button-container {
       width: 100%;
       display: flex;

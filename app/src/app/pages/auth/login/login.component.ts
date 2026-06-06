@@ -1,11 +1,5 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  saxArrowLeftOutline,
-  saxActivityOutline,
-  saxCupOutline,
-  saxMicrophoneOutline,
-} from '@ng-icons/iconsax/outline';
-import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
+import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
 import {
   Component,
   ElementRef,
@@ -13,8 +7,6 @@ import {
   viewChild,
   NgZone,
   AfterViewInit,
-  OnInit,
-  OnDestroy,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -30,31 +22,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AnalyticsService } from '../../../services/analytics.service';
 import { LanguageService } from '../../../services/language.service';
 import { environment } from '../../../../environments/environment';
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-          }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: {
-              type?: string;
-              size?: string;
-              theme?: string;
-              width?: number;
-              locale?: string;
-            }
-          ) => void;
-        };
-      };
-    };
-  }
-}
 
 @Component({
   selector: 'app-login',
@@ -73,16 +40,12 @@ declare global {
   providers: [
     provideIcons({
       saxArrowLeftOutline,
-      saxActivityOutline,
-      saxCupOutline,
-      saxMicrophoneOutline,
-      saxDiamondsBold,
     }),
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
+export class LoginComponent implements AfterViewInit {
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -92,119 +55,14 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   private analyticsService = inject(AnalyticsService);
   private ngZone = inject(NgZone);
 
-  googleButtonContainer = viewChild<ElementRef<HTMLElement>>(
-    'googleButtonContainer'
-  );
   telegramButtonContainer = viewChild<ElementRef<HTMLElement>>(
     'telegramButtonContainer'
   );
 
-  // Onboarding Carousel Data
-  slides = [
-    {
-      title: 'login.onboarding.signalsTitle',
-      description: 'login.onboarding.signalsDesc',
-      icon: 'saxActivityOutline',
-      color: 'green',
-    },
-    {
-      title: 'login.onboarding.aiTitle',
-      description: 'login.onboarding.aiDesc',
-      icon: 'saxDiamondsBold',
-      color: 'blue',
-    },
-    {
-      title: 'login.onboarding.leaderboardTitle',
-      description: 'login.onboarding.leaderboardDesc',
-      icon: 'saxCupOutline',
-      color: 'amber',
-    },
-    {
-      title: 'login.onboarding.podcastTitle',
-      description: 'login.onboarding.podcastDesc',
-      icon: 'saxMicrophoneOutline',
-      color: 'purple',
-    },
-  ];
-
-  activeSlide = signal(0);
-  private autoplayInterval: any;
-
   constructor(public languageService: LanguageService) {}
 
-  ngOnInit() {
-    this.startAutoplay();
-  }
-
-  ngOnDestroy() {
-    if (this.autoplayInterval) {
-      clearInterval(this.autoplayInterval);
-    }
-  }
-
-  private startAutoplay() {
-    this.autoplayInterval = setInterval(() => {
-      this.activeSlide.update((curr) => (curr + 1) % this.slides.length);
-    }, 4000);
-  }
-
-  setSlide(index: number) {
-    this.activeSlide.set(index);
-    if (this.autoplayInterval) {
-      clearInterval(this.autoplayInterval);
-      this.startAutoplay();
-    }
-  }
-
-  showGoogleSignIn(): boolean {
-    return false;
-  }
-
   ngAfterViewInit(): void {
-    if (this.showGoogleSignIn()) {
-      const tryRenderGoogle = () => {
-        if (window.google?.accounts?.id) {
-          this.renderGoogleButton();
-          return true;
-        }
-        return false;
-      };
-      if (!tryRenderGoogle()) {
-        const interval = setInterval(() => {
-          if (tryRenderGoogle()) clearInterval(interval);
-        }, 100);
-        setTimeout(() => clearInterval(interval), 5000);
-      }
-    }
-
     this.renderTelegramButton();
-  }
-
-  private renderGoogleButton(): void {
-    const container = this.googleButtonContainer()?.nativeElement;
-    const clientId = environment.googleClientId;
-    if (!container || !clientId || !window.google?.accounts?.id) return;
-
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: (response) => {
-        this.ngZone.run(() => this.handleGoogleCredential(response.credential));
-      },
-    });
-    setTimeout(() => {
-      const w =
-        container.clientWidth ||
-        (container.parentElement?.clientWidth ?? 0) ||
-        320;
-      const width = Math.min(400, Math.max(200, w));
-      window.google.accounts.id.renderButton(container, {
-        type: 'standard',
-        size: 'large',
-        theme: 'outline',
-        width,
-        locale: 'en',
-      });
-    }, 0);
   }
 
   private renderTelegramButton(): void {
@@ -228,21 +86,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     container.appendChild(script);
-  }
-
-  private async handleGoogleCredential(idToken: string): Promise<void> {
-    this.loading.set(true);
-    this.errorMessage.set(null);
-    try {
-      await this.auth.googleLoginMutation.mutateAsync(idToken);
-      this.analyticsService.trackEvent('login', { method: 'google' });
-      const returnPath = this.route.snapshot.queryParams?.['returnPath'];
-      this.router.navigate([returnPath || '/'], { replaceUrl: true });
-    } catch {
-      this.errorMessage.set('login.googleError');
-    } finally {
-      this.loading.set(false);
-    }
   }
 
   private async handleTelegramWidgetAuth(user: any): Promise<void> {
