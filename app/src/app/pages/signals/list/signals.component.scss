@@ -18,3 +18,50 @@ mat-button-toggle {
   right: 24px;
   z-index: 1000;
 }
+
+.status-chips-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-start;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  overflow-x: auto;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.status-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  &.active {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.08);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}

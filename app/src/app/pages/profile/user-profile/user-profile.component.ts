@@ -18,8 +18,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { injectQuery, injectInfiniteQuery } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
@@ -43,6 +44,7 @@ const PAGE_SIZE = 20;
     MatDividerModule,
     MatButtonModule,
     MatToolbarModule,
+    MatTooltipModule,
     RouterModule,
     TranslateModule,
     SignalCardComponent,
@@ -79,12 +81,55 @@ export class UserProfileComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly auth = inject(AuthService);
+  private readonly translate = inject(TranslateService);
 
   isOwnProfile = computed(() => {
     const currentUser = this.auth.userQuery.data();
     const profileId = this.route.snapshot.params['id'];
     return !profileId || currentUser?.id === profileId;
   });
+
+  getRelativeJoinedDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const created = new Date(dateStr);
+    const now = new Date();
+    
+    created.setHours(0,0,0,0);
+    const today = new Date(now);
+    today.setHours(0,0,0,0);
+    
+    const diffTime = today.getTime() - created.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    const isFa = this.translate.currentLang === 'fa';
+
+    if (diffDays <= 0) {
+      return isFa ? 'عضویت: امروز' : 'Joined: Today';
+    }
+    if (diffDays === 1) {
+      return isFa ? 'عضویت: دیروز' : 'Joined: Yesterday';
+    }
+    if (diffDays < 30) {
+      return isFa ? `عضویت: ${diffDays} روز پیش` : `Joined: ${diffDays}d ago`;
+    }
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) {
+      return isFa ? `عضویت: ${diffMonths} ماه پیش` : `Joined: ${diffMonths}mo ago`;
+    }
+    const diffYears = Math.floor(diffMonths / 12);
+    return isFa ? `عضویت: ${diffYears} سال پیش` : `Joined: ${diffYears}yr ago`;
+  }
+
+  getAbsoluteJoinedDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const created = new Date(dateStr);
+    const dateFormatted = created.toLocaleDateString(
+      this.translate.currentLang === 'fa' ? 'fa-IR' : 'en-US',
+      { year: 'numeric', month: '2-digit', day: '2-digit' }
+    );
+    const prefix = this.translate.currentLang === 'fa' ? 'تاریخ عضویت: ' : 'Joined: ';
+    return `${prefix}${dateFormatted}`;
+  }
 
   userQuery = injectQuery(() => ({
     queryKey: ['user', this.route.snapshot.params['id']],
@@ -224,5 +269,17 @@ export class UserProfileComponent {
       default:
         return 'gold-achievement';
     }
+  }
+
+  toggleFollow() {
+    const user = this.userQuery.data();
+    if (!user) return;
+    const isFollowing = user.isFollowing;
+    const url = `/api/users/${user.id}/${isFollowing ? 'unfollow' : 'follow'}`;
+    this.http.post(url, {}).subscribe({
+      next: () => {
+        this.userQuery.refetch();
+      }
+    });
   }
 }

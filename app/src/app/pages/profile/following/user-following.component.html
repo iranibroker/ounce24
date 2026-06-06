@@ -1,0 +1,114 @@
+<mat-toolbar>
+  <mat-toolbar-row>
+    <button mat-icon-button goBack>
+      <ng-icon name="saxArrowLeftOutline" class="rtl" size="20px"></ng-icon>
+    </button>
+    <h1>{{ (activeTabIndex === 1 ? 'profile.followersTitle' : 'profile.followingTitle') | translate }}</h1>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div class="following-container">
+  <mat-tab-group [selectedIndex]="activeTabIndex" (selectedIndexChange)="onTabChange($event)">
+    
+    <!-- Followers Tab -->
+    <mat-tab label="{{ 'profile.followers' | translate }}">
+      <div class="tab-content-container">
+        @if (followers().length > 0) {
+          <div class="following-list">
+            @for (user of followers(); track user.id) {
+              <mat-card class="following-card">
+                <mat-card-content class="following-card-content">
+                  <div class="user-info" [routerLink]="['/profile', user.id]">
+                    <img [appAvatar]="user" class="user-avatar" />
+                    <div class="user-details">
+                      <span class="user-name">{{ user.title || user.name }}</span>
+                      <span class="user-tag">{{ user.tag }}</span>
+                    </div>
+                  </div>
+                  @if (user.id !== auth.userQuery.data()?.id) {
+                    <button 
+                      [class.follow-btn-flat]="!user.isFollowing"
+                      [class.follow-btn-stroked]="user.isFollowing"
+                      class="follow-action-btn-compact" 
+                      (click)="toggleFollow(user); $event.stopPropagation()"
+                    >
+                      {{ (user.isFollowing ? 'profile.unfollow' : 'profile.follow') | translate }}
+                    </button>
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+
+          @if (followersQuery.isLoading() || followersQuery.isFetchingNextPage()) {
+            <app-data-loading />
+          } @else {
+            @if (followersQuery.hasNextPage()) {
+              <button mat-button class="load-more-btn" (click)="followersQuery.fetchNextPage()">
+                {{ 'app.loadMore' | translate }}
+              </button>
+            }
+          }
+        } @else if (!followersQuery.isLoading()) {
+          <app-empty-state
+            iconName="saxEmojiSadOutline"
+            [text]="'profile.noFollowers' | translate"
+          />
+        } @else {
+          <app-data-loading />
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Following Tab -->
+    <mat-tab label="{{ 'profile.following' | translate }}">
+      <div class="tab-content-container">
+        @if (followings().length > 0) {
+          <div class="following-list">
+            @for (user of followings(); track user.id) {
+              <mat-card class="following-card">
+                <mat-card-content class="following-card-content">
+                  <div class="user-info" [routerLink]="['/profile', user.id]">
+                    <img [appAvatar]="user" class="user-avatar" />
+                    <div class="user-details">
+                      <span class="user-name">{{ user.title || user.name }}</span>
+                      <span class="user-tag">{{ user.tag }}</span>
+                    </div>
+                  </div>
+                  @if (user.id !== auth.userQuery.data()?.id) {
+                    <button 
+                      [class.follow-btn-flat]="!user.isFollowing"
+                      [class.follow-btn-stroked]="user.isFollowing"
+                      class="follow-action-btn-compact" 
+                      (click)="toggleFollow(user); $event.stopPropagation()"
+                    >
+                      {{ (user.isFollowing ? 'profile.unfollow' : 'profile.follow') | translate }}
+                    </button>
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+
+          @if (followingQuery.isLoading() || followingQuery.isFetchingNextPage()) {
+            <app-data-loading />
+          } @else {
+            @if (followingQuery.hasNextPage()) {
+              <button mat-button class="load-more-btn" (click)="followingQuery.fetchNextPage()">
+                {{ 'app.loadMore' | translate }}
+              </button>
+            }
+          }
+        } @else if (!followingQuery.isLoading()) {
+          <app-empty-state
+            iconName="saxEmojiSadOutline"
+            [text]="'profile.noFollowing' | translate"
+          />
+        } @else {
+          <app-data-loading />
+        }
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>

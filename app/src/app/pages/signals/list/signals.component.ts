@@ -15,6 +15,8 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxAddOutline } from '@ng-icons/iconsax/outline';
 
+import { AuthService } from '../../../services/auth.service';
+
 const PAGE_SIZE = 20;
 
 @Component({
@@ -40,35 +42,45 @@ export class SignalsComponent {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
 
-  status = signal<SignalStatus>(SignalStatus.Active);
+  status = signal<string>('all');
+  filter = signal<'all' | 'myself' | 'following' | 'bookmarked'>('all');
   SignalStatus = SignalStatus;
 
+  isLoggedIn = computed(() => !!this.auth.userQuery.data());
+
   constructor() {
-    // Initialize status from query params
+    // Initialize status and filter from query params
     const statusParam = this.route.snapshot.queryParams['status'];
-    if (statusParam && Object.values(SignalStatus).includes(statusParam as SignalStatus)) {
-      this.status.set(statusParam as SignalStatus);
+    if (statusParam && (statusParam === 'all' || Object.values(SignalStatus).includes(statusParam as SignalStatus))) {
+      this.status.set(statusParam);
+    }
+    const filterParam = this.route.snapshot.queryParams['filter'];
+    if (filterParam && ['all', 'myself', 'following', 'bookmarked'].includes(filterParam)) {
+      this.filter.set(filterParam as any);
     }
 
-    // Update URL when status changes
+    // Update URL when status or filter changes
     effect(() => {
       const currentStatus = this.status();
+      const currentFilter = this.filter();
       this.router.navigate([], {
         relativeTo: this.route,
-        queryParams: { status: currentStatus },
+        queryParams: { status: currentStatus, filter: currentFilter },
         queryParamsHandling: 'merge'
       });
     });
   }
 
   query = injectInfiniteQuery(() => ({
-    queryKey: ['signals', 'status', this.status()],
+    queryKey: ['signals', 'status', this.status(), this.filter()],
     queryFn: async ({ pageParam }) => {
       return lastValueFrom(
         this.http.get<Signal[]>('/api/signals/status/' + this.status(), {
           params: {
             page: pageParam,
+            filter: this.filter(),
           },
         }),
       );

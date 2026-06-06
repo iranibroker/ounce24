@@ -22,53 +22,15 @@
     color: var(--mat-sys-outline);
   }
 
-  mat-card-subtitle {
-    font-size: 1rem;
-  }
-
   img.mat-mdc-card-avatar {
     border-radius: 4px !important;
-  }
-
-  .profile-header-details {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 16px 0 8px 0;
-    gap: 8px;
-
-    .profile-avatar-large {
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      object-fit: cover;
-      border: 3px solid var(--mat-sys-primary-container);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .profile-name-large {
-      margin: 0;
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: var(--mat-sys-on-surface);
-    }
-
-    .profile-joined-date {
-      margin: 0;
-      font-size: 0.85rem;
-      color: var(--mat-sys-outline);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
   }
 }
 
 .stats-row {
   display: flex;
-  gap: 16px;
-  padding: 16px 0;
+  gap: 8px;
+  padding: 12px 0;
 
   .stat-item {
     flex: 1;
@@ -76,20 +38,22 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 8px;
+    gap: 4px;
+    min-width: 55px;
 
     i, ng-icon:not(.tonal-icon) {
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       color: var(--mat-sys-primary);
     }
 
     span {
-      font-size: 0.9rem;
+      font-size: 0.72rem;
       color: var(--mat-sys-outline);
+      white-space: nowrap;
     }
 
     strong {
-      font-size: 1.2rem;
+      font-size: 1rem;
       color: var(--mat-sys-on-surface);
     }
   }
@@ -482,5 +446,220 @@
     .icon-glow-wrapper {
       background: transparent;
     }
+  }
+}
+
+.profile-compact-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.profile-avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.profile-avatar-compact {
+  width: 84px;
+  height: 84px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 2px solid var(--mat-sys-primary-container);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.profile-joined-relative {
+  font-size: 0.68rem !important;
+  color: var(--mat-sys-outline) !important;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 400 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+
+  &:hover {
+    color: var(--mat-sys-on-surface) !important;
+  }
+}
+
+.profile-signals-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px; // align visually
+  
+  .label {
+    font-size: 0.75rem;
+    color: var(--mat-sys-outline);
+  }
+  
+  .value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.profile-main-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.profile-name-compact {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-joined-compact {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--mat-sys-outline);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.profile-follow-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+.follow-stat-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-sizing: border-box;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.07) !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    &:active {
+      transform: scale(0.95) !important;
+    }
+  }
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+
+  span {
+    font-size: 0.72rem;
+    color: var(--mat-sys-outline);
+  }
+}
+
+.follow-action-compact {
+  margin-top: 6px;
+  width: 100%;
+  max-width: 150px;
+}
+
+.profile-follow-btn-compact {
+  width: 100%;
+  height: 32px !important;
+  line-height: 30px !important;
+  border-radius: 10px !important;
+  font-size: 0.75rem !important;
+  padding: 0 12px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  font-weight: 600;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: none !important;
+    transform: translateY(-1px);
+  }
+
+  &.mat-mdc-flat-button {
+    background: var(--mat-sys-primary) !important;
+    color: var(--mat-sys-on-primary) !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    &:hover {
+      background: var(--mat-sys-primary) !important;
+      filter: brightness(1.15);
+      box-shadow: none !important;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.compact-stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.compact-stat-item {
+  flex: 1 1 calc(33.33% - 8px);
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 6px 4px;
+
+  .label {
+    font-size: 0.72rem;
+    color: var(--mat-sys-outline);
+    margin-bottom: 2px;
+  }
+
+  .value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 }

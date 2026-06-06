@@ -10,7 +10,8 @@ import {
   saxNotificationOutline, 
   saxActivityOutline,
   saxShieldOutline,
-  saxInfoCircleOutline
+  saxInfoCircleOutline,
+  saxBookmarkOutline
 } from '@ng-icons/iconsax/outline';
 import { PushNotificationService } from '../../services/push-notification.service';
 import { AuthService } from '../../services/auth.service';
@@ -35,6 +36,7 @@ import { SHARED } from '../../shared';
       saxActivityOutline,
       saxShieldOutline,
       saxInfoCircleOutline,
+      saxBookmarkOutline,
     }),
   ],
   templateUrl: './notification-settings.component.html',

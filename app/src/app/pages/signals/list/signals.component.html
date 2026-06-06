@@ -1,15 +1,51 @@
 <div class="signals-container">
-  <mat-button-toggle-group [(ngModel)]="status" hideSingleSelectionIndicator>
-    <mat-button-toggle [value]="SignalStatus.Active">
+  @if (isLoggedIn()) {
+    <mat-button-toggle-group [(ngModel)]="filter" hideSingleSelectionIndicator class="author-toggle-group">
+      <mat-button-toggle value="all">
+        {{ 'signal.filter.all' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle value="following">
+        {{ 'signal.filter.following' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle value="bookmarked">
+        {{ 'signal.filter.bookmarked' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle value="myself">
+        {{ 'signal.filter.myself' | translate }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  }
+
+  <div class="status-chips-container">
+    <button 
+      class="status-chip" 
+      [class.active]="status() === 'all'" 
+      (click)="status.set('all')"
+    >
+      {{ 'signal.status.all' | translate }}
+    </button>
+    <button 
+      class="status-chip" 
+      [class.active]="status() === SignalStatus.Active" 
+      (click)="status.set(SignalStatus.Active)"
+    >
       {{ 'signal.status.ACTIVE' | translate }}
-    </mat-button-toggle>
-    <mat-button-toggle [value]="SignalStatus.Pending">
+    </button>
+    <button 
+      class="status-chip" 
+      [class.active]="status() === SignalStatus.Pending" 
+      (click)="status.set(SignalStatus.Pending)"
+    >
       {{ 'signal.status.PENDING.TITLE' | translate }}
-    </mat-button-toggle>
-    <mat-button-toggle [value]="SignalStatus.Closed">
+    </button>
+    <button 
+      class="status-chip" 
+      [class.active]="status() === SignalStatus.Closed" 
+      (click)="status.set(SignalStatus.Closed)"
+    >
       {{ 'signal.status.CLOSED' | translate }}
-    </mat-button-toggle>
-  </mat-button-toggle-group>
+    </button>
+  </div>
 
   @if (data()?.length > 0) {
     @for (signal of data(); track $index) {

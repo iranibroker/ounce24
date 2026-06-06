@@ -36,6 +36,7 @@
     "closedOuncePrice": "kapanış fiyatı",
     "riskFree": "risksiz",
     "status": {
+      "all": "Tüm Durumlar",
       "PENDING": "beklemede",
       "ACTIVE": "aktif",
       "CLOSED": "kapalı",
@@ -46,6 +47,12 @@
       "CANCELED.TITLE": "İptal Edilen Sinyal"
     },
     "emptyState": "Sinyal bulunamadı",
+    "filter": {
+      "all": "Tümü",
+      "myself": "Benim",
+      "following": "Takip Edilenler",
+      "bookmarked": "Yer İmleri"
+    },
     "info": {
       "title": "Sinyal Bilgisi",
       "createdAt": "Oluşturulma tarihi",
@@ -62,10 +69,10 @@
       "cancelSuccess": "Sinyal başarıyla iptal edildi",
       "closeSuccess": "Sinyal başarıyla kapatıldı",
       "riskFreeSuccess": "Sinyal başarıyla risksiz hale getirildi",
-      "follow": "Sinyali Takip Et",
+      "follow": "Sinyali Yer İmlerine Ekle",
       "followDesc": "Bu sinyal için aktivasyon veya kapanış bildirimleri alın",
-      "followSuccess": "Sinyal takip durumu güncellendi",
-      "unfollowSuccess": "Sinyal takibi başarıyla iptal edildi",
+      "followSuccess": "Sinyal başarıyla yer imlerine eklendi",
+      "unfollowSuccess": "Sinyal başarıyla yer imlerinden kaldırıldı",
       "aiShield": "Akıllı Kalkan",
       "aiShieldDesc": "Yapay zeka tabanlı risksiz, takip eden ve erken çıkış uyarıları alın (tavsiye başına 3 GEM)",
       "aiShieldSuccess": "Akıllı Kalkan etkinleştirildi! 🛡️",
@@ -327,8 +334,8 @@
       "priceDesc": "Her 5 saniyede bir altın ons fiyatı güncellemelerini alın",
       "telegramTitle": "Telegram Bildirimleri",
       "telegramDesc": "Bu uyarıları doğrudan Ounce24 Telegram Botu aracılığıyla alın. Telegram hesabınızın bota bağlı olduğundan emin olun.",
-      "signalFollowTitle": "Sinyal Durumu Güncellemeleri",
-      "signalFollowDesc": "Takip edilen sinyaller açıldığında veya kapandığında bildirimler",
+      "signalFollowTitle": "Yer İmli Sinyaller",
+      "signalFollowDesc": "Yer imlerine eklenen sinyaller açıldığında veya kapandığında bildirimler",
       "aiShieldTitle": "Yapay Zeka Akıllı Kalkan",
       "aiShieldDesc": "İşlemleri yönetmek için yapay zeka önerileri",
       "warningNotSupported": "Bu tarayıcıda bildirim alma desteklenmiyor."

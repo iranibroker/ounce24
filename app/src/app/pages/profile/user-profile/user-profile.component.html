@@ -6,14 +6,12 @@
       <button mat-icon-button goBack>
         <ng-icon name="saxArrowLeftOutline" class="rtl" size="20px"></ng-icon>
       </button>
+      <h1>{{ userQuery.data().title || userQuery.data().name }}</h1>
       @if (isOwnProfile()) {
-        <h1>{{ 'profile.yourProfile' | translate }}</h1>
         <span class="spacer"></span>
         <button mat-icon-button routerLink="/profile/edit">
           <ng-icon name="saxEditOutline" size="20px"></ng-icon>
         </button>
-      } @else {
-        <h1>{{ 'profile.pageTitle' | translate }}</h1>
       }
     </mat-toolbar-row>
   </mat-toolbar>
@@ -22,50 +20,68 @@
 
     <mat-card class="user-info-card">
       <mat-card-content>
-        <div class="profile-header-details">
-          <img [appAvatar]="userQuery.data()" class="profile-avatar-large" />
-          <h2 class="profile-name-large">{{ userQuery.data().title || userQuery.data().name }}</h2>
-          @if (userQuery.data().createdAt) {
-            <p class="profile-joined-date">
-              <ng-icon name="saxCalendarOutline" size="14px"></ng-icon>
-              {{ 'profile.createdAt' | translate }}: {{ userQuery.data().createdAt | date: 'dd/MM/yyyy' }}
-            </p>
-          }
+        <div class="profile-compact-header">
+          <div class="profile-avatar-container">
+            <img [appAvatar]="userQuery.data()" class="profile-avatar-compact" />
+            @if (userQuery.data().createdAt) {
+              <span #tooltip="matTooltip" class="profile-joined-relative" [matTooltip]="getAbsoluteJoinedDate(userQuery.data().createdAt)" matTooltipPosition="above" (click)="tooltip.toggle()">
+                {{ getRelativeJoinedDate(userQuery.data().createdAt) }}
+              </span>
+            }
+          </div>
+          <div class="profile-main-info">
+            <div class="profile-signals-badge">
+              <span class="label">{{ 'profile.signals' | translate }}:</span>
+              <strong class="value">{{ userQuery.data().totalSignals || 0 | number }}</strong>
+            </div>
+            
+            <div class="profile-follow-row">
+              <a class="follow-stat-compact clickable" [routerLink]="['/profile', userQuery.data().id || userQuery.data()._id, 'following']" [queryParams]="{ tab: 'followers' }">
+                <strong>{{ userQuery.data().followersCount || 0 | number }}</strong>
+                <span>{{ 'profile.followers' | translate }}</span>
+              </a>
+              <a class="follow-stat-compact clickable" [routerLink]="['/profile', userQuery.data().id || userQuery.data()._id, 'following']" [queryParams]="{ tab: 'following' }">
+                <strong>{{ userQuery.data().followingCount || 0 | number }}</strong>
+                <span>{{ 'profile.following' | translate }}</span>
+              </a>
+            </div>
+
+            @if (!isOwnProfile()) {
+              <div class="follow-action-compact">
+                @if (userQuery.data().isFollowing) {
+                  <button mat-stroked-button class="profile-follow-btn-compact" (click)="toggleFollow()">
+                    {{ 'profile.unfollow' | translate }}
+                  </button>
+                } @else {
+                  <button mat-flat-button color="primary" class="profile-follow-btn-compact" (click)="toggleFollow()">
+                    {{ 'profile.follow' | translate }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
         </div>
-        <mat-divider style="margin: 16px 0;" />
+
+        <mat-divider style="margin: 8px 0;" />
 
         <div class="stats-row">
-          @if (isOwnProfile()) {
-            <div class="stat-item">
-              <ng-icon name="saxDiamondsBold" class="tonal-icon blue" size="16px"></ng-icon>
-              <span>{{ 'profile.yourGems' | translate }}</span>
-              <strong>{{ userQuery.data().gem | number }}</strong>
-            </div>
-          }
           <div class="stat-item">
-            <ng-icon name="saxCupOutline" class="tonal-icon amber" size="16px"></ng-icon>
+            <ng-icon name="saxCupOutline" class="tonal-icon icon-sm amber" size="16px"></ng-icon>
             <span>{{ 'profile.rank' | translate }}</span>
             <strong>{{ userQuery.data().rank | number }}</strong>
           </div>
           <div class="stat-item">
-            <ng-icon name="saxStarOutline" class="tonal-icon amber" size="16px"></ng-icon>
+            <ng-icon name="saxStarOutline" class="tonal-icon icon-sm amber" size="16px"></ng-icon>
             <span>{{ 'profile.score' | translate }}</span>
             <strong>{{ userQuery.data().score?.toFixed(1) | number }}</strong>
           </div>
-        </div>
-        <div class="stats-row">
           <div class="stat-item">
-            <ng-icon name="saxActivityOutline" class="tonal-icon slate" size="16px"></ng-icon>
-            <span>{{ 'profile.signals' | translate }}</span>
-            <strong>{{ userQuery.data().totalSignals }}</strong>
-          </div>
-          <div class="stat-item">
-            <ng-icon name="saxPercentageCircleOutline" class="tonal-icon green" size="16px"></ng-icon>
+            <ng-icon name="saxPercentageCircleOutline" class="tonal-icon icon-sm green" size="16px"></ng-icon>
             <span>{{ 'profile.winRate' | translate }}</span>
             <strong>{{ userQuery.data().winRate?.toFixed(1) }}%</strong>
           </div>
           <div class="stat-item">
-            <ng-icon name="saxJudgeOutline" class="tonal-icon purple" size="16px"></ng-icon>
+            <ng-icon name="saxJudgeOutline" class="tonal-icon icon-sm purple" size="16px"></ng-icon>
             <span>{{ 'profile.avgRiskReward' | translate }}</span>
             <strong>{{ userQuery.data().avgRiskReward?.toFixed(1) }}</strong>
           </div>

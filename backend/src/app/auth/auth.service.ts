@@ -8,7 +8,7 @@ import {
 import * as Kavenegar from 'kavenegar';
 import { isValidUserTitle, PersianNumberService, sanitizeUserTitle } from '@ounce24/utils';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '@ounce24/types';
+import { User, Follow } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
@@ -21,6 +21,7 @@ export class AuthService {
   mobilePhoneTokens: { [key: string]: string } = {};
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Follow.name) private followModel: Model<Follow>,
     private jwtService: JwtService,
     private http: HttpService,
   ) {
@@ -132,7 +133,7 @@ export class AuthService {
       .toPromise();
   }
 
-  async getUserInfo(userId: string, isOwner = false) {
+  async getUserInfo(userId: string, isOwner = false, loggedInUserId?: string | null) {
     let user = (await this.userModel.findById(userId)).toJSON();
 
     if (!user) {
@@ -147,6 +148,21 @@ export class AuthService {
       })
       .exec();
     user.rank = rank + 1;
+
+    const followersCount = await this.followModel.countDocuments({ following: userId }).exec();
+    const followingCount = await this.followModel.countDocuments({ follower: userId }).exec();
+    let isFollowing = false;
+    if (loggedInUserId && loggedInUserId !== userId) {
+      const followRelation = await this.followModel.findOne({
+        follower: loggedInUserId,
+        following: userId,
+      }).exec();
+      isFollowing = !!followRelation;
+    }
+
+    user.followersCount = followersCount;
+    user.followingCount = followingCount;
+    user.isFollowing = isFollowing;
 
     if (!isOwner) {
       user = this.sanitizeUser(user);
@@ -194,6 +210,9 @@ export class AuthService {
       'createdAt',
       'updatedAt',
       'rank',
+      'followersCount',
+      'followingCount',
+      'isFollowing',
     ];
     const sanitized: any = {};
     for (const field of publicFields) {

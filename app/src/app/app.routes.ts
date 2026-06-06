@@ -15,6 +15,7 @@ import { MenuComponent } from './pages/menu/menu.component';
 import { NotificationSettingsComponent } from './pages/notifications/notification-settings.component';
 import { AiSettingsComponent } from './pages/profile/ai-settings/ai-settings.component';
 import { MarketComponent } from './pages/market/market.component';
+import { UserFollowingComponent } from './pages/profile/following/user-following.component';
 
 export const appRoutes: Route[] = [
   {
@@ -85,6 +86,16 @@ export const appRoutes: Route[] = [
           {
             path: 'avatar',
             component: AvatarEditComponent,
+            canActivate: [loginActivator],
+          },
+          {
+            path: 'following',
+            component: UserFollowingComponent,
+            canActivate: [loginActivator],
+          },
+          {
+            path: ':id/following',
+            component: UserFollowingComponent,
             canActivate: [loginActivator],
           },
           {

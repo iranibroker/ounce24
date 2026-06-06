@@ -4,7 +4,7 @@ import {
   saxCloseCircleOutline, 
   saxStopOutline, 
   saxInfoCircleOutline,
-  saxNotificationOutline,
+  saxBookmarkOutline,
   saxShieldOutline 
 } from '@ng-icons/iconsax/outline';
 import { Component, computed, inject, OnInit } from '@angular/core';
@@ -57,7 +57,7 @@ import { GemRequiredDialogComponent } from '../../../components/gem-required-dia
       saxCloseCircleOutline, 
       saxStopOutline, 
       saxInfoCircleOutline,
-      saxNotificationOutline,
+      saxBookmarkOutline,
       saxShieldOutline 
     })
   ],

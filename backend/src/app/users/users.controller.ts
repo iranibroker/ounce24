@@ -8,6 +8,7 @@ import {
   NotFoundException,
   NotAcceptableException,
   Req,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { GemLog, GemLogAction, User } from '@ounce24/types';
@@ -69,7 +70,7 @@ export class UsersController {
   async getUserProfile(@Param('id') id: string, @Req() req: any) {
     const loggedInUserId = this.auth.getUserIdFromRequest(req);
     const isOwner = loggedInUserId === id;
-    return this.auth.getUserInfo(id, isOwner);
+    return this.auth.getUserInfo(id, isOwner, loggedInUserId);
   }
 
   @Public()
@@ -133,5 +134,53 @@ export class UsersController {
     });
 
     return updatedUser;
+  }
+
+  @Post(':id/follow')
+  async followUser(@LoginUser() user: User, @Param('id') id: string) {
+    return this.usersService.followUser(user.id, id);
+  }
+
+  @Post(':id/unfollow')
+  async unfollowUser(@LoginUser() user: User, @Param('id') id: string) {
+    return this.usersService.unfollowUser(user.id, id);
+  }
+
+  @Public()
+  @Get(':id/following')
+  async getUserFollowing(
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('limit') limit = 20,
+    @Req() req?: any,
+  ) {
+    const list = await this.usersService.getUserFollowing(id, Number(page), Number(limit));
+    const loggedInUserId = this.auth.getUserIdFromRequest(req);
+    return list.map((u: any) => {
+      const isOwner = loggedInUserId === u.id;
+      if (!isOwner) {
+        return this.auth.sanitizeUser(u);
+      }
+      return u;
+    });
+  }
+
+  @Public()
+  @Get(':id/followers')
+  async getUserFollowers(
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('limit') limit = 20,
+    @Req() req?: any,
+  ) {
+    const list = await this.usersService.getUserFollowers(id, Number(page), Number(limit));
+    const loggedInUserId = this.auth.getUserIdFromRequest(req);
+    return list.map((u: any) => {
+      const isOwner = loggedInUserId === u.id;
+      if (!isOwner) {
+        return this.auth.sanitizeUser(u);
+      }
+      return u;
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Achievement,
@@ -7,11 +7,14 @@ import {
   SignalStatus,
   User,
   OctopusPrediction,
+  Follow,
 } from '@ounce24/types';
 import mongoose, { Model } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
+import { InjectBot } from 'nestjs-telegraf';
+import { Telegraf, Context } from 'telegraf';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +23,8 @@ export class UsersService {
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(Achievement.name) private achievementModel: Model<Achievement>,
     @InjectModel(OctopusPrediction.name) private predictionModel: Model<OctopusPrediction>,
+    @InjectModel(Follow.name) private followModel: Model<Follow>,
+    @InjectBot('main') private readonly bot: Telegraf<Context>,
   ) {}
 
   @OnEvent(EVENTS.SIGNAL_CLOSED)
@@ -530,5 +535,113 @@ export class UsersService {
         user: winnerId,
       });
     }
+  }
+
+  async followUser(followerId: string, followingId: string) {
+    if (followerId === followingId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+    const targetUser = await this.userModel.findById(followingId).exec();
+    if (!targetUser) {
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
+    }
+
+    try {
+      await this.followModel.create({
+        follower: followerId,
+        following: followingId,
+      });
+    } catch (err: any) {
+      if (err.code !== 11000) {
+        throw err;
+      }
+      return { success: true };
+    }
+
+    // Trigger notification asynchronously
+    this.sendFollowTelegramNotification(followerId, targetUser).catch((err) => {
+      console.error('Failed to send Telegram follow notification:', err);
+    });
+
+    return { success: true };
+  }
+
+  private async sendFollowTelegramNotification(followerId: string, targetUser: any) {
+    if (!targetUser || !targetUser.telegramId) {
+      return;
+    }
+
+    try {
+      const follower = await this.userModel.findById(followerId).exec();
+      if (!follower) return;
+
+      const followersCount = await this.followModel.countDocuments({ following: targetUser._id }).exec();
+      const followerName = follower.title || follower.name || 'یک کاربر';
+
+      const message = `👤 <b>${followerName}</b> شما را فالو کرد!\n\n` +
+        `📊 تعداد کل دنبال‌کنندگان شما: <b>${followersCount}</b> نفر\n\n` +
+        `✨ امکانات بیشتر و کارکردن راحت‌تر با اپلیکیشن`;
+
+      const appUrl = process.env.APP_URL || 'https://app.ounce24.com';
+      const inlineKeyboard = [
+        [
+          {
+            text: 'ورود به اپلیکیشن 📱',
+            url: appUrl,
+          },
+        ],
+      ];
+
+      await this.bot.telegram.sendMessage(targetUser.telegramId, message, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: inlineKeyboard,
+        },
+      });
+    } catch (err) {
+      console.error('Error in sendFollowTelegramNotification:', err);
+    }
+  }
+
+  async unfollowUser(followerId: string, followingId: string) {
+    await this.followModel.deleteOne({
+      follower: followerId,
+      following: followingId,
+    }).exec();
+    return { success: true };
+  }
+
+  async getUserFollowing(userId: string, page: number, limit: number) {
+    const skip = page * limit;
+    const follows = await this.followModel
+      .find({ follower: userId })
+      .skip(skip)
+      .limit(limit)
+      .populate('following')
+      .exec();
+
+    return follows.map((f: any) => {
+      const userObj = f.following?.toJSON ? f.following.toJSON() : f.following;
+      if (!userObj) return null;
+      return userObj;
+    }).filter(Boolean);
+  }
+
+  async getUserFollowers(userId: string, page: number, limit: number) {
+    const skip = page * limit;
+    const follows = await this.followModel
+      .find({ following: userId })
+      .skip(skip)
+      .limit(limit)
+      .populate('follower')
+      .exec();
+
+    return follows.map((f: any) => {
+      const userObj = f.follower?.toJSON ? f.follower.toJSON() : f.follower;
+      if (!userObj) return null;
+      return userObj;
+    }).filter(Boolean);
   }
 }

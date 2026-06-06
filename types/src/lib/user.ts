@@ -69,6 +69,10 @@ export class User {
   notifPrice?: boolean;        // قیمت لحظه‌ای اونس
   notifSignalFollow?: boolean; // وضعیت سیگنال‌های دنبال شده
   notifAiShield?: boolean;     // سپر هوشمند
+  
+  followersCount?: number;
+  followingCount?: number;
+  isFollowing?: boolean;
 
   static getFullName(user?: User): string {
     if (!user) return '';

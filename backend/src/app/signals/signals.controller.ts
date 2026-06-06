@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Delete, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Delete, ForbiddenException, BadRequestException, NotFoundException, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   GemLog,
@@ -8,12 +8,15 @@ import {
   User,
   TradingStyle,
   RiskTolerance,
+  Follow,
+  SignalSubscription,
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
 import { LoginUser } from '../auth/user.decorator';
 import { SignalsService } from './signals.service';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('signals')
 export class SignalsController {
@@ -22,8 +25,11 @@ export class SignalsController {
 
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    @InjectModel(Follow.name) private followModel: Model<Follow>,
+    @InjectModel(SignalSubscription.name) private signalSubModel: Model<SignalSubscription>,
     private readonly signalService: SignalsService,
     private readonly ouncePriceService: OuncePriceService,
+    private readonly auth: AuthService,
   ) {}
 
   private sanitizeSignal(signal: any): any {
@@ -144,15 +150,44 @@ export class SignalsController {
   @Public()
   @Get('status/:status')
   async filterStatus(
-    @Param('status') status: SignalStatus,
+    @Param('status') status: string,
     @Query('page') page?: string,
+    @Query('filter') filter?: 'all' | 'myself' | 'following' | 'bookmarked',
+    @Req() req?: any,
   ) {
     const PAGE_SIZE = 20;
+    const query: any = {
+      deletedAt: null,
+    };
+    if (status !== 'all') {
+      query.status = status;
+    }
+
+    const loggedInUserId = this.auth.getUserIdFromRequest(req);
+
+    if (filter === 'myself') {
+      if (!loggedInUserId) {
+        return [];
+      }
+      query.owner = loggedInUserId;
+    } else if (filter === 'following') {
+      if (!loggedInUserId) {
+        return [];
+      }
+      const follows = await this.followModel.find({ follower: loggedInUserId }).exec();
+      const followingIds = follows.map((f) => f.following);
+      query.owner = { $in: followingIds };
+    } else if (filter === 'bookmarked') {
+      if (!loggedInUserId) {
+        return [];
+      }
+      const subscriptions = await this.signalSubModel.find({ user: loggedInUserId, followStatus: true }).exec();
+      const signalIds = subscriptions.map((s) => s.signal);
+      query._id = { $in: signalIds };
+    }
+
     const signals = await this.signalModel
-      .find({
-        deletedAt: null,
-        status,
-      })
+      .find(query)
       .populate('owner', this.publicUserFields)
       .sort({
         updatedAt: -1,
