@@ -394,5 +394,44 @@
     "liquidationPrice": "Est. Liquidation Price",
     "liquidationWarning": "Warning: Account will be liquidated before reaching Stop Loss! Reduce volume.",
     "recommendedVolume": "Recommended Volume (2% Risk)"
+  },
+  "aiSettings": {
+    "menuTitle": "AI Settings",
+    "menuDescription": "Manage your default trading style and risk tolerance for AI generation and analysis",
+    "pageTitle": "AI Settings",
+    "tradingStyle": {
+      "label": "Default Trading Style",
+      "SCALP": "Scalp (Short-term)",
+      "DAY": "Day Trading (Intraday)",
+      "SWING": "Swing Trading (Long-term)",
+      "SCALP_SHORT": "Scalp",
+      "DAY_SHORT": "Day",
+      "SWING_SHORT": "Swing",
+      "SCALP_DESC": "Short-term (Scalp 5m & 15m timeframes with closer targets)",
+      "DAY_DESC": "Intraday (15m & 1h timeframes with daily entries/exits)",
+      "SWING_DESC": "Long-term (Swing 1h & 4h timeframes with larger targets)",
+      "hint": "Select the timeframe style you want the AI to analyze and generate signals in."
+    },
+    "riskTolerance": {
+      "label": "Default Risk Tolerance",
+      "CONSERVATIVE": "Conservative (Low Risk)",
+      "MODERATE": "Moderate (Medium Risk)",
+      "AGGRESSIVE": "Aggressive (High Risk)",
+      "CONSERVATIVE_SHORT": "Conservative",
+      "MODERATE_SHORT": "Moderate",
+      "AGGRESSIVE_SHORT": "Aggressive",
+      "CONSERVATIVE_DESC": "Low Risk (Aligned with primary trend, no technical barriers, high R:R)",
+      "MODERATE_DESC": "Medium Risk (Standard risk rules, reward/risk ratio 1.5 to 3.0)",
+      "AGGRESSIVE_DESC": "High Risk (Allows counter-trend setups if momentum is strong)",
+      "hint": "Controls how the AI calculates Stop Loss levels and Risk-to-Reward expectations."
+    },
+    "save": "Save Settings",
+    "saveSuccess": "AI settings updated successfully"
+  },
+  "aiSettingsDialog": {
+    "title": "AI Parameters Configuration",
+    "description": "You can temporarily adjust the trading style and risk tolerance for this action:",
+    "confirmGenerate": "Generate with AI",
+    "confirmAnalyze": "Analyze with AI"
   }
 }

@@ -388,5 +388,44 @@
     "liquidationPrice": "Tahmini Likidasyon Fiyatı",
     "liquidationWarning": "Uyarı: Hesap, Zarar Durdur seviyesine ulaşmadan önce tasfiye edilecektir! Hacmi azaltın.",
     "recommendedVolume": "Önerilen Hacim (%2 Risk)"
+  },
+  "aiSettings": {
+    "menuTitle": "Yapay Zeka Ayarları",
+    "menuDescription": "Yapay zeka ile sinyal oluşturma ve analiz için varsayılan işlem tarzınızı ve risk toleransınızı yönetin",
+    "pageTitle": "Yapay Zeka Ayarları",
+    "tradingStyle": {
+      "label": "Varsayılan İşlem Tarzı",
+      "SCALP": "Scalp (Kısa vadeli)",
+      "DAY": "Günlük İşlem (Gün içi)",
+      "SWING": "Swing İşlem (Uzun vadeli)",
+      "SCALP_SHORT": "Scalp",
+      "DAY_SHORT": "Günlük",
+      "SWING_SHORT": "Swing",
+      "SCALP_DESC": "Kısa vadeli (5d ve 15d zaman dilimlerinde yakın hedeflerle scalp)",
+      "DAY_DESC": "Gün içi (15d ve 1h zaman dilimlerinde günlük giriş ve çıkışlar)",
+      "SWING_DESC": "Uzun vadeli (1h ve 4h zaman dilimlerinde daha büyük hedeflerle swing)",
+      "hint": "Yapay zekanın analiz etmesini ve sinyaller üretmesini istediğiniz zaman dilimi tarzını seçin."
+    },
+    "riskTolerance": {
+      "label": "Varsayılan Risk Toleransı",
+      "CONSERVATIVE": "Muhafazakar (Düşük Risk)",
+      "MODERATE": "Dengeli (Orta Risk)",
+      "AGGRESSIVE": "Agresif (Yüksek Risk)",
+      "CONSERVATIVE_SHORT": "Muhafazakar",
+      "MODERATE_SHORT": "Dengeli",
+      "AGGRESSIVE_SHORT": "Agresif",
+      "CONSERVATIVE_DESC": "Düşük Risk (Ana trendle uyumlu, teknik engeller olmadan, yüksek R:R)",
+      "MODERATE_DESC": "Orta Risk (Standart risk kuralları, 1.5 ila 3.0 ödül/risk oranı)",
+      "AGGRESSIVE_DESC": "Yüksek Risk (Güçlü momentuma dayalı trend tersi kurulumlara izin verir)",
+      "hint": "Yapay zekanın Zarar Durdur seviyelerini ve Risk/Ödül beklentilerini nasıl hesaplayacağını kontrol eder."
+    },
+    "save": "Ayarları Kaydet",
+    "saveSuccess": "Yapay zeka ayarları başarıyla güncellendi"
+  },
+  "aiSettingsDialog": {
+    "title": "Yapay Zeka Parametre Yapılandırması",
+    "description": "Bu işlem için işlem tarzını ve risk toleransını geçici olarak ayarlayabilirsiniz:",
+    "confirmGenerate": "Yapay Zeka ile Oluştur",
+    "confirmAnalyze": "Yapay Zeka ile Analiz Et"
   }
 }

@@ -1,5 +1,5 @@
 import { Signal } from './signal';
-import { User } from './user';
+import { User, TradingStyle, RiskTolerance } from './user';
 
 export class SignalAnalyze {
   _id: any;
@@ -19,6 +19,13 @@ export class SignalAnalyze {
 
   model?: string;
 
+  tradingStyle?: TradingStyle;
+
+  riskTolerance?: RiskTolerance;
+
+  language?: string;
+
   createdAt: Date;
 }
+
 

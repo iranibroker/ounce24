@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
-import { Signal } from '@ounce24/types';
+import { Signal, TradingStyle, RiskTolerance } from '@ounce24/types';
 import { SHARED } from '../../shared';
 import { DataLoadingComponent } from '../data-loading/data-loading.component';
 import { injectMutation } from '@tanstack/angular-query-experimental';
@@ -21,6 +21,8 @@ import { GemRequiredDialogComponent } from '../gem-required-dialog/gem-required-
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { AnalyticsService } from '../../services/analytics.service';
+import { AuthService } from '../../services/auth.service';
+import { AiSettingsDialogComponent } from '../ai-settings-dialog/ai-settings-dialog.component';
 
 interface SignalAnalysisResponse {
   analysis: string;
@@ -55,13 +57,20 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
   private dialog = inject(MatDialog);
   private analyticsService = inject(AnalyticsService);
   private translate = inject(TranslateService);
+  private auth = inject(AuthService);
   signal!: Signal;
 
   analyzeMutation = injectMutation(() => ({
-    mutationFn: (signal: Signal) =>
-      lastValueFrom(
-        this.http.post<SignalAnalysisResponse>('/api/signals/analyze', signal),
-      ),
+    mutationFn: (args: { signal: Signal; tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }) => {
+      let url = '/api/signals/analyze';
+      const params: string[] = [];
+      if (args.tradingStyle) params.push(`tradingStyle=${args.tradingStyle}`);
+      if (args.riskTolerance) params.push(`riskTolerance=${args.riskTolerance}`);
+      if (params.length > 0) url += `?${params.join('&')}`;
+      return lastValueFrom(
+        this.http.post<SignalAnalysisResponse>(url, args.signal),
+      );
+    },
     onError: (error: any) => {
       if (error?.status === 406) {
         this.dialog
@@ -90,6 +99,31 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
 
   analyzeSignal() {
     this.analyticsService.trackEvent('analyze_signal');
-    this.analyzeMutation.mutate(this.signal);
+    
+    const user = this.auth.userQuery.data();
+    const currentStyle = user?.tradingStyle || TradingStyle.Day;
+    const currentRisk = user?.riskTolerance || RiskTolerance.Moderate;
+
+    const dialogRef = this.dialog.open(AiSettingsDialogComponent, {
+      width: '450px',
+      maxWidth: '95vw',
+      data: {
+        title: 'aiSettingsDialog.title',
+        description: 'aiSettingsDialog.description',
+        confirmLabel: 'aiSettingsDialog.confirmAnalyze',
+        tradingStyle: currentStyle,
+        riskTolerance: currentRisk,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.analyzeMutation.mutate({
+          signal: this.signal,
+          tradingStyle: result.tradingStyle,
+          riskTolerance: result.riskTolerance,
+        });
+      }
+    });
   }
 }

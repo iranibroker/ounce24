@@ -83,6 +83,8 @@ export class Signal {
     createdAt: Date;
   }>;
 
+  generationAnalysis?: string;
+
   //virtual props
   isSell: boolean;
   profit: number;

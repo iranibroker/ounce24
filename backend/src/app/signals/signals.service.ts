@@ -16,6 +16,8 @@ import {
   User,
   OuncePriceCandle,
   SignalSubscription,
+  TradingStyle,
+  RiskTolerance,
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -23,6 +25,7 @@ import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { AiChatService } from '../ai-chat/ai-chat.service';
+import { analyzeMarketState } from './market-analyzer.helper';
 
 const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
   ? 3
@@ -344,7 +347,11 @@ export class SignalsService {
     }
   }
 
-  async analyzeSignal(signal: Signal, userId?: string) {
+  async analyzeSignal(
+    signal: Signal,
+    userId?: string,
+    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
+  ) {
     try {
       // Normalize incoming signal properties in case it is a partial or form-based unsaved object.
       const signalType = signal.type;
@@ -380,13 +387,51 @@ export class SignalsService {
         });
       }
 
-      const user = await this.userModel
-        .findById(targetUserId)
-        .exec();
+      const user = await this.userModel.findById(targetUserId).exec();
       if (!user) {
         throw new NotFoundException({
           translationKey: 'userNotFound',
         });
+      }
+
+      const currentPrice = this.ouncePriceService.current;
+      const userLang = user.language || 'fa';
+      const style = overrides?.tradingStyle || user.tradingStyle || TradingStyle.Day;
+      const risk = overrides?.riskTolerance || user.riskTolerance || RiskTolerance.Moderate;
+
+      // Check if we have a fresh generation analysis cached (less than 30 minutes old)
+      // Only bypass AI if overrides differ from the user's defaults.
+      const isFresh = signal.createdAt ? (Date.now() - new Date(signal.createdAt).getTime() < 30 * 60 * 1000) : true;
+      const hasOverrides = (overrides?.tradingStyle && overrides.tradingStyle !== user.tradingStyle) || 
+                          (overrides?.riskTolerance && overrides.riskTolerance !== user.riskTolerance);
+      if (signal.generationAnalysis && isFresh && !hasOverrides) {
+        return {
+          analysis: signal.generationAnalysis,
+          signal,
+          user,
+          currentPrice: currentPrice,
+          totalTokens: 0,
+        };
+      }
+
+      // Check if we have a fresh matching analysis in our SignalAnalyze collection (less than 30 minutes old)
+      const freshAnalyze = await this.signalAnalyzeModel.findOne({
+        signal: signal.id || signal._id || null,
+        creator: user.id || user._id,
+        tradingStyle: style,
+        riskTolerance: risk,
+        language: userLang,
+        createdAt: { $gte: new Date(Date.now() - 30 * 60 * 1000) }
+      }).sort({ createdAt: -1 }).exec();
+
+      if (freshAnalyze) {
+        return {
+          analysis: freshAnalyze.analyzeText,
+          signal,
+          user,
+          currentPrice: currentPrice,
+          totalTokens: freshAnalyze.totalTokens || 0,
+        };
       }
 
       if (!user.gem || user.gem <= 0) {
@@ -395,62 +440,18 @@ export class SignalsService {
         });
       }
 
-      const currentPrice = this.ouncePriceService.current;
-
       // Fetch recent 5m candles from the past 30 days
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const candles5m = await this.candleModel.find({
         timestamp: { $gte: thirtyDaysAgo }
       }).sort({ timestamp: 1 }).exec();
 
-      // Prepare default values
-      let formattedHistory4h = 'No historical data available.';
-      let formattedHistory1h = 'No historical data available.';
-      let formattedHistory15m = 'No historical data available.';
-      let formattedHistory5m = 'No historical data available.';
-      let rsi5m = 50;
-      let rsi15m = 50;
-      let rsi1h = 50;
-      let sma20_5m = currentPrice;
-      let sma20_1h = currentPrice;
-      let sma50_1h = currentPrice;
-      let atr5m = 1.5;
-
-      if (candles5m.length > 0) {
-        const closes5m = candles5m.map(c => c.close);
-        rsi5m = calculateRSI(closes5m, 14);
-        sma20_5m = calculateSMA(closes5m, 20);
-        atr5m = calculateATR(candles5m, 14);
-
-        const candles15m = aggregateTo15m(candles5m);
-        const closes15m = candles15m.map(c => c.close);
-        rsi15m = calculateRSI(closes15m, 14);
-
-        const candles1h = aggregateTo1h(candles5m);
-        const closes1h = candles1h.map(c => c.close);
-        rsi1h = calculateRSI(closes1h, 14);
-        sma20_1h = calculateSMA(closes1h, 20);
-        sma50_1h = calculateSMA(closes1h, 50);
-
-        const formatCandle = (c: any) => {
-          const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
-          return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
-        };
-
-        const candles4h = aggregateTo4h(candles5m);
-        if (candles4h.length > 0) {
-          formattedHistory4h = candles4h.map(formatCandle).join('\n');
-        }
-        if (candles1h.length > 0) {
-          formattedHistory1h = candles1h.slice(-72).map(formatCandle).join('\n'); // last 3 days
-        }
-        if (candles15m.length > 0) {
-          formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
-        }
-        formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
+      if (candles5m.length === 0) {
+        throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
       }
 
-      const userLang = user.language || 'en';
+      const marketState = analyzeMarketState(currentPrice, candles5m);
+
       const langConfig = {
         fa: {
           name: 'Persian (Farsi)',
@@ -458,10 +459,9 @@ export class SignalsService {
           high: '🟢 بالا',
           medium: '🟡 متوسط',
           low: '🔴 پایین',
-          exampleHigh: '📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با شتاب خریداران در تایم‌فریم کوتاه‌مدت',
-          exampleLow: '📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی ۵ دقیقه‌ای',
+          exampleHigh: '📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با روند اصلی صعودی در تایم‌فریم ۱ ساعته',
+          exampleLow: '📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی نزولی در تایم‌فریم ۱ ساعته',
           doubleSidedExample: '"از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"',
-          bluntExamples: '"حد ضرر خیلی پایینه، بهتره رو نقطه فلان باشه"، "این سری احتمالا نقطه ورود رو اصلا تاچ نمیکنه" و "بازار کاملا برعکس این میره جلو و کاملا اشتباهه"',
         },
         en: {
           name: 'English',
@@ -469,10 +469,9 @@ export class SignalsService {
           high: '🟢 High',
           medium: '🟡 Medium',
           low: '🔴 Low',
-          exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with buyer momentum in the short-term timeframe',
-          exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 5-minute trend',
+          exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with the main 1-hour bullish trend',
+          exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 1-hour bearish trend',
           doubleSidedExample: '"on one hand ... and on the other hand ...", "it might go up or it might go down"',
-          bluntExamples: '"The stop loss is too tight, it should be at level X", "It is highly unlikely to touch the entry price this time" and "The market will move completely against this trade and it is totally wrong"',
         },
         ar: {
           name: 'Arabic',
@@ -480,10 +479,9 @@ export class SignalsService {
           high: '🟢 مرتفعة',
           medium: '🟡 متوسطة',
           low: '🔴 منخفضة',
-          exampleHigh: '📊 فرصة نجاح الإشارة: 🟢 مرتفعة - متوافقة مع زخم المشترين في الإطار الزمني قصير المدى',
-          exampleLow: '📊 فرصة نجاح الإشارة: 🔴 منخفضة - عكس الاتجاه الرئيسي لـ 5 دقائق',
+          exampleHigh: '📊 فرصة نجاح الإشارة: 🟢 مرتفعة - متوافقة مع الاتجاه الصعودي الرئيسي لمدة 1 ساعة',
+          exampleLow: '📊 فرصة نجاح الإشارة: 🔴 منخفضة - عكس الاتجاه الهبوطي الرئيسي لمدة 1 ساعة',
           doubleSidedExample: '"من ناحية ... ومن ناحية أخرى ...", "قد يكون صعودياً أو هبوطياً"',
-          bluntExamples: '"حد وقف الخسارة قريب جداً، من الأفضل أن يكون عند مستوى X"، "من غير المرجح إطلاقاً أن يلمس سعر الدخول هذه المرة" و"السوق سيسير تماماً عكس ذلك وهو خاطئ تماماً"',
         },
         tr: {
           name: 'Turkish',
@@ -491,10 +489,9 @@ export class SignalsService {
           high: '🟢 Yüksek',
           medium: '🟡 Orta',
           low: '🔴 Düşük',
-          exampleHigh: '📊 Sinyal Başarı Şansı: 🟢 Yüksek - Kısa vadeli zaman diliminde alıcı ivmesiyle uyumlu',
-          exampleLow: '📊 Sinyal Başarı Şansı: 🔴 Düşük - 5 dakikalık ana trendin tersine',
-          doubleSidedExample: '"bir yandan ... diğer yandan ...", "yükseliş de olabilir düşüş de"',
-          bluntExamples: '"Zarar durdurma çok yakın, X seviyesinde olması daha iyi", "Bu sefer giriş fiyatına ulaşması pek olası değil" ve "Piyasa bunun tamamen aksine gidecek ve bu tamamen yanlış"',
+          exampleHigh: '📊 Sinyal Başarı Şansı: 🟢 Yüksek - 1 saatlik ana yükseliş trendiyle uyumlu',
+          exampleLow: '📊 Sinyal Başarı Şansı: 🔴 Düşük - 1 saatlik ana düşüş trendinin tersine',
+          doubleSidedExample: '"bir yandan ... دیگر yandan ...", "yükseliş de olabilir düşüş de"',
         }
       }[userLang as 'fa' | 'en' | 'ar' | 'tr'] || {
         name: 'English',
@@ -502,15 +499,16 @@ export class SignalsService {
         high: '🟢 High',
         medium: '🟡 Medium',
         low: '🔴 Low',
-        exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with buyer momentum in the short-term timeframe',
-        exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 5-minute trend',
+        exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with the main 1-hour bullish trend',
+        exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 1-hour bearish trend',
         doubleSidedExample: '"on one hand ... and on the other hand ...", "it might go up or it might go down"',
-        bluntExamples: '"The stop loss is too tight, it should be at level X", "It is highly unlikely to touch the entry price this time" and "The market will move completely against this trade and it is totally wrong"',
       };
 
+      const styleInstructions = getStyleInstructions(style, risk);
+
       const promptMessage = `
-You are an expert, extremely bold, decisive, and authoritative financial analyst AI for Ounce24.
-Analyze the following short-term Gold (XAUUSD) signal based on the technical price history and indicators provided below.
+You are an expert, objective, and authoritative technical analyst AI for Ounce24.
+Analyze the following Gold (XAUUSD) signal based on the technical market state and parameters provided below.
 
 Signal Details:
 - Action Type: ${signalType === SignalType.Buy ? 'BUY' : 'SELL'}
@@ -524,26 +522,28 @@ ${signal.closedOuncePrice ? `- Closed Ounce Price: $${signal.closedOuncePrice.to
 - Take Profit (TP): $${profit.toFixed(2)} (Target Move: $${Math.abs(profit - entryPrice).toFixed(2)})
 - Stop Loss (SL): $${loss.toFixed(2)} (Risk Move: $${Math.abs(loss - entryPrice).toFixed(2)})
 
-Technical Indicators (Calculated on 5m, 15m, 1h tables):
-- 5m RSI(14): ${rsi5m.toFixed(2)}
-- 15m RSI(14): ${rsi15m.toFixed(2)}
-- 1h RSI(14): ${rsi1h.toFixed(2)}
-- 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
-- 1h SMA(20): $${sma20_1h.toFixed(2)}
-- 1h SMA(50): $${sma50_1h.toFixed(2)}
-- 5m ATR(14) (Volatility): $${atr5m.toFixed(2)}
+Market State:
+${marketState.semanticText}
 
-Recent Price History (4-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory4h}
+${styleInstructions}
 
-Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory1h}
-
-Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory15m}
-
-Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory5m}
+Technical Analysis Principles (Must follow strictly to evaluate the signal):
+1. Short-Term Timeframe Priority:
+   - For Scalping or Day Trading styles, or if the duration of the signal is expected to be short-term (under 1 hour), prioritize 5m and 15m Price Action (candle rejections, breaks of support/resistance) and Moving Average (SMA20/SMA50) alignments.
+   - For BUY signals: Check if price is above the 5m and 15m SMA20 and SMA50 (indicates strong upward short-term momentum). If price is below them, momentum is bearish, which increases risk.
+   - For SELL signals: Check if price is below the 5m and 15m SMA20 and SMA50 (indicates strong downward short-term momentum). If price is above them, momentum is bullish, which increases risk.
+2. Trend Alignment: Verify if the trade aligns with the specified trend instructions in the profile settings.
+   - If the trade is counter-trend relative to the primary timeframes, it should be rated as MEDIUM or LOW success chance unless there is a very close, strong horizontal level (within 2-3 USD) rejecting the trend.
+3. Price Action & Horizontal S/R Levels:
+   - Identify if any key horizontal support or resistance levels (especially the short-term 15m levels) block the path of the trade.
+   - For a BUY signal, verify if any major resistance level blocks the target before the TP is hit (Entry < Resistance < TP).
+   - For a SELL signal, verify if any major support level blocks the target before the TP is hit (Entry > Support > TP).
+   - If a blocking level exists, explain it clearly and rate the success chance as LOW or MEDIUM.
+4. Risk Management:
+   - Verify if the Stop Loss is placed logically behind a key Support (for BUY) or Resistance (for SELL) level, or at least 1.5x ATR away from Entry.
+   - Verify if the Risk-Reward Ratio is between 1.5 and 3.0 (unless overrides permit a different ratio).
+5. Double-Checking for Logical Consistency:
+   - ALWAYS double-check your analysis: The overall success chance (High, Medium, Low) MUST be logically consistent with your technical findings. For example, do NOT rate a BUY signal as "High" success chance if price is trading below the 5m/15m/1h SMA20 and SMA50 or if there is a major resistance level blocking the path. If your technical points find significant negative indicators or counter-trend structures, the rating must be "Medium" or "Low".
 
 Instructions for Analysis:
 1. Write the analysis strictly in ${langConfig.name}.
@@ -553,26 +553,20 @@ Instructions for Analysis:
    For example: "${langConfig.exampleLow}" or "${langConfig.exampleHigh}"
 4. Provide a very brief, direct 1-line summary of your analysis right after this indicator.
 5. Provide the rest of your technical analysis in 1 or 2 very short, concise paragraphs. Keep the entire response brief, clean, and to the point.
-6. Prioritize technical analysis approaches by giving the highest priority to Price Action (specifically Support & Resistance levels, key breakout/breakdown levels, and market structure on the 30-day 4-hour price history) and secondary priority to Moving Average trends (using SMA20/SMA50 indicators). RSI and other momentum tools are of much lower priority.
-7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., ${langConfig.doubleSidedExample}). You must be extremely bold, decisive, and opinionated. Provide direct, blunt judgment and suggestions in ${langConfig.name} using your own natural technical analytical vocabulary to fit the context. The phrasings ${langConfig.bluntExamples} are illustrative examples of the expected level of confidence, directness, and bluntness—not strict templates to copy-paste. Give professional, analytical, and highly confident feedback.
+6. Your success assessment must be objective and fair. If a signal conforms to all Technical Analysis Principles, rate it High or Medium. Do not search for artificial faults.
+7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., ${langConfig.doubleSidedExample}). Be decisive. Give professional, analytical, and highly confident feedback.
 8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits.
 9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.
 10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
-11. Ensure all price levels, support/resistance levels, and targets you mention are mathematically and logically correct. For a BUY signal, a resistance level ONLY blocks/obstructs the signal's target (TP) if it is located between the Entry Price and the TP (Entry < Resistance < TP). If the resistance is higher than the TP (Resistance > TP), it does NOT block the target, and you must not claim it blocks. Conversely, for a SELL signal, a support level only blocks the TP if it is between the Entry and TP (Entry > Support > TP). Do not hallucinate or make false claims about support/resistance blocking targets if they are outside this mathematical range. Double-check your numeric logic.
-12. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "resistance level at [price]" or its translation in ${langConfig.name}, and instead of "key support", say "support level at [price]" or its translation in ${langConfig.name}. Never mention a price level or chart concept without including its specific numerical value.
-13. Be highly aware of the Signal Status:
+11. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "resistance level at [price]" or its translation in ${langConfig.name}, and instead of "key support", say "support level at [price]" or its translation in ${langConfig.name}. Never mention a price level or chart concept without including its specific numerical value.
+12. Be highly aware of the Signal Status:
    - If the status is PENDING:
-     - Understand that the trade is NOT live yet. The price must first reach/touch the Entry Price.
-     - For a BUY signal where the Entry Price is below the Current Price (e.g. Entry 4426.00 and Current Price 4449.16), the price must first drop (pullback) to trigger the buy entry. Calculate the distance between Current Price and Entry Price. If they are far apart, explain that the price needs to pullback to trigger, and state if it's unlikely to touch the entry ("It is unlikely to touch the entry price" or its translation in ${langConfig.name}) based on the current market momentum/consolidation.
-     - For a SELL signal where the Entry Price is above the Current Price, the price must rise to trigger.
-     - Do NOT treat the Take Profit (TP) target level as a "resistance level that must be broken" for the signal to succeed. Reaching the TP is the goal of the trade, not a barrier.
+     - Understand that the trade is NOT live yet. The price must first reach/touch the Entry Price. Explain the distance and touch probability.
    - If the status is CLOSED or CANCELED:
-     - Understand that this is a past, finished trade. Your analysis must be a post-mortem technical review (an educational review of what happened in hindsight). Do NOT write a future forecast.
-     - Look at the Placed Time, Triggered/Activated Time, and Closed/Finished Time. Review how the price moved during this active period based on the price history.
-     - Analyze whether the signal reached its TP (Success) or hit SL (Failure), or remained pending and was canceled without triggering. State clearly in hindsight if the Entry, TP, and SL levels were well-placed or poorly positioned relative to the actual price action. Give honest, blunt, and educational feedback on the trade setup.
+     - Write an educational review in hindsight of how the trade performed relative to the actual price path.
 `;
 
-      const result = await this.aiChatService.createResponse(promptMessage, userLang);
+      const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
 
       // // Deduct 1 gem from user
       await this.userModel
@@ -597,6 +591,9 @@ Instructions for Analysis:
         creator: user.id,
         prompt: promptMessage,
         model: result.model,
+        tradingStyle: style,
+        riskTolerance: risk,
+        language: userLang,
       });
 
       return {
@@ -612,7 +609,10 @@ Instructions for Analysis:
     }
   }
 
-  async generateSignal(userId: string) {
+  async generateSignal(
+    userId: string,
+    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
+  ) {
     try {
       const user = await this.userModel.findById(userId).exec();
       if (!user) {
@@ -635,101 +635,59 @@ Instructions for Analysis:
         timestamp: { $gte: thirtyDaysAgo }
       }).sort({ timestamp: 1 }).exec();
 
-      // Prepare default values
-      let formattedHistory4h = 'No historical data available.';
-      let formattedHistory1h = 'No historical data available.';
-      let formattedHistory15m = 'No historical data available.';
-      let formattedHistory5m = 'No historical data available.';
-      let rsi5m = 50;
-      let rsi15m = 50;
-      let rsi1h = 50;
-      let sma20_5m = currentPrice;
-      let sma20_1h = currentPrice;
-      let sma50_1h = currentPrice;
-      let atr5m = 1.5;
-
-      if (candles5m.length > 0) {
-        const closes5m = candles5m.map(c => c.close);
-        rsi5m = calculateRSI(closes5m, 14);
-        sma20_5m = calculateSMA(closes5m, 20);
-        atr5m = calculateATR(candles5m, 14);
-
-        const candles15m = aggregateTo15m(candles5m);
-        const closes15m = candles15m.map(c => c.close);
-        rsi15m = calculateRSI(closes15m, 14);
-
-        const candles1h = aggregateTo1h(candles5m);
-        const closes1h = candles1h.map(c => c.close);
-        rsi1h = calculateRSI(closes1h, 14);
-        sma20_1h = calculateSMA(closes1h, 20);
-        sma50_1h = calculateSMA(closes1h, 50);
-
-        const formatCandle = (c: any) => {
-          const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
-          return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
-        };
-
-        const candles4h = aggregateTo4h(candles5m);
-        if (candles4h.length > 0) {
-          formattedHistory4h = candles4h.map(formatCandle).join('\n');
-        }
-        if (candles1h.length > 0) {
-          formattedHistory1h = candles1h.slice(-72).map(formatCandle).join('\n'); // last 3 days
-        }
-        if (candles15m.length > 0) {
-          formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
-        }
-        formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
+      if (candles5m.length === 0) {
+        throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
       }
+
+      const marketState = analyzeMarketState(currentPrice, candles5m);
+      const userLang = user.language || 'fa';
+      const langName = userLang === 'fa' ? 'Persian (Farsi)' : 'English';
+
+      const style = overrides?.tradingStyle || user.tradingStyle || TradingStyle.Day;
+      const risk = overrides?.riskTolerance || user.riskTolerance || RiskTolerance.Moderate;
+      const styleInstructions = getStyleInstructions(style, risk);
 
       const promptMessage = `
 You are an expert, bold, and authoritative quantitative trading system for Ounce24.
-Generate a high-probability short-term Gold (XAUUSD) trading signal based on the technical price history and indicators provided below.
+Generate a high-probability Gold (XAUUSD) trading signal based on the technical market state and parameters provided below.
 
-Current Price: $${currentPrice.toFixed(2)}
+Market State:
+${marketState.semanticText}
 
-Technical Indicators (Calculated on 5m, 15m, 1h tables):
-- 5m RSI(14): ${rsi5m.toFixed(2)}
-- 15m RSI(14): ${rsi15m.toFixed(2)}
-- 1h RSI(14): ${rsi1h.toFixed(2)}
-- 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
-- 1h SMA(20): $${sma20_1h.toFixed(2)}
-- 1h SMA(50): $${sma50_1h.toFixed(2)}
-- 5m ATR(14) (Volatility): $${atr5m.toFixed(2)}
+${styleInstructions}
 
-Recent Price History (4-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory4h}
+Technical Analysis Principles (Must follow strictly to generate the signal):
+1. Short-Term Timeframe Priority:
+   - For Scalping or Day Trading styles, prioritize the 5m and 15m timeframes. The signal direction must align with the short-term trend and SMA20/50 momentum.
+   - For BUY signals: Only generate if price is supported by 5m/15m SMA20 and SMA50 (momentum is bullish).
+   - For SELL signals: Only generate if price is below 5m/15m SMA20 and SMA50 (momentum is bearish).
+2. Trend Alignment: The signal MUST align with the specified trend instructions in the profile settings.
+3. Price Action & Horizontal Levels:
+   - For a BUY signal: The entry price must be above key support (specifically checking 15m local support), and take profit must not be blocked by any key resistance levels.
+   - For a SELL signal: The entry price must be below key resistance (specifically checking 15m local resistance), and take profit must not be blocked by any key support levels.
+   - Check local 15m candle patterns (e.g. rejection candles at S/R) to confirm the entry and bounce validity.
+4. Risk Management & Double-Checking:
+   - Stop Loss must be placed behind a valid swing level or calculated as at least 1.5x to 2x ATR(14) from Entry (unless overrides permit a different ratio).
+   - Risk-Reward Ratio (TP / SL distance) must be between 1.5 and 3.0 (unless overrides permit a different ratio).
+   - Double-check that entryPrice, takeProfit, and stopLoss are logically placed relative to the current price (e.g. for BUY, takeProfit > entryPrice and stopLoss < entryPrice).
+5. Entry Execution:
+   - Use "instantEntry: true" ONLY when the current price is at an ideal execution level.
+   - Use "instantEntry: false" when waiting for a pullback/breakout is wiser. Specifying the target entryPrice at that level.
 
-Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory1h}
-
-Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory15m}
-
-Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory5m}
-
-Instructions for Signal Generation:
-1. Analyze the trend and key Support/Resistance areas. Decide on a short-term trading setup.
-2. Determine if the setup is a BUY or SELL signal.
-3. Suggest a realistic Entry Price, Take Profit (TP), and Stop Loss (SL). 
-4. The Stop Loss must be calculated logically based on the recent swing low/high or the ATR volatility (e.g. SL distance from entry should be at least 1.5x to 2x ATR).
-5. The Risk-Reward Ratio (Target Move / Risk Move) must be between 1.5 and 3.0.
-6. Decide whether to use an instant market entry (instantEntry: true) or a pending order (instantEntry: false):
-   - Use "instantEntry: true" ONLY when the current price is already at an ideal technical execution zone (e.g. just breaking out of a key level or bouncing directly off a support/resistance line). In this case, entryPrice must be equal to the current price ($${currentPrice.toFixed(2)}).
-   - Use "instantEntry: false" when the current price is not at an ideal level, and it is wiser to wait for a pullback to a key support/resistance level or a breakout above/below a key level. In this case, specify the target entryPrice at that future level (e.g., for a BUY pending limit order, entryPrice should be lower than the current price; for a SELL pending limit order, entryPrice should be higher than the current price).
-   - Make sure to dynamically generate both instant and pending signals depending on the market structure. Do NOT always generate instant entries.
-7. Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
+Instructions for Output:
+1. Write the analysis/reasoning strictly in ${langName}. Do NOT use any asterisks (*) or markdown formatting in your text.
+2. Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
 {
   "type": "buy" | "sell",
   "entryPrice": number,
   "takeProfit": number,
   "stopLoss": number,
-  "instantEntry": boolean
+  "instantEntry": boolean,
+  "generationAnalysis": "Write a brief 1-2 paragraph technical reasoning for this trade setup in ${langName}. Explain how it aligns with the trend, SMA, RSI, and horizontal levels."
 }
 `;
 
-      const result = await this.aiChatService.createResponse(promptMessage);
+      const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
 
       // Clean the AI response in case it returned markdown code block
       let cleanText = result.text.trim();
@@ -940,4 +898,32 @@ function aggregateTo4h(candles5m: OuncePriceCandle[]): { timestamp: Date; open: 
     candles4h.push({ timestamp, open, high, low, close });
   }
   return candles4h;
+}
+
+export function getStyleInstructions(
+  style?: TradingStyle,
+  risk?: RiskTolerance,
+): string {
+  let styleInstructions = `\nSTYLE & RISK PROFILE SETTINGS (MUST FOLLOW STRICTLY):\n`;
+
+  const finalStyle = style || TradingStyle.Day;
+  const finalRisk = risk || RiskTolerance.Moderate;
+
+  if (finalStyle === TradingStyle.Scalp) {
+    styleInstructions += `- Trading Style: SCALPING (Very short-term trading). Focus heavily on the 5-minute and 15-minute timeframes. Use the 5m and 15m SMA20/SMA50 to determine momentum. For BUY setups, price should be above 5m and 15m SMAs. For SELL setups, price should be below 5m and 15m SMAs. Check short-term Price Action (candle rejections or breakout candles) at the 15m support/resistance levels. Ignore 1h/4h structures except as minor background direction. Suggest tighter stop loss levels (e.g. 1.0x ATR) and closer take profit levels.\n`;
+  } else if (finalStyle === TradingStyle.Swing) {
+    styleInstructions += `- Trading Style: SWING TRADING (Medium to long-term trading). Focus on the 1-hour and 4-hour horizontal S/R structures. Completely ignore 5-minute and 15-minute noise. Suggest wider stop losses and larger take profit targets (at least 2.0x to 3.0x risk move) to allow the trade room to develop.\n`;
+  } else {
+    styleInstructions += `- Trading Style: DAY TRADING (Intraday trading). Look to enter and exit within the day. Balance 15m momentum (using 15m SMA20/50 alignment) with 1h structure (using 1h SMA20/50 and horizontal S/R). Ensure entry/exit targets are not blocked by key short-term (15m) or medium-term (1h) levels. Price action rejections at 15m or 1h support/resistance are critical.\n`;
+  }
+
+  if (finalRisk === RiskTolerance.Conservative) {
+    styleInstructions += `- Risk Tolerance: CONSERVATIVE (Low Risk). You must strictly follow the trend direction (BUY when trend is BULLISH, SELL when trend is BEARISH). Reject any trade if there is a major horizontal barrier blocking the path to the TP. Risk-Reward ratio must be at least 2.0.\n`;
+  } else if (finalRisk === RiskTolerance.Aggressive) {
+    styleInstructions += `- Risk Tolerance: AGGRESSIVE (High Risk). You are allowed to suggest counter-trend breakout setups if momentum (RSI) is extremely strong in that direction. The Risk-Reward ratio can be as low as 1.2 if the momentum supports a quick target touch.\n`;
+  } else {
+    styleInstructions += `- Risk Tolerance: MODERATE. Standard risk management rules apply (Risk-Reward ratio between 1.5 and 3.0).\n`;
+  }
+
+  return styleInstructions;
 }

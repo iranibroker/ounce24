@@ -1,4 +1,4 @@
-import { User } from '@ounce24/types';
+import { User, TradingStyle, RiskTolerance } from '@ounce24/types';
 import mongoose from 'mongoose';
 
 export const UserSchema = new mongoose.Schema<User>(
@@ -30,6 +30,18 @@ export const UserSchema = new mongoose.Schema<User>(
     alternativeTelegramToken: { type: String, required: false },
     weekScore: { type: Number, required: true, default: 0 },
     language: { type: String, required: false, default: 'en' },
+    tradingStyle: {
+      type: String,
+      enum: Object.values(TradingStyle),
+      required: false,
+      default: TradingStyle.Day,
+    },
+    riskTolerance: {
+      type: String,
+      enum: Object.values(RiskTolerance),
+      required: false,
+      default: RiskTolerance.Moderate,
+    },
     notifPrice: { type: Boolean, required: false, default: true },
     notifSignalFollow: { type: Boolean, required: false, default: true },
     notifAiShield: { type: Boolean, required: false, default: true },

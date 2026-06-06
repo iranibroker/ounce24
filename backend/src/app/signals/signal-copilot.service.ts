@@ -10,6 +10,8 @@ import {
   SignalSubscription,
   GemLog,
   GemLogAction,
+  TradingStyle,
+  RiskTolerance,
 } from '@ounce24/types';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectBot } from 'nestjs-telegraf';
@@ -18,8 +20,9 @@ import { EVENTS } from '../consts';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { AiChatService } from '../ai-chat/ai-chat.service';
 import { WebPushService } from '../web-push/web-push.service';
-import { SignalsService } from './signals.service';
+import { SignalsService, getStyleInstructions } from './signals.service';
 import { getTranslation } from '../bot/i18n';
+import { analyzeMarketState } from './market-analyzer.helper';
 
 
 interface CachedSubscription {
@@ -32,6 +35,8 @@ interface CachedSubscription {
   /** User-level notification flags */
   notifSignalFollow: boolean;
   notifAiShield: boolean;
+  tradingStyle?: TradingStyle;
+  riskTolerance?: RiskTolerance;
 }
 
 interface CachedSignal {
@@ -105,6 +110,8 @@ export class SignalCopilotService implements OnModuleInit {
               aiShield: sub.aiShield,
               notifSignalFollow: userObj.notifSignalFollow !== false,
               notifAiShield: userObj.notifAiShield !== false,
+              tradingStyle: userObj.tradingStyle,
+              riskTolerance: userObj.riskTolerance,
             });
           }
         }
@@ -155,6 +162,8 @@ export class SignalCopilotService implements OnModuleInit {
           aiShield: sub.aiShield,
           notifSignalFollow: userObj.notifSignalFollow !== false,
           notifAiShield: userObj.notifAiShield !== false,
+          tradingStyle: userObj.tradingStyle,
+          riskTolerance: userObj.riskTolerance,
         });
       }
     }
@@ -230,6 +239,8 @@ export class SignalCopilotService implements OnModuleInit {
         aiShield: sub.aiShield,
         notifSignalFollow: userObj.notifSignalFollow !== false,
         notifAiShield: userObj.notifAiShield !== false,
+        tradingStyle: userObj.tradingStyle,
+        riskTolerance: userObj.riskTolerance,
       });
     }
   }
@@ -409,55 +420,35 @@ export class SignalCopilotService implements OnModuleInit {
         .sort({ timestamp: 1 })
         .exec();
 
-      let formattedHistory4h = 'No historical data available.';
-      let formattedHistory1h = 'No historical data available.';
-      let formattedHistory15m = 'No historical data available.';
-      let formattedHistory5m = 'No historical data available.';
-      let rsi5m = 50;
-      let rsi15m = 50;
-      let rsi1h = 50;
-      let sma20_5m = currentPrice;
-      let sma20_1h = currentPrice;
-      let sma50_1h = currentPrice;
-      let atr5m = 1.5;
+      if (candles5m.length === 0) return;
 
-      if (candles5m.length > 0) {
-        const closes5m = candles5m.map((c) => c.close);
-        rsi5m = calculateRSI(closes5m, 14);
-        sma20_5m = calculateSMA(closes5m, 20);
-        atr5m = calculateATR(candles5m, 14);
-
-        const candles15m = aggregateTo15m(candles5m);
-        const closes15m = candles15m.map((c) => c.close);
-        rsi15m = calculateRSI(closes15m, 14);
-
-        const candles1h = aggregateTo1h(candles5m);
-        const closes1h = candles1h.map((c) => c.close);
-        rsi1h = calculateRSI(closes1h, 14);
-        sma20_1h = calculateSMA(closes1h, 20);
-        sma50_1h = calculateSMA(closes1h, 50);
-
-        const formatCandle = (c: any) => {
-          const dateStr = new Date(c.timestamp).toISOString().replace('T', ' ').substring(5, 16);
-          return `${dateStr},${c.open.toFixed(2)},${c.high.toFixed(2)},${c.low.toFixed(2)},${c.close.toFixed(2)}`;
-        };
-
-        const candles4h = aggregateTo4h(candles5m);
-        if (candles4h.length > 0) {
-          formattedHistory4h = candles4h.map(formatCandle).join('\n');
-        }
-        if (candles1h.length > 0) {
-          formattedHistory1h = candles1h.slice(-72).map(formatCandle).join('\n'); // last 3 days
-        }
-        if (candles15m.length > 0) {
-          formattedHistory15m = candles15m.slice(-48).map(formatCandle).join('\n'); // last 12 hours
-        }
-        formattedHistory5m = candles5m.slice(-24).map(formatCandle).join('\n'); // last 2 hours
-      }
+      const marketState = analyzeMarketState(currentPrice, candles5m);
 
       const alreadyRecommendedRiskFree = signal.aiRecommendations?.some((rec) => rec.type === 'risk_free') || signal.riskFree;
 
-      const promptMessage = `
+      const ownerId = signal.owner ? ((signal.owner as any)._id || (signal.owner as any).id || (signal.owner as any)).toString() : '';
+
+      // Group active subscriptions by their unique tradingStyle and riskTolerance combination
+      const groups = new Map<string, {
+        style: TradingStyle;
+        risk: RiskTolerance;
+        subs: CachedSubscription[];
+      }>();
+
+      for (const sub of subscriptions) {
+        const style = sub.tradingStyle || TradingStyle.Day;
+        const risk = sub.riskTolerance || RiskTolerance.Moderate;
+        const key = `${style}_${risk}`;
+        if (!groups.has(key)) {
+          groups.set(key, { style, risk, subs: [] });
+        }
+        groups.get(key)!.subs.push(sub);
+      }
+
+      for (const [key, group] of groups.entries()) {
+        const styleInstructions = getStyleInstructions(group.style, group.risk);
+
+        const promptMessage = `
 You are the Smart Shield AI Trading Guard for Ounce24.
 You are monitoring a Gold (XAUUSD) signal in real-time.
 
@@ -467,29 +458,15 @@ Signal Status: ${signal.status.toUpperCase()}
 - Current Price: $${currentPrice.toFixed(2)}
 - Take Profit (TP): $${tp.toFixed(2)}
 - Stop Loss (SL): $${sl.toFixed(2)}
-- Volatility (ATR 5m): $${atr5m.toFixed(2)}
-- 5m RSI(14): ${rsi5m.toFixed(2)}
-- 15m RSI(14): ${rsi15m.toFixed(2)}
-- 1h RSI(14): ${rsi1h.toFixed(2)}
-- 5m SMA(20): $${sma20_5m.toFixed(2)} (Current price is ${currentPrice > sma20_5m ? 'above' : 'below'} SMA20 by $${Math.abs(currentPrice - sma20_5m).toFixed(2)})
-- 1h SMA(20): $${sma20_1h.toFixed(2)}
-- 1h SMA(50): $${sma50_1h.toFixed(2)}
 - Risk-Free setup already suggested/active: ${alreadyRecommendedRiskFree ? 'YES' : 'NO'}
 
-Recent Price History (4-hour resolution, past 30 days - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory4h}
+Market State:
+${marketState.semanticText}
 
-Recent Price History (1-hour resolution, past 3 days - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory1h}
-
-Recent Price History (15-minute resolution, past 12 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory15m}
-
-Recent Price History (5-minute resolution, past 2 hours - Format: MM-DD HH:mm,Open,High,Low,Close):
-${formattedHistory5m}
+${styleInstructions}
 
 Instructions:
-Evaluate the technical gold chart and indicators to suggest trade adjustments.
+Evaluate the technical gold chart and indicators to suggest trade adjustments based on the Technical Analysis Principles.
 - If status is ACTIVE:
   Evaluate whether the user should:
   1. "risk_free": Move SL to Entry (only suggest if price is in decent profit, e.g., >= 1.5x ATR, and it hasn't been done yet).
@@ -502,129 +479,135 @@ Evaluate the technical gold chart and indicators to suggest trade adjustments.
   1. "cancel": Cancel the pending order immediately because the market structure/trend has changed significantly and the setup is no longer valid or has high risk.
   2. "none": Keep the pending order as is.
 
+Technical Analysis Principles (Must follow strictly):
+1. Trend Alignment: If a trade is counter-trend (e.g. BUY signal when Trend is BEARISH), and the trend continues strongly without sign of reversal, suggest "early_exit" (if active) or "cancel" (if pending).
+2. S/R Barriers: If a strong horizontal level blocks the path to the TP, and momentum is slowing down, consider "early_exit" or do NOT suggest "extend_tp".
+3. Decisiveness: Be objective. Do not suggest changes unless they are clearly justified by the market state.
+
 Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
 {
   "recommendation": "risk_free" | "trailing_sl" | "extend_tp" | "early_exit" | "cancel" | "none",
   "price": number, // suggest the exact price level if recommendation is extend_tp or trailing_sl, otherwise current price or 0
   "messageFa": "Persian instruction message to the trader, clear, blunt and decisive. e.g. 'طلا مقاومت کلیدی فلان را با شتاب شکسته است؛ حد سود را به ۲۳۶۰ افزایش دهید.'",
-  "messageEn": "English version of the message"
+  "messageEn": "English version of the message",
+  "messageAr": "Arabic version of the message",
+  "messageTr": "Turkish version of the message"
 }
 `;
 
-      const result = await this.aiChatService.createResponse(promptMessage, 'fa');
+        const result = await this.aiChatService.createResponse(promptMessage, 'fa', { temperature: 0.1 });
 
-      let cleanText = result.text.trim();
-      if (cleanText.startsWith('```')) {
-        cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
-      }
-
-      const copilotResponse = JSON.parse(cleanText);
-      const recommendationType = copilotResponse.recommendation;
-
-      if (!recommendationType || recommendationType === 'none') {
-        await this.signalModel.findByIdAndUpdate(signal._id, {
-          lastAiCheckedAt: new Date(),
-          lastAiCheckedPrice: currentPrice,
-        });
-
-        // Update in-memory cache timestamps
-        const cached = this.signalCache.get(signal._id.toString());
-        if (cached) {
-          cached.lastAiCheckedAt = new Date();
-          cached.lastAiCheckedPrice = currentPrice;
+        let cleanText = result.text.trim();
+        if (cleanText.startsWith('```')) {
+          cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
         }
-        return;
+
+        let copilotResponse: any = null;
+        try {
+          copilotResponse = JSON.parse(cleanText);
+        } catch (e) {
+          this.logger.error(`Failed to parse AI Shield response JSON: ${cleanText}`);
+          continue;
+        }
+
+        const recommendationType = copilotResponse?.recommendation;
+
+        if (!recommendationType || recommendationType === 'none') {
+          continue;
+        }
+
+        // If this group contains the signal owner, we push the recommendation to the database
+        const isOwnerGroup = group.subs.some((sub) => sub.userId === ownerId);
+        if (isOwnerGroup) {
+          const newRec = {
+            type: recommendationType,
+            price: copilotResponse.price || currentPrice,
+            message: copilotResponse.messageFa,
+            applied: false,
+            createdAt: new Date(),
+          };
+
+          await this.signalModel.findByIdAndUpdate(signal._id, {
+            $push: { aiRecommendations: newRec },
+          });
+        }
+
+        // Dispatch notifications to subscribers in this group
+        for (const sub of group.subs) {
+          if (sub.gem < 100) continue;
+          if (!sub.notifAiShield) continue;
+
+          const isPersonal = signal.owner && (
+            (signal.owner as any)._id?.toString() === sub.userId || 
+            (signal.owner as any).id?.toString() === sub.userId || 
+            signal.owner.toString() === sub.userId
+          );
+
+          const lang = sub.language || 'fa';
+          
+          let message = copilotResponse.messageEn;
+          if (lang === 'fa') {
+            message = copilotResponse.messageFa;
+          } else if (lang === 'ar') {
+            message = copilotResponse.messageAr || copilotResponse.messageEn;
+          } else if (lang === 'tr') {
+            message = copilotResponse.messageTr || copilotResponse.messageEn;
+          }
+
+          const t = getTranslation(lang);
+          const alertTitle = `🛡️ ${t.pushNotifications.aiShieldTitle}`;
+
+          if (sub.telegramId) {
+            const signalInfo = formatSignalDetails(signal, lang);
+            const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n${signalInfo}`;
+            
+            const targetPrice = copilotResponse.price || currentPrice || 0;
+            const inlineKeyboard = isPersonal 
+              ? getCopilotInlineKeyboard(recommendationType, signal._id.toString(), targetPrice, lang)
+              : undefined;
+
+            await this.bot.telegram
+              .sendMessage(sub.telegramId, telegramMessage, {
+                parse_mode: 'HTML',
+                reply_markup: inlineKeyboard ? { inline_keyboard: inlineKeyboard } : undefined,
+              })
+              .catch((err) => {
+                this.logger.error(`Failed to send Telegram message to user ${sub.userId}:`, err);
+              });
+          }
+
+          // Deduct 3 Gems
+          await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -3 } }).exec();
+
+          // Log Gem deduction
+          await this.gemLogModel.create({
+            user: sub.userId,
+            gemsChange: -3,
+            gemsBefore: sub.gem,
+            gemsAfter: sub.gem - 3,
+            action: GemLogAction.SignalAnalyze,
+          });
+
+          sub.gem = sub.gem - 3;
+        }
       }
 
-      const newRec = {
-        type: recommendationType,
-        price: copilotResponse.price || currentPrice,
-        message: copilotResponse.messageFa,
-        applied: false,
-        createdAt: new Date(),
-      };
-
+      // Always update last checked timestamps on the signal document and cache
       await this.signalModel.findByIdAndUpdate(signal._id, {
-        $push: { aiRecommendations: newRec },
         lastAiCheckedAt: new Date(),
         lastAiCheckedPrice: currentPrice,
       });
 
-      // Update in-memory cache timestamps
       const cached = this.signalCache.get(signal._id.toString());
       if (cached) {
         cached.lastAiCheckedAt = new Date();
         cached.lastAiCheckedPrice = currentPrice;
       }
-
-      // Dispatch notifications to subscribers
-      for (const sub of subscriptions) {
-        // Double check gems in cache (requires 3 gems now)
-        if (sub.gem < 100) continue;
-        // Skip if user has disabled AI Shield notifications
-        if (!sub.notifAiShield) continue;
-
-        const isPersonal = signal.owner && (
-          (signal.owner as any)._id?.toString() === sub.userId || 
-          (signal.owner as any).id?.toString() === sub.userId || 
-          signal.owner.toString() === sub.userId
-        );
-
-        const lang = sub.language || 'fa';
-        const message = lang === 'fa' ? copilotResponse.messageFa : copilotResponse.messageEn;
-        const t = getTranslation(lang);
-        const alertTitle = `🛡️ ${t.pushNotifications.aiShieldTitle}`;
-
-        // 1. Send via WebPush (Disabled - Telegram active)
-        /*
-        const pushPayload = JSON.stringify({
-          title: alertTitle,
-          body: `${message}\n\nPrice: $${currentPrice.toFixed(2)}`,
-          icon: '/assets/icons/icon-192x192.png',
-          data: { url: `/signals/${signal._id}` },
-        });
-        await this.webPushService.sendNotificationToUser(sub.userId, pushPayload);
-        */
-
-        // 2. Send via Telegram Bot
-        if (sub.telegramId) {
-          const signalInfo = formatSignalDetails(signal, lang);
-          const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n${signalInfo}`;
-          
-          const targetPrice = copilotResponse.price || currentPrice || 0;
-          const inlineKeyboard = isPersonal 
-            ? getCopilotInlineKeyboard(recommendationType, signal._id.toString(), targetPrice, lang)
-            : undefined;
-
-          await this.bot.telegram
-            .sendMessage(sub.telegramId, telegramMessage, {
-              parse_mode: 'HTML',
-              reply_markup: inlineKeyboard ? { inline_keyboard: inlineKeyboard } : undefined,
-            })
-            .catch((err) => {
-              this.logger.error(`Failed to send Telegram message to user ${sub.userId}:`, err);
-            });
-        }
-
-        // 3. Deduct 3 Gems
-        await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -3 } }).exec();
-
-        // 4. Log Gem deduction
-        await this.gemLogModel.create({
-          user: sub.userId,
-          gemsChange: -3,
-          gemsBefore: sub.gem,
-          gemsAfter: sub.gem - 3,
-          action: GemLogAction.SignalAnalyze,
-        });
-
-        // 5. Deduct from local cache gem count
-        sub.gem = sub.gem - 3;
-      }
     } catch (error) {
       this.logger.error(`Error in evaluateSignalWithAI for signal ${signal._id}:`, error);
     }
   }
+
 
   // Handle follow notifications
   private async notifyFollowers(signal: Signal, state: 'active' | 'closed' | 'canceled') {

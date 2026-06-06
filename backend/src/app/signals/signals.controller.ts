@@ -6,6 +6,8 @@ import {
   SignalSource,
   SignalStatus,
   User,
+  TradingStyle,
+  RiskTolerance,
 } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
@@ -166,8 +168,17 @@ export class SignalsController {
   }
 
   @Post('analyze')
-  async analyzeSignal(@Body() signal: Signal, @LoginUser() user: User) {
-    const res = await this.signalService.analyzeSignal(signal, user.id || (user as any)._id);
+  async analyzeSignal(
+    @Body() signal: Signal,
+    @Query('tradingStyle') tradingStyle: TradingStyle,
+    @Query('riskTolerance') riskTolerance: RiskTolerance,
+    @LoginUser() user: User,
+  ) {
+    const res = await this.signalService.analyzeSignal(
+      signal,
+      user.id || (user as any)._id,
+      { tradingStyle, riskTolerance },
+    );
     if (res && res.signal) {
       res.signal = this.sanitizeSignal(res.signal);
     }
@@ -175,8 +186,15 @@ export class SignalsController {
   }
 
   @Post('generate')
-  async generateSignal(@LoginUser() user: User) {
-    return this.signalService.generateSignal(user.id || (user as any)._id);
+  async generateSignal(
+    @Query('tradingStyle') tradingStyle: TradingStyle,
+    @Query('riskTolerance') riskTolerance: RiskTolerance,
+    @LoginUser() user: User,
+  ) {
+    return this.signalService.generateSignal(
+      user.id || (user as any)._id,
+      { tradingStyle, riskTolerance },
+    );
   }
 
   @Delete(':id')

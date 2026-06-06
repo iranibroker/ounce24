@@ -1,0 +1,74 @@
+<h2 mat-dialog-title>{{ data.title | translate }}</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (data.description) {
+    <p class="description-text">{{ data.description | translate }}</p>
+  }
+
+  <div class="settings-group">
+    <label class="group-label">{{ 'aiSettings.tradingStyle.label' | translate }}</label>
+    <mat-button-toggle-group 
+      [(ngModel)]="tradingStyle" 
+      [ngModelOptions]="{standalone: true}"
+      class="modern-toggle-group"
+    >
+      <mat-button-toggle [value]="TradingStyle.Scalp">
+        {{ 'aiSettings.tradingStyle.SCALP_SHORT' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle [value]="TradingStyle.Day">
+        {{ 'aiSettings.tradingStyle.DAY_SHORT' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle [value]="TradingStyle.Swing">
+        {{ 'aiSettings.tradingStyle.SWING_SHORT' | translate }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    
+    <div class="selected-desc-box">
+      @if (tradingStyle === TradingStyle.Scalp) {
+        {{ 'aiSettings.tradingStyle.SCALP_DESC' | translate }}
+      } @else if (tradingStyle === TradingStyle.Day) {
+        {{ 'aiSettings.tradingStyle.DAY_DESC' | translate }}
+      } @else if (tradingStyle === TradingStyle.Swing) {
+        {{ 'aiSettings.tradingStyle.SWING_DESC' | translate }}
+      }
+    </div>
+    <span class="group-hint">{{ 'aiSettings.tradingStyle.hint' | translate }}</span>
+  </div>
+
+  <div class="settings-group">
+    <label class="group-label">{{ 'aiSettings.riskTolerance.label' | translate }}</label>
+    <mat-button-toggle-group 
+      [(ngModel)]="riskTolerance" 
+      [ngModelOptions]="{standalone: true}"
+      class="modern-toggle-group"
+    >
+      <mat-button-toggle [value]="RiskTolerance.Conservative">
+        {{ 'aiSettings.riskTolerance.CONSERVATIVE_SHORT' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle [value]="RiskTolerance.Moderate">
+        {{ 'aiSettings.riskTolerance.MODERATE_SHORT' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle [value]="RiskTolerance.Aggressive">
+        {{ 'aiSettings.riskTolerance.AGGRESSIVE_SHORT' | translate }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <div class="selected-desc-box">
+      @if (riskTolerance === RiskTolerance.Conservative) {
+        {{ 'aiSettings.riskTolerance.CONSERVATIVE_DESC' | translate }}
+      } @else if (riskTolerance === RiskTolerance.Moderate) {
+        {{ 'aiSettings.riskTolerance.MODERATE_DESC' | translate }}
+      } @else if (riskTolerance === RiskTolerance.Aggressive) {
+        {{ 'aiSettings.riskTolerance.AGGRESSIVE_DESC' | translate }}
+      }
+    </div>
+    <span class="group-hint">{{ 'aiSettings.riskTolerance.hint' | translate }}</span>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="cancel()">{{ 'app.cancel' | translate }}</button>
+  <button mat-flat-button color="primary" (click)="confirm()">
+    {{ data.confirmLabel | translate }}
+  </button>
+</mat-dialog-actions>

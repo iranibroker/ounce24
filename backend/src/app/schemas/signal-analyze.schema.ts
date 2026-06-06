@@ -1,4 +1,4 @@
-import { SignalAnalyze } from '@ounce24/types';
+import { SignalAnalyze, TradingStyle, RiskTolerance } from '@ounce24/types';
 import mongoose from 'mongoose';
 
 export const SignalAnalyzeSchema = new mongoose.Schema<SignalAnalyze>(
@@ -10,6 +10,17 @@ export const SignalAnalyzeSchema = new mongoose.Schema<SignalAnalyze>(
     totalTokens: { type: Number, required: true, default: 0 },
     prompt: { type: String, required: false },
     model: { type: String, required: false },
+    tradingStyle: {
+      type: String,
+      enum: Object.values(TradingStyle),
+      required: false,
+    },
+    riskTolerance: {
+      type: String,
+      enum: Object.values(RiskTolerance),
+      required: false,
+    },
+    language: { type: String, required: false },
   },
   {
     timestamps: true,

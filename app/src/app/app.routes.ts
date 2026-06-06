@@ -13,6 +13,7 @@ import { AvatarEditComponent } from './pages/profile/avatar-edit/avatar-edit.com
 import { PodcastListComponent } from './pages/podcast/podcast-list/podcast-list.component';
 import { MenuComponent } from './pages/menu/menu.component';
 import { NotificationSettingsComponent } from './pages/notifications/notification-settings.component';
+import { AiSettingsComponent } from './pages/profile/ai-settings/ai-settings.component';
 
 export const appRoutes: Route[] = [
   {
@@ -69,6 +70,11 @@ export const appRoutes: Route[] = [
           {
             path: 'edit',
             component: EditUserComponent,
+            canActivate: [loginActivator],
+          },
+          {
+            path: 'ai-settings',
+            component: AiSettingsComponent,
             canActivate: [loginActivator],
           },
           {

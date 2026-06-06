@@ -1,0 +1,92 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px 24px;
+  min-width: 280px;
+}
+
+.description-text {
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant, rgba(255, 255, 255, 0.7));
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+
+  .group-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface, #ffffff);
+  }
+
+  .group-hint {
+    font-size: 12px;
+    color: var(--mat-sys-outline, rgba(255, 255, 255, 0.5));
+    line-height: 1.4;
+  }
+
+  .selected-desc-box {
+    font-size: 13px;
+    color: var(--mat-sys-primary, #ffd254);
+    background-color: rgba(255, 210, 84, 0.08);
+    border-left: 3px solid var(--mat-sys-primary, #ffd254);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 4px;
+    line-height: 1.5;
+    animation: dialogFadeIn 0.25s ease-out;
+
+    :host-context([dir="rtl"]) & {
+      border-left: none;
+      border-right: 3px solid var(--mat-sys-primary, #ffd254);
+    }
+  }
+
+  @keyframes dialogFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modern-toggle-group {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+
+    mat-button-toggle {
+      flex: 1;
+      text-align: center;
+      background: transparent;
+      border: none;
+      color: var(--mat-sys-on-surface, rgba(255, 255, 255, 0.8));
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 4px 0;
+
+      &.mat-button-toggle-checked {
+        background-color: var(--mat-sys-primary, #6200ee);
+        color: var(--mat-sys-on-primary, #ffffff);
+      }
+    }
+  }
+}
+
+.dialog-actions {
+  padding: 8px 24px 24px 24px;
+  gap: 8px;
+}

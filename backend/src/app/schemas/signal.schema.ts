@@ -43,6 +43,7 @@ export const SignalSchema = new mongoose.Schema<Signal>(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    generationAnalysis: { type: String, required: false },
   },
   {
     timestamps: true,

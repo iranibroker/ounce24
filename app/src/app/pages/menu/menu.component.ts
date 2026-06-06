@@ -11,7 +11,8 @@ import {
   saxNotificationOutline, 
   saxDocumentDownloadOutline, 
   saxGlobalOutline, 
-  saxLogoutOutline 
+  saxLogoutOutline,
+  saxCpuOutline
 } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { PushNotificationService } from '../../services/push-notification.service';
@@ -40,6 +41,7 @@ import { SHARED } from '../../shared';
       saxGlobalOutline,
       saxLogoutOutline,
       saxDiamondsBold,
+      saxCpuOutline,
     }),
   ],
   templateUrl: './menu.component.html',

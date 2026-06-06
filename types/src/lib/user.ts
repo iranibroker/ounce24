@@ -1,3 +1,15 @@
+export enum TradingStyle {
+  Scalp = 'SCALP',
+  Day = 'DAY',
+  Swing = 'SWING',
+}
+
+export enum RiskTolerance {
+  Conservative = 'CONSERVATIVE',
+  Moderate = 'MODERATE',
+  Aggressive = 'AGGRESSIVE',
+}
+
 export class User {
   _id: any;
   id: string;
@@ -7,6 +19,9 @@ export class User {
   name: string;
 
   title: string;
+
+  tradingStyle?: TradingStyle;
+  riskTolerance?: RiskTolerance;
 
   avatar?: string;
 
