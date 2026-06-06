@@ -1,4 +1,11 @@
-import { Component, computed, inject, input, signal, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -17,10 +24,10 @@ import { OuncePriceService } from '../../services/ounce-price.service';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    SHARED
+    SHARED,
   ],
   templateUrl: './volume-calculator.component.html',
-  styleUrls: ['./volume-calculator.component.scss']
+  styleUrls: ['./volume-calculator.component.scss'],
 })
 export class VolumeCalculatorComponent implements OnInit {
   private readonly ouncePrice = inject(OuncePriceService);
@@ -41,17 +48,23 @@ export class VolumeCalculatorComponent implements OnInit {
   // Computations ensuring safe numeric fallback
   entryPrice = computed(() => {
     const custom = this.customEntryPrice();
-    return custom !== null && custom !== undefined && !isNaN(custom) ? custom : this.signal().entryPrice;
+    return custom !== null && custom !== undefined && !isNaN(custom)
+      ? custom
+      : this.signal().entryPrice;
   });
 
   takeProfit = computed(() => {
     const custom = this.customTakeProfit();
-    return custom !== null && custom !== undefined && !isNaN(custom) ? custom : this.signal().profit;
+    return custom !== null && custom !== undefined && !isNaN(custom)
+      ? custom
+      : this.signal().profit;
   });
 
   stopLoss = computed(() => {
     const custom = this.customStopLoss();
-    return custom !== null && custom !== undefined && !isNaN(custom) ? custom : this.signal().loss;
+    return custom !== null && custom !== undefined && !isNaN(custom)
+      ? custom
+      : this.signal().loss;
   });
 
   // Constants: Gold Contract Size (1 Lot XAU/USD = 100 ounces)
@@ -73,8 +86,8 @@ export class VolumeCalculatorComponent implements OnInit {
     const entry = Number(this.entryPrice()) || 0;
     const tp = Number(this.takeProfit()) || 0;
     const isSell = this.signal().type === SignalType.Sell;
-    
-    const diff = isSell ? (entry - tp) : (tp - entry);
+
+    const diff = isSell ? entry - tp : tp - entry;
     return vol * this.CONTRACT_SIZE * diff;
   });
 
@@ -84,8 +97,8 @@ export class VolumeCalculatorComponent implements OnInit {
     const entry = Number(this.entryPrice()) || 0;
     const sl = Number(this.stopLoss()) || 0;
     const isSell = this.signal().type === SignalType.Sell;
-    
-    const diff = isSell ? (sl - entry) : (entry - sl);
+
+    const diff = isSell ? sl - entry : entry - sl;
     return vol * this.CONTRACT_SIZE * diff;
   });
 
@@ -96,7 +109,7 @@ export class VolumeCalculatorComponent implements OnInit {
     const curPrice = Number(this.currentPrice()) || 0;
     const isSell = this.signal().type === SignalType.Sell;
 
-    const diff = isSell ? (entry - curPrice) : (curPrice - entry);
+    const diff = isSell ? entry - curPrice : curPrice - entry;
     return vol * this.CONTRACT_SIZE * diff;
   });
 
@@ -148,14 +161,14 @@ export class VolumeCalculatorComponent implements OnInit {
     const entry = Number(this.entryPrice()) || 0;
     const margin = this.requiredMargin();
     const isSell = this.signal().type === SignalType.Sell;
-    
+
     if (bal <= 0 || vol <= 0 || entry <= 0 || margin <= 0) return null;
-    
+
     const stopOutLevel = 0.5; // 50% stop out is extremely common in gold/forex
-    const maxAllowedLoss = bal - (margin * stopOutLevel);
+    const maxAllowedLoss = bal - margin * stopOutLevel;
     const priceMovement = maxAllowedLoss / (vol * this.CONTRACT_SIZE);
-    
-    const liq = isSell ? (entry + priceMovement) : (entry - priceMovement);
+
+    const liq = isSell ? entry + priceMovement : entry - priceMovement;
     return liq > 0 ? Number(liq.toFixed(2)) : 0;
   });
 
@@ -165,9 +178,9 @@ export class VolumeCalculatorComponent implements OnInit {
     const sl = Number(this.stopLoss()) || 0;
     const entry = Number(this.entryPrice()) || 0;
     const isSell = this.signal().type === SignalType.Sell;
-    
+
     if (!liq || sl <= 0 || entry <= 0) return false;
-    
+
     if (isSell) {
       // Sell: loses when price rises. If liquidation price is below or equal to SL, it triggers first
       return liq <= sl;
@@ -182,12 +195,12 @@ export class VolumeCalculatorComponent implements OnInit {
     const bal = this.balance();
     const entry = Number(this.entryPrice()) || 0;
     const sl = Number(this.stopLoss()) || 0;
-    
+
     if (!bal || bal <= 0 || entry <= 0 || sl <= 0) return null;
-    
+
     const slDistance = Math.abs(entry - sl);
     if (slDistance <= 0) return null;
-    
+
     const allowedRiskAmount = bal * 0.02; // 2% risk rule
     const vol = allowedRiskAmount / (slDistance * this.CONTRACT_SIZE);
     return Number(vol.toFixed(3));

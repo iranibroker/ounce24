@@ -58,7 +58,7 @@ export class LanguageService {
         if (tgUser && tgUser.language_code) {
           const tgLang = tgUser.language_code.split('-')[0].toLowerCase();
           if (this.supportedLanguages.some((lang) => lang.code === tgLang)) {
-            this.setLanguage(tgLang, false);
+            this.setLanguage(tgLang, true, true);
             return;
           }
         }
