@@ -3,3 +3,7 @@
   <router-outlet />
 </main>
 <app-bottom-navigation />
+
+@if (tourService.showTour()) {
+  <app-product-tour (completed)="onTourComplete()" />
+}

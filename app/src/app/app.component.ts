@@ -69,29 +69,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
   onOnboardingComplete() {
     localStorage.setItem('ounce24_onboarded', 'true');
+    localStorage.setItem('ounce24_needs_tour', 'true');
     this.showOnboarding = false;
   }
 
   checkAndStartPushTimer() {
-    const isLoggedIn = !!this.authService.token();
-    const isLoginPage = this.router.url.includes('/login');
-
-    if (isLoggedIn && !isLoginPage) {
-      if (
-        !this.pushTimer &&
-        this.pwaService.isPwaSupported() &&
-        !this.pwaService.hasAskedBefore()
-      ) {
-        this.pushTimer = setTimeout(() => {
-          this.showPwaInstallPrompt();
-        }, 20000);
-      }
-    } else {
-      if (this.pushTimer) {
-        clearTimeout(this.pushTimer);
-        this.pushTimer = null;
-      }
-    }
+    // Automatic PWA prompt is disabled to prevent clashing with the App Guide.
+    // Installation is triggered manually from the menu.
   }
 
   showPwaInstallPrompt() {

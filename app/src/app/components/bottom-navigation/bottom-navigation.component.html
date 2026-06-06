@@ -1,17 +1,17 @@
 <mat-toolbar dir="ltr">
-  <a mat-button routerLink="/signals" routerLinkActive #rlaSignals="routerLinkActive">
+  <a mat-button routerLink="/signals" routerLinkActive #rlaSignals="routerLinkActive" id="tour-tab-signals">
     <div class="nav-item-wrapper">
       <ng-icon [name]="rlaSignals.isActive ? 'saxActivityBold' : 'saxActivityOutline'" size="24px"></ng-icon>
       {{ 'bottomNav.signals' | translate }}
     </div>
   </a>
-  <a mat-button routerLink="/market" routerLinkActive #rlaMarket="routerLinkActive">
+  <a mat-button routerLink="/market" routerLinkActive #rlaMarket="routerLinkActive" id="tour-tab-market">
     <div class="nav-item-wrapper">
       <ng-icon [name]="rlaMarket.isActive ? 'saxCandle2Bold' : 'saxCandle2Outline'" size="24px"></ng-icon>
       {{ 'bottomNav.market' | translate }}
     </div>
   </a>
-  <a mat-button routerLink="/leaderboard" routerLinkActive #rlaLeaderboard="routerLinkActive">
+  <a mat-button routerLink="/leaderboard" routerLinkActive #rlaLeaderboard="routerLinkActive" id="tour-tab-leaderboard">
     <div class="nav-item-wrapper">
       <ng-icon [name]="rlaLeaderboard.isActive ? 'saxCupBold' : 'saxCupOutline'" size="24px"></ng-icon>
       {{ 'bottomNav.leaderboard' | translate }}

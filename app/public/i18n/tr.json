@@ -17,7 +17,9 @@
   },
   "menu": {
     "pageTitle": "Menü",
-    "viewProfile": "Profili Görüntüle"
+    "viewProfile": "Profili Görüntüle",
+    "downloadApp": "Uygulamayı İndir",
+    "downloadAppDesc": "Ounce24'ü doğrudan ana ekranınıza yükleyin"
   },
   "podcast": {
     "comingSoon": {
@@ -501,5 +503,31 @@
         "color": "blue"
       }
     ]
+  },
+  "productTour": {
+    "skip": "Geç",
+    "next": "İleri",
+    "prev": "Geri",
+    "finish": "Tur Bitir",
+    "dialog": {
+      "title": "Ounce24 Kullanıcı Kılavuzu",
+      "subtitle": "Uygulamanın temel özelliklerini hızlı bir görsel turla incelemek ister misiniz?",
+      "start": "Evet, Turu Başlat",
+      "later": "Daha Sonra"
+    },
+    "steps": {
+      "signals": {
+        "title": "İşlem Sinyalleri",
+        "description": "Ounce24'ün kalbi; kendi sinyallerinizi paylaşın, diğer yatırımcıları takip edin ve yapay zeka ile analiz edin."
+      },
+      "market": {
+        "title": "Piyasa ve Canlı Grafikler",
+        "description": "Bu sekmede gerçek zamanlı altın fiyatlarını, canlı etkileşimli grafikleri ve teknik göstergeleri kontrol edin."
+      },
+      "leaderboard": {
+        "title": "Rekabet ve Liderlik Tablosu",
+        "description": "Diğer yatırımcılarla rekabet edin, haftalık/genel liderlik tablolarında yükselin ve kazanılan başarıları inceleyin."
+      }
+    }
   }
 }

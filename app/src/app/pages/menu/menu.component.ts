@@ -12,13 +12,16 @@ import {
   saxDocumentDownloadOutline, 
   saxGlobalOutline, 
   saxLogoutOutline,
-  saxCpuOutline
+  saxCpuOutline,
+  saxTeacherOutline
 } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { PushNotificationService } from '../../services/push-notification.service';
 import { LanguageService } from '../../services/language.service';
 import { AuthService } from '../../services/auth.service';
 import { LanguageSelectionModalComponent } from '../../components/language-selection-modal/language-selection-modal.component';
+import { PwaService } from '../../services/pwa.service';
+import { PwaInstallDialogComponent } from '../../components/pwa-install-dialog/pwa-install-dialog.component';
 import { environment } from '../../../environments/environment';
 import { SHARED } from '../../shared';
 
@@ -42,6 +45,7 @@ import { SHARED } from '../../shared';
       saxLogoutOutline,
       saxDiamondsBold,
       saxCpuOutline,
+      saxTeacherOutline,
     }),
   ],
   templateUrl: './menu.component.html',
@@ -51,8 +55,24 @@ export class MenuComponent {
   public readonly auth = inject(AuthService);
   public readonly pushService = inject(PushNotificationService);
   public readonly languageService = inject(LanguageService);
+  public readonly pwaService = inject(PwaService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+
+  showPwaInstallPrompt() {
+    const dialogRef = this.dialog.open(PwaInstallDialogComponent, {
+      width: '400px',
+      maxWidth: '95vw',
+      panelClass: 'push-notification-dialog-panel',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((accept: boolean) => {
+      if (accept) {
+        this.pwaService.install();
+      }
+    });
+  }
 
   downloadChartData(format: 'csv' | 'json') {
     const url = `${environment.apiUrl}/api/ounce-price/history?format=${format}`;

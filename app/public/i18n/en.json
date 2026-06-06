@@ -17,7 +17,9 @@
   },
   "menu": {
     "pageTitle": "Menu",
-    "viewProfile": "View Profile"
+    "viewProfile": "View Profile",
+    "downloadApp": "Download App",
+    "downloadAppDesc": "Install Ounce24 directly on your home screen"
   },
   "podcast": {
     "comingSoon": {
@@ -515,5 +517,31 @@
         "color": "blue"
       }
     ]
+  },
+  "productTour": {
+    "skip": "Skip",
+    "next": "Next",
+    "prev": "Prev",
+    "finish": "Finish",
+    "dialog": {
+      "title": "Ounce24 User Guide",
+      "subtitle": "Would you like to take a quick visual tour of the application's key features?",
+      "start": "Yes, Start Tour",
+      "later": "Maybe Later"
+    },
+    "steps": {
+      "signals": {
+        "title": "Trading Signals",
+        "description": "The core of Ounce24; post your own trading signals, follow other traders, and analyze them with AI."
+      },
+      "market": {
+        "title": "Market & Live Charts",
+        "description": "Check real-time spot gold prices, live interactive charts, and technical indicators in this tab."
+      },
+      "leaderboard": {
+        "title": "Competition & Leaderboard",
+        "description": "Compete with other traders, climb the weekly/all-time leaderboards, and check earned achievements."
+      }
+    }
   }
 }

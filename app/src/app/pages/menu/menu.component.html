@@ -82,6 +82,25 @@
     </mat-card-content>
   </mat-card>
 
+  @if (pwaService.isPwaSupported()) {
+    <mat-card class="settings-card clickable-card" (click)="showPwaInstallPrompt()">
+      <mat-card-content>
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="icon-container download-app-icon-container">
+              <ng-icon name="saxDocumentDownloadOutline" size="20px"></ng-icon>
+            </div>
+            <div class="settings-texts">
+              <h3>{{ 'menu.downloadApp' | translate }}</h3>
+              <p>{{ 'menu.downloadAppDesc' | translate }}</p>
+            </div>
+          </div>
+          <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
   <mat-card class="settings-card clickable-card" (click)="openLanguageSelection()">
     <mat-card-content>
       <div class="settings-row">

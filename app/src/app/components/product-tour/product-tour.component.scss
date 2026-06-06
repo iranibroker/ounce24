@@ -1,0 +1,237 @@
+.tour-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: auto; // Blocks clicks to the rest of the application
+  background-color: transparent;
+  overflow: hidden;
+  font-family: 'Estedad', sans-serif !important;
+
+  * {
+    font-family: inherit !important;
+  }
+
+  &.rtl {
+    direction: rtl;
+
+    .prev-arrow {
+      transform: scaleX(-1) !important;
+    }
+    .next-arrow {
+      transform: none !important;
+    }
+  }
+
+  &:not(.rtl) {
+    direction: ltr;
+
+    .prev-arrow {
+      transform: none !important;
+    }
+    .next-arrow {
+      transform: scaleX(-1) !important;
+    }
+  }
+}
+
+// Spotlight window with massive box-shadow backdrop cutout
+.tour-spotlight {
+  position: fixed;
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(12, 12, 14, 0.85);
+  border: 2px solid #fbbf24;
+  z-index: 10000;
+  pointer-events: none; // Allows clicks to pass if needed, though overlay blocks them
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+
+  // Pulse ring animation around spotlight
+  .pulse-ring {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid rgba(251, 191, 36, 0.4);
+    border-radius: 16px;
+    opacity: 0;
+    animation: tour-pulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  }
+}
+
+@keyframes tour-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.08);
+    opacity: 0;
+  }
+}
+
+// Spotlight Popover Tooltip
+.tour-popover {
+  position: fixed;
+  background: rgba(24, 24, 28, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  box-sizing: border-box;
+  z-index: 10001;
+  pointer-events: auto; // Make popover controls clickable
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 16px;
+    height: 16px;
+    background: rgba(24, 24, 28, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+  }
+
+  // Adjust arrow position in RTL layout
+  .rtl &::after {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%) rotate(45deg);
+  }
+}
+
+.popover-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .popover-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .popover-desc {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+  }
+}
+
+.popover-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  width: 100%;
+
+  .spacer {
+    flex: 1;
+  }
+
+  .skip-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+
+  .prev-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  }
+
+  .next-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.finish-btn {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #000000;
+      border: none;
+      box-shadow: 0 4px 10px rgba(251, 191, 36, 0.25);
+
+      &:hover {
+        box-shadow: 0 6px 14px rgba(251, 191, 36, 0.35);
+      }
+    }
+  }
+}
+
+// Fade/Scale animations
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

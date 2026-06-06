@@ -1,0 +1,46 @@
+<div class="tour-overlay" [class.rtl]="isRTL">
+  <!-- The highlighted spotlight window -->
+  <div class="tour-spotlight" [ngStyle]="spotlightStyle()">
+    <div class="pulse-ring"></div>
+  </div>
+
+  <!-- Popover card above the tab -->
+  <div class="tour-popover animate-scale-in" [ngStyle]="popoverStyle()">
+    <div class="popover-content">
+      <h3 class="popover-title">
+        {{ steps[activeStep()].translationKey + '.title' | translate }}
+      </h3>
+      <p class="popover-desc">
+        {{ steps[activeStep()].translationKey + '.description' | translate }}
+      </p>
+    </div>
+
+    <div class="popover-actions">
+      @if (activeStep() < steps.length - 1) {
+        <button class="skip-btn" (click)="finish()">
+          {{ 'productTour.skip' | translate }}
+        </button>
+      } @else {
+        <div class="spacer"></div>
+      }
+
+      <div class="nav-buttons">
+        @if (activeStep() > 0) {
+          <button class="nav-btn prev-btn" (click)="prev()">
+            <ng-icon name="saxArrowLeftOutline" class="arrow-icon prev-arrow" size="14px"></ng-icon>
+            <span>{{ 'productTour.prev' | translate }}</span>
+          </button>
+        }
+
+        <button class="nav-btn next-btn" [class.finish-btn]="activeStep() === steps.length - 1" (click)="next()">
+          @if (activeStep() === steps.length - 1) {
+            <span>{{ 'productTour.finish' | translate }}</span>
+          } @else {
+            <span>{{ 'productTour.next' | translate }}</span>
+            <ng-icon name="saxArrowLeftOutline" class="arrow-icon next-arrow" size="14px"></ng-icon>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

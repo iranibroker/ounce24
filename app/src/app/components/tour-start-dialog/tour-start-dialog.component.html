@@ -1,0 +1,17 @@
+<div class="dialog-wrapper" [dir]="isRTL ? 'rtl' : 'ltr'">
+  <h2 class="dialog-header">
+    <ng-icon name="saxTeacherOutline" class="gold-icon" size="24px"></ng-icon>
+    <span>{{ 'productTour.dialog.title' | translate }}</span>
+  </h2>
+  <div class="dialog-content">
+    <p class="dialog-subtitle">{{ 'productTour.dialog.subtitle' | translate }}</p>
+  </div>
+  <div class="dialog-actions">
+    <button mat-button class="cancel-btn" (click)="decline()">
+      {{ 'productTour.dialog.later' | translate }}
+    </button>
+    <button mat-flat-button class="confirm-btn" (click)="accept()">
+      {{ 'productTour.dialog.start' | translate }}
+    </button>
+  </div>
+</div>
