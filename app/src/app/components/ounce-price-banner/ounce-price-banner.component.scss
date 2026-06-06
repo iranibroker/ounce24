@@ -38,3 +38,37 @@
     }
   }
 }
+
+.market-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+  color: #ef4444; // closed: red
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #ef4444; // closed: red
+    flex-shrink: 0;
+  }
+
+  &.open {
+    color: #22c55e; // open: green
+
+    .dot {
+      background-color: #22c55e;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+

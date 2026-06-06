@@ -18,6 +18,12 @@
       </span>
     </span>
     <span style="flex: 1"></span>
+    @if (!priceService.isMarketOpen()) {
+      <span class="market-badge">
+        <span class="dot"></span>
+        <span class="badge-text">{{ 'octopus.marketClosed' | translate }}</span>
+      </span>
+    }
     <ng-icon name="saxExport3Outline" size="16px"></ng-icon>
   </mat-toolbar>
 </a>
