@@ -55,3 +55,10 @@
     <p class="error-message">{{ errorMessage() | translate }}</p>
   }
 </div>
+
+@if (loading()) {
+  <div class="loading-overlay">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="loading-text">{{ 'login.telegram.logging_in' | translate }}</p>
+  </div>
+}

@@ -67,13 +67,18 @@ export class AuthService {
     if (user) return user;
 
     if (data?.username) {
-      user = await this.userModel.findOne({ telegramUsername: data.username });
-      if (user) {
+      const escapedUsername = data.username.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      user = await this.userModel.findOne({
+        telegramUsername: { $regex: new RegExp(`^${escapedUsername}$`, 'i') },
+      });
+      if (user && (!user.telegramId || user.telegramId === telegramId)) {
         user.telegramId = telegramId;
         if (data.first_name) user.name = [data.first_name, data.last_name].filter(Boolean).join(' ');
-        if (data.username) user.telegramUsername = data.username;
+        user.telegramUsername = data.username;
         await user.save();
         return user;
+      } else {
+        user = null;
       }
     }
 
@@ -324,10 +329,15 @@ export class AuthService {
 
     if (!user) {
       if (data.username) {
-        user = await this.userModel.findOne({ telegramUsername: data.username });
-        if (user) {
+        const escapedUsername = data.username.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        user = await this.userModel.findOne({
+          telegramUsername: { $regex: new RegExp(`^${escapedUsername}$`, 'i') },
+        });
+        if (user && (!user.telegramId || user.telegramId === telegramId)) {
           user.telegramId = telegramId;
           await user.save();
+        } else {
+          user = null;
         }
       }
     }
@@ -389,12 +399,15 @@ export class AuthService {
     if (!user) {
       // Try to find by username if available, though telegramId is safer
       if (telegramUser.username) {
+        const escapedUsername = telegramUser.username.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         user = await this.userModel.findOne({
-          telegramUsername: telegramUser.username,
+          telegramUsername: { $regex: new RegExp(`^${escapedUsername}$`, 'i') },
         });
-        if (user) {
+        if (user && (!user.telegramId || user.telegramId === telegramId)) {
           user.telegramId = telegramId;
           await user.save();
+        } else {
+          user = null;
         }
       }
     }

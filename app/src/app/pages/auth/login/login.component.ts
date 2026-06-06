@@ -157,7 +157,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   showGoogleSignIn(): boolean {
-    return !!environment.googleClientId;
+    return false;
   }
 
   ngAfterViewInit(): void {
