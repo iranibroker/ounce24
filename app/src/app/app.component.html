@@ -1,1 +1,5 @@
-<app-shell />
+@if (showOnboarding) {
+  <app-onboarding (completed)="onOnboardingComplete()" />
+} @else {
+  <app-shell />
+}

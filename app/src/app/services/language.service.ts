@@ -40,6 +40,15 @@ export class LanguageService {
 
   private initializeLanguage(): void {
     if (isPlatformBrowser(this.platformId)) {
+      // Check query parameters first (e.g. ?lang=fa)
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryLang = urlParams.get('lang');
+
+      if (queryLang && this.supportedLanguages.some((lang) => lang.code === queryLang)) {
+        this.setLanguage(queryLang, false);
+        return;
+      }
+
       const storedLanguage = this.getStoredLanguage();
       if (storedLanguage && this.supportedLanguages.some((lang) => lang.code === storedLanguage)) {
         this.setLanguage(storedLanguage, false);

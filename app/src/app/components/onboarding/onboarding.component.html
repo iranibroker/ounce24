@@ -1,0 +1,84 @@
+<div class="onboarding-overlay" [class.rtl]="isRTL">
+  <div class="glow-bg">
+    <div class="glow-sphere sphere-1"></div>
+    <div class="glow-sphere sphere-2"></div>
+  </div>
+
+  <div class="header-container">
+    <div class="header-left"></div>
+    <div class="header-center">
+      <img src="images/logo.svg" alt="Ounce24 Logo" class="onboarding-logo" />
+    </div>
+    <div class="header-right">
+      @if (activeSlide() < slides().length - 1) {
+        <button class="skip-btn" (click)="finish()">
+          {{ 'introTour.skip' | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="slides-container">
+    @for (slide of slides(); track $index; let i = $index) {
+      @if (activeSlide() === i) {
+        <div class="slide-card animate-fade-in">
+          <div class="icon-wrapper" [ngClass]="slide.color">
+            <ng-icon [name]="slide.icon" size="36px"></ng-icon>
+          </div>
+          <h1 class="slide-title">{{ slide.title }}</h1>
+          
+          @let parsed = parseDescription(slide.description);
+          <p class="slide-description">{{ parsed.intro }}</p>
+          
+          @if (parsed.items.length > 0) {
+            <ul class="slide-list">
+              @for (item of parsed.items; track $index) {
+                <li class="slide-list-item">
+                  <span class="bullet-icon" [ngClass]="slide.color">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                  <span class="item-text">{{ item }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <div class="footer-controls">
+    <div class="dots-indicator">
+      @for (slide of slides(); track $index; let i = $index) {
+        <span 
+          class="dot" 
+          [class.active]="activeSlide() === i"
+          (click)="setSlide(i)"
+        ></span>
+      }
+    </div>
+
+    <div class="buttons-row">
+      @if (activeSlide() > 0) {
+        <button class="nav-btn prev-btn" (click)="prevSlide()">
+          <ng-icon name="saxArrowLeftOutline" class="arrow-icon prev-arrow" size="18px"></ng-icon>
+          <span>{{ 'introTour.prev' | translate }}</span>
+        </button>
+      } @else {
+        <!-- Invisible spacer to keep Next button aligned when Prev is hidden -->
+        <div class="spacer"></div>
+      }
+
+      <button class="nav-btn next-btn" [class.finish-btn]="activeSlide() === slides().length - 1" (click)="nextSlide()">
+        @if (activeSlide() === slides().length - 1) {
+          <span>{{ 'introTour.start' | translate }}</span>
+        } @else {
+          <span>{{ 'introTour.next' | translate }}</span>
+          <ng-icon name="saxArrowLeftOutline" class="arrow-icon next-arrow" size="18px"></ng-icon>
+        }
+      </button>
+    </div>
+  </div>
+</div>

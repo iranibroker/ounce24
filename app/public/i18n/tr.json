@@ -457,5 +457,49 @@
     "bearish": "Ayı (Satıcı)",
     "consolidating": "Yatay (Kararsız)",
     "chart": "Canlı Grafik"
+  },
+  "introTour": {
+    "skip": "Geç",
+    "next": "İleri",
+    "prev": "Geri",
+    "start": "Başlayalım!",
+    "slides": [
+      {
+        "title": "Altın Yatırımcıları için Sosyal ve Eğitim Ağı",
+        "description": "Ounce24, üst düzey altın yatırımcıları için özel bir sosyal ağ ve eğitim platformudur. Seçkinlerden bilgi edinin ve piyasa analizlerinizi paylaşın.",
+        "icon": "saxHomeOutline",
+        "color": "amber"
+      },
+      {
+        "title": "İşlem Sinyalleri ve Sosyal Ağ",
+        "description": "Bu platformda herkes sinyal yayınlayabilir ve bunlar sistem tarafından otomatik olarak izlenir:\n• En başarılı yatırımcıları takip edin ve istatistiklerini kontrol edin\n• Anlık durum güncellemeleri almak için sinyalleri yer imlerine ekleyin\n• Gerçek zamanlı kazanma oranlarına, ortalama risk-ödül oranlarına ve canlı kayıtlara erişin",
+        "icon": "saxActivityOutline",
+        "color": "blue"
+      },
+      {
+        "title": "Gelişmiş Yapay Zeka Analitiği ve Araçları",
+        "description": "Ounce24 yapay zeka asistanı işlemlerinizin her adımında size eşlik eder:\n• İşleme girmeden önce akıllı sinyal analizi\n• Takip eden zarar durdurma ve en uygun çıkış uyarıları için Yapay Zeka Akıllı Kalkan (AI Shield)\n• Yapay zeka tarafından üretilen yüksek doğruluklu özel sinyaller alın",
+        "icon": "lucideSparkles",
+        "color": "purple"
+      },
+      {
+        "title": "Canlı Piyasa Analizi ve İnteraktif Grafikler",
+        "description": "Doğrudan uygulamada gerçek zamanlı teknik analiz ve piyasa trendlerine erişin:\n• Spot altın fiyatlarının etkileşimli canlı grafiklerini görüntüleyin\n• Kritik destek ve direnç seviyelerini ve göstergeleri otomatik olarak takip edin\n• Çeşitli zaman dilimlerinde trend yönlerini ve hareketli ortalamaları kontrol edin",
+        "icon": "saxTrendUpOutline",
+        "color": "green"
+      },
+      {
+        "title": "Yarışmalar, Madalyalar ve GEM Ödülleri",
+        "description": "İşlemlerinizi geliştirin, sıralamalarda yükselin ve performansınız için GEM kazanın:\n• Gerçek istatistiklere dayalı haftalık ve genel liderlik tablolarında yarışın\n• Yıldız kazanmak için Ahtapot yön tahmin oyununu oynayın\n• Özel başarıların kilidini açın ve GEM ödülleri kazanın",
+        "icon": "saxCupOutline",
+        "color": "red"
+      },
+      {
+        "title": "Gelişmiş İşlem Hesap Makinesi",
+        "description": "Pozisyon açmadan önce hassas değişkenleri hesaplayarak işlem riskinizi en aza indirin:\n• Hesap bakiyenizin %2 risk toleransına göre otomatik lot büyüklüğü hesaplama\n• TP/SL seviyeleri için tam kâr ve zarar hesaplamaları\n• Gerekli teminat ve tahmini likidasyon fiyatı çıktısı",
+        "icon": "saxClockOutline",
+        "color": "blue"
+      }
+    ]
   }
 }

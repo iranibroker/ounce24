@@ -44,6 +44,7 @@ import {
   saxPercentageCircleOutline,
 } from '@ng-icons/iconsax/outline';
 import { simpleTelegram } from '@ng-icons/simple-icons';
+import { lucideSparkles } from '@ng-icons/lucide';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -82,6 +83,7 @@ export const appConfig: ApplicationConfig = {
       saxAddOutline,
       saxPercentageCircleOutline,
       simpleTelegram,
+      lucideSparkles,
     }),
   ],
 };

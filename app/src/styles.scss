@@ -21,7 +21,7 @@ html {
   @include mat.theme(
     (
       color: theme.$primary,
-      typography: 'Vazir Code',
+      typography: 'Estedad',
       density: -2,
     )
   );
@@ -30,7 +30,7 @@ html {
     @include mat.theme(
       (
         color: theme.$tertiary,
-        typography: 'Vazir Code',
+        typography: 'Estedad',
         density: -2,
       )
     );
@@ -40,7 +40,7 @@ html {
     @include mat.theme(
       (
         color: theme.$error,
-        typography: 'Vazir Code',
+        typography: 'Estedad',
         density: -2,
       )
     );
@@ -54,15 +54,14 @@ body {
 }
 body {
   margin: 0;
-  font-family: 'Vazir Code', monospace;
+  font-family: 'Estedad', sans-serif;
   background: #121212 !important;
   color: #f5f5f5 !important;
 }
 
 html[dir='rtl'] {
   i.rtl,
-  ng-icon.rtl,
-  :not(body).rtl {
+  ng-icon.rtl {
     transform: rotate(180deg) !important;
   }
 }

@@ -11,14 +11,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { PwaService } from './services/pwa.service';
 import { PwaInstallDialogComponent } from './components/pwa-install-dialog/pwa-install-dialog.component';
 
+import { OnboardingComponent } from './components/onboarding/onboarding.component';
+
 @Component({
-  imports: [ShellComponent],
+  imports: [ShellComponent, OnboardingComponent],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'app';
+  showOnboarding = false;
   private telegramService = inject(TelegramService);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -37,6 +40,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Check onboarding status
+    const onboarded = localStorage.getItem('ounce24_onboarded');
+    this.showOnboarding = onboarded !== 'true';
+
     // Always re-authenticate when in Telegram Mini App - user may have switched
     // accounts; localStorage would still have the previous JWT otherwise.
     if (this.telegramService.isTelegramApp) {
@@ -58,6 +65,11 @@ export class AppComponent implements OnInit, OnDestroy {
     });
     // Trigger initial check in case user is already logged in on startup
     this.checkAndStartPushTimer();
+  }
+
+  onOnboardingComplete() {
+    localStorage.setItem('ounce24_onboarded', 'true');
+    this.showOnboarding = false;
   }
 
   checkAndStartPushTimer() {
