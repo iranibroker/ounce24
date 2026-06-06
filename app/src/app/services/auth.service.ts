@@ -123,6 +123,23 @@ export class AuthService {
     },
   }));
 
+  // Telegram OIDC Login mutation – returns { token, user } from backend
+  telegramOidcLoginMutation = injectMutation<
+    { token: string; user: User },
+    Error,
+    { code: string; redirectUri: string }
+  >(() => ({
+    mutationFn: (payload) =>
+      this.http
+        .post<{ token: string; user: User }>(`/api/auth/telegram-oidc-login`, payload)
+        .toPromise()
+        .then((res) => res!),
+    onSuccess: async (response) => {
+      await this.saveToken(response.token);
+      return response;
+    },
+  }));
+
   userQuery = injectQuery<User | null>(() => ({
     queryKey: ['user', this.token()],
     queryFn: () => {

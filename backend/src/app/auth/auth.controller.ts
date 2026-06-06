@@ -33,6 +33,12 @@ export class AuthController {
   }
 
   @Public()
+  @Post('telegram-oidc-login')
+  async telegramOidcLogin(@Body() body: { code: string; redirectUri: string }) {
+    return this.auth.telegramOidcLogin(body.code, body.redirectUri);
+  }
+
+  @Public()
   @Post('google-login')
   async googleLogin(@Body() body: { idToken?: string; credential?: string }) {
     const token = body.idToken ?? body.credential;

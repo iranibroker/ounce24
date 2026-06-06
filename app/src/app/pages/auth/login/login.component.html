@@ -16,7 +16,10 @@
     
     <div class="buttons-layout">
       <!-- Telegram Button -->
-      <div #telegramButtonContainer id="telegram-button-container"></div>
+      <button mat-flat-button class="telegram-oidc-btn" (click)="onTelegramOidcClick()">
+        <ng-icon name="simpleTelegram" size="20px" class="telegram-icon"></ng-icon>
+        <span>{{ 'login.loginWithTelegram' | translate }}</span>
+      </button>
     </div>
   </div>
 

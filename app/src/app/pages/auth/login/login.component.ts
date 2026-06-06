@@ -1,12 +1,12 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
+import { simpleTelegram } from '@ng-icons/simple-icons';
 import {
   Component,
   ElementRef,
   inject,
   viewChild,
-  NgZone,
-  AfterViewInit,
+  OnInit,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -40,12 +40,13 @@ import { environment } from '../../../../environments/environment';
   providers: [
     provideIcons({
       saxArrowLeftOutline,
+      simpleTelegram,
     }),
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements OnInit {
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -53,50 +54,41 @@ export class LoginComponent implements AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private analyticsService = inject(AnalyticsService);
-  private ngZone = inject(NgZone);
-
-  telegramButtonContainer = viewChild<ElementRef<HTMLElement>>(
-    'telegramButtonContainer'
-  );
 
   constructor(public languageService: LanguageService) {}
 
-  ngAfterViewInit(): void {
-    this.renderTelegramButton();
+  ngOnInit() {
+    // Handle Telegram OIDC Callback if code parameter exists
+    const code = this.route.snapshot.queryParams['code'];
+    if (code) {
+      this.handleTelegramOidcCallback(code);
+    }
   }
 
-  private renderTelegramButton(): void {
-    const container = this.telegramButtonContainer()?.nativeElement;
-    const botName = environment.telegramBotName;
-    if (!container || !botName) return;
-
-    container.innerHTML = '';
-
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', botName);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-radius', '12');
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.setAttribute('data-request-access', 'write');
-    script.async = true;
-
-    (window as any).onTelegramAuth = (user: any) => {
-      this.ngZone.run(() => this.handleTelegramWidgetAuth(user));
-    };
-
-    container.appendChild(script);
+  onTelegramOidcClick(): void {
+    const clientId = environment.telegramOidcClientId;
+    if (!clientId) {
+      this.errorMessage.set('login.telegram.error');
+      return;
+    }
+    const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
+    const state = Math.random().toString(36).substring(2, 15);
+    const scope = encodeURIComponent('openid profile');
+    const oidcUrl = `https://oauth.telegram.org/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+    window.location.href = oidcUrl;
   }
 
-  private async handleTelegramWidgetAuth(user: any): Promise<void> {
+  private async handleTelegramOidcCallback(code: string): Promise<void> {
     this.loading.set(true);
     this.errorMessage.set(null);
     try {
-      await this.auth.telegramWidgetLoginMutation.mutateAsync(user);
-      this.analyticsService.trackEvent('login', { method: 'telegram_widget' });
+      const redirectUri = window.location.origin + window.location.pathname;
+      await this.auth.telegramOidcLoginMutation.mutateAsync({ code, redirectUri });
+      this.analyticsService.trackEvent('login', { method: 'telegram_oidc' });
       const returnPath = this.route.snapshot.queryParams?.['returnPath'];
       this.router.navigate([returnPath || '/'], { replaceUrl: true });
-    } catch {
+    } catch (err) {
+      console.error('Telegram OIDC login error:', err);
       this.errorMessage.set('login.telegram.error');
     } finally {
       this.loading.set(false);

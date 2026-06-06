@@ -101,6 +101,7 @@
     "phonePlaceholder": "9123456789",
     "phoneAction": "Send verification code",
     "loginWithGoogle": "Login with Google",
+    "loginWithTelegram": "Log In with Telegram",
     "loginWithPhone": "Login with phone",
     "or": "or",
     "chooseDescription": "Choose how you want to sign in",

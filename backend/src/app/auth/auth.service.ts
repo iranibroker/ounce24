@@ -12,13 +12,15 @@ import { User, Follow } from '@ounce24/types';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
-import { createHash, createHmac } from 'crypto';
+import { createHash, createHmac, createPublicKey } from 'crypto';
+import * as jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 let kavenegarApi;
 
 @Injectable()
 export class AuthService {
   mobilePhoneTokens: { [key: string]: string } = {};
+  private cachedBotUsername: string | null = null;
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Follow.name) private followModel: Model<Follow>,
@@ -468,6 +470,169 @@ export class AuthService {
     return {
       token: this.login(user),
       user: user
+    };
+  }
+
+  async getBotUsername(): Promise<string> {
+    if (this.cachedBotUsername) return this.cachedBotUsername;
+    if (process.env.TELEGRAM_BOT_NAME) {
+      this.cachedBotUsername = process.env.TELEGRAM_BOT_NAME;
+      return this.cachedBotUsername;
+    }
+    const token = process.env.BOT_TOKEN;
+    if (!token) {
+      throw new BadRequestException('BOT_TOKEN is not configured');
+    }
+    try {
+      const res = await this.http.get(`https://api.telegram.org/bot${token}/getMe`).toPromise();
+      const username = res?.data?.result?.username;
+      if (!username) {
+        throw new BadRequestException('Failed to retrieve bot username from Telegram API');
+      }
+      this.cachedBotUsername = username;
+      return username;
+    } catch (e: any) {
+      console.error('Failed to get bot username from Telegram:', e.message);
+      throw new BadRequestException('Failed to get bot username from Telegram API');
+    }
+  }
+
+  async telegramOidcLogin(code: string, redirectUri: string) {
+    const clientId = process.env.TELEGRAM_OIDC_CLIENT_ID;
+    const clientSecret = process.env.TELEGRAM_OIDC_CLIENT_SECRET;
+    if (!clientId || !clientSecret) {
+      throw new BadRequestException('Telegram OIDC Client ID or Client Secret is not configured');
+    }
+
+    // Exchange authorization code for tokens
+    const params = new URLSearchParams();
+    params.append('grant_type', 'authorization_code');
+    params.append('code', code);
+    params.append('redirect_uri', redirectUri);
+    params.append('client_id', clientId);
+
+    const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+    let tokenResponse;
+    try {
+      const res = await this.http
+        .post('https://oauth.telegram.org/token', params.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${authHeader}`,
+          },
+        })
+        .toPromise();
+      tokenResponse = res?.data;
+    } catch (e: any) {
+      console.error('Telegram OIDC token exchange failed:', e?.response?.data || e.message);
+      throw new BadRequestException('Failed to exchange code for Telegram token');
+    }
+
+    const idToken = tokenResponse?.id_token;
+    if (!idToken) {
+      throw new BadRequestException('id_token is missing from token response');
+    }
+
+    // Decode JWT header to extract kid
+    const decodedJwt = jwt.decode(idToken, { complete: true }) as any;
+    if (!decodedJwt?.header?.kid) {
+      throw new BadRequestException('Invalid ID token format: missing kid');
+    }
+    const kid = decodedJwt.header.kid;
+    const alg = decodedJwt.header.alg;
+
+    // Fetch Telegram JWKS public keys
+    let keys;
+    try {
+      const jwksRes = await this.http.get('https://oauth.telegram.org/.well-known/jwks.json').toPromise();
+      keys = jwksRes?.data?.keys || [];
+    } catch (e: any) {
+      console.error('Failed to fetch Telegram JWKS:', e.message);
+      throw new BadRequestException('Failed to fetch Telegram JWKS');
+    }
+
+    const jwk = keys.find((key: any) => key.kid === kid);
+    if (!jwk) {
+      throw new BadRequestException(`Key with kid ${kid} not found in Telegram JWKS`);
+    }
+
+    // Import JWK and verify signature and claims
+    let payload: any;
+    try {
+      const publicKey = createPublicKey({
+        key: jwk,
+        format: 'jwk',
+      });
+      payload = jwt.verify(idToken, publicKey, {
+        algorithms: [alg],
+        audience: clientId,
+        issuer: 'https://oauth.telegram.org',
+      }) as any;
+    } catch (e: any) {
+      console.error('Telegram OIDC ID token validation failed:', e.message);
+      throw new BadRequestException('Invalid Telegram ID token signature');
+    }
+
+    if (!payload?.sub) {
+      throw new BadRequestException('Invalid Telegram ID token: missing sub');
+    }
+
+    const telegramId = Number(payload.sub);
+    const fullName = payload.name;
+    const username = payload.preferred_username;
+    const photo_url = payload.picture;
+
+    let user = await this.userModel.findOne({ telegramId });
+
+    if (!user && username) {
+      const escapedUsername = username.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      user = await this.userModel.findOne({
+        telegramUsername: { $regex: new RegExp(`^${escapedUsername}$`, 'i') },
+      });
+      if (user && (!user.telegramId || user.telegramId === telegramId)) {
+        user.telegramId = telegramId;
+        await user.save();
+      } else {
+        user = null;
+      }
+    }
+
+    if (!user) {
+      const title = sanitizeUserTitle(fullName || username) || `u${String(telegramId).slice(-6)}`;
+      user = await this.userModel.create({
+        telegramId,
+        name: fullName || `User ${telegramId}`,
+        telegramUsername: username,
+        avatar: photo_url,
+        avatarSource: photo_url ? 'telegram' : 'bitbots',
+        title,
+      });
+    } else {
+      let updated = false;
+      if (fullName && user.name !== fullName) {
+        user.name = fullName;
+        updated = true;
+      }
+      if (username && user.telegramUsername !== username) {
+        user.telegramUsername = username;
+        updated = true;
+      }
+      if (
+        photo_url &&
+        (!user.avatarSource || user.avatarSource === 'telegram') &&
+        user.avatar !== photo_url
+      ) {
+        user.avatar = photo_url;
+        user.avatarSource = 'telegram';
+        updated = true;
+      }
+      if (updated) await user.save();
+    }
+
+    return {
+      token: this.login(user),
+      user,
     };
   }
 

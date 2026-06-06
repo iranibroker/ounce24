@@ -101,6 +101,7 @@
     "phonePlaceholder": "9123456789",
     "phoneAction": "إرسال رمز التحقق",
     "loginWithGoogle": "تسجيل الدخول عبر جوجل",
+    "loginWithTelegram": "تسجيل الدخول عبر تيليجرام",
     "loginWithPhone": "تسجيل الدخول بالهاتف",
     "or": "أو",
     "chooseDescription": "اختر طريقة تسجيل الدخول",

@@ -101,6 +101,7 @@
     "phonePlaceholder": "9123456789",
     "phoneAction": "Doğrulama Kodu Gönder",
     "loginWithGoogle": "Google ile Giriş Yap",
+    "loginWithTelegram": "Telegram ile Giriş Yap",
     "loginWithPhone": "Telefon ile Giriş Yap",
     "or": "veya",
     "chooseDescription": "Nasıl giriş yapmak istediğinizi seçin",

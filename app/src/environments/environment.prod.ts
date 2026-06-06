@@ -6,4 +6,5 @@ export const environment = {
   googleClientId:
     '11344143099-c1mu2t5lfk04ifi4shnnsohf9u84vtu3.apps.googleusercontent.com',
   telegramBotName: 'ounce24_bot',
+  telegramOidcClientId: '7018776603',
 };
