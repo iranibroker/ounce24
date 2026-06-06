@@ -12,6 +12,7 @@
     "profile": "Profil",
     "signals": "Sinyaller",
     "podcast": "Podcast",
+    "market": "Piyasa Analizi",
     "menu": "Menü"
   },
   "menu": {
@@ -427,5 +428,27 @@
     "description": "Bu işlem için işlem tarzını ve risk toleransını geçici olarak ayarlayabilirsiniz:",
     "confirmGenerate": "Yapay Zeka ile Oluştur",
     "confirmAnalyze": "Yapay Zeka ile Analiz Et"
+  },
+  "market": {
+    "pageTitle": "Yapay Zeka Piyasa Analizi",
+    "viewChart": "📈 Canlı Grafiği Göster",
+    "hideChart": "📉 Grafiği Gizle",
+    "currentPrice": "Anlık Altın Fiyatı",
+    "trends": "Trendler ve Hareketli Ortalamalar",
+    "indicators": "Teknik Göstergeler",
+    "levels": "Kritik Destek ve Direnç Seviyeleri",
+    "shortTerm": "Kısa Vadeli (15d)",
+    "longTerm": "Orta/Uzun Vadeli (1s & 4s)",
+    "trend": "Trend",
+    "above": "üzerinde",
+    "below": "altında",
+    "neutral": "Nötr",
+    "overbought": "Aşırı Alım",
+    "oversold": "Aşırı Satım",
+    "loading": "Piyasa verileri alınıyor...",
+    "bullish": "Boğa (Alıcı)",
+    "bearish": "Ayı (Satıcı)",
+    "consolidating": "Yatay (Kararsız)",
+    "chart": "Canlı Grafik"
   }
 }

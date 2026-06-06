@@ -22,7 +22,7 @@ import { AiChatService } from '../ai-chat/ai-chat.service';
 import { WebPushService } from '../web-push/web-push.service';
 import { SignalsService, getStyleInstructions } from './signals.service';
 import { getTranslation } from '../bot/i18n';
-import { analyzeMarketState } from './market-analyzer.helper';
+import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
 
 
 interface CachedSubscription {
@@ -428,7 +428,10 @@ export class SignalCopilotService implements OnModuleInit {
 
       const ownerId = signal.owner ? ((signal.owner as any)._id || (signal.owner as any).id || (signal.owner as any)).toString() : '';
 
-      // Group active subscriptions by their unique tradingStyle and riskTolerance combination
+      // Group active subscriptions by their unique riskTolerance (tradingStyle is auto-detected per signal)
+      const targetDistance = Math.abs(tp - entryPrice);
+      const style = detectTradingStyle(targetDistance, marketState.atr1h);
+
       const groups = new Map<string, {
         style: TradingStyle;
         risk: RiskTolerance;
@@ -436,9 +439,8 @@ export class SignalCopilotService implements OnModuleInit {
       }>();
 
       for (const sub of subscriptions) {
-        const style = sub.tradingStyle || TradingStyle.Day;
         const risk = sub.riskTolerance || RiskTolerance.Moderate;
-        const key = `${style}_${risk}`;
+        const key = `${risk}`;
         if (!groups.has(key)) {
           groups.set(key, { style, risk, subs: [] });
         }

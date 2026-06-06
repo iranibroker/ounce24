@@ -113,6 +113,7 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
         confirmLabel: 'aiSettingsDialog.confirmAnalyze',
         tradingStyle: currentStyle,
         riskTolerance: currentRisk,
+        hideTradingStyle: true,
       },
     });
 

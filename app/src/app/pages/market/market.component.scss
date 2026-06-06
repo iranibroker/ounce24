@@ -1,0 +1,389 @@
+.market-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  padding-bottom: 72px;
+  max-width: 600px;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+
+  // Active chart tab layout overrides (Full-Screen)
+  &.chart-active {
+    padding: 0;
+    max-width: 100%;
+    height: calc(100vh - 32px - 64px); // exact space between gold price banner and bottom nav
+    gap: 0;
+
+    .market-header {
+      padding: 12px 16px 12px 16px;
+      margin-bottom: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(18, 18, 18, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .chart-fullscreen {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #131722;
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+    }
+  }
+}
+
+.market-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+
+  mat-button-toggle-group {
+    border-radius: 20px !important;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    height: 36px;
+    align-items: center;
+
+    mat-button-toggle {
+      font-size: 0.8rem !important;
+      font-weight: 600 !important;
+      border: none !important;
+      color: rgba(255, 255, 255, 0.6) !important;
+
+      &.mat-button-toggle-checked {
+        background-color: rgba(255, 255, 255, 0.12) !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+}
+
+// Spot Price Card Styling
+.price-card {
+  text-align: center;
+  padding: 16px 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+
+  .price-label {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .price-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffb300; // Gold spot price
+    font-family: 'Vazir Code', monospace;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 10px rgba(255, 179, 0, 0.25));
+
+    .currency {
+      font-size: 1.4rem;
+      margin-inline-end: 4px;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+  }
+}
+
+// Standard Dashboard Cards
+.dashboard-card {
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+
+  mat-card-title {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    color: #f5f5f5 !important;
+  }
+
+  .header-icon {
+    margin-inline-end: 8px;
+  }
+}
+
+// Trends Grid
+.trend-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.trend-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+
+  .timeframe {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .trend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+
+    &.bullish {
+      background-color: rgba(76, 175, 80, 0.12);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    &.bearish {
+      background-color: rgba(244, 67, 54, 0.12);
+      color: #f44336;
+      border: 1px solid rgba(244, 67, 54, 0.2);
+    }
+
+    &.consolidating {
+      background-color: rgba(255, 179, 0, 0.12);
+      color: #ffb300;
+      border: 1px solid rgba(255, 179, 0, 0.2);
+    }
+  }
+
+  .sma-detail {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 4px;
+
+    .direction {
+      font-size: 0.75rem;
+      font-weight: 500;
+
+      &.up {
+        color: #4caf50;
+      }
+
+      &.down {
+        color: #f44336;
+      }
+    }
+  }
+}
+
+// Indicator Grid
+.indicator-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+    gap: 24px;
+  }
+}
+
+.indicator-group {
+  flex: 1;
+
+  h3 {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.indicator-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .ind-label {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .ind-value-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ind-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: 'Vazir Code', monospace;
+  }
+
+  .ind-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    &.overbought {
+      background-color: rgba(244, 67, 54, 0.15);
+      color: #ef5350;
+    }
+
+    &.oversold {
+      background-color: rgba(76, 175, 80, 0.15);
+      color: #66bb6a;
+    }
+
+    &.neutral {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+// Support & Resistance Levels
+.levels-container {
+  width: 100%;
+}
+
+.level-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 440px) {
+    flex-direction: row;
+    gap: 24px;
+  }
+}
+
+.level-sub-group {
+  flex: 1;
+
+  .level-header-title {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .level-value {
+    font-family: 'Vazir Code', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    text-align: center;
+  }
+
+  &.resistances {
+    .level-value {
+      border-inline-start: 4px solid #ef5350;
+      color: #ef5350;
+    }
+  }
+
+  &.supports {
+    .level-value {
+      border-inline-start: 4px solid #66bb6a;
+      color: #66bb6a;
+    }
+  }
+}
+
+.text-red {
+  color: #ef5350;
+}
+
+.text-green {
+  color: #66bb6a;
+}
+
+.no-levels {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+// Animations
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pulse {
+  animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    filter: drop-shadow(0 0 10px rgba(255, 179, 0, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(255, 179, 0, 0.45));
+  }
+  100% {
+    filter: drop-shadow(0 0 10px rgba(255, 179, 0, 0.25));
+  }
+}
+
+.hidden {
+  display: none !important;
+}

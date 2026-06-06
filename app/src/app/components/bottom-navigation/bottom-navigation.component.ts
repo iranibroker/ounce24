@@ -1,6 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxHomeOutline, saxActivityOutline, saxCupOutline, saxMicrophoneOutline, saxNotificationOutline, saxMenu1Outline } from '@ng-icons/iconsax/outline';
-import { saxActivityBold, saxCupBold, saxMenu1Bold } from '@ng-icons/iconsax/bold';
+import { saxHomeOutline, saxActivityOutline, saxCupOutline, saxMicrophoneOutline, saxNotificationOutline, saxMenu1Outline, saxCandle2Outline } from '@ng-icons/iconsax/outline';
+import { saxActivityBold, saxCupBold, saxMenu1Bold, saxCandle2Bold } from '@ng-icons/iconsax/bold';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -19,9 +19,11 @@ import { AuthService } from '../../services/auth.service';
       saxMicrophoneOutline,
       saxNotificationOutline,
       saxMenu1Outline,
+      saxCandle2Outline,
       saxActivityBold,
       saxCupBold,
       saxMenu1Bold,
+      saxCandle2Bold,
     }),
   ],
   templateUrl: './bottom-navigation.component.html',

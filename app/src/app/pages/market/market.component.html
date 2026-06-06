@@ -1,0 +1,224 @@
+<div class="market-container" [class.chart-active]="activeTab() === 'chart'">
+  <!-- Header -->
+  <div class="market-header">
+    <mat-button-toggle-group [value]="activeTab()" (change)="setTab($event.value)" hideSingleSelectionIndicator>
+      <mat-button-toggle value="analysis">
+        {{ 'bottomNav.market' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle value="chart">
+        {{ 'market.chart' | translate }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <!-- Technical Dashboard (Analysis) -->
+  <div class="analysis-tab-content" [class.hidden]="activeTab() !== 'analysis'">
+    <!-- Loading State -->
+    @if (query.isLoading()) {
+      <app-data-loading></app-data-loading>
+    } @else {
+      @if (query.data(); as data) {
+        <!-- Spot Price Card -->
+        <mat-card class="price-card animate-fade-in">
+          <mat-card-content>
+            <div class="price-label">{{ 'market.currentPrice' | translate }}</div>
+            <div class="price-value pulse">
+              <span class="currency">$</span>{{ data.currentPrice | number:'1.2-2' }}
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Trends & Moving Averages Card -->
+        <mat-card class="dashboard-card animate-fade-in">
+          <mat-card-header>
+            <ng-icon name="saxTrendUpOutline" class="header-icon blue" size="24px"></ng-icon>
+            <mat-card-title>{{ 'market.trends' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="trend-grid">
+              <!-- 5m Trend -->
+              <div class="trend-item">
+                <span class="timeframe">5m ({{ 'aiSettings.tradingStyle.SCALP_SHORT' | translate }})</span>
+                <div class="trend-badge" [ngClass]="data.trend5m.toLowerCase()">
+                  <ng-icon
+                    [name]="data.trend5m === 'Bullish' ? 'saxTrendUpOutline' : (data.trend5m === 'Bearish' ? 'saxTrendDownOutline' : 'saxActivityOutline')"
+                    size="18px"
+                  ></ng-icon>
+                  <span>{{ 'market.' + data.trend5m.toLowerCase() | translate }}</span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA20: ${{ data.sma20_5m | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="data.currentPrice >= data.sma20_5m ? 'up' : 'down'">
+                    ({{ 'market.' + (data.currentPrice >= data.sma20_5m ? 'above' : 'below') | translate }} SMA20)
+                  </span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA50: ${{ data.sma50_5m | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="data.currentPrice >= data.sma50_5m ? 'up' : 'down'">
+                    ({{ 'market.' + (data.currentPrice >= data.sma50_5m ? 'above' : 'below') | translate }} SMA50)
+                  </span>
+                </div>
+              </div>
+
+              <!-- 15m Trend -->
+              <div class="trend-item">
+                <span class="timeframe">15m ({{ 'market.shortTerm' | translate }})</span>
+                <div class="trend-badge" [ngClass]="data.trend15m.toLowerCase()">
+                  <ng-icon
+                    [name]="data.trend15m === 'Bullish' ? 'saxTrendUpOutline' : (data.trend15m === 'Bearish' ? 'saxTrendDownOutline' : 'saxActivityOutline')"
+                    size="18px"
+                  ></ng-icon>
+                  <span>{{ 'market.' + data.trend15m.toLowerCase() | translate }}</span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA20: ${{ data.sma20_15m | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="data.currentPrice >= data.sma20_15m ? 'up' : 'down'">
+                    ({{ 'market.' + (data.currentPrice >= data.sma20_15m ? 'above' : 'below') | translate }} SMA20)
+                  </span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA50: ${{ data.sma50_15m | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="data.currentPrice >= data.sma50_15m ? 'up' : 'down'">
+                    ({{ 'market.' + (data.currentPrice >= data.sma50_15m ? 'above' : 'below') | translate }} SMA50)
+                  </span>
+                </div>
+              </div>
+
+              <!-- 1h Trend -->
+              <div class="trend-item">
+                <span class="timeframe">1h ({{ 'aiSettings.tradingStyle.DAY_SHORT' | translate }})</span>
+                <div class="trend-badge" [ngClass]="data.trend1h.toLowerCase()">
+                  <ng-icon
+                    [name]="data.trend1h === 'Bullish' ? 'saxTrendUpOutline' : (data.trend1h === 'Bearish' ? 'saxTrendDownOutline' : 'saxActivityOutline')"
+                    size="18px"
+                  ></ng-icon>
+                  <span>{{ 'market.' + data.trend1h.toLowerCase() | translate }}</span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA20: ${{ data.sma20_1h | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="data.currentPrice >= data.sma20_1h ? 'up' : 'down'">
+                    ({{ 'market.' + (data.currentPrice >= data.sma20_1h ? 'above' : 'below') | translate }} SMA20)
+                  </span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA50: ${{ data.sma50_1h | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="data.currentPrice >= data.sma50_1h ? 'up' : 'down'">
+                    ({{ 'market.' + (data.currentPrice >= data.sma50_1h ? 'above' : 'below') | translate }} SMA50)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Technical Indicators Card -->
+        <mat-card class="dashboard-card animate-fade-in">
+          <mat-card-header>
+            <ng-icon name="saxActivityOutline" class="header-icon blue" size="24px"></ng-icon>
+            <mat-card-title>{{ 'market.indicators' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="indicator-grid">
+              <!-- RSI Table/List -->
+              <div class="indicator-group">
+                <h3>RSI (14)</h3>
+                <div class="indicator-row">
+                  <span class="ind-label">5m RSI</span>
+                  <div class="ind-value-wrapper">
+                    <span class="ind-value">{{ data.rsi5m | number:'1.1-1' }}</span>
+                    <span class="ind-badge" [ngClass]="getRsiInterpretation(data.rsi5m)">
+                      {{ 'market.' + getRsiInterpretation(data.rsi5m) | translate }}
+                    </span>
+                  </div>
+                </div>
+                <div class="indicator-row">
+                  <span class="ind-label">15m RSI</span>
+                  <div class="ind-value-wrapper">
+                    <span class="ind-value">{{ data.rsi15m | number:'1.1-1' }}</span>
+                    <span class="ind-badge" [ngClass]="getRsiInterpretation(data.rsi15m)">
+                      {{ 'market.' + getRsiInterpretation(data.rsi15m) | translate }}
+                    </span>
+                  </div>
+                </div>
+                <div class="indicator-row">
+                  <span class="ind-label">1h RSI</span>
+                  <div class="ind-value-wrapper">
+                    <span class="ind-value">{{ data.rsi1h | number:'1.1-1' }}</span>
+                    <span class="ind-badge" [ngClass]="getRsiInterpretation(data.rsi1h)">
+                      {{ 'market.' + getRsiInterpretation(data.rsi1h) | translate }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Volatility (ATR) -->
+              <div class="indicator-group">
+                <h3>{{ 'market.indicators' | translate }} & Volatility</h3>
+                <div class="indicator-row">
+                  <span class="ind-label">5m ATR (Volatility)</span>
+                  <span class="ind-value">${{ data.atr5m | number:'1.2-2' }}</span>
+                </div>
+                <div class="indicator-row">
+                  <span class="ind-label">1h ATR (Volatility)</span>
+                  <span class="ind-value">${{ data.atr1h | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Key Support & Resistance Levels Card -->
+        <mat-card class="dashboard-card animate-fade-in">
+          <mat-card-header>
+            <ng-icon name="saxInfoCircleOutline" class="header-icon blue" size="24px"></ng-icon>
+            <mat-card-title>{{ 'market.levels' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="levels-container">
+              <!-- Support & Resistance Levels -->
+              <div class="level-group">
+                <div class="level-row">
+                  <div class="level-sub-group resistances">
+                    <span class="level-header-title text-red">Resistances (above price)</span>
+                    @if (data.keyResistances.length > 0) {
+                      <ul>
+                        @for (res of data.keyResistances; track $index) {
+                          <li class="level-value">${{ res | number:'1.2-2' }}</li>
+                        }
+                      </ul>
+                    } @else {
+                      <span class="no-levels">None</span>
+                    }
+                  </div>
+                  <div class="level-sub-group supports">
+                    <span class="level-header-title text-green">Supports (below price)</span>
+                    @if (data.keySupports.length > 0) {
+                      <ul>
+                        @for (sup of data.keySupports; track $index) {
+                          <li class="level-value">${{ sup | number:'1.2-2' }}</li>
+                        }
+                      </ul>
+                    } @else {
+                      <span class="no-levels">None</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  </div>
+
+  <!-- Fullscreen TradingView Chart -->
+  <div class="chart-fullscreen animate-fade-in" [class.hidden]="activeTab() !== 'chart'">
+    <iframe
+      src="https://s.tradingview.com/widgetembed/?symbol=FX%3AXAUUSD&theme=dark&interval=15&hidesidetoolbar=true&hidetoptoolbar=true&symboledit=0&saveimage=0"
+      frameborder="0"
+      allowtransparency="true"
+      scrolling="no"
+      allowfullscreen
+    ></iframe>
+  </div>
+</div>

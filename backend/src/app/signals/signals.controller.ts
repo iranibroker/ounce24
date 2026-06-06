@@ -103,6 +103,12 @@ export class SignalsController {
   }
 
   @Public()
+  @Get('market/state')
+  async getMarketState() {
+    return this.signalService.getMarketState();
+  }
+
+  @Public()
   @Get(':id')
   async getSignal(@Param('id') id: string) {
     const signal = await this.signalModel.findById(id).populate('owner', this.publicUserFields).exec();

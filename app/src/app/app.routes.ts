@@ -14,6 +14,7 @@ import { PodcastListComponent } from './pages/podcast/podcast-list/podcast-list.
 import { MenuComponent } from './pages/menu/menu.component';
 import { NotificationSettingsComponent } from './pages/notifications/notification-settings.component';
 import { AiSettingsComponent } from './pages/profile/ai-settings/ai-settings.component';
+import { MarketComponent } from './pages/market/market.component';
 
 export const appRoutes: Route[] = [
   {
@@ -58,6 +59,10 @@ export const appRoutes: Route[] = [
       {
         path: 'leaderboard',
         component: LeaderboardComponent,
+      },
+      {
+        path: 'market',
+        component: MarketComponent,
       },
       {
         path: 'profile',

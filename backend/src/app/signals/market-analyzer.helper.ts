@@ -1,4 +1,4 @@
-import { OuncePriceCandle } from '@ounce24/types';
+import { OuncePriceCandle, TradingStyle } from '@ounce24/types';
 
 export interface MarketStateSummary {
   currentPrice: number;
@@ -15,9 +15,21 @@ export interface MarketStateSummary {
   rsi15m: number;
   rsi1h: number;
   atr5m: number;
+  atr1h: number;
   keySupports: number[];
   keyResistances: number[];
   semanticText: string;
+}
+
+export function detectTradingStyle(targetDistance: number, atr1h: number): TradingStyle {
+  const vol = atr1h && atr1h > 0 ? atr1h : 4.0;
+  if (targetDistance <= 1.5 * vol) {
+    return TradingStyle.Scalp;
+  } else if (targetDistance <= 5.0 * vol) {
+    return TradingStyle.Day;
+  } else {
+    return TradingStyle.Swing;
+  }
 }
 
 export function calculateRSI(closes: number[], period = 14): number {
@@ -227,6 +239,7 @@ export function analyzeMarketState(
   const candles1h = aggregateTo1h(candles5m);
   const closes1h = candles1h.map((c) => c.close);
   const rsi1h = calculateRSI(closes1h, 14);
+  const atr1h = calculateATR(candles1h, 14);
   const sma20_1h = calculateSMA(closes1h, 20);
   const sma50_1h = calculateSMA(closes1h, 50);
 
@@ -286,6 +299,7 @@ export function analyzeMarketState(
 
   semanticText += `[Key Technical Indicators]\n`;
   semanticText += `- 5-minute Volatility (ATR 14): $${atr5m.toFixed(2)}\n`;
+  semanticText += `- 1-hour Volatility (ATR 14): $${atr1h.toFixed(2)}\n`;
   semanticText += `- 5m RSI (14): ${rsi5m.toFixed(2)}\n`;
   semanticText += `- 15m RSI (14): ${rsi15m.toFixed(2)}\n`;
   semanticText += `- 1h RSI (14): ${rsi1h.toFixed(2)}\n\n`;
@@ -330,6 +344,7 @@ export function analyzeMarketState(
     rsi15m,
     rsi1h,
     atr5m,
+    atr1h,
     keySupports,
     keyResistances,
     semanticText,

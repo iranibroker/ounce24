@@ -5,6 +5,12 @@
       {{ 'bottomNav.signals' | translate }}
     </div>
   </a>
+  <a mat-button routerLink="/market" routerLinkActive #rlaMarket="routerLinkActive">
+    <div class="nav-item-wrapper">
+      <ng-icon [name]="rlaMarket.isActive ? 'saxCandle2Bold' : 'saxCandle2Outline'" size="24px"></ng-icon>
+      {{ 'bottomNav.market' | translate }}
+    </div>
+  </a>
   <a mat-button routerLink="/leaderboard" routerLinkActive #rlaLeaderboard="routerLinkActive">
     <div class="nav-item-wrapper">
       <ng-icon [name]="rlaLeaderboard.isActive ? 'saxCupBold' : 'saxCupOutline'" size="24px"></ng-icon>

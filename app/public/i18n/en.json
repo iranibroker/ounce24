@@ -6,13 +6,14 @@
     "cancel": "Cancel"
   },
   "bottomNav": {
-    "home": "home",
-    "leaderboard": "leaderboard",
-    "notifications": "notifications",
-    "profile": "profile",
-    "signals": "signals",
-    "podcast": "podcast",
-    "menu": "menu"
+    "home": "Home",
+    "leaderboard": "Leaderboard",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "signals": "Signals",
+    "podcast": "Podcast",
+    "market": "Market",
+    "menu": "Menu"
   },
   "menu": {
     "pageTitle": "Menu",
@@ -433,5 +434,27 @@
     "description": "You can temporarily adjust the trading style and risk tolerance for this action:",
     "confirmGenerate": "Generate with AI",
     "confirmAnalyze": "Analyze with AI"
+  },
+  "market": {
+    "pageTitle": "AI Market Analyzer",
+    "viewChart": "📈 View Live Chart",
+    "hideChart": "📉 Hide Chart",
+    "currentPrice": "Gold Spot Price",
+    "trends": "Trends & Moving Averages",
+    "indicators": "Technical Indicators",
+    "levels": "Key Support & Resistance",
+    "shortTerm": "Short-Term (15m)",
+    "longTerm": "Medium/Long-Term (1h & 4h)",
+    "trend": "Trend",
+    "above": "above",
+    "below": "below",
+    "neutral": "Neutral",
+    "overbought": "Overbought",
+    "oversold": "Oversold",
+    "loading": "Fetching market data...",
+    "bullish": "Bullish",
+    "bearish": "Bearish",
+    "consolidating": "Consolidating",
+    "chart": "Live Chart"
   }
 }

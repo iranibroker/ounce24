@@ -25,7 +25,7 @@ import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { AiChatService } from '../ai-chat/ai-chat.service';
-import { analyzeMarketState } from './market-analyzer.helper';
+import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
 
 const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
   ? 3
@@ -396,14 +396,33 @@ export class SignalsService {
 
       const currentPrice = this.ouncePriceService.current;
       const userLang = user.language || 'fa';
-      const style = overrides?.tradingStyle || user.tradingStyle || TradingStyle.Day;
       const risk = overrides?.riskTolerance || user.riskTolerance || RiskTolerance.Moderate;
 
+      if (!user.gem || user.gem <= 0) {
+        throw new NotAcceptableException({
+          translationKey: 'insufficientGems',
+        });
+      }
+
+      // Fetch recent 5m candles from the past 30 days
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const candles5m = await this.candleModel.find({
+        timestamp: { $gte: thirtyDaysAgo }
+      }).sort({ timestamp: 1 }).exec();
+
+      if (candles5m.length === 0) {
+        throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
+      }
+
+      const marketState = analyzeMarketState(currentPrice, candles5m);
+
+      // Auto-detect trading style based on target distance relative to 1h ATR
+      const targetDistance = Math.abs(profit - entryPrice);
+      const style = detectTradingStyle(targetDistance, marketState.atr1h);
+
       // Check if we have a fresh generation analysis cached (less than 30 minutes old)
-      // Only bypass AI if overrides differ from the user's defaults.
       const isFresh = signal.createdAt ? (Date.now() - new Date(signal.createdAt).getTime() < 30 * 60 * 1000) : true;
-      const hasOverrides = (overrides?.tradingStyle && overrides.tradingStyle !== user.tradingStyle) || 
-                          (overrides?.riskTolerance && overrides.riskTolerance !== user.riskTolerance);
+      const hasOverrides = overrides?.riskTolerance && overrides.riskTolerance !== user.riskTolerance;
       if (signal.generationAnalysis && isFresh && !hasOverrides) {
         return {
           analysis: signal.generationAnalysis,
@@ -433,24 +452,6 @@ export class SignalsService {
           totalTokens: freshAnalyze.totalTokens || 0,
         };
       }
-
-      if (!user.gem || user.gem <= 0) {
-        throw new NotAcceptableException({
-          translationKey: 'insufficientGems',
-        });
-      }
-
-      // Fetch recent 5m candles from the past 30 days
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const candles5m = await this.candleModel.find({
-        timestamp: { $gte: thirtyDaysAgo }
-      }).sort({ timestamp: 1 }).exec();
-
-      if (candles5m.length === 0) {
-        throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
-      }
-
-      const marketState = analyzeMarketState(currentPrice, candles5m);
 
       const langConfig = {
         fa: {
@@ -769,6 +770,20 @@ Instructions for Output:
       .exec();
     this.eventEmitter.emit(EVENTS.SIGNAL_SUBSCRIPTION_UPDATED, populatedSub || savedSub);
     return populatedSub || savedSub;
+  }
+
+  async getMarketState() {
+    const currentPrice = this.ouncePriceService.current;
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const candles5m = await this.candleModel.find({
+      timestamp: { $gte: thirtyDaysAgo }
+    }).sort({ timestamp: 1 }).exec();
+
+    if (candles5m.length === 0) {
+      throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
+    }
+
+    return analyzeMarketState(currentPrice, candles5m);
   }
 }
 

@@ -13,6 +13,7 @@ export interface AiSettingsDialogData {
   confirmLabel: string;
   tradingStyle: TradingStyle;
   riskTolerance: RiskTolerance;
+  hideTradingStyle?: boolean;
 }
 
 @Component({
