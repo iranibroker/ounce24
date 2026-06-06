@@ -20,6 +20,29 @@ import {
 } from '@ng-icons/iconsax/outline';
 import { DataLoadingComponent } from '../../components/data-loading/data-loading.component';
 
+export interface SMCOrderBlock {
+  type: 'Bullish' | 'Bearish';
+  top: number;
+  bottom: number;
+  mitigated: boolean;
+  timeframe: '15m' | '1h';
+}
+
+export interface SMCFairValueGap {
+  type: 'Bullish' | 'Bearish';
+  top: number;
+  bottom: number;
+  mitigated: boolean;
+  timeframe: '15m' | '1h';
+}
+
+export interface SMCMarketStructure {
+  type: 'BOS' | 'CHoCH';
+  direction: 'Bullish' | 'Bearish';
+  price: number;
+  timeframe: '15m' | '1h';
+}
+
 export interface MarketStateSummary {
   currentPrice: number;
   trend5m: 'Bullish' | 'Bearish' | 'Consolidating';
@@ -39,6 +62,9 @@ export interface MarketStateSummary {
   keySupports: number[];
   keyResistances: number[];
   semanticText: string;
+  smcOrderBlocks: SMCOrderBlock[];
+  smcFVGs: SMCFairValueGap[];
+  marketStructure: SMCMarketStructure[];
 }
 
 @Component({

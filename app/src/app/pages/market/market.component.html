@@ -31,7 +31,6 @@
         <!-- Trends & Moving Averages Card -->
         <mat-card class="dashboard-card animate-fade-in">
           <mat-card-header>
-            <ng-icon name="saxTrendUpOutline" class="header-icon blue" size="24px"></ng-icon>
             <mat-card-title>{{ 'market.trends' | translate }}</mat-card-title>
           </mat-card-header>
           <mat-card-content>
@@ -62,7 +61,7 @@
 
               <!-- 15m Trend -->
               <div class="trend-item">
-                <span class="timeframe">15m ({{ 'market.shortTerm' | translate }})</span>
+                <span class="timeframe">15m ({{ 'aiSettings.tradingStyle.DAY_SHORT' | translate }})</span>
                 <div class="trend-badge" [ngClass]="data.trend15m.toLowerCase()">
                   <ng-icon
                     [name]="data.trend15m === 'Bullish' ? 'saxTrendUpOutline' : (data.trend15m === 'Bearish' ? 'saxTrendDownOutline' : 'saxActivityOutline')"
@@ -86,7 +85,7 @@
 
               <!-- 1h Trend -->
               <div class="trend-item">
-                <span class="timeframe">1h ({{ 'aiSettings.tradingStyle.DAY_SHORT' | translate }})</span>
+                <span class="timeframe">1h ({{ 'aiSettings.tradingStyle.SWING_SHORT' | translate }})</span>
                 <div class="trend-badge" [ngClass]="data.trend1h.toLowerCase()">
                   <ng-icon
                     [name]="data.trend1h === 'Bullish' ? 'saxTrendUpOutline' : (data.trend1h === 'Bearish' ? 'saxTrendDownOutline' : 'saxActivityOutline')"
@@ -114,7 +113,6 @@
         <!-- Technical Indicators Card -->
         <mat-card class="dashboard-card animate-fade-in">
           <mat-card-header>
-            <ng-icon name="saxActivityOutline" class="header-icon blue" size="24px"></ng-icon>
             <mat-card-title>{{ 'market.indicators' | translate }}</mat-card-title>
           </mat-card-header>
           <mat-card-content>
@@ -170,7 +168,6 @@
         <!-- Key Support & Resistance Levels Card -->
         <mat-card class="dashboard-card animate-fade-in">
           <mat-card-header>
-            <ng-icon name="saxInfoCircleOutline" class="header-icon blue" size="24px"></ng-icon>
             <mat-card-title>{{ 'market.levels' | translate }}</mat-card-title>
           </mat-card-header>
           <mat-card-content>
@@ -203,6 +200,78 @@
                     }
                   </div>
                 </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Smart Money Zones (SMC) Card -->
+        <mat-card class="dashboard-card smc-card animate-fade-in">
+          <mat-card-header>
+            <mat-card-title>Smart Money Zones (SMC)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="smc-grid">
+              <!-- Order Blocks -->
+              <div class="smc-group">
+                <h3>Order Blocks (OB)</h3>
+                @if (data.smcOrderBlocks.length > 0) {
+                  <div class="smc-list">
+                    @for (ob of data.smcOrderBlocks; track $index) {
+                      <div class="smc-item ob-item" [ngClass]="[ob.type.toLowerCase(), ob.mitigated ? 'mitigated' : 'active']">
+                        <div class="smc-meta">
+                          <span class="smc-badge">{{ ob.type }} OB</span>
+                          <span class="smc-tf">{{ ob.timeframe }}</span>
+                        </div>
+                        <span class="smc-range">${{ ob.bottom | number:'1.2-2' }} - ${{ ob.top | number:'1.2-2' }}</span>
+                        <span class="smc-status">{{ ob.mitigated ? 'Mitigated' : 'Active' }}</span>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <span class="no-levels">No active Order Blocks</span>
+                }
+              </div>
+
+              <!-- Fair Value Gaps (FVG) -->
+              <div class="smc-group">
+                <h3>Fair Value Gaps (FVG)</h3>
+                @if (data.smcFVGs.length > 0) {
+                  <div class="smc-list">
+                    @for (fvg of data.smcFVGs; track $index) {
+                      <div class="smc-item fvg-item" [ngClass]="[fvg.type.toLowerCase(), fvg.mitigated ? 'mitigated' : 'active']">
+                        <div class="smc-meta">
+                          <span class="smc-badge">{{ fvg.type }} FVG</span>
+                          <span class="smc-tf">{{ fvg.timeframe }}</span>
+                        </div>
+                        <span class="smc-range">${{ fvg.bottom | number:'1.2-2' }} - ${{ fvg.top | number:'1.2-2' }}</span>
+                        <span class="smc-status">{{ fvg.mitigated ? 'Mitigated' : 'Active' }}</span>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <span class="no-levels">No active Fair Value Gaps</span>
+                }
+              </div>
+
+              <!-- Market Structure (BOS / CHoCH) -->
+              <div class="smc-group full-width">
+                <h3>Market Structure Breaks</h3>
+                @if (data.marketStructure.length > 0) {
+                  <div class="structure-list">
+                    @for (struct of data.marketStructure; track $index) {
+                      <div class="structure-item" [ngClass]="struct.direction.toLowerCase()">
+                        <div class="struct-title">
+                          <span class="struct-type">{{ struct.type }}</span>
+                          <span class="struct-dir">{{ struct.direction }} Break</span>
+                        </div>
+                        <span class="struct-price">${{ struct.price | number:'1.2-2' }} ({{ struct.timeframe }})</span>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <span class="no-levels">No recent structure breaks</span>
+                }
               </div>
             </div>
           </mat-card-content>

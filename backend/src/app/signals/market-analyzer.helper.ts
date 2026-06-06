@@ -1,5 +1,28 @@
 import { OuncePriceCandle, TradingStyle } from '@ounce24/types';
 
+export interface SMCOrderBlock {
+  type: 'Bullish' | 'Bearish';
+  top: number;
+  bottom: number;
+  mitigated: boolean;
+  timeframe: '15m' | '1h';
+}
+
+export interface SMCFairValueGap {
+  type: 'Bullish' | 'Bearish';
+  top: number;
+  bottom: number;
+  mitigated: boolean;
+  timeframe: '15m' | '1h';
+}
+
+export interface SMCMarketStructure {
+  type: 'BOS' | 'CHoCH';
+  direction: 'Bullish' | 'Bearish';
+  price: number;
+  timeframe: '15m' | '1h';
+}
+
 export interface MarketStateSummary {
   currentPrice: number;
   trend5m: 'Bullish' | 'Bearish' | 'Consolidating';
@@ -19,6 +42,9 @@ export interface MarketStateSummary {
   keySupports: number[];
   keyResistances: number[];
   semanticText: string;
+  smcOrderBlocks: SMCOrderBlock[];
+  smcFVGs: SMCFairValueGap[];
+  marketStructure: SMCMarketStructure[];
 }
 
 export function detectTradingStyle(targetDistance: number, atr1h: number): TradingStyle {
@@ -329,6 +355,21 @@ export function analyzeMarketState(
     semanticText += `  - Resistance Levels (above price): None identified in recent data.\n`;
   }
 
+  const smcOrderBlocks = [
+    ...findOrderBlocks(candles15m, '15m'),
+    ...findOrderBlocks(candles1h, '1h'),
+  ];
+
+  const smcFVGs = [
+    ...findFVGs(candles15m, '15m'),
+    ...findFVGs(candles1h, '1h'),
+  ];
+
+  const marketStructure = [
+    ...findMarketStructure(candles15m, '15m'),
+    ...findMarketStructure(candles1h, '1h'),
+  ];
+
   return {
     currentPrice,
     trend5m,
@@ -348,5 +389,219 @@ export function analyzeMarketState(
     keySupports,
     keyResistances,
     semanticText,
+    smcOrderBlocks,
+    smcFVGs,
+    marketStructure,
   };
+}
+
+// SMC Detection Helpers
+
+function calculateATRForCandles(candles: { high: number; low: number; close: number }[], period = 14): number {
+  if (candles.length < period + 1) return 1.5;
+  const trs: number[] = [];
+  for (let i = 1; i < candles.length; i++) {
+    const h = candles[i].high;
+    const l = candles[i].low;
+    const pc = candles[i - 1].close;
+    const tr = Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc));
+    trs.push(tr);
+  }
+  const sum = trs.slice(-period).reduce((a, b) => a + b, 0);
+  return sum / period;
+}
+
+function findOrderBlocks(
+  candles: { open: number; high: number; low: number; close: number }[],
+  timeframe: '15m' | '1h',
+): SMCOrderBlock[] {
+  const atr = calculateATRForCandles(candles, 14);
+  const obs: SMCOrderBlock[] = [];
+  const startIdx = Math.max(1, candles.length - 40);
+
+  for (let i = startIdx; i < candles.length - 1; i++) {
+    const prevCandle = candles[i - 1];
+    const currentCandle = candles[i];
+    const bodySize = Math.abs(currentCandle.close - currentCandle.open);
+
+    // Bullish OB
+    if (prevCandle.close < prevCandle.open && currentCandle.close > currentCandle.open && bodySize > 0.8 * atr) {
+      const top = prevCandle.high;
+      const bottom = prevCandle.low;
+
+      let mitigated = false;
+      let invalidated = false;
+      for (let j = i + 1; j < candles.length; j++) {
+        if (candles[j].low <= top) {
+          mitigated = true;
+        }
+        if (candles[j].close < bottom) {
+          invalidated = true;
+          break;
+        }
+      }
+
+      if (!invalidated) {
+        obs.push({
+          type: 'Bullish',
+          top: Number(top.toFixed(2)),
+          bottom: Number(bottom.toFixed(2)),
+          mitigated,
+          timeframe,
+        });
+      }
+    }
+
+    // Bearish OB
+    if (prevCandle.close > prevCandle.open && currentCandle.close < currentCandle.open && bodySize > 0.8 * atr) {
+      const top = prevCandle.high;
+      const bottom = prevCandle.low;
+
+      let mitigated = false;
+      let invalidated = false;
+      for (let j = i + 1; j < candles.length; j++) {
+        if (candles[j].high >= bottom) {
+          mitigated = true;
+        }
+        if (candles[j].close > top) {
+          invalidated = true;
+          break;
+        }
+      }
+
+      if (!invalidated) {
+        obs.push({
+          type: 'Bearish',
+          top: Number(top.toFixed(2)),
+          bottom: Number(bottom.toFixed(2)),
+          mitigated,
+          timeframe,
+        });
+      }
+    }
+  }
+
+  const bullishOBs = obs.filter((ob) => ob.type === 'Bullish').slice(-2);
+  const bearishOBs = obs.filter((ob) => ob.type === 'Bearish').slice(-2);
+  return [...bullishOBs, ...bearishOBs];
+}
+
+function findFVGs(
+  candles: { open: number; high: number; low: number; close: number }[],
+  timeframe: '15m' | '1h',
+): SMCFairValueGap[] {
+  const fvgs: SMCFairValueGap[] = [];
+  const startIdx = Math.max(2, candles.length - 40);
+
+  for (let i = startIdx; i < candles.length; i++) {
+    const prev2 = candles[i - 2];
+    const curr = candles[i];
+
+    // Bullish FVG
+    if (curr.low > prev2.high) {
+      const top = curr.low;
+      const bottom = prev2.high;
+
+      let mitigated = false;
+      for (let j = i + 1; j < candles.length; j++) {
+        if (candles[j].low <= bottom) {
+          mitigated = true;
+          break;
+        }
+      }
+
+      fvgs.push({
+        type: 'Bullish',
+        top: Number(top.toFixed(2)),
+        bottom: Number(bottom.toFixed(2)),
+        mitigated,
+        timeframe,
+      });
+    }
+
+    // Bearish FVG
+    if (curr.high < prev2.low) {
+      const top = prev2.low;
+      const bottom = curr.high;
+
+      let mitigated = false;
+      for (let j = i + 1; j < candles.length; j++) {
+        if (candles[j].high >= top) {
+          mitigated = true;
+          break;
+        }
+      }
+
+      fvgs.push({
+        type: 'Bearish',
+        top: Number(top.toFixed(2)),
+        bottom: Number(bottom.toFixed(2)),
+        mitigated,
+        timeframe,
+      });
+    }
+  }
+
+  return fvgs.filter((f) => !f.mitigated).slice(-2);
+}
+
+function findMarketStructure(
+  candles: { open: number; high: number; low: number; close: number }[],
+  timeframe: '15m' | '1h',
+): SMCMarketStructure[] {
+  const structures: SMCMarketStructure[] = [];
+  const len = candles.length;
+  if (len < 10) return [];
+
+  const swingHighs: { idx: number; price: number }[] = [];
+  const swingLows: { idx: number; price: number }[] = [];
+
+  for (let i = 2; i < len - 2; i++) {
+    const c = candles[i];
+    if (
+      c.high > candles[i - 1].high &&
+      c.high > candles[i - 2].high &&
+      c.high > candles[i + 1].high &&
+      c.high > candles[i + 2].high
+    ) {
+      swingHighs.push({ idx: i, price: c.high });
+    }
+
+    if (
+      c.low < candles[i - 1].low &&
+      c.low < candles[i - 2].low &&
+      c.low < candles[i + 1].low &&
+      c.low < candles[i + 2].low
+    ) {
+      swingLows.push({ idx: i, price: c.low });
+    }
+  }
+
+  const lastClose = candles[len - 1].close;
+
+  if (swingHighs.length > 0) {
+    const lastSwingHigh = swingHighs[swingHighs.length - 1];
+    if (lastClose > lastSwingHigh.price) {
+      structures.push({
+        type: 'BOS',
+        direction: 'Bullish',
+        price: Number(lastSwingHigh.price.toFixed(2)),
+        timeframe,
+      });
+    }
+  }
+
+  if (swingLows.length > 0) {
+    const lastSwingLow = swingLows[swingLows.length - 1];
+    if (lastClose < lastSwingLow.price) {
+      structures.push({
+        type: 'BOS',
+        direction: 'Bearish',
+        price: Number(lastSwingLow.price.toFixed(2)),
+        timeframe,
+      });
+    }
+  }
+
+  return structures.slice(-1);
 }

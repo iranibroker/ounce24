@@ -40,6 +40,13 @@
   }
 }
 
+.analysis-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
 .market-header {
   display: flex;
   justify-content: center;
@@ -123,7 +130,7 @@
   flex-direction: column;
   gap: 16px;
 
-  @media (min-width: 480px) {
+  @media (min-width: 600px) {
     flex-direction: row;
     justify-content: space-between;
   }
@@ -381,6 +388,208 @@
   }
   100% {
     filter: drop-shadow(0 0 10px rgba(255, 179, 0, 0.25));
+  }
+}
+
+// SMC Card Styling
+.smc-card {
+  margin-top: 8px;
+
+  .smc-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    @media (min-width: 500px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+  }
+
+  .smc-group {
+    display: flex;
+    flex-direction: column;
+
+    h3 {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin: 0 0 12px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    &.full-width {
+      grid-column: span 2;
+
+      @media (max-width: 499px) {
+        grid-column: span 1;
+      }
+    }
+  }
+
+  .smc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .smc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.88rem;
+
+    .smc-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .smc-badge {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .smc-tf {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.35);
+      font-weight: 500;
+    }
+
+    .smc-range {
+      font-family: 'Vazir Code', monospace;
+      font-weight: 700;
+    }
+
+    .smc-status {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    // Bullish OB/FVG
+    &.bullish {
+      border-inline-start: 3px solid #00e5ff; // Bright cyan glow
+
+      .smc-badge {
+        color: #00e5ff;
+      }
+
+      &.active {
+        background: linear-gradient(90deg, rgba(0, 229, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border-color: rgba(0, 229, 255, 0.15) rgba(255, 255, 255, 0.03) rgba(255, 255, 255, 0.03);
+        
+        .smc-status {
+          background-color: rgba(0, 229, 255, 0.12);
+          color: #00e5ff;
+        }
+      }
+    }
+
+    // Bearish OB/FVG
+    &.bearish {
+      border-inline-start: 3px solid #ff4081; // Bright pink glow
+
+      .smc-badge {
+        color: #ff4081;
+      }
+
+      &.active {
+        background: linear-gradient(90deg, rgba(255, 40, 81, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border-color: rgba(255, 40, 81, 0.15) rgba(255, 255, 255, 0.03) rgba(255, 255, 255, 0.03);
+        
+        .smc-status {
+          background-color: rgba(255, 40, 81, 0.12);
+          color: #ff4081;
+        }
+      }
+    }
+
+    // Mitigated states
+    &.mitigated {
+      opacity: 0.45;
+      border-inline-start-style: dashed;
+      
+      .smc-status {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+  }
+
+  // Market Structure breaks styling
+  .structure-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .structure-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+
+    .struct-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .struct-type {
+      font-weight: 800;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .struct-dir {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .struct-price {
+      font-family: 'Vazir Code', monospace;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    &.bullish {
+      border-inline-start: 4px solid #00e5ff;
+      background: linear-gradient(90deg, rgba(0, 229, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
+      
+      .struct-dir {
+        color: #00e5ff;
+      }
+      .struct-price {
+        color: #00e5ff;
+      }
+    }
+
+    &.bearish {
+      border-inline-start: 4px solid #ff4081;
+      background: linear-gradient(90deg, rgba(255, 64, 129, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
+
+      .struct-dir {
+        color: #ff4081;
+      }
+      .struct-price {
+        color: #ff4081;
+      }
+    }
   }
 }
 
