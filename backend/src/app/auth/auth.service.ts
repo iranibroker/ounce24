@@ -417,6 +417,13 @@ export class AuthService {
 
     let user = await this.userModel.findOne({ telegramId });
 
+    const getSupportedLanguage = (langCode?: string): string => {
+      if (!langCode) return 'fa';
+      const cleanCode = langCode.split('-')[0].toLowerCase();
+      const supported = ['en', 'fa', 'ar', 'tr'];
+      return supported.includes(cleanCode) ? cleanCode : 'en';
+    };
+
     if (!user) {
       // Try to find by username if available, though telegramId is safer
       if (telegramUser.username) {
@@ -443,6 +450,7 @@ export class AuthService {
          avatar: telegramUser.photo_url,
          avatarSource: telegramUser.photo_url ? 'telegram' : 'bitbots',
          title,
+         language: getSupportedLanguage(telegramUser.language_code),
        });
     } else {
         // Update user info
@@ -462,6 +470,11 @@ export class AuthService {
         ) {
             user.avatar = telegramUser.photo_url;
             user.avatarSource = 'telegram';
+            updated = true;
+        }
+        const targetLang = getSupportedLanguage(telegramUser.language_code);
+        if ((!user.language || user.language === 'en') && targetLang !== 'en') {
+            user.language = targetLang;
             updated = true;
         }
         if (updated) await user.save();

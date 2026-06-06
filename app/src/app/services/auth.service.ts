@@ -33,7 +33,7 @@ export class AuthService {
       const user = this.userQuery.data();
       if (user && user.language) {
         if (this.languageService.getCurrentLanguage() !== user.language) {
-          this.languageService.setLanguage(user.language, true);
+          this.languageService.setLanguage(user.language, false, true);
         }
       }
     });

@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { PwaService } from './services/pwa.service';
 import { PwaInstallDialogComponent } from './components/pwa-install-dialog/pwa-install-dialog.component';
+import { LanguageSelectionModalComponent } from './components/language-selection-modal/language-selection-modal.component';
 
 import { OnboardingComponent } from './components/onboarding/onboarding.component';
 
@@ -44,6 +45,13 @@ export class AppComponent implements OnInit, OnDestroy {
     const onboarded = localStorage.getItem('ounce24_onboarded');
     this.showOnboarding = onboarded !== 'true';
 
+    // If no language has been explicitly selected yet, open the language selection modal
+    if (!this.languageService.hasExplicitLanguageSelection()) {
+      setTimeout(() => {
+        this.showLanguageSelectionModal();
+      });
+    }
+
     // Always re-authenticate when in Telegram Mini App - user may have switched
     // accounts; localStorage would still have the previous JWT otherwise.
     if (this.telegramService.isTelegramApp) {
@@ -76,6 +84,15 @@ export class AppComponent implements OnInit, OnDestroy {
   checkAndStartPushTimer() {
     // Automatic PWA prompt is disabled to prevent clashing with the App Guide.
     // Installation is triggered manually from the menu.
+  }
+
+  showLanguageSelectionModal() {
+    this.dialog.open(LanguageSelectionModalComponent, {
+      width: '400px',
+      maxWidth: '95vw',
+      panelClass: 'language-dialog-panel',
+      disableClose: true,
+    });
   }
 
   showPwaInstallPrompt() {

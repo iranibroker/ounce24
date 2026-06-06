@@ -803,3 +803,8 @@ mat-tab-group,
     color: rgba(255, 255, 255, 0.7) !important;
   }
 }
+
+// Ensure Angular Material dialog overlays are drawn above the onboarding wizard
+.cdk-overlay-container {
+  z-index: 11000 !important;
+}

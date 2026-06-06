@@ -53,6 +53,15 @@ export class LanguageService {
       if (storedLanguage && this.supportedLanguages.some((lang) => lang.code === storedLanguage)) {
         this.setLanguage(storedLanguage, false);
       } else {
+        // Check Telegram WebApp user language code if running in Telegram
+        const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
+        if (tgUser && tgUser.language_code) {
+          const tgLang = tgUser.language_code.split('-')[0].toLowerCase();
+          if (this.supportedLanguages.some((lang) => lang.code === tgLang)) {
+            this.setLanguage(tgLang, false);
+            return;
+          }
+        }
         this.setLanguage(this.DEFAULT_LANGUAGE, true);
       }
     }
@@ -71,7 +80,11 @@ export class LanguageService {
     }
   }
 
-  public setLanguage(languageCode: string, skipLocalStorage = false): void {
+  public setLanguage(
+    languageCode: string,
+    skipLocalStorage = false,
+    skipBackendSync = false,
+  ): void {
     const languageConfig = this.supportedLanguages.find(
       (lang) => lang.code === languageCode,
     );
@@ -91,8 +104,8 @@ export class LanguageService {
       // Handle RTL
       this.setRTL(languageConfig.rtl);
 
-      // Sync to backend if logged in and not skipping local storage
-      if (!skipLocalStorage && isPlatformBrowser(this.platformId)) {
+      // Sync to backend if logged in and not skipping backend sync
+      if (!skipBackendSync && isPlatformBrowser(this.platformId)) {
         const token = localStorage.getItem('jwtToken');
         if (token) {
           this.http.patch('/api/auth/me', { language: languageCode }).subscribe({
