@@ -16,7 +16,7 @@ export interface LanguageConfig {
 })
 export class LanguageService {
   private readonly LANGUAGE_KEY = 'app_language';
-  private readonly DEFAULT_LANGUAGE = 'en';
+  private readonly DEFAULT_LANGUAGE = 'fa';
   private http = inject(HttpClient);
 
   private currentLanguageSubject = new BehaviorSubject<string>(
@@ -45,24 +45,15 @@ export class LanguageService {
       const queryLang = urlParams.get('lang');
 
       if (queryLang && this.supportedLanguages.some((lang) => lang.code === queryLang)) {
-        this.setLanguage(queryLang, false);
+        this.setLanguage(queryLang, false, true);
         return;
       }
 
       const storedLanguage = this.getStoredLanguage();
       if (storedLanguage && this.supportedLanguages.some((lang) => lang.code === storedLanguage)) {
-        this.setLanguage(storedLanguage, false);
+        this.setLanguage(storedLanguage, false, true);
       } else {
-        // Check Telegram WebApp user language code if running in Telegram
-        const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
-        if (tgUser && tgUser.language_code) {
-          const tgLang = tgUser.language_code.split('-')[0].toLowerCase();
-          if (this.supportedLanguages.some((lang) => lang.code === tgLang)) {
-            this.setLanguage(tgLang, true, true);
-            return;
-          }
-        }
-        this.setLanguage(this.DEFAULT_LANGUAGE, true);
+        this.setLanguage(this.DEFAULT_LANGUAGE, true, true);
       }
     }
   }

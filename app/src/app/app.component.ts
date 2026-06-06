@@ -5,7 +5,7 @@ import { AnalyticsService } from './services/analytics.service';
 import { AchievementService } from './services/achievement.service';
 import { TelegramService } from './services/telegram.service';
 import { AuthService } from './services/auth.service';
-import { inject, OnInit, OnDestroy } from '@angular/core';
+import { inject, OnInit, OnDestroy, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { PwaService } from './services/pwa.service';
@@ -30,6 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private pwaService = inject(PwaService);
   private pushTimer: any = null;
   private routerSubscription: any = null;
+  private languageDialogRef: any = null;
 
   constructor(
     private languageService: LanguageService,
@@ -38,6 +39,17 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
     // Language service will handle initialization
     // This ensures RTL is set correctly on app startup
+
+    const authService = inject(AuthService);
+    effect(() => {
+      const user = authService.userQuery.data();
+      if (user && user.language) {
+        if (this.languageDialogRef) {
+          this.languageDialogRef.close();
+          this.languageDialogRef = null;
+        }
+      }
+    });
   }
 
   ngOnInit() {
@@ -87,7 +99,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   showLanguageSelectionModal() {
-    this.dialog.open(LanguageSelectionModalComponent, {
+    this.languageDialogRef = this.dialog.open(LanguageSelectionModalComponent, {
       width: '400px',
       maxWidth: '95vw',
       panelClass: 'language-dialog-panel',
