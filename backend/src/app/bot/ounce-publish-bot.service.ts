@@ -46,7 +46,7 @@ export class OuncePublishBotService {
                 [
                   {
                     text: 'Signal list',
-                    url: APP_URL,
+                    web_app: { url: `${APP_URL}/signals` },
                   },
                 ],
               ],
@@ -82,7 +82,7 @@ export class OuncePublishBotService {
                 [
                   {
                     text: 'Signal list',
-                    url: APP_URL,
+                    web_app: { url: `${APP_URL}/signals` },
                   },
                 ],
               ],

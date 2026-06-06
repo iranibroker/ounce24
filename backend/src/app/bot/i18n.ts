@@ -38,6 +38,7 @@ export interface BotTranslation {
   pushNotifications: {
     aiShieldTitle: string;
     signalStatusTitle: string;
+    signalCreated: (type: string) => string;
     signalActive: (type: string, price: string) => string;
     signalClosed: (type: string, result: string) => string;
     signalCanceled: (type: string) => string;
@@ -52,6 +53,7 @@ export interface BotTranslation {
     stopLoss: string;
     takeProfit: string;
     owner: string;
+    viewAndApply: string;
   };
 }
 
@@ -140,6 +142,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
     pushNotifications: {
       aiShieldTitle: 'Smart Shield',
       signalStatusTitle: 'Signal Status Update',
+      signalCreated: (type: string) => `➕ Gold ${type} signal has been created!`,
       signalActive: (type: string, price: string) => `🔔 Gold ${type} signal is now ACTIVE!\nTrigger price: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 Gold ${type} signal is now CLOSED!\nResult: ${result}`,
       signalCanceled: (type: string) => `🚫 Gold ${type} signal has been CANCELED.`,
@@ -154,6 +157,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       stopLoss: 'Stop Loss',
       takeProfit: 'Take Profit',
       owner: 'Trader',
+      viewAndApply: '🔍 View & Apply Changes',
     },
   },
 
@@ -241,6 +245,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
     pushNotifications: {
       aiShieldTitle: 'سپر هوشمند',
       signalStatusTitle: 'به‌روزرسانی وضعیت سیگنال',
+      signalCreated: (type: string) => `➕ سیگنال ${type} طلا با موفقیت ثبت شد!`,
       signalActive: (type: string, price: string) => `🔔 سیگنال ${type} طلا فعال شد!\nقیمت فعال‌سازی: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 سیگنال ${type} طلا بسته شد!\nنتیجه: ${result}`,
       signalCanceled: (type: string) => `🚫 سیگنال ${type} طلا لغو گردید.`,
@@ -255,6 +260,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       stopLoss: 'حد ضرر',
       takeProfit: 'حد سود',
       owner: 'تریدر',
+      viewAndApply: '🔍 مشاهده و اعمال تغییرات',
     },
   },
 
@@ -342,6 +348,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
     pushNotifications: {
       aiShieldTitle: 'درع الذكاء الاصطناعي الذكي',
       signalStatusTitle: 'تحديث حالة الإشارة',
+      signalCreated: (type: string) => `➕ تم إنشاء إشارة الذهب ${type} بنجاح!`,
       signalActive: (type: string, price: string) => `🔔 تم تفعيل إشارة الذهب ${type}!\nسعر التفعيل: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 تم إغلاق إشارة الذهب ${type}!\nالنتيجة: ${result}`,
       signalCanceled: (type: string) => `🚫 تم إلغاء إشارة الذهب ${type}.`,
@@ -356,6 +363,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       stopLoss: 'وقف الخسارة',
       takeProfit: 'أخذ الأرباح',
       owner: 'المتداول',
+      viewAndApply: '🔍 عرض وتطبيق التغييرات',
     },
   },
 
@@ -443,6 +451,7 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
     pushNotifications: {
       aiShieldTitle: 'Yapay Zeka Akıllı Kalkan',
       signalStatusTitle: 'Sinyal Durumu Güncellemesi',
+      signalCreated: (type: string) => `➕ Altın ${type} sinyali başarıyla oluşturuldu!`,
       signalActive: (type: string, price: string) => `🔔 Altın ${type} sinyali artık AKTİF!\nTetikleme fiyatı: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 Altın ${type} sinyali KAPATILDI!\nSonuç: ${result}`,
       signalCanceled: (type: string) => `🚫 Altın ${type} sinyali İPTAL EDİLDİ.`,
@@ -457,6 +466,7 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
       stopLoss: 'Zarar Durdur',
       takeProfit: 'Kâr Al',
       owner: 'Yatırımcı',
+      viewAndApply: '🔍 Görüntüle ve Değişiklikleri Uygula',
     },
   },
 };

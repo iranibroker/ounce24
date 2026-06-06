@@ -24,6 +24,7 @@ import { SignalsService, getStyleInstructions } from './signals.service';
 import { getTranslation } from '../bot/i18n';
 import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
 
+const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 
 interface CachedSubscription {
   userId: string;
@@ -561,17 +562,21 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
           if (sub.telegramId) {
             const signalInfo = formatSignalDetails(signal, lang);
-            const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n💵 Price: <b>$${currentPrice.toFixed(2)}</b>\n\n${signalInfo}`;
+            const telegramMessage = `🛡️ <b>${alertTitle}</b>\n\n${message}\n\n${signalInfo}\n\n💵 XAUUSD: <b>${currentPrice.toFixed(2)}</b>`;
             
-            const targetPrice = copilotResponse.price || currentPrice || 0;
-            const inlineKeyboard = isPersonal 
-              ? getCopilotInlineKeyboard(recommendationType, signal._id.toString(), targetPrice, lang)
-              : undefined;
-
             await this.bot.telegram
               .sendMessage(sub.telegramId, telegramMessage, {
                 parse_mode: 'HTML',
-                reply_markup: inlineKeyboard ? { inline_keyboard: inlineKeyboard } : undefined,
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: t.pushNotifications.viewAndApply,
+                        web_app: { url: `${APP_URL}/signals/${signal._id.toString()}` },
+                      },
+                    ],
+                  ],
+                },
               })
               .catch((err) => {
                 this.logger.error(`Failed to send Telegram message to user ${sub.userId}:`, err);
@@ -625,7 +630,10 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
 
       if (!populatedSignal) return;
 
+      const ownerId = populatedSignal.owner ? ((populatedSignal.owner as any)._id || (populatedSignal.owner as any).id || populatedSignal.owner).toString() : '';
+
       for (const sub of cached.subscriptions.values()) {
+        if (sub.userId === ownerId) continue;
         if (!sub.followStatus) continue;
         // Skip if user has disabled signal-follow notifications
         if (!sub.notifSignalFollow) continue;
@@ -666,6 +674,16 @@ Return your response ONLY as a valid JSON object matching the following TypeScri
           await this.bot.telegram
             .sendMessage(sub.telegramId, telegramMessage, {
               parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: t.pushNotifications.viewAndApply,
+                      web_app: { url: `${APP_URL}/signals/${signalIdStr}` },
+                    },
+                  ],
+                ],
+              },
             })
             .catch((err) => {
               this.logger.error(`Failed to send follower Telegram alert to user ${sub.userId}:`, err);
@@ -783,21 +801,25 @@ function getCopilotInlineKeyboard(
   return undefined;
 }
 
-function formatSignalDetails(signal: Signal, lang: string): string {
-  const t = getTranslation(lang);
-  const typeStr = signal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+export function formatSignalDetails(signal: Signal, lang: string): string {
+  const typeStr = signal.type;
   
   const sl = signal.type === SignalType.Sell ? signal.maxPrice : signal.minPrice;
   const tp = signal.type === SignalType.Sell ? signal.minPrice : signal.maxPrice;
 
-  let details = `📊 <b>${typeStr} Signal Details</b>\n` +
-         `🔹 ${t.pushNotifications.entryPrice}: <b>$${signal.entryPrice.toFixed(2)}</b>\n` +
-         `🛑 ${t.pushNotifications.stopLoss}: <b>$${sl.toFixed(2)}</b>\n` +
-         `🎯 ${t.pushNotifications.takeProfit}: <b>$${tp.toFixed(2)}</b>`;
-
+  let details = '';
   if (signal.owner && (signal.owner as any).tag) {
-    details += `\n👤 ${t.pushNotifications.owner}: <b>${(signal.owner as any).tag}</b>`;
+    details += `👤 <b>${(signal.owner as any).tag}</b>\n\n`;
   }
+
+  const typeEmoji = typeStr === 'BUY' ? '🟢' : '🔴';
+  const statusStr = signal.status ? signal.status.charAt(0).toUpperCase() + signal.status.slice(1).toLowerCase() : '';
+
+  details += `${typeEmoji} <b>${typeStr}</b>\n` +
+         `Entry Price: <b>$${signal.entryPrice.toFixed(2)}</b>\n` +
+         `TP: <b>$${tp.toFixed(2)}</b>\n` +
+         `SL: <b>$${sl.toFixed(2)}</b>\n` +
+         `Status: <b>${statusStr}</b>`;
 
   return details;
 }

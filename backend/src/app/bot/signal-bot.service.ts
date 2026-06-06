@@ -22,6 +22,8 @@ import { SignalsService } from '../signals/signals.service';
 import { UsersService } from '../users/users.service';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { Public } from '../auth/public.decorator';
+import { formatSignalDetails } from '../signals/signal-copilot.service';
+import { getTranslation } from './i18n';
 
 function getAvailableBot(signals: Signal[]) {
   let min: [number, string] = [10000, ''];
@@ -102,9 +104,29 @@ export class SignalBotService extends BaseBot {
       })
       .exec();
 
+    const lang = populatedSignal.owner.language || 'fa';
+    const t = getTranslation(lang);
+    const typeStr = populatedSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+    const alertMessage = t.pushNotifications.signalActive(typeStr, populatedSignal.entryPrice.toFixed(2));
+    const signalInfo = formatSignalDetails(populatedSignal, lang);
+    const telegramMessage = `📢 <b>${t.pushNotifications.signalStatusTitle}</b>\n\n${alertMessage}\n\n${signalInfo}`;
+
     this.bot.telegram.sendMessage(
       populatedSignal.owner.telegramId,
-      Signal.getMessage(populatedSignal, { showId: true, skipOwner: true }),
+      telegramMessage,
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: t.pushNotifications.viewAndApply,
+                web_app: { url: `${APP_URL}/signals/${populatedSignal._id.toString()}` },
+              },
+            ],
+          ],
+        },
+      }
     );
     this.publishSignal(populatedSignal, populatedSignal.entryPrice);
   }
@@ -138,9 +160,32 @@ export class SignalBotService extends BaseBot {
           this.publishSignal(signal, this.ouncePriceService.current);
         });
     }, 3000);
+
+    const lang = populatedSignal.owner.language || 'fa';
+    const t = getTranslation(lang);
+    const typeStr = populatedSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+    const profitPip = populatedSignal.pip !== null ? populatedSignal.pip : 0;
+    const pipStr = profitPip >= 0 ? `+${profitPip} pip` : `${profitPip} pip`;
+    const alertMessage = t.pushNotifications.signalClosed(typeStr, pipStr);
+    const signalInfo = formatSignalDetails(populatedSignal, lang);
+    const telegramMessage = `📢 <b>${t.pushNotifications.signalStatusTitle}</b>\n\n${alertMessage}\n\n${signalInfo}`;
+
     this.bot.telegram.sendMessage(
       populatedSignal.owner.telegramId,
-      Signal.getMessage(populatedSignal, { showId: true, skipOwner: true }),
+      telegramMessage,
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: t.pushNotifications.viewAndApply,
+                web_app: { url: `${APP_URL}/signals/${populatedSignal._id.toString()}` },
+              },
+            ],
+          ],
+        },
+      }
     );
   }
 
@@ -164,9 +209,29 @@ export class SignalBotService extends BaseBot {
       );
     }
 
+    const lang = populatedSignal.owner.language || 'fa';
+    const t = getTranslation(lang);
+    const typeStr = populatedSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+    const alertMessage = t.pushNotifications.signalCanceled(typeStr);
+    const signalInfo = formatSignalDetails(populatedSignal, lang);
+    const telegramMessage = `📢 <b>${t.pushNotifications.signalStatusTitle}</b>\n\n${alertMessage}\n\n${signalInfo}`;
+
     this.bot.telegram.sendMessage(
       populatedSignal.owner.telegramId,
-      Signal.getMessage(populatedSignal, { showId: true, skipOwner: true }),
+      telegramMessage,
+      {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: t.pushNotifications.viewAndApply,
+                web_app: { url: `${APP_URL}/signals/${populatedSignal._id.toString()}` },
+              },
+            ],
+          ],
+        },
+      }
     );
   }
 
@@ -426,16 +491,24 @@ export class SignalBotService extends BaseBot {
         });
         if (createdSignal) {
           BaseBot.userStates.delete(ctx.from.id);
+          const lang = createdSignal.owner.language || 'fa';
+          const t = getTranslation(lang);
+          const typeStr = createdSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+          const alertMessage = t.pushNotifications.signalCreated(typeStr);
+          const signalInfo = formatSignalDetails(createdSignal, lang);
+          const telegramMessage = `📢 <b>${t.pushNotifications.signalStatusTitle}</b>\n\n${alertMessage}\n\n${signalInfo}`;
+
           await this.bot.telegram.sendMessage(
             createdSignal.owner.telegramId,
-            Signal.getMessage(createdSignal, { showId: true, skipOwner: true }),
+            telegramMessage,
             {
+              parse_mode: 'HTML',
               reply_markup: {
                 inline_keyboard: [
                   [
                     {
-                  text: '✨ Analyze signal',
-                  callback_data: `analyze_signal_${createdSignal.id}`,
+                      text: t.pushNotifications.viewAndApply,
+                      web_app: { url: `${APP_URL}/signals/${createdSignal._id.toString()}` },
                     },
                   ],
                 ],
@@ -1077,8 +1150,14 @@ You can do this once every 15 days. ${
                   ],
                   [
                     {
+                      text: '✨ Analyze signal',
+                      web_app: { url: `${APP_URL}/signals/${signal.id}` },
+                    },
+                  ],
+                  [
+                    {
                       text: 'Signal list',
-                      url: APP_URL,
+                      web_app: { url: `${APP_URL}/signals` },
                     },
                   ],
                 ],
@@ -1098,13 +1177,13 @@ You can do this once every 15 days. ${
                 [
                   {
                     text: '✨ Analyze signal',
-                    callback_data: `analyze_signal_${signal.id}`,
+                    web_app: { url: `${APP_URL}/signals/${signal.id}` },
                   },
                 ],
                 [
                   {
                     text: 'Signal list',
-                    url: APP_URL,
+                    web_app: { url: `${APP_URL}/signals` },
                   },
                 ],
               ],
