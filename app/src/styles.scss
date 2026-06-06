@@ -1,6 +1,21 @@
 @use '@angular/material' as mat;
 @use 'theme-colors.scss' as theme;
 
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+*:focus,
+*:focus-visible,
+button:focus,
+a:focus,
+.mat-mdc-button:focus,
+.mat-mdc-button-toggle:focus,
+.mat-mdc-tab:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 html {
   color-scheme: dark;
   @include mat.theme(
@@ -506,7 +521,7 @@ img[appAvatar] {
 mat-button-toggle-group {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 30px !important;
+  border-radius: 32px !important;
   padding: 3px !important;
   display: flex !important;
   width: 100% !important;
@@ -526,7 +541,7 @@ mat-button-toggle-group {
     flex: 1 !important;
     background: transparent !important;
     border: none !important;
-    border-radius: 26px !important;
+    border-radius: 28px !important;
     color: rgba(241, 245, 249, 0.5) !important;
     font-weight: 500 !important;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -580,7 +595,7 @@ mat-tab-group {
   .mat-mdc-tab-labels {
     background: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 30px !important;
+    border-radius: 32px !important;
     padding: 3px !important;
     display: flex !important;
     align-items: center !important;
@@ -592,7 +607,7 @@ mat-tab-group {
     flex: 1 !important;
     height: 36px !important;
     min-height: 36px !important;
-    border-radius: 26px !important;
+    border-radius: 28px !important;
     color: rgba(241, 245, 249, 0.5) !important;
     font-weight: 500 !important;
     opacity: 1 !important;

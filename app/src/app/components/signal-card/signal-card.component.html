@@ -11,11 +11,10 @@
     >
       <img mat-card-avatar [appAvatar]="signal().owner" [routerLink]="['/profile', signal().owner.id]" (click)="$event.stopPropagation()" style="cursor: pointer;" />
       <mat-card-title [routerLink]="['/profile', signal().owner.id]" (click)="$event.stopPropagation()" style="cursor: pointer;">
-        {{ ownerTitle }}
+        {{ ownerTitle }} <span style="opacity: 0.6; font-weight: 500; font-size: 0.9em; margin-inline-start: 4px;">(<ng-icon name="saxStarOutline" size="14px" style="margin-top: -2px;"></ng-icon> {{ signal().owner.score.toFixed(1) }})</span>
       </mat-card-title>
       <mat-card-subtitle>
-        <ng-icon name="saxStarOutline" size="14px"></ng-icon>
-        {{ signal().owner.score.toFixed(1) }}
+        {{ signal().createdAt | date: 'dd/MM/yyyy HH:mm' }}
       </mat-card-subtitle>
       <div class="header-actions">
         @if (signal().status === SignalStatus.Active || signal().status === SignalStatus.Closed) {
