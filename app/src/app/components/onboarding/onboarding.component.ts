@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIconComponent } from '@ng-icons/core';
 import { LanguageService } from '../../services/language.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface Slide {
   title: string;
@@ -28,21 +29,14 @@ export class OnboardingComponent {
   slides = signal<Slide[]>([]);
 
   constructor() {
-    // Fetch slides from translations dynamically to support language changes
-    this.translateService.get('introTour.slides').subscribe((translatedSlides: Slide[]) => {
-      if (Array.isArray(translatedSlides)) {
-        this.slides.set(translatedSlides);
-      }
-    });
-
-    // Also update if language changes
-    this.translateService.onLangChange.subscribe(() => {
-      this.translateService.get('introTour.slides').subscribe((translatedSlides: Slide[]) => {
+    // Stream slides from translations to automatically support initialization and language changes
+    this.translateService.stream('introTour.slides')
+      .pipe(takeUntilDestroyed())
+      .subscribe((translatedSlides: Slide[]) => {
         if (Array.isArray(translatedSlides)) {
           this.slides.set(translatedSlides);
         }
       });
-    });
   }
 
   get isRTL(): boolean {
