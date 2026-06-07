@@ -22,7 +22,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
-import { AiSettingsDialogComponent } from '../ai-settings-dialog/ai-settings-dialog.component';
 
 interface SignalAnalysisResponse {
   analysis: string;
@@ -101,30 +100,13 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
     this.analyticsService.trackEvent('analyze_signal');
     
     const user = this.auth.userQuery.data();
-    const currentStyle = user?.tradingStyle || TradingStyle.Day;
-    const currentRisk = user?.riskTolerance || RiskTolerance.Moderate;
+    const style = user?.tradingStyle || TradingStyle.Day;
+    const risk = user?.riskTolerance || RiskTolerance.Moderate;
 
-    const dialogRef = this.dialog.open(AiSettingsDialogComponent, {
-      width: '450px',
-      maxWidth: '95vw',
-      data: {
-        title: 'aiSettingsDialog.title',
-        description: 'aiSettingsDialog.description',
-        confirmLabel: 'aiSettingsDialog.confirmAnalyze',
-        tradingStyle: currentStyle,
-        riskTolerance: currentRisk,
-        hideTradingStyle: true,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.analyzeMutation.mutate({
-          signal: this.signal,
-          tradingStyle: result.tradingStyle,
-          riskTolerance: result.riskTolerance,
-        });
-      }
+    this.analyzeMutation.mutate({
+      signal: this.signal,
+      tradingStyle: style,
+      riskTolerance: risk,
     });
   }
 }

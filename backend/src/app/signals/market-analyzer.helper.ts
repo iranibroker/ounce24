@@ -370,6 +370,28 @@ export function analyzeMarketState(
     ...findMarketStructure(candles1h, '1h'),
   ];
 
+  // Add SMC data to semanticText
+  if (smcOrderBlocks.length > 0) {
+    semanticText += `\n[SMC Order Blocks]\n`;
+    for (const ob of smcOrderBlocks) {
+      semanticText += `- ${ob.timeframe} ${ob.type} OB: $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}${ob.mitigated ? ' (mitigated)' : ' (fresh)'}\n`;
+    }
+  }
+
+  if (smcFVGs.length > 0) {
+    semanticText += `\n[SMC Fair Value Gaps (unfilled)]\n`;
+    for (const fvg of smcFVGs) {
+      semanticText += `- ${fvg.timeframe} ${fvg.type} FVG: $${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}\n`;
+    }
+  }
+
+  if (marketStructure.length > 0) {
+    semanticText += `\n[Market Structure]\n`;
+    for (const ms of marketStructure) {
+      semanticText += `- ${ms.timeframe} ${ms.type} ${ms.direction} at $${ms.price.toFixed(2)}\n`;
+    }
+  }
+
   return {
     currentPrice,
     trend5m,

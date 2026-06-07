@@ -452,50 +452,26 @@ export class SignalCopilotService implements OnModuleInit {
         const styleInstructions = getStyleInstructions(group.style, group.risk);
 
         const promptMessage = `
-You are the Smart Shield AI Trading Guard for Ounce24.
-You are monitoring a Gold (XAUUSD) signal in real-time.
+Smart Shield AI Guard for Ounce24. Monitor this Gold (XAUUSD) signal in real-time.
 
-Signal Status: ${signal.status.toUpperCase()}
-- Action Type: ${isSell ? 'SELL' : 'BUY'}
-- Entry Price: $${entryPrice.toFixed(2)}
-- Current Price: $${currentPrice.toFixed(2)}
-- Take Profit (TP): $${tp.toFixed(2)}
-- Stop Loss (SL): $${sl.toFixed(2)}
-- Risk-Free setup already suggested/active: ${alreadyRecommendedRiskFree ? 'YES' : 'NO'}
+Signal: ${isSell ? 'SELL' : 'BUY'} | Status: ${signal.status.toUpperCase()} | Entry: $${entryPrice.toFixed(2)} | Current: $${currentPrice.toFixed(2)} | TP: $${tp.toFixed(2)} | SL: $${sl.toFixed(2)} | Risk-Free: ${alreadyRecommendedRiskFree ? 'YES' : 'NO'}
 
 Market State:
 ${marketState.semanticText}
 
 ${styleInstructions}
 
-Instructions:
-Evaluate the technical gold chart and indicators to suggest trade adjustments based on the Technical Analysis Principles.
-- If status is ACTIVE:
-  Evaluate whether the user should:
-  1. "risk_free": Move SL to Entry (only suggest if price is in decent profit, e.g., >= 1.5x ATR, and it hasn't been done yet).
-  2. "extend_tp": Move TP higher (for BUY) or lower (for SELL) because momentum is extremely strong in the trade direction.
-  3. "early_exit": Close the trade immediately at current market price because the trend has clearly reversed and keeping the trade is highly risky.
-  4. "trailing_sl": Lock in profit by moving SL further into profit territory.
-  5. "none": No change needed. Just keep the trade running as is.
-- If status is PENDING:
-  Evaluate whether the user should:
-  1. "cancel": Cancel the pending order immediately because the market structure/trend has changed significantly and the setup is no longer valid or has high risk.
-  2. "none": Keep the pending order as is.
+Recommendations (pick ONE):
+ACTIVE signals: "risk_free" (move SL to entry, only if profit >= 1.5x ATR and not already done), "extend_tp" (strong momentum continues), "early_exit" (trend clearly reversed), "trailing_sl" (lock profit), "none" (no change).
+PENDING signals: "cancel" (setup invalidated by market change), "none" (keep as is).
 
-Technical Analysis Principles (Must follow strictly):
-1. Trend Alignment: If a trade is counter-trend (e.g. BUY signal when Trend is BEARISH), and the trend continues strongly without sign of reversal, suggest "early_exit" (if active) or "cancel" (if pending).
-2. S/R Barriers: If a strong horizontal level blocks the path to the TP, and momentum is slowing down, consider "early_exit" or do NOT suggest "extend_tp".
-3. Decisiveness: Be objective. Do not suggest changes unless they are clearly justified by the market state.
+Rules:
+1. Counter-trend + strong continuation = "early_exit" or "cancel".
+2. S/R blocking TP + slowing momentum = "early_exit", NOT "extend_tp".
+3. Only suggest changes with clear technical justification.
 
-Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
-{
-  "recommendation": "risk_free" | "trailing_sl" | "extend_tp" | "early_exit" | "cancel" | "none",
-  "price": number, // suggest the exact price level if recommendation is extend_tp or trailing_sl, otherwise current price or 0
-  "messageFa": "Persian instruction message to the trader, clear, blunt and decisive. e.g. 'طلا مقاومت کلیدی فلان را با شتاب شکسته است؛ حد سود را به ۲۳۶۰ افزایش دهید.'",
-  "messageEn": "English version of the message",
-  "messageAr": "Arabic version of the message",
-  "messageTr": "Turkish version of the message"
-}
+Return ONLY valid JSON (no markdown):
+{"recommendation":"risk_free"|"trailing_sl"|"extend_tp"|"early_exit"|"cancel"|"none","price":number,"messageFa":"...","messageEn":"...","messageAr":"...","messageTr":"..."}
 `;
 
         const result = await this.aiChatService.createResponse(promptMessage, 'fa', { temperature: 0.1 });

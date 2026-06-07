@@ -420,7 +420,6 @@ export class SignalsService {
       const targetDistance = Math.abs(profit - entryPrice);
       const style = detectTradingStyle(targetDistance, marketState.atr1h);
 
-
       const langConfig = {
         fa: {
           name: 'Persian (Farsi)',
@@ -428,9 +427,6 @@ export class SignalsService {
           high: '🟢 بالا',
           medium: '🟡 متوسط',
           low: '🔴 پایین',
-          exampleHigh: '📊 شانس موفقیت سیگنال: 🟢 بالا - هم‌جهت با روند اصلی صعودی در تایم‌فریم ۱ ساعته',
-          exampleLow: '📊 شانس موفقیت سیگنال: 🔴 پایین - بر خلاف روند اصلی نزولی در تایم‌فریم ۱ ساعته',
-          doubleSidedExample: '"از یک سو ... و از سوی دیگر ...", "شاید صعودی باشد یا نزولی"',
         },
         en: {
           name: 'English',
@@ -438,9 +434,6 @@ export class SignalsService {
           high: '🟢 High',
           medium: '🟡 Medium',
           low: '🔴 Low',
-          exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with the main 1-hour bullish trend',
-          exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 1-hour bearish trend',
-          doubleSidedExample: '"on one hand ... and on the other hand ...", "it might go up or it might go down"',
         },
         ar: {
           name: 'Arabic',
@@ -448,9 +441,6 @@ export class SignalsService {
           high: '🟢 مرتفعة',
           medium: '🟡 متوسطة',
           low: '🔴 منخفضة',
-          exampleHigh: '📊 فرصة نجاح الإشارة: 🟢 مرتفعة - متوافقة مع الاتجاه الصعودي الرئيسي لمدة 1 ساعة',
-          exampleLow: '📊 فرصة نجاح الإشارة: 🔴 منخفضة - عكس الاتجاه الهبوطي الرئيسي لمدة 1 ساعة',
-          doubleSidedExample: '"من ناحية ... ومن ناحية أخرى ...", "قد يكون صعودياً أو هبوطياً"',
         },
         tr: {
           name: 'Turkish',
@@ -458,9 +448,6 @@ export class SignalsService {
           high: '🟢 Yüksek',
           medium: '🟡 Orta',
           low: '🔴 Düşük',
-          exampleHigh: '📊 Sinyal Başarı Şansı: 🟢 Yüksek - 1 saatlik ana yükseliş trendiyle uyumlu',
-          exampleLow: '📊 Sinyal Başarı Şansı: 🔴 Düşük - 1 saatlik ana düşüş trendinin tersine',
-          doubleSidedExample: '"bir yandan ... دیگر yandan ...", "yükseliş de olabilir düşüş de"',
         }
       }[userLang as 'fa' | 'en' | 'ar' | 'tr'] || {
         name: 'English',
@@ -468,71 +455,38 @@ export class SignalsService {
         high: '🟢 High',
         medium: '🟡 Medium',
         low: '🔴 Low',
-        exampleHigh: '📊 Signal Success Chance: 🟢 High - Aligned with the main 1-hour bullish trend',
-        exampleLow: '📊 Signal Success Chance: 🔴 Low - Against the main 1-hour bearish trend',
-        doubleSidedExample: '"on one hand ... and on the other hand ...", "it might go up or it might go down"',
       };
 
       const styleInstructions = getStyleInstructions(style, risk);
 
       const promptMessage = `
-You are an expert, objective, and authoritative technical analyst AI for Ounce24.
-Analyze the following Gold (XAUUSD) signal based on the technical market state and parameters provided below.
+You are an expert Gold (XAUUSD) technical analyst AI for Ounce24.
+Analyze this signal objectively using the market data below.
 
-Signal Details:
-- Action Type: ${signalType === SignalType.Buy ? 'BUY' : 'SELL'}
-- Signal Status: ${status.toUpperCase()}
-- Placed Time (Created): ${signal.createdAt ? new Date(signal.createdAt).toISOString().replace('T', ' ').substring(5, 16) : 'N/A'}
-${signal.activeAt ? `- Triggered/Activated Time: ${new Date(signal.activeAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}
-${signal.closedAt ? `- Closed/Finished Time: ${new Date(signal.closedAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}
-${signal.closedOuncePrice ? `- Closed Ounce Price: $${signal.closedOuncePrice.toFixed(2)}` : ''}
-- Current Price: $${currentPrice.toFixed(2)}
-- Entry Price: $${entryPrice.toFixed(2)}
-- Take Profit (TP): $${profit.toFixed(2)} (Target Move: $${Math.abs(profit - entryPrice).toFixed(2)})
-- Stop Loss (SL): $${loss.toFixed(2)} (Risk Move: $${Math.abs(loss - entryPrice).toFixed(2)})
+Signal: ${signalType === SignalType.Buy ? 'BUY' : 'SELL'} | Status: ${status.toUpperCase()} | Entry: $${entryPrice.toFixed(2)} | TP: $${profit.toFixed(2)} | SL: $${loss.toFixed(2)} | Current: $${currentPrice.toFixed(2)}
+${signal.createdAt ? `Created: ${new Date(signal.createdAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}${signal.activeAt ? ` | Active: ${new Date(signal.activeAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}${signal.closedAt ? ` | Closed: ${new Date(signal.closedAt).toISOString().replace('T', ' ').substring(5, 16)} at $${signal.closedOuncePrice?.toFixed(2)}` : ''}
 
 Market State:
 ${marketState.semanticText}
 
 ${styleInstructions}
 
-Technical Analysis Principles (Must follow strictly to evaluate the signal):
-1. Short-Term Timeframe Priority:
-   - For Scalping or Day Trading styles, or if the duration of the signal is expected to be short-term (under 1 hour), prioritize 5m and 15m Price Action (candle rejections, breaks of support/resistance) and Moving Average (SMA20/SMA50) alignments.
-   - For BUY signals: Check if price is above the 5m and 15m SMA20 and SMA50 (indicates strong upward short-term momentum). If price is below them, momentum is bearish, which increases risk.
-   - For SELL signals: Check if price is below the 5m and 15m SMA20 and SMA50 (indicates strong downward short-term momentum). If price is above them, momentum is bullish, which increases risk.
-2. Trend Alignment: Verify if the trade aligns with the specified trend instructions in the profile settings.
-   - If the trade is counter-trend relative to the primary timeframes, it should be rated as MEDIUM or LOW success chance unless there is a very close, strong horizontal level (within 2-3 USD) rejecting the trend.
-3. Price Action & Horizontal S/R Levels:
-   - Identify if any key horizontal support or resistance levels (especially the short-term 15m levels) block the path of the trade.
-   - For a BUY signal, verify if any major resistance level blocks the target before the TP is hit (Entry < Resistance < TP).
-   - For a SELL signal, verify if any major support level blocks the target before the TP is hit (Entry > Support > TP).
-   - If a blocking level exists, explain it clearly and rate the success chance as LOW or MEDIUM.
-4. Risk Management:
-   - Verify if the Stop Loss is placed logically behind a key Support (for BUY) or Resistance (for SELL) level, or at least 1.5x ATR away from Entry.
-   - Verify if the Risk-Reward Ratio is between 1.5 and 3.0 (unless overrides permit a different ratio).
-5. Double-Checking for Logical Consistency:
-   - ALWAYS double-check your analysis: The overall success chance (High, Medium, Low) MUST be logically consistent with your technical findings. For example, do NOT rate a BUY signal as "High" success chance if price is trading below the 5m/15m/1h SMA20 and SMA50 or if there is a major resistance level blocking the path. If your technical points find significant negative indicators or counter-trend structures, the rating must be "Medium" or "Low".
+Rules:
+1. For BUY: price should be above 5m/15m SMA20+SMA50 for high rating. For SELL: below them.
+2. Counter-trend trades = MEDIUM or LOW unless strong S/R rejection within $3.
+3. If a key S/R level blocks the path to TP, rate LOW or MEDIUM.
+4. SL must be behind a valid level or >= 1.5x ATR from entry.
+5. R:R ratio should be 1.5-3.0 for standard risk.
+6. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are bearish for a BUY.
 
-Instructions for Analysis:
-1. Write the analysis strictly in ${langConfig.name}.
-2. Do NOT repeat or list the signal details (such as Entry Price, TP, SL, or Current Price) at the top of your response. The user already sees these details on their screen.
-3. Start your response directly with the final success assessment formatted exactly as follows:
-   "${langConfig.label}: [High/Medium/Low represented with a matching emoji: ${langConfig.high}, ${langConfig.medium}, ${langConfig.low}] - [1-sentence reason]"
-   For example: "${langConfig.exampleLow}" or "${langConfig.exampleHigh}"
-4. Provide a very brief, direct 1-line summary of your analysis right after this indicator.
-5. Provide the rest of your technical analysis in 1 or 2 very short, concise paragraphs. Keep the entire response brief, clean, and to the point.
-6. Your success assessment must be objective and fair. If a signal conforms to all Technical Analysis Principles, rate it High or Medium. Do not search for artificial faults.
-7. Do NOT make double-sided, hesitant, or fence-sitting statements (e.g., ${langConfig.doubleSidedExample}). Be decisive. Give professional, analytical, and highly confident feedback.
-8. Output all numbers (prices, RSI values, target moves, etc.) strictly using English digits (e.g. 2350.50), not Persian digits.
-9. Use only plain text with newlines/spacing for formatting. Use emojis to make the text engaging.
-10. Do NOT use asterisks (*) or underscores (_) or any other markdown/HTML formatting characters in your text. They look ugly and must be completely avoided. Just write plain clean text.
-11. Whenever you refer to a support level, resistance level, moving average, or past key level, ALWAYS state its exact price number (using English digits) instead of using abstract terms. For example, instead of "previous resistance", say "resistance level at [price]" or its translation in ${langConfig.name}, and instead of "key support", say "support level at [price]" or its translation in ${langConfig.name}. Never mention a price level or chart concept without including its specific numerical value.
-12. Be highly aware of the Signal Status:
-   - If the status is PENDING:
-     - Understand that the trade is NOT live yet. The price must first reach/touch the Entry Price. Explain the distance and touch probability.
-   - If the status is CLOSED or CANCELED:
-     - Write an educational review in hindsight of how the trade performed relative to the actual price path.
+Output format (in ${langConfig.name}):
+- Line 1: "${langConfig.label}: [${langConfig.high}/${langConfig.medium}/${langConfig.low}] - [reason]"
+- Line 2: Brief 1-line summary
+- 1-2 short paragraphs of technical reasoning
+- Do NOT repeat signal details. Do NOT use markdown (*/_). Use plain text + emojis.
+- All numbers in English digits. Always state exact price levels.
+- Be decisive, not fence-sitting.
+${status === 'pending' ? '- PENDING: trade is not live yet. Discuss distance to entry and touch probability.' : ''}${status === 'closed' || status === 'canceled' ? '- CLOSED/CANCELED: write a brief educational review of the outcome.' : ''}
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
@@ -617,43 +571,25 @@ Instructions for Analysis:
       const styleInstructions = getStyleInstructions(style, risk);
 
       const promptMessage = `
-You are an expert, bold, and authoritative quantitative trading system for Ounce24.
-Generate a high-probability Gold (XAUUSD) trading signal based on the technical market state and parameters provided below.
+You are a strict Gold (XAUUSD) quantitative trading system for Ounce24.
+Generate ONLY high-confidence signals that pass ALL checks below. If no valid setup exists, return null.
 
 Market State:
 ${marketState.semanticText}
 
 ${styleInstructions}
 
-Technical Analysis Principles (Must follow strictly to generate the signal):
-1. Short-Term Timeframe Priority:
-   - For Scalping or Day Trading styles, prioritize the 5m and 15m timeframes. The signal direction must align with the short-term trend and SMA20/50 momentum.
-   - For BUY signals: Only generate if price is supported by 5m/15m SMA20 and SMA50 (momentum is bullish).
-   - For SELL signals: Only generate if price is below 5m/15m SMA20 and SMA50 (momentum is bearish).
-2. Trend Alignment: The signal MUST align with the specified trend instructions in the profile settings.
-3. Price Action & Horizontal Levels:
-   - For a BUY signal: The entry price must be above key support (specifically checking 15m local support), and take profit must not be blocked by any key resistance levels.
-   - For a SELL signal: The entry price must be below key resistance (specifically checking 15m local resistance), and take profit must not be blocked by any key support levels.
-   - Check local 15m candle patterns (e.g. rejection candles at S/R) to confirm the entry and bounce validity.
-4. Risk Management & Double-Checking:
-   - Stop Loss must be placed behind a valid swing level or calculated as at least 1.5x to 2x ATR(14) from Entry (unless overrides permit a different ratio).
-   - Risk-Reward Ratio (TP / SL distance) must be between 1.5 and 3.0 (unless overrides permit a different ratio).
-   - Double-check that entryPrice, takeProfit, and stopLoss are logically placed relative to the current price (e.g. for BUY, takeProfit > entryPrice and stopLoss < entryPrice).
-5. Entry Execution:
-   - Use "instantEntry: true" ONLY when the current price is at an ideal execution level.
-   - Use "instantEntry: false" when waiting for a pullback/breakout is wiser. Specifying the target entryPrice at that level.
+Strict Rules (MUST ALL pass to generate a signal):
+1. Direction MUST align with the dominant trend. For BUY: price must be above 5m and 15m SMA20+SMA50. For SELL: below them. NEVER generate counter-trend signals.
+2. No key S/R level may block the path from Entry to TP.
+3. SL must be behind a valid swing level or >= 1.5x ATR from Entry.
+4. R:R ratio must be 1.5-3.0 for standard risk.
+5. Use instantEntry=true ONLY if current price is at an ideal level. Otherwise set a limit entry.
+6. SELF-CHECK: Before outputting, verify your signal would receive a HIGH success rating if analyzed. If it would receive MEDIUM or LOW, do NOT output it — return null instead.
 
-Instructions for Output:
-1. Write the analysis/reasoning strictly in ${langName}. Do NOT use any asterisks (*) or markdown formatting in your text.
-2. Return your response ONLY as a valid JSON object matching the following TypeScript interface (do NOT include any markdown code blocks, backticks, or other text):
-{
-  "type": "buy" | "sell",
-  "entryPrice": number,
-  "takeProfit": number,
-  "stopLoss": number,
-  "instantEntry": boolean,
-  "generationAnalysis": "Write a brief 1-2 paragraph technical reasoning for this trade setup in ${langName}. Explain how it aligns with the trend, SMA, RSI, and horizontal levels."
-}
+Output: Return ONLY a valid JSON object (no markdown, no backticks):
+{"type":"buy"|"sell","entryPrice":number,"takeProfit":number,"stopLoss":number,"instantEntry":boolean,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName}. No asterisks or markdown."}
+OR if no valid setup exists: {"type":null}
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
@@ -667,9 +603,40 @@ Instructions for Output:
       let generatedSignal = null;
       let parseError = false;
       try {
-        generatedSignal = JSON.parse(cleanText);
+        const parsed = JSON.parse(cleanText);
+        // If AI returned null signal (no valid setup)
+        if (!parsed || parsed.type === null || parsed.type === 'null') {
+          generatedSignal = null;
+        } else {
+          generatedSignal = parsed;
+        }
       } catch (e) {
         parseError = true;
+      }
+
+      // Coherence check: if signal was generated, do a quick validation
+      if (generatedSignal && !parseError) {
+        const isBuy = generatedSignal.type === 'buy';
+        const entry = generatedSignal.entryPrice || 0;
+        const tp = generatedSignal.takeProfit || 0;
+        const sl = generatedSignal.stopLoss || 0;
+
+        // Basic logical validation
+        const logicallyValid = isBuy
+          ? (tp > entry && sl < entry)
+          : (tp < entry && sl > entry);
+
+        // Trend alignment check
+        const trendAligned = isBuy
+          ? (marketState.trend5m !== 'Bearish' && marketState.trend15m !== 'Bearish')
+          : (marketState.trend5m !== 'Bullish' && marketState.trend15m !== 'Bullish');
+
+        if (!logicallyValid || !trendAligned) {
+          // Signal failed coherence check — discard it
+          generatedSignal = null;
+          parseError = true;
+          cleanText = cleanText + '\n\n[Signal rejected by coherence check: failed trend/logic validation]';
+        }
       }
 
       // Deduct 20 gems from user
