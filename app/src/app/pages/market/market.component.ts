@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { OuncePriceService } from '../../services/ounce-price.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -96,7 +97,7 @@ export interface MarketStateSummary {
 })
 export class MarketComponent {
   private readonly http = inject(HttpClient);
-  
+  public readonly priceService = inject(OuncePriceService);
   activeTab = signal<'analysis' | 'chart'>('analysis');
 
   constructor() {

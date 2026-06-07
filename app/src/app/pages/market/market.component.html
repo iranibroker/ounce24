@@ -18,12 +18,13 @@
       <app-data-loading></app-data-loading>
     } @else {
       @if (query.data(); as data) {
+        @let currentPrice = priceService.value() > 0 ? priceService.value() : data.currentPrice;
         <!-- Spot Price Card -->
         <mat-card class="price-card animate-fade-in">
           <mat-card-content>
             <div class="price-label">{{ 'market.currentPrice' | translate }}</div>
             <div class="price-value pulse">
-              <span class="currency">$</span>{{ data.currentPrice | number:'1.2-2' }}
+              <span class="currency">$</span>{{ currentPrice | number:'1.2-2' }}
             </div>
           </mat-card-content>
         </mat-card>
@@ -47,14 +48,14 @@
                 </div>
                 <div class="sma-detail">
                   <span>SMA20: ${{ data.sma20_5m | number:'1.2-2' }}</span>
-                  <span class="direction" [ngClass]="data.currentPrice >= data.sma20_5m ? 'up' : 'down'">
-                    ({{ 'market.' + (data.currentPrice >= data.sma20_5m ? 'above' : 'below') | translate }} SMA20)
+                  <span class="direction" [ngClass]="currentPrice >= data.sma20_5m ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma20_5m ? 'above' : 'below') | translate }} SMA20)
                   </span>
                 </div>
                 <div class="sma-detail">
                   <span>SMA50: ${{ data.sma50_5m | number:'1.2-2' }}</span>
-                  <span class="direction" [ngClass]="data.currentPrice >= data.sma50_5m ? 'up' : 'down'">
-                    ({{ 'market.' + (data.currentPrice >= data.sma50_5m ? 'above' : 'below') | translate }} SMA50)
+                  <span class="direction" [ngClass]="currentPrice >= data.sma50_5m ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma50_5m ? 'above' : 'below') | translate }} SMA50)
                   </span>
                 </div>
               </div>
@@ -71,14 +72,14 @@
                 </div>
                 <div class="sma-detail">
                   <span>SMA20: ${{ data.sma20_15m | number:'1.2-2' }}</span>
-                  <span class="direction" [ngClass]="data.currentPrice >= data.sma20_15m ? 'up' : 'down'">
-                    ({{ 'market.' + (data.currentPrice >= data.sma20_15m ? 'above' : 'below') | translate }} SMA20)
+                  <span class="direction" [ngClass]="currentPrice >= data.sma20_15m ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma20_15m ? 'above' : 'below') | translate }} SMA20)
                   </span>
                 </div>
                 <div class="sma-detail">
                   <span>SMA50: ${{ data.sma50_15m | number:'1.2-2' }}</span>
-                  <span class="direction" [ngClass]="data.currentPrice >= data.sma50_15m ? 'up' : 'down'">
-                    ({{ 'market.' + (data.currentPrice >= data.sma50_15m ? 'above' : 'below') | translate }} SMA50)
+                  <span class="direction" [ngClass]="currentPrice >= data.sma50_15m ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma50_15m ? 'above' : 'below') | translate }} SMA50)
                   </span>
                 </div>
               </div>
@@ -95,14 +96,14 @@
                 </div>
                 <div class="sma-detail">
                   <span>SMA20: ${{ data.sma20_1h | number:'1.2-2' }}</span>
-                  <span class="direction" [ngClass]="data.currentPrice >= data.sma20_1h ? 'up' : 'down'">
-                    ({{ 'market.' + (data.currentPrice >= data.sma20_1h ? 'above' : 'below') | translate }} SMA20)
+                  <span class="direction" [ngClass]="currentPrice >= data.sma20_1h ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma20_1h ? 'above' : 'below') | translate }} SMA20)
                   </span>
                 </div>
                 <div class="sma-detail">
                   <span>SMA50: ${{ data.sma50_1h | number:'1.2-2' }}</span>
-                  <span class="direction" [ngClass]="data.currentPrice >= data.sma50_1h ? 'up' : 'down'">
-                    ({{ 'market.' + (data.currentPrice >= data.sma50_1h ? 'above' : 'below') | translate }} SMA50)
+                  <span class="direction" [ngClass]="currentPrice >= data.sma50_1h ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma50_1h ? 'above' : 'below') | translate }} SMA50)
                   </span>
                 </div>
               </div>
