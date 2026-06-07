@@ -4,7 +4,23 @@
     <meta charset="utf-8" />
     <title>ounce24</title>
     <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- Prevent zoom on mobile devices -->
+    <script>
+      document.addEventListener('gesturestart', function (e) {
+        e.preventDefault();
+      });
+      document.addEventListener('touchstart', function (e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    </script>
     <link rel="icon" type="image/svg+xml" href="images/logo-icon.svg" />
     <link rel="alternate icon" type="image/png" href="images/logo-icon.png" />
     <link rel="manifest" href="/manifest.json" />

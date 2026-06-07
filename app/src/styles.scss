@@ -87,6 +87,7 @@ html,
 body {
   min-height: 100%;
   font-size: 14px;
+  touch-action: pan-x pan-y;
 }
 body {
   margin: 0;
