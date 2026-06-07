@@ -639,20 +639,22 @@ OR if no valid setup exists: {"type":null}
         }
       }
 
-      // Deduct 20 gems from user
-      await this.userModel
-        .findByIdAndUpdate(user.id, {
-          $inc: { gem: -20 },
-        })
-        .exec();
+      // Deduct 20 gems from user only if a signal was successfully generated
+      if (generatedSignal && !parseError) {
+        await this.userModel
+          .findByIdAndUpdate(user.id, {
+            $inc: { gem: -20 },
+          })
+          .exec();
 
-      this.gemLogModel.create({
-        user: user.id,
-        gemsChange: -20,
-        gemsBefore: user.gem,
-        gemsAfter: user.gem - 20,
-        action: GemLogAction.GenerateSignal,
-      });
+        this.gemLogModel.create({
+          user: user.id,
+          gemsChange: -20,
+          gemsBefore: user.gem,
+          gemsAfter: user.gem - 20,
+          action: GemLogAction.GenerateSignal,
+        });
+      }
 
       return {
         signal: generatedSignal,

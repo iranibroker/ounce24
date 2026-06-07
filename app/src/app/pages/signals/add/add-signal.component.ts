@@ -3,6 +3,7 @@ import { saxArrowLeftOutline, saxTrendUpOutline, saxTrendDownOutline } from '@ng
 import { saxTrendUpBold, saxTrendDownBold } from '@ng-icons/iconsax/bold';
 import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateService } from '@ngx-translate/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -48,6 +49,7 @@ export class AddSignalComponent {
   isGenerating = false;
   private ounceService = inject(OuncePriceService);
   private auth = inject(AuthService);
+  private translateService = inject(TranslateService);
 
   constructor(
     private fb: FormBuilder,
@@ -205,11 +207,15 @@ export class AddSignalComponent {
       next: (response) => {
         this.isGenerating = false;
         
-        if (response.parseError || !response.signal) {
-          window.alert(
-            'سیگنال توسط هوش مصنوعی تولید شد اما به صورت خودکار قالب‌بندی و بارگذاری نشد. لطفاً مقادیر زیر را به صورت دستی وارد کنید:\n\n' + 
-            response.rawText
-          );
+        if (response.parseError) {
+          const alertMessage = this.translateService.instant('addSignal.generateError', { rawText: response.rawText });
+          window.alert(alertMessage);
+          return;
+        }
+
+        if (!response.signal) {
+          const alertMessage = this.translateService.instant('addSignal.noSetupFound');
+          window.alert(alertMessage);
           return;
         }
 

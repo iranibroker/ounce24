@@ -248,7 +248,9 @@
     "analyzeWithAI": "Yapay Zeka ile Analiz Et",
     "generateWithAI": "Yapay Zeka ile Sinyal Oluştur (20 GEM)",
     "generating": "Yapay zekadan sinyal oluşturuluyor...",
-    "gemRequired": "İşlem sinyalinizi yapay zeka ile analiz etmek için gem'lere ihtiyacınız var"
+    "gemRequired": "İşlem sinyalinizi yapay zeka ile analiz etmek için gem'lere ihtiyacınız var",
+    "generateError": "Sinyal yapay zeka tarafından oluşturuldu ancak otomatik olarak ayrıştırılamadı. Lütfen değerleri manuel olarak girin:\n\n{{rawText}}",
+    "noSetupFound": "Mevcut piyasa koşullarında yüksek güvenli bir işlem kurulumu bulunamadı. Lütfen daha sonra tekrar deneyin veya yapay zeka ayarlarınızı düzenleyin."
   },
   "languageSelection": {
     "title": "Dil Seçin",
