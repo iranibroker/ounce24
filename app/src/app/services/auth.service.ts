@@ -24,8 +24,6 @@ export class AuthService {
         localStorage.setItem(JWT_KEY, currentToken);
       } else {
         localStorage.removeItem(JWT_KEY);
-        localStorage.removeItem('app_language');
-        this.languageService.setLanguage('en', true);
       }
     });
 
