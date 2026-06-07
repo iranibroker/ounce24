@@ -486,7 +486,7 @@ Output format (in ${langConfig.name}):
 - Do NOT repeat signal details. Do NOT use markdown (*/_). Use plain text + emojis.
 - All numbers in English digits. Always state exact price levels.
 - Be decisive, not fence-sitting.
-${status === 'pending' ? '- PENDING: trade is not live yet. Discuss distance to entry and touch probability.' : ''}${status === 'closed' || status === 'canceled' ? '- CLOSED/CANCELED: write a brief educational review of the outcome.' : ''}
+${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss distance to entry and touch probability.' : ''}${status === SignalStatus.Closed || status === SignalStatus.Canceled ? '- CLOSED/CANCELED: write a brief educational review of the outcome.' : ''}
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
