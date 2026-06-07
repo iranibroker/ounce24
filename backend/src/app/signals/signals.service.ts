@@ -420,38 +420,6 @@ export class SignalsService {
       const targetDistance = Math.abs(profit - entryPrice);
       const style = detectTradingStyle(targetDistance, marketState.atr1h);
 
-      // Check if we have a fresh generation analysis cached (less than 30 minutes old)
-      const isFresh = signal.createdAt ? (Date.now() - new Date(signal.createdAt).getTime() < 30 * 60 * 1000) : true;
-      const hasOverrides = overrides?.riskTolerance && overrides.riskTolerance !== user.riskTolerance;
-      if (signal.generationAnalysis && isFresh && !hasOverrides) {
-        return {
-          analysis: signal.generationAnalysis,
-          signal,
-          user,
-          currentPrice: currentPrice,
-          totalTokens: 0,
-        };
-      }
-
-      // Check if we have a fresh matching analysis in our SignalAnalyze collection (less than 30 minutes old)
-      const freshAnalyze = await this.signalAnalyzeModel.findOne({
-        signal: signal.id || signal._id || null,
-        creator: user.id || user._id,
-        tradingStyle: style,
-        riskTolerance: risk,
-        language: userLang,
-        createdAt: { $gte: new Date(Date.now() - 30 * 60 * 1000) }
-      }).sort({ createdAt: -1 }).exec();
-
-      if (freshAnalyze) {
-        return {
-          analysis: freshAnalyze.analyzeText,
-          signal,
-          user,
-          currentPrice: currentPrice,
-          totalTokens: freshAnalyze.totalTokens || 0,
-        };
-      }
 
       const langConfig = {
         fa: {

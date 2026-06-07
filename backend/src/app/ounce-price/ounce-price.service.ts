@@ -61,30 +61,43 @@ export class OuncePriceService implements OnModuleInit {
     return this.calculateMarketOpen(date);
   }
 
-  /** Pure UTC calculation — no side effects. */
   private calculateMarketOpen(date: Date): boolean {
-    const day = date.getUTCDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
-    const hour = date.getUTCHours();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour12: false,
+      weekday: 'long',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
 
-    // Daily break: 22:00 to 23:00 UTC is always closed
-    if (hour === 22) return false;
+    const parts = formatter.formatToParts(date);
+    const weekday = parts.find((p) => p.type === 'weekday')!.value;
+    const hour = parseInt(parts.find((p) => p.type === 'hour')!.value, 10);
+    const minute = parseInt(parts.find((p) => p.type === 'minute')!.value, 10);
 
-    // Weekend close: Friday 22:00 UTC to Sunday 23:00 UTC
-    if (day === 6) return false;          // Saturday: always closed
-    if (day === 0) return hour >= 23;     // Sunday: open from 23:00 UTC
-    if (day === 5) return hour < 22;      // Friday: close at 22:00 UTC
-    return true;                          // Mon, Tue, Wed, Thu
+    const timeInHours = hour + minute / 60;
+
+    if (weekday === 'Saturday') {
+      return false;
+    }
+    if (weekday === 'Sunday') {
+      return timeInHours >= 18;
+    }
+    if (weekday === 'Friday') {
+      return timeInHours < 17;
+    }
+    return timeInHours < 17 || timeInHours >= 18;
   }
 
-  /** Fired at 22:00 UTC Mon–Fri (market daily break / weekend close on Fri). */
-  @Cron('0 22 * * 1-5', { timeZone: 'UTC' })
+  /** Fired at 17:00 America/New_York Mon–Fri (market daily break / weekend close on Fri). */
+  @Cron('0 17 * * 1-5', { timeZone: 'America/New_York' })
   triggerMarketClose() {
     this.marketOpen = false;
     this.eventEmitter.emit(EVENTS.MARKET_CLOSED);
   }
 
-  /** Fired at 23:00 UTC Sun–Thu (market reopens after daily break). */
-  @Cron('0 23 * * 0-4', { timeZone: 'UTC' })
+  /** Fired at 18:00 America/New_York Sun–Thu (market reopens after daily break). */
+  @Cron('0 18 * * 0-4', { timeZone: 'America/New_York' })
   triggerMarketOpen() {
     this.marketOpen = true;
     this.eventEmitter.emit(EVENTS.MARKET_OPENED);
