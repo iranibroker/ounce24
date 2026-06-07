@@ -1,16 +1,26 @@
 @let price = priceService.value();
-@if (priceService.isMarketOpen()) {
-  <a
-    class="price-pill"
-    href="https://www.tradingview.com/symbols/XAUUSD"
-    target="_blank"
-  >
+<a
+  class="price-toolbar"
+  href="https://www.tradingview.com/symbols/XAUUSD"
+  target="_blank"
+>
+  <div class="left-section">
     <img
-      src="https://s3-symbol-logo.tradingview.com/metal/gold--big.svg"
-      alt="gold"
+      src="images/logo.svg"
+      alt="Ounce24"
+      class="app-logo"
     />
-    <span class="price-text" [style.color]="color()">
+  </div>
+  
+  <div class="right-section">
+    @if (!priceService.isMarketOpen()) {
+      <span class="market-badge closed">
+        <span class="dot"></span>
+        <span class="badge-text">{{ 'octopus.marketClosed' | translate }}</span>
+      </span>
+    }
+    <span class="price-text" [style.color]="color() || '#f1f5f9'">
       {{ (price > 0 ? price : 2345.67) | currency:'USD':'symbol':'1.2-2' }}
     </span>
-  </a>
-}
+  </div>
+</a>

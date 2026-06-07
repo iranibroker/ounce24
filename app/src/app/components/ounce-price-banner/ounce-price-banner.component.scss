@@ -1,45 +1,78 @@
 :host {
-  direction: ltr !important;
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 32px;
+  background-color: rgba(24, 24, 24, 0.85); // slightly lighter than body background (#121212)
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.price-pill {
-  direction: ltr !important;
-  position: fixed;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  display: inline-flex;
+.price-toolbar {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  background-color: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  padding: 2px 8px 2px 6px;
-  height: 20px;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 16px;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: inherit;
+  transition: background-color 0.2s ease;
+  direction: ltr !important;
 
   &:hover {
-    background-color: rgba(20, 20, 20, 0.9);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateX(-50%) scale(1.05);
+    background-color: rgba(255, 255, 255, 0.02);
   }
 
-  img {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: block;
+  .left-section {
+    display: flex;
+    align-items: center;
+
+    .app-logo {
+      height: 16px;
+      display: block;
+    }
   }
 
-  .price-text {
-    font-size: 10px;
-    font-weight: 700;
-    color: #f1f5f9;
-    letter-spacing: -0.01em;
-    line-height: 1;
+  .right-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .market-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+
+      .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        display: block;
+      }
+
+      &.closed {
+        color: #f87171;
+        background-color: rgba(248, 113, 113, 0.08);
+
+        .dot {
+          background-color: #f87171;
+        }
+      }
+    }
+
+    .price-text {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.01em;
+      transition: color 0.15s ease;
+    }
   }
 }
