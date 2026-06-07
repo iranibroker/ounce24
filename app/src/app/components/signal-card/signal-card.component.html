@@ -11,10 +11,19 @@
     >
       <img mat-card-avatar [appAvatar]="signal().owner" [routerLink]="['/profile', signal().owner.id]" (click)="$event.stopPropagation()" style="cursor: pointer;" />
       <mat-card-title [routerLink]="['/profile', signal().owner.id]" (click)="$event.stopPropagation()" style="cursor: pointer;">
-        {{ ownerTitle }} <span style="opacity: 0.6; font-weight: 500; font-size: 0.9em; margin-inline-start: 4px;">(<ng-icon name="saxStarOutline" size="14px" style="margin-top: -2px;"></ng-icon> {{ signal().owner.score.toFixed(1) }})</span>
+        {{ ownerTitle }}
+        <span class="owner-badges">
+          @if (signal().owner.rank) {
+            <span class="rank-badge"><ng-icon name="saxCupBold" size="10px"></ng-icon>{{ signal().owner.rank }}</span>
+          }
+          <span class="score-badge" [class.score-negative]="signal().owner.score < 0">
+            <ng-icon name="saxStarOutline" size="11px"></ng-icon>
+            {{ signal().owner.score?.toFixed(1) }}
+          </span>
+        </span>
       </mat-card-title>
       <mat-card-subtitle>
-        {{ signal().createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        {{ signal().createdAt | date: 'MMM d · HH:mm' }}
       </mat-card-subtitle>
       <div class="header-actions">
         @if (signal().status === SignalStatus.Active || signal().status === SignalStatus.Closed) {

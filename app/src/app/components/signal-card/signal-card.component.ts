@@ -1,6 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxStarOutline, saxActivityOutline, saxClockOutline, saxPlayOutline, saxStopOutline } from '@ng-icons/iconsax/outline';
-import { saxTrendUpBold, saxTrendDownBold, saxDiamondsBold } from '@ng-icons/iconsax/bold';
+import { saxTrendUpBold, saxTrendDownBold, saxDiamondsBold, saxCupBold } from '@ng-icons/iconsax/bold';
 import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -27,7 +27,7 @@ import { Router } from '@angular/router';
     MatChipsModule,
     MatTooltipModule,
     MatButtonModule,],
-  providers: [provideIcons({ saxStarOutline, saxActivityOutline, saxClockOutline, saxPlayOutline, saxStopOutline, saxDiamondsBold, saxTrendUpBold, saxTrendDownBold })],
+  providers: [provideIcons({ saxStarOutline, saxActivityOutline, saxClockOutline, saxPlayOutline, saxStopOutline, saxDiamondsBold, saxTrendUpBold, saxTrendDownBold, saxCupBold })],
   templateUrl: './signal-card.component.html',
   styleUrl: './signal-card.component.scss',
 })

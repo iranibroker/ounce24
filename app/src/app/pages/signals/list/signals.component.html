@@ -19,13 +19,6 @@
   <div class="status-chips-container">
     <button 
       class="status-chip" 
-      [class.active]="status() === 'all'" 
-      (click)="status.set('all')"
-    >
-      {{ 'signal.status.all' | translate }}
-    </button>
-    <button 
-      class="status-chip" 
       [class.active]="status() === SignalStatus.Active" 
       (click)="status.set(SignalStatus.Active)"
     >
@@ -44,6 +37,13 @@
       (click)="status.set(SignalStatus.Closed)"
     >
       {{ 'signal.status.CLOSED' | translate }}
+    </button>
+    <button 
+      class="status-chip" 
+      [class.active]="status() === 'all'" 
+      (click)="status.set('all')"
+    >
+      {{ 'signal.status.all' | translate }}
     </button>
   </div>
 

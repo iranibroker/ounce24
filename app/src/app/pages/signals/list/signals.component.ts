@@ -44,7 +44,7 @@ export class SignalsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
 
-  status = signal<string>('all');
+  status = signal<string>(SignalStatus.Active);
   filter = signal<'all' | 'myself' | 'following' | 'bookmarked'>('all');
   SignalStatus = SignalStatus;
 

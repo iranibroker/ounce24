@@ -21,7 +21,7 @@ import { AuthService } from '../auth/auth.service';
 @Controller('signals')
 export class SignalsController {
   private readonly publicUserFields =
-    'name title avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore createdAt';
+    'name title avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore rank createdAt';
 
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
@@ -50,6 +50,7 @@ export class SignalsController {
         'totalSignals',
         'winRate',
         'weekScore',
+        'rank',
         'createdAt',
       ];
       const sanitizedOwner: any = {};
@@ -190,7 +191,7 @@ export class SignalsController {
       .find(query)
       .populate('owner', this.publicUserFields)
       .sort({
-        updatedAt: -1,
+        createdAt: -1,
       })
       .limit(PAGE_SIZE)
       .skip(page ? Number(page) * PAGE_SIZE : 0);

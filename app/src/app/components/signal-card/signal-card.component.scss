@@ -161,7 +161,7 @@ mat-chip {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  padding: 10px 12px !important;
+  padding: 8px 12px !important;
 
   ::ng-deep {
     .mat-mdc-card-header-text {
@@ -174,38 +174,44 @@ mat-chip {
       margin-inline-start: 8px !important;
       padding: 0 !important;
       padding-inline: 0 !important;
-      gap: 2px !important;
+      gap: 1px !important;
+      overflow: hidden !important;
     }
 
     .mat-mdc-card-title {
-      font-size: 1.05rem !important;
+      font-size: 0.92rem !important;
       font-weight: 600 !important;
       margin: 0 !important;
       margin-inline: 0 !important;
       padding: 0 !important;
       padding-inline: 0 !important;
-      line-height: 1.2 !important;
+      line-height: 1.3 !important;
       color: #f1f5f9 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      flex-wrap: nowrap !important;
     }
 
     .mat-mdc-card-subtitle {
-      font-size: 0.8rem !important;
+      font-size: 0.7rem !important;
       margin: 0 !important;
       margin-inline: 0 !important;
-      margin-top: 2px !important;
+      margin-top: 1px !important;
       padding: 0 !important;
       padding-inline: 0 !important;
-      color: var(--mat-sys-outline) !important;
+      color: rgba(255, 255, 255, 0.35) !important;
       display: flex !important;
       align-items: center !important;
       gap: 4px !important;
       line-height: 1.2 !important;
+      letter-spacing: 0.02em !important;
     }
 
     img.mat-mdc-card-avatar {
       margin: 0 !important;
-      width: 40px !important;
-      height: 40px !important;
+      width: 36px !important;
+      height: 36px !important;
       border-radius: 10px !important;
       object-fit: cover;
       align-self: center !important;
@@ -213,5 +219,61 @@ mat-chip {
   }
 }
 
+.owner-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: 2px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
 
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  padding: 1px 5px;
+  border-radius: 6px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 
+  ng-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #fbbf24;
+  }
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: 6px;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  ng-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &.score-negative {
+    color: var(--mat-sys-error);
+    background: rgba(239, 68, 68, 0.1);
+
+    ng-icon {
+      color: var(--mat-sys-error);
+    }
+  }
+}
