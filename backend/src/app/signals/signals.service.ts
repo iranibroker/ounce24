@@ -472,12 +472,12 @@ ${marketState.semanticText}
 ${styleInstructions}
 
 Rules:
-1. For BUY: price should be above 5m/15m SMA20+SMA50 for high rating. For SELL: below them.
-2. Counter-trend trades = MEDIUM or LOW unless strong S/R rejection within $3.
+1. Trend & Entry Alignment: For BUY, the entryPrice (or currentPrice if live) should be aligned with the dominant trend of higher timeframes (15m/1h SMA20+SMA50) or placed at a key support/Order Block/FVG. For SELL, aligned with the dominant downtrend or placed at key resistance/OB/FVG.
+2. Counter-trend trades (against dominant 15m/1h trend) = MEDIUM or LOW unless strong S/R rejection exists.
 3. If a key S/R level blocks the path to TP, rate LOW or MEDIUM.
 4. SL must be behind a valid level or >= 1.5x ATR from entry.
 5. R:R ratio should be 1.5-3.0 for standard risk.
-6. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are bearish for a BUY.
+6. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are opposing the direction.
 
 Output format (in ${langConfig.name}):
 - Line 1: "${langConfig.label}: [${langConfig.high}/${langConfig.medium}/${langConfig.low}] - [reason]"
@@ -571,27 +571,27 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
       const styleInstructions = getStyleInstructions(style, risk);
 
       const promptMessage = `
-You are a strict Gold (XAUUSD) quantitative trading system for Ounce24.
-Generate ONLY high-confidence signals (either instant market entry or pending limit orders) that pass ALL checks below. If no valid setup exists, return null.
+You are a Gold (XAUUSD) quantitative trading assistant for Ounce24.
+Analyze the current market state and generate the best possible trading signal (either instant market entry or pending limit order) based on the conditions.
+You MUST ALWAYS return a valid signal. Do not return null.
 
 Market State:
 ${marketState.semanticText}
 
 ${styleInstructions}
 
-Strict Rules (MUST ALL pass to generate a signal):
-1. Trend Alignment: The signal direction must align with the dominant trend (15m and 1h). For BUY: the 15m or 1h trend must be Bullish (never Bearish). For SELL: Bearish (never Bullish).
+Guidelines to generate the best setup:
+1. Trend & Market Structure: Align the signal direction with the dominant trend of higher timeframes (15m and 1h). If the market is consolidating (no clear trend), look for range-bound trade opportunities (e.g., buying near key support levels, selling near key resistance levels).
 2. Entry Type Selection:
-   - INSTANT ENTRY (instantEntry=true): Use ONLY if current price is at an ideal entry level (e.g., breakout confirmation or immediate bounce).
-   - LIMIT ENTRY (instantEntry=false): If current price is not at an ideal level (e.g. price is overextended or in a minor pullback), set a pending limit order (entryPrice at a key support/resistance, fresh Order Block, or FVG) where price is highly likely to retract and trigger the entry before continuing the trend.
-3. No key S/R level may block the path from Entry to TP.
-4. SL must be behind a valid swing level or >= 1.5x ATR from Entry.
-5. R:R ratio must be 1.5-3.0 for standard risk.
-6. SELF-CHECK: Before outputting, verify your signal would receive a HIGH success rating if analyzed. If it would receive MEDIUM or LOW, do NOT output it — return null instead.
+   - INSTANT ENTRY (instantEntry=true): Use if current price is at a very favorable level (breakout or support/resistance bounce).
+   - LIMIT ENTRY (instantEntry=false): If current price is not at an ideal entry zone, place a pending limit order (entryPrice) at a key support/resistance level, fresh Order Block, or FVG.
+3. Targets:
+   - TP should be set before key S/R levels.
+   - SL should be placed behind a valid swing level or >= 1.5x ATR from Entry.
+   - Risk to Reward (R:R) ratio should ideally be between 1.5 and 3.0.
 
-Output: Return ONLY a valid JSON object (no markdown, no backticks):
+Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments):
 {"type":"buy"|"sell","entryPrice":number,"takeProfit":number,"stopLoss":number,"instantEntry":boolean,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName}. No asterisks or markdown."}
-OR if no valid setup exists: {"type":null}
 `;
 
       const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
@@ -628,16 +628,11 @@ OR if no valid setup exists: {"type":null}
           ? (tp > entry && sl < entry)
           : (tp < entry && sl > entry);
 
-        // Trend alignment check: dominant trend (15m or 1h) must not oppose the signal direction.
-        const trendAligned = isBuy
-          ? (marketState.trend15m !== 'Bearish' || marketState.trend1h !== 'Bearish')
-          : (marketState.trend15m !== 'Bullish' || marketState.trend1h !== 'Bullish');
-
-        if (!logicallyValid || !trendAligned) {
+        if (!logicallyValid) {
           // Signal failed coherence check — discard it
           generatedSignal = null;
           parseError = true;
-          cleanText = cleanText + '\n\n[Signal rejected by coherence check: failed trend/logic validation]';
+          cleanText = cleanText + '\n\n[Signal rejected by coherence check: failed logical validation (TP/SL orientation)]';
         }
       }
 
