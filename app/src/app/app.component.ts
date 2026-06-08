@@ -11,6 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { PwaService } from './services/pwa.service';
 import { PwaInstallDialogComponent } from './components/pwa-install-dialog/pwa-install-dialog.component';
 import { LanguageSelectionModalComponent } from './components/language-selection-modal/language-selection-modal.component';
+import { OuncePriceService } from './services/ounce-price.service';
 
 import { OnboardingComponent } from './components/onboarding/onboarding.component';
 
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private pwaService = inject(PwaService);
+  private ouncePriceService = inject(OuncePriceService);
   private pushTimer: any = null;
   private routerSubscription: any = null;
   private languageDialogRef: any = null;
