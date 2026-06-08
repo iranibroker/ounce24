@@ -146,7 +146,7 @@ export class BaseBot {
             [
               {
                 text: t.buttons.support,
-                callback_data: 'support',
+                url: 'https://t.me/ounce24_support',
               },
             ],
             [

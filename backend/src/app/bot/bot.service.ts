@@ -73,13 +73,22 @@ We gather the best trading ideas from the market—free and practical.
     );
   }
 
+  @Command('support')
   @Action('support')
   async support(@Ctx() ctx: Context) {
     const lang = await this.getUserLang(ctx.from.id);
     const t = getTranslation(lang);
-    ctx.reply(t.supportPrompt);
-    this.setState(ctx.from.id, {
-      state: UserStateType.Support,
+    await ctx.reply(t.supportPrompt, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: t.buttons.support,
+              url: 'https://t.me/ounce24_support',
+            },
+          ],
+        ],
+      },
     });
     ctx.answerCbQuery?.();
   }

@@ -13,7 +13,8 @@ import {
   saxGlobalOutline, 
   saxLogoutOutline,
   saxCpuOutline,
-  saxTeacherOutline
+  saxTeacherOutline,
+  sax24SupportOutline
 } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { PushNotificationService } from '../../services/push-notification.service';
@@ -46,6 +47,7 @@ import { SHARED } from '../../shared';
       saxDiamondsBold,
       saxCpuOutline,
       saxTeacherOutline,
+      sax24SupportOutline,
     }),
   ],
   templateUrl: './menu.component.html',
@@ -89,6 +91,10 @@ export class MenuComponent {
       width: '400px',
       maxWidth: '95vw',
     });
+  }
+
+  contactSupport() {
+    window.open('https://t.me/ounce24_support', '_blank');
   }
 
   logout() {

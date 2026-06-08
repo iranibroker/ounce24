@@ -137,6 +137,23 @@
     </mat-card-content>
   </mat-card>
 
+  <mat-card class="settings-card clickable-card" (click)="contactSupport()">
+    <mat-card-content>
+      <div class="settings-row">
+        <div class="settings-info">
+          <div class="icon-container support-icon-container">
+            <ng-icon name="sax24SupportOutline" size="20px"></ng-icon>
+          </div>
+          <div class="settings-texts">
+            <h3>{{ 'menu.support' | translate }}</h3>
+            <p>{{ 'menu.supportDesc' | translate }}</p>
+          </div>
+        </div>
+        <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="settings-card logout-card" (click)="logout()">
     <mat-card-content>
       <div class="settings-row">

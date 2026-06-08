@@ -20,7 +20,9 @@
     "pageTitle": "Menu",
     "viewProfile": "View Profile",
     "downloadApp": "Download App",
-    "downloadAppDesc": "Install Ounce24 directly on your home screen"
+    "downloadAppDesc": "Install Ounce24 directly on your home screen",
+    "support": "Telegram Support",
+    "supportDesc": "Direct contact with Ounce24 support on Telegram"
   },
   "podcast": {
     "comingSoon": {

@@ -20,7 +20,9 @@
     "pageTitle": "Menü",
     "viewProfile": "Profili Görüntüle",
     "downloadApp": "Uygulamayı İndir",
-    "downloadAppDesc": "Ounce24'ü doğrudan ana ekranınıza yükleyin"
+    "downloadAppDesc": "Ounce24'ü doğrudan ana ekranınıza yükleyin",
+    "support": "Telegram Destek",
+    "supportDesc": "Telegram'da Ounce24 desteği ile doğrudan iletişim"
   },
   "podcast": {
     "comingSoon": {
