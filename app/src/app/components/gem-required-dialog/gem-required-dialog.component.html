@@ -11,7 +11,7 @@
   </button>
   @if (data.accept) {
     <button mat-flat-button [matDialogClose]="true">
-      {{ 'gemDialog.accept' | translate }}
+      {{ data.acceptText || ('gemDialog.accept' | translate) }}
     </button>
   }
 </mat-dialog-actions>

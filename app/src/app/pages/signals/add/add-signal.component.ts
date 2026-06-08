@@ -18,6 +18,7 @@ import {
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { SignalType, TradingStyle, RiskTolerance } from '@ounce24/types';
 import { SHARED } from '../../../shared';
 import { SignalAnalyzeService } from '../../../services/signal-analyze.service';
@@ -25,6 +26,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OuncePriceService } from '../../../services/ounce-price.service';
 import { AnalyticsService } from '../../../services/analytics.service';
 import { AuthService } from '../../../services/auth.service';
+import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 
 @Component({
   selector: 'app-add-signal',
@@ -50,6 +52,7 @@ export class AddSignalComponent {
   private ounceService = inject(OuncePriceService);
   private auth = inject(AuthService);
   private translateService = inject(TranslateService);
+  private dialog = inject(MatDialog);
 
   constructor(
     private fb: FormBuilder,
@@ -165,9 +168,11 @@ export class AddSignalComponent {
 
       this.http.post('/api/signals', signal).subscribe({
         next: () => {
-          this.snackBar.open('Signal created successfully', 'Close', {
-            duration: 3000,
-          });
+          this.snackBar.open(
+            this.translateService.instant('addSignal.success'),
+            this.translateService.instant('app.close'),
+            { duration: 3000 }
+          );
           this.analyticsService.trackEvent('signal_created', {
             signal,
           });
@@ -187,62 +192,81 @@ export class AddSignalComponent {
   generateWithAI(): void {
     if (this.isGenerating) return;
 
-    this.isGenerating = true;
-    const user = this.auth.userQuery.data();
-    const style = user?.tradingStyle || TradingStyle.Day;
-    const risk = user?.riskTolerance || RiskTolerance.Moderate;
+    const hasGems = (this.auth.userQuery.data()?.gem ?? 0) >= 2;
+    const desc = this.translateService.instant('addSignal.confirmAiGenerateDesc') + 
+      (!hasGems ? '\n\n' + this.translateService.instant('apiError.insufficientGems') : '');
 
-    this.http.post<{
-      signal: {
-        type: 'buy' | 'sell';
-        entryPrice: number;
-        takeProfit: number;
-        stopLoss: number;
-        instantEntry: boolean;
-        generationAnalysis?: string;
-      } | null;
-      rawText: string;
-      parseError: boolean;
-    }>(`/api/signals/generate?tradingStyle=${style}&riskTolerance=${risk}`, {}).subscribe({
-      next: (response) => {
-        this.isGenerating = false;
-        
-        if (response.parseError) {
-          const alertMessage = this.translateService.instant('addSignal.generateError', { rawText: response.rawText });
-          window.alert(alertMessage);
-          return;
-        }
+    this.dialog.open(GemRequiredDialogComponent, {
+      width: '400px',
+      data: {
+        description: desc,
+        accept: hasGems,
+        acceptText: this.translateService.instant('app.confirm')
+      }
+    }).afterClosed().subscribe((result) => {
+      if (result) {
+        this.isGenerating = true;
+        const user = this.auth.userQuery.data();
+        const style = user?.tradingStyle || TradingStyle.Day;
+        const risk = user?.riskTolerance || RiskTolerance.Moderate;
 
-        if (!response.signal) {
-          const alertMessage = this.translateService.instant('addSignal.noSetupFound');
-          window.alert(alertMessage);
-          return;
-        }
+        this.http.post<{
+          signal: {
+            type: 'buy' | 'sell';
+            entryPrice: number;
+            takeProfit: number;
+            stopLoss: number;
+            instantEntry: boolean;
+            generationAnalysis?: string;
+          } | null;
+          rawText: string;
+          parseError: boolean;
+        }>(`/api/signals/generate?tradingStyle=${style}&riskTolerance=${risk}`, {}).subscribe({
+          next: (response) => {
+            this.isGenerating = false;
+            
+            if (response.parseError) {
+              const alertMessage = this.translateService.instant('addSignal.generateError', { rawText: response.rawText });
+              window.alert(alertMessage);
+              return;
+            }
 
-        const generated = response.signal;
-        const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
-        
-        this.form.patchValue({
-          type: type,
-          entryPrice: generated.entryPrice,
-          takeProfit: generated.takeProfit,
-          stopLoss: generated.stopLoss,
-          instantEntry: generated.instantEntry,
-          generationAnalysis: generated.generationAnalysis || '',
-        });
+            if (!response.signal) {
+              const alertMessage = this.translateService.instant('addSignal.noSetupFound');
+              window.alert(alertMessage);
+              return;
+            }
 
-        this.snackBar.open('Signal generated and filled successfully!', 'Close', {
-          duration: 3000,
-        });
-      },
-      error: (err) => {
-        this.isGenerating = false;
-        let errorMessage = 'Failed to generate signal';
-        if (err.error && err.error.translationKey) {
-          errorMessage = err.error.translationKey;
-        }
-        this.snackBar.open(errorMessage, 'Close', {
-          duration: 3000,
+            const generated = response.signal;
+            const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
+            
+            this.form.patchValue({
+              type: type,
+              entryPrice: generated.entryPrice,
+              takeProfit: generated.takeProfit,
+              stopLoss: generated.stopLoss,
+              instantEntry: generated.instantEntry,
+              generationAnalysis: generated.generationAnalysis || '',
+            });
+
+            this.snackBar.open(
+              this.translateService.instant('addSignal.generateSuccess'),
+              this.translateService.instant('app.close'),
+              { duration: 3000 }
+            );
+          },
+          error: (err) => {
+            this.isGenerating = false;
+            let errorMessage = this.translateService.instant('addSignal.aiGenerateError');
+            if (err.error && err.error.translationKey) {
+              errorMessage = this.translateService.instant('apiError.' + err.error.translationKey);
+            }
+            this.snackBar.open(
+              errorMessage,
+              this.translateService.instant('app.close'),
+              { duration: 3000 }
+            );
+          }
         });
       }
     });

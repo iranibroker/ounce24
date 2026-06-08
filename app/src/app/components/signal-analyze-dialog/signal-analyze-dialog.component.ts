@@ -1,11 +1,11 @@
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxCloseCircleOutline, saxActivityOutline, saxStarOutline } from '@ng-icons/iconsax/outline';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  MatBottomSheetRef,
-  MAT_BOTTOM_SHEET_DATA,
-} from '@angular/material/bottom-sheet';
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialog,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -16,10 +16,8 @@ import { DataLoadingComponent } from '../data-loading/data-loading.component';
 import { injectMutation } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { GemRequiredDialogComponent } from '../gem-required-dialog/gem-required-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -34,30 +32,34 @@ interface SignalAnalyzeData {
 }
 
 @Component({
-  selector: 'app-signal-analyze-bottom-sheet',
+  selector: 'app-signal-analyze-dialog',
   standalone: true,
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
     MatDividerModule,
+    MatDialogModule,
+    TranslateModule,
     SHARED,
     DataLoadingComponent,
-    MatToolbarModule,
-    NgIcon],
-  providers: [provideIcons({ saxCloseCircleOutline, saxActivityOutline, saxStarOutline })],
-  templateUrl: './signal-analyze-bottom-sheet.component.html',
-  styleUrls: ['./signal-analyze-bottom-sheet.component.scss'],
+  ],
+  templateUrl: './signal-analyze-dialog.component.html',
+  styleUrls: ['./signal-analyze-dialog.component.scss'],
 })
-export class SignalAnalyzeBottomSheetComponent implements OnInit {
-  private bottomSheetRef = inject(MatBottomSheetRef);
+export class SignalAnalyzeDialogComponent implements OnInit {
   private http = inject(HttpClient);
-  private data = inject(MAT_BOTTOM_SHEET_DATA) as SignalAnalyzeData;
   private dialog = inject(MatDialog);
   private analyticsService = inject(AnalyticsService);
   private translate = inject(TranslateService);
   private auth = inject(AuthService);
   signal!: Signal;
+
+  constructor(
+    public dialogRef: MatDialogRef<SignalAnalyzeDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: SignalAnalyzeData,
+  ) {}
 
   analyzeMutation = injectMutation(() => ({
     mutationFn: (args: { signal: Signal; tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }) => {
@@ -89,11 +91,11 @@ export class SignalAnalyzeBottomSheetComponent implements OnInit {
 
   ngOnInit() {
     this.signal = this.data.signal;
-    this.analyticsService.trackEvent('signal_analyze_bottom_sheet_opened');
+    this.analyticsService.trackEvent('signal_analyze_dialog_opened');
   }
 
   close() {
-    this.bottomSheetRef.dismiss();
+    this.dialogRef.close();
   }
 
   analyzeSignal() {

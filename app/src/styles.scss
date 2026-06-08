@@ -167,18 +167,6 @@ input::placeholder {
     )
   );
 }
-
-.signal-analyze-bottom-sheet {
-  .mat-mdc-bottom-sheet-container {
-    border-top-left-radius: 24px !important;
-    border-top-right-radius: 24px !important;
-    padding: 0 !important;
-    background: rgba(10, 10, 10, 0.85) !important;
-    backdrop-filter: blur(10px) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
-}
-
 // ====================================================
 // Modern Premium Slate & Glassmorphic Design System
 // ====================================================
@@ -518,6 +506,11 @@ img[appAvatar] {
 }
 
 // 7. Glassmorphic Dialogs & Popovers
+.cdk-overlay-backdrop {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
 .mat-mdc-dialog-container {
   border-radius: 20px !important;
   background: rgba(10, 10, 10, 0.85) !important;
@@ -525,6 +518,42 @@ img[appAvatar] {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
   overflow: hidden !important;
+}
+
+.rtl {
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-title,
+  h2[mat-dialog-title],
+  .mat-mdc-dialog-content,
+  mat-dialog-content,
+  .mat-mdc-dialog-actions,
+  mat-dialog-actions,
+  .cdk-overlay-pane {
+    direction: rtl !important;
+    text-align: right !important;
+  }
+  
+  .mat-mdc-dialog-title, h2[mat-dialog-title] {
+    justify-content: flex-start !important;
+  }
+}
+
+.ltr {
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-title,
+  h2[mat-dialog-title],
+  .mat-mdc-dialog-content,
+  mat-dialog-content,
+  .mat-mdc-dialog-actions,
+  mat-dialog-actions,
+  .cdk-overlay-pane {
+    direction: ltr !important;
+    text-align: left !important;
+  }
+  
+  .mat-mdc-dialog-title, h2[mat-dialog-title] {
+    justify-content: flex-start !important;
+  }
 }
 
 // 8. Flat CSS loading spinner

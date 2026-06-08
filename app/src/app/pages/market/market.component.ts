@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { OuncePriceService } from '../../services/ounce-price.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -8,8 +8,11 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDialog } from '@angular/material/dialog';
 import { SHARED } from '../../shared';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslateService } from '@ngx-translate/core';
+import { MarketInfoDialogComponent } from '../../components/market-info-dialog/market-info-dialog.component';
 import {
   saxTrendUpOutline,
   saxTrendDownOutline,
@@ -103,7 +106,23 @@ export interface MarketStateSummary {
 export class MarketComponent {
   private readonly http = inject(HttpClient);
   public readonly priceService = inject(OuncePriceService);
+  private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
   activeTab = signal<'analysis' | 'chart'>('analysis');
+  currentTime = signal(Date.now());
+
+  lastUpdateText = computed(() => {
+    const updatedAt = this.query.dataUpdatedAt();
+    if (!updatedAt) return '';
+
+    const diffMs = this.currentTime() - updatedAt;
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) {
+      return this.translate.instant('market.updatedJustNow');
+    }
+    return this.translate.instant('market.updatedMinutesAgo', { count: diffMins });
+  });
 
   constructor() {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -112,6 +131,20 @@ export class MarketComponent {
         this.activeTab.set(saved);
       }
     }
+
+    if (typeof window !== 'undefined') {
+      setInterval(() => {
+        this.currentTime.set(Date.now());
+      }, 10000);
+    }
+  }
+
+  openInfo(key: string) {
+    this.dialog.open(MarketInfoDialogComponent, {
+      width: '450px',
+      maxWidth: '95vw',
+      data: { key },
+    });
   }
 
   setTab(value: 'analysis' | 'chart') {

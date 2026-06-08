@@ -29,10 +29,19 @@
           </mat-card-content>
         </mat-card>
 
+        <div class="market-update-status animate-fade-in">
+          <span class="update-time">{{ lastUpdateText() }}</span>
+          <span class="update-divider">•</span>
+          <span class="update-interval">{{ 'market.updateIntervalHint' | translate }}</span>
+        </div>
+
         <!-- Trends & Moving Averages Card -->
         <mat-card class="dashboard-card animate-fade-in">
-          <mat-card-header>
+          <mat-card-header class="header-with-action">
             <mat-card-title>{{ 'market.trends' | translate }}</mat-card-title>
+            <button mat-icon-button (click)="openInfo('trends')" class="info-btn" title="Help">
+              <ng-icon name="saxInfoCircleOutline" size="18px"></ng-icon>
+            </button>
           </mat-card-header>
           <mat-card-content>
             <div class="trend-grid">
@@ -144,7 +153,12 @@
             <div class="indicator-grid">
               <!-- RSI Table/List -->
               <div class="indicator-group">
-                <h3>RSI (14)</h3>
+                <div class="group-header-row">
+                  <h3>RSI (14)</h3>
+                  <button mat-icon-button (click)="openInfo('rsi')" class="info-btn" title="Help">
+                    <ng-icon name="saxInfoCircleOutline" size="16px"></ng-icon>
+                  </button>
+                </div>
                 <div class="indicator-row">
                   <span class="ind-label">5m RSI</span>
                   <div class="ind-value-wrapper">
@@ -185,7 +199,12 @@
 
               <!-- Volatility (ATR) -->
               <div class="indicator-group">
-                <h3>{{ 'market.indicators' | translate }} & Volatility</h3>
+                <div class="group-header-row">
+                  <h3>{{ 'market.indicators' | translate }} & Volatility</h3>
+                  <button mat-icon-button (click)="openInfo('atr')" class="info-btn" title="Help">
+                    <ng-icon name="saxInfoCircleOutline" size="16px"></ng-icon>
+                  </button>
+                </div>
                 <div class="indicator-row">
                   <span class="ind-label">5m ATR (Volatility)</span>
                   <span class="ind-value">${{ data.atr5m | number:'1.2-2' }}</span>
@@ -205,8 +224,11 @@
 
         <!-- Key Support & Resistance Levels Card -->
         <mat-card class="dashboard-card animate-fade-in">
-          <mat-card-header>
+          <mat-card-header class="header-with-action">
             <mat-card-title>{{ 'market.levels' | translate }}</mat-card-title>
+            <button mat-icon-button (click)="openInfo('levels')" class="info-btn" title="Help">
+              <ng-icon name="saxInfoCircleOutline" size="18px"></ng-icon>
+            </button>
           </mat-card-header>
           <mat-card-content>
             <div class="levels-container">
@@ -252,7 +274,12 @@
             <div class="smc-grid">
               <!-- Order Blocks -->
               <div class="smc-group">
-                <h3>Order Blocks (OB)</h3>
+                <div class="group-header-row">
+                  <h3>Order Blocks (OB)</h3>
+                  <button mat-icon-button (click)="openInfo('ob')" class="info-btn" title="Help">
+                    <ng-icon name="saxInfoCircleOutline" size="16px"></ng-icon>
+                  </button>
+                </div>
                 @if (data.smcOrderBlocks.length > 0) {
                   <div class="smc-list">
                     @for (ob of data.smcOrderBlocks; track $index) {
@@ -273,7 +300,12 @@
 
               <!-- Fair Value Gaps (FVG) -->
               <div class="smc-group">
-                <h3>Fair Value Gaps (FVG)</h3>
+                <div class="group-header-row">
+                  <h3>Fair Value Gaps (FVG)</h3>
+                  <button mat-icon-button (click)="openInfo('fvg')" class="info-btn" title="Help">
+                    <ng-icon name="saxInfoCircleOutline" size="16px"></ng-icon>
+                  </button>
+                </div>
                 @if (data.smcFVGs.length > 0) {
                   <div class="smc-list">
                     @for (fvg of data.smcFVGs; track $index) {
@@ -294,7 +326,12 @@
 
               <!-- Market Structure (BOS / CHoCH) -->
               <div class="smc-group full-width">
-                <h3>Market Structure Breaks</h3>
+                <div class="group-header-row">
+                  <h3>Market Structure Breaks</h3>
+                  <button mat-icon-button (click)="openInfo('structure')" class="info-btn" title="Help">
+                    <ng-icon name="saxInfoCircleOutline" size="16px"></ng-icon>
+                  </button>
+                </div>
                 @if (data.marketStructure.length > 0) {
                   <div class="structure-list">
                     @for (struct of data.marketStructure; track $index) {

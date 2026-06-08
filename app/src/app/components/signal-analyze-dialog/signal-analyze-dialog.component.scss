@@ -1,0 +1,112 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+h2[mat-dialog-title] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 16px 20px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600;
+
+  .title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .ai-sparkles-icon-header {
+      fill: #c084fc;
+      filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.6));
+    }
+  }
+
+  .close-btn {
+    color: rgba(255, 255, 255, 0.5);
+    &:hover {
+      color: #ffffff;
+    }
+  }
+}
+
+mat-dialog-content {
+  padding: 20px !important;
+  max-height: 65vh;
+  overflow-y: auto;
+  margin: 0 !important;
+}
+
+.analysis-section {
+  padding: 8px 0;
+
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 0;
+
+    p {
+      color: var(--mat-sys-on-surface-variant);
+      margin: 0;
+    }
+  }
+
+  .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 0;
+
+    .error-icon {
+      font-size: 3rem;
+      color: var(--mat-sys-error);
+    }
+
+    p {
+      color: var(--mat-sys-on-surface-variant);
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  .analysis-result {
+    .analysis-text {
+      line-height: 1.8;
+      direction: rtl;
+      font-family: 'Estedad', sans-serif;
+      white-space: break-spaces;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-align: justify;
+    }
+  }
+
+  .initial-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 0;
+    text-align: start;
+
+    .description-text {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      line-height: 1.6;
+      max-width: 100%;
+      font-size: 0.95rem;
+      font-family: 'Estedad', sans-serif;
+      text-align: start;
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 12px 20px 20px 20px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  margin: 0 !important;
+}

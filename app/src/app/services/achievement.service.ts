@@ -11,8 +11,8 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 import { AuthService } from './auth.service';
 import { lastValueFrom } from 'rxjs';
 import { Achievement } from '@ounce24/types';
-import { NewAchievementBottomSheetComponent } from '../components/new-achievement-bottom-sheet/new-achievement-bottom-sheet.component';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { NewAchievementDialogComponent } from '../components/new-achievement-dialog/new-achievement-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 const LAST_CHECK_ACHIEVEMENTS_KEY = 'lastCheckAchievements';
 
@@ -22,7 +22,7 @@ const LAST_CHECK_ACHIEVEMENTS_KEY = 'lastCheckAchievements';
 export class AchievementService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly bottomSheet = inject(MatBottomSheet);
+  private readonly dialog = inject(MatDialog);
   userId = computed(() => this.auth.userQuery.data()?.id);
   lastCheck = signal<number>(
     localStorage.getItem(LAST_CHECK_ACHIEVEMENTS_KEY)
@@ -31,7 +31,7 @@ export class AchievementService {
   );
 
   constructor() {
-    // Bottom sheet disabled for now:
+    // Dialog disabled for now:
     /*
     effect(() => {
       const achievements = this.achievementsQuery.data();
@@ -41,8 +41,10 @@ export class AchievementService {
           const achievementDate = new Date(achievement.createdAt).valueOf();
           if (achievementDate > this.lastCheck()) {
             setTimeout(() => {
-            this.bottomSheet.open(NewAchievementBottomSheetComponent, {
+            this.dialog.open(NewAchievementDialogComponent, {
                 data: achievement,
+                width: '400px',
+                maxWidth: '95vw',
               });
             }, 3000);
             localStorage.setItem(

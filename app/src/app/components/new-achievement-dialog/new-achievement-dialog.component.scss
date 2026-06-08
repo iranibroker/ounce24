@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+h2[mat-dialog-title] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 20px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600;
+
+  span {
+    flex: 1;
+  }
+
+  .close-btn {
+    color: rgba(255, 255, 255, 0.5);
+    &:hover {
+      color: #ffffff;
+    }
+  }
+}
+
+mat-dialog-content {
+  padding: 24px !important;
+  max-height: 60vh;
+  overflow-y: auto;
+  margin: 0 !important;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: center;
+  align-items: center;
+
+  img {
+    width: 160px;
+    height: auto;
+    filter: drop-shadow(0 8px 24px rgba(251, 191, 36, 0.2));
+  }
+
+  .achievement-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fbbf24;
+  }
+}
+
+mat-dialog-actions {
+  padding: 12px 20px 20px 20px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  margin: 0 !important;
+}

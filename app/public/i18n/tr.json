@@ -3,7 +3,8 @@
     "loadMore": "Daha Fazla Yükle",
     "save": "Kaydet",
     "close": "Kapat",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "confirm": "Onayla"
   },
   "bottomNav": {
     "home": "Ana Sayfa",
@@ -256,11 +257,15 @@
     },
     "submit": "Sinyal Oluştur",
     "analyzeWithAI": "Yapay Zeka ile Analiz Et",
-    "generateWithAI": "Yapay Zeka ile Sinyal Oluştur (2 GEM)",
+    "generateWithAI": "Yapay Zeka ile Sinyal Oluştur",
     "generating": "Yapay zekadan sinyal oluşturuluyor...",
-    "gemRequired": "İşlem sinyalinizi yapay zeka ile analiz etmek için gem'lere ihtiyacınız var",
+    "gemRequired": "Yapay zeka ile sinyal oluşturmak için gem'lere ihtiyacınız var",
     "generateError": "Sinyal yapay zeka tarafından oluşturuldu ancak otomatik olarak ayrıştırılamadı. Lütfen değerleri manuel olarak girin:\n\n{{rawText}}",
-    "noSetupFound": "Mevcut piyasa koşullarında yüksek güvenli bir işlem kurulumu bulunamadı. Lütfen daha sonra tekrar deneyin veya yapay zeka ayarlarınızı düzenleyin."
+    "noSetupFound": "Mevcut piyasa koşullarında yüksek güvenli bir işlem kurulumu bulunamadı. Lütfen daha sonra tekrar deneyin veya yapay zeka ayarlarınızı düzenleyin.",
+    "success": "Sinyal başarıyla oluşturuldu",
+    "generateSuccess": "Sinyal yapay zeka ile başarıyla oluşturuldu ve yerleştirildi!",
+    "aiGenerateError": "Sinyal yapay zeka ile oluşturulamadı",
+    "confirmAiGenerateDesc": "Yapay zeka kullanarak canlı piyasa trendlerine göre akıllı işlem sinyali üretimi (2 Gem gerekir)"
   },
   "languageSelection": {
     "title": "Dil Seçin",
@@ -472,7 +477,57 @@
     "bullish": "Boğa (Alıcı)",
     "bearish": "Ayı (Satıcı)",
     "consolidating": "Yatay (Kararsız)",
-    "chart": "Canlı Grafik"
+    "chart": "Canlı Grafik",
+    "updatedJustNow": "Güncellendi: az önce",
+    "updatedMinutesAgo": "Güncellendi: {{count}} dakika önce",
+    "updateIntervalHint": "Veriler her 60 saniyede bir güncellenir"
+  },
+  "marketInfo": {
+    "whatIsIt": "Nedir?",
+    "whenToUse": "Ne Zaman Kullanılır?",
+    "example": "Örnek",
+    "trends": {
+      "title": "Trendler ve Hareketli Ortalamalar",
+      "what": "Son dönemlerdeki (son 20 veya 50 mum gibi) ortalama altın fiyatı. Genel performansını anlamak için bir öğrencinin genel not ortalamasına bakmak gibidir.",
+      "when": "Genel piyasa yönünü belirlemek için kullanılır. Fiyat ortalamanın üzerindeyse yükseliş trendi (al), altındaysa düşüş trendidir (sat).",
+      "example": "Mevcut altın fiyatı 2350 $ ve 20 periyotluk ortalama 2300 $ ise, piyasa yükseliş momentumuna sahiptir ve alım tercih edilir."
+    },
+    "rsi": {
+      "title": "Göreceli Güç Endeksi (RSI)",
+      "what": "Fiyat hareketlerinin hızını ve gücünü 0 ile 100 arasında ölçer. Hızlandığımızı gösteren bir araba hız göstergesi gibidir.",
+      "when": "70 Üzeri (Aşırı Alım): Piyasa çok sıcak ve fiyat düşüşü olası (sat). 30 Altı (Aşırı Satım): Piyasa çok ucuz ve alıcılar girmeye hazır (al). 30 ile 70 arası: Normal koşullar.",
+      "example": "RSI 80'e ulaştığında, alıcılar tükenmiştir ve fiyat muhtemelen yakında düşecektir. Bu noktada yeni alım yapmaktan kaçının."
+    },
+    "atr": {
+      "title": "Oynaklık Göstergesi (ATR)",
+      "what": "Altın fiyatının belirli bir zaman diliminde ne kadar dalgalandığını (piyasa türbülansı) gösterir. Deniz dalgalarının yüksekliği gibidir - fırtınalı veya sakin.",
+      "when": "Zarar durdurma ve kâr alma seviyelerini belirlemek için. Fırtınalı bir piyasada (yüksek ATR), küçük dalgalanmalarla devre dışı kalmamak için zarar durdurmayı daha uzağa yerleştirin.",
+      "example": "5 dakikalık ATR 2 $ ise, altın her 5 dakikada bir yaklaşık 2 $ dalgalanır. Sadece 0.50 $ zarar durdurma koymayın, hemen tetiklenir."
+    },
+    "levels": {
+      "title": "Destek ve Direnç Seviyeleri",
+      "what": "Destek (Taban): Alıcıların devreye girdiği ve fiyatın daha fazla düşmesini engellediği fiyat seviyesi. Direnç (Tavan): Satıcıların fiyatın daha fazla yükselmesini engellediği seviye.",
+      "when": "Destek (taban) yakınında alım yapın ve direnç (tavan) yakınında satın. Bu seviyelerin kırılması, güçlü yeni bir hareketin başladığını gösterir.",
+      "example": "Altın defalarca 2300 $'dan yukarı sıçrarsa, 2300 $ güçlü bir destektir. 2300 $ yakınında alım yapmak iyi bir fırsattır."
+    },
+    "ob": {
+      "title": "Order Blocks (OB)",
+      "what": "Büyük bankaların ve finansal kuruluşların büyük alım veya satım emirleri yerleştirdiği ve geride büyük emirlerin izini bıraktığı fiyat bölgeleri.",
+      "when": "Fiyat bu bölgeye geri döndüğünde, doldurulmamış eski emirler etkinleşerek güçlü bir fiyat dönüşüne neden olur. Bu alanlarda onlarla birlikte işlem yaparız.",
+      "example": "2310 $'da bir alış emir bloğu oluşur. Fiyat daha sonra 2310 $'a döndüğünde, kurumsal emir akışıyla birlikte alım yaparız."
+    },
+    "fvg": {
+      "title": "Fair Value Gaps (FVG)",
+      "what": "Fiyat çok hızlı yükseldiğinde veya düştüğünde grafikte boş bir alan (boşluk) bırakır. Piyasa bir mıknatıs gibi davranır, geri dönüp bu boş alanı doldurmak ister.",
+      "when": "Geçici fiyat geri çekilmelerini tahmin etmek için kullanılır. Fiyat genellikle yoluna devam etmeden önce boşluğu doldurmak için geri döner. Girmek için bu seviyeyi bekleriz.",
+      "example": "Altın 2320 $'dan 2340 $'a sıçrayarak bir boşluk bırakır. Fiyatın 2325 $'a geri dönmesini (boşluğu doldurmasını) bekler ve satın alırız."
+    },
+    "structure": {
+      "title": "Piyasa Yapısı Kırılımları (BOS/CHoCH)",
+      "what": "Piyasa yönündeki bir değişikliği veya güçlü bir trendin devamını gösterir. CHoCH (Karakter Değişimi) bir dönüşün ilk işareti, BOS (Yapı Kırılımı) ise trendin devam ettiğini doğrular.",
+      "when": "Yeni trendlere katılmak için kullanılır. CHoCH bize trendin tersine döndüğünü söyler. BOS trendin devam ettiğini söyler, böylece pozisyonlarımızı koruyabilir veya ekleme yapabiliriz.",
+      "example": "Altın düşüyor. Aniden, önceki zirvenin üzerine çıkıyor (CHoCH oluşturuyor). Bu, düşüş trendinin bittiği ve satın alma zamanı olduğu anlamına gelir."
+    }
   },
   "introTour": {
     "skip": "Geç",

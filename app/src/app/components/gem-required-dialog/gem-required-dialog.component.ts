@@ -28,7 +28,7 @@ export class GemRequiredDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<GemRequiredDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: { description: string; accept?: boolean },
+    public data: { description: string; accept?: boolean; acceptText?: string },
   ) {}
 
   onClose(): void {

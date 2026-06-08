@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>
+  <div class="title-with-icon">
+    <svg viewBox="0 0 24 24" class="ai-sparkles-icon-header" width="20px" height="20px">
+      <path d="M12 3l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z" />
+      <path d="M19 8l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" />
+      <path d="M6 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" />
+    </svg>
+    <span>{{ 'signalAnalyze.title' | translate }}</span>
+  </div>
+</h2>
+
+<mat-dialog-content>
+  <!-- Analysis Section -->
+  <div class="analysis-section">
+    @if (analyzeMutation.isPending()) {
+      <div class="loading-state">
+        <app-data-loading />
+        <p>{{ 'signalAnalyze.analyzing' | translate }}</p>
+      </div>
+    } @else if (analyzeMutation.data()) {
+      <div class="analysis-result">
+        <div class="analysis-text">
+          {{ analyzeMutation.data()?.analysis }}
+        </div>
+      </div>
+    } @else {
+      <div class="initial-state">
+        <p class="description-text">{{ 'signalAnalyze.description' | translate }}</p>
+      </div>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">
+    {{ 'app.close' | translate }}
+  </button>
+  
+  @if (!analyzeMutation.isPending() && !analyzeMutation.data()) {
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="analyzeSignal()"
+    >
+      {{ 'signalAnalyze.analyze' | translate }}
+    </button>
+  }
+</mat-dialog-actions>

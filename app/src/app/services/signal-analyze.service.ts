@@ -1,18 +1,19 @@
 import { Injectable, inject } from '@angular/core';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { SignalAnalyzeBottomSheetComponent } from '../components/signal-analyze-bottom-sheet/signal-analyze-bottom-sheet.component';
+import { MatDialog } from '@angular/material/dialog';
+import { SignalAnalyzeDialogComponent } from '../components/signal-analyze-dialog/signal-analyze-dialog.component';
 import { Signal } from '@ounce24/types';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SignalAnalyzeService {
-  private bottomSheet = inject(MatBottomSheet);
+  private dialog = inject(MatDialog);
 
   openSignalAnalyze(signal: Signal): void {
-    this.bottomSheet.open(SignalAnalyzeBottomSheetComponent, {
+    this.dialog.open(SignalAnalyzeDialogComponent, {
       data: { signal },
-      panelClass: 'signal-analyze-bottom-sheet',
+      width: '500px',
+      maxWidth: '95vw',
       disableClose: true,
     });
   }

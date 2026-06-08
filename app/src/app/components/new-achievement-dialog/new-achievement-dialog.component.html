@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>
+  <span>{{ 'achievement.newAchievementDialog.title' | translate }}</span>
+</h2>
+<mat-dialog-content>
+  <main>
+    <img
+      src="images/achievements/{{ achievement.type }}.png"
+      alt="Achievement Icon"
+    />
+    <div class="achievement-name">
+      {{ achievement.type | achievementType }}
+    </div>
+  </main>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">
+    {{ 'app.close' | translate }}
+  </button>
+</mat-dialog-actions>
