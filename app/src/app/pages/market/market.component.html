@@ -107,6 +107,30 @@
                   </span>
                 </div>
               </div>
+
+              <!-- 4h Trend -->
+              <div class="trend-item">
+                <span class="timeframe">4h ({{ 'aiSettings.tradingStyle.SWING_SHORT' | translate }})</span>
+                <div class="trend-badge" [ngClass]="data.trend4h.toLowerCase()">
+                  <ng-icon
+                    [name]="data.trend4h === 'Bullish' ? 'saxTrendUpOutline' : (data.trend4h === 'Bearish' ? 'saxTrendDownOutline' : 'saxActivityOutline')"
+                    size="18px"
+                  ></ng-icon>
+                  <span>{{ 'market.' + data.trend4h.toLowerCase() | translate }}</span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA20: ${{ data.sma20_4h | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="currentPrice >= data.sma20_4h ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma20_4h ? 'above' : 'below') | translate }} SMA20)
+                  </span>
+                </div>
+                <div class="sma-detail">
+                  <span>SMA50: ${{ data.sma50_4h | number:'1.2-2' }}</span>
+                  <span class="direction" [ngClass]="currentPrice >= data.sma50_4h ? 'up' : 'down'">
+                    ({{ 'market.' + (currentPrice >= data.sma50_4h ? 'above' : 'below') | translate }} SMA50)
+                  </span>
+                </div>
+              </div>
             </div>
           </mat-card-content>
         </mat-card>
@@ -148,6 +172,15 @@
                     </span>
                   </div>
                 </div>
+                <div class="indicator-row">
+                  <span class="ind-label">4h RSI</span>
+                  <div class="ind-value-wrapper">
+                    <span class="ind-value">{{ data.rsi4h | number:'1.1-1' }}</span>
+                    <span class="ind-badge" [ngClass]="getRsiInterpretation(data.rsi4h)">
+                      {{ 'market.' + getRsiInterpretation(data.rsi4h) | translate }}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <!-- Volatility (ATR) -->
@@ -160,6 +193,10 @@
                 <div class="indicator-row">
                   <span class="ind-label">1h ATR (Volatility)</span>
                   <span class="ind-value">${{ data.atr1h | number:'1.2-2' }}</span>
+                </div>
+                <div class="indicator-row">
+                  <span class="ind-label">4h ATR (Volatility)</span>
+                  <span class="ind-value">${{ data.atr4h | number:'1.2-2' }}</span>
                 </div>
               </div>
             </div>

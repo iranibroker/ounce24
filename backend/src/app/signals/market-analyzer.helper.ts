@@ -34,11 +34,16 @@ export interface MarketStateSummary {
   trend1h: 'Bullish' | 'Bearish' | 'Consolidating';
   sma20_1h: number;
   sma50_1h: number;
+  trend4h: 'Bullish' | 'Bearish' | 'Consolidating';
+  sma20_4h: number;
+  sma50_4h: number;
   rsi5m: number;
   rsi15m: number;
   rsi1h: number;
+  rsi4h: number;
   atr5m: number;
   atr1h: number;
+  atr4h: number;
   keySupports: number[];
   keyResistances: number[];
   semanticText: string;
@@ -277,6 +282,19 @@ export function analyzeMarketState(
   }
 
   const candles4h = aggregateTo4h(candles5m);
+  const closes4h = candles4h.map((c) => c.close);
+  const rsi4h = calculateRSI(closes4h, 14);
+  const atr4h = calculateATR(candles4h, 14);
+  const sma20_4h = calculateSMA(closes4h, 20);
+  const sma50_4h = calculateSMA(closes4h, 50);
+
+  let trend4h: 'Bullish' | 'Bearish' | 'Consolidating' = 'Consolidating';
+  if (currentPrice > sma20_4h && currentPrice > sma50_4h && sma20_4h > sma50_4h) {
+    trend4h = 'Bullish';
+  } else if (currentPrice < sma20_4h && currentPrice < sma50_4h && sma20_4h < sma50_4h) {
+    trend4h = 'Bearish';
+  }
+
   const sr15m = findSupportResistance(candles15m, 4, 4, 0.8);
   const sr1h = findSupportResistance(candles1h, 3, 3, 1.5);
   const sr4h = findSupportResistance(candles4h, 2, 2, 2.5);
@@ -323,12 +341,19 @@ export function analyzeMarketState(
   semanticText += `- 1h SMA20: $${sma20_1h.toFixed(2)} (Price is $${Math.abs(currentPrice - sma20_1h).toFixed(2)} ${currentPrice > sma20_1h ? 'above' : 'below'} SMA20)\n`;
   semanticText += `- 1h SMA50: $${sma50_1h.toFixed(2)} (Price is $${Math.abs(currentPrice - sma50_1h).toFixed(2)} ${currentPrice > sma50_1h ? 'above' : 'below'} SMA50)\n\n`;
 
+  semanticText += `[Trend & Moving Averages (4-hour timeframe - Long-Term)]\n`;
+  semanticText += `- 4h Trend: ${trend4h.toUpperCase()}\n`;
+  semanticText += `- 4h SMA20: $${sma20_4h.toFixed(2)} (Price is $${Math.abs(currentPrice - sma20_4h).toFixed(2)} ${currentPrice > sma20_4h ? 'above' : 'below'} SMA20)\n`;
+  semanticText += `- 4h SMA50: $${sma50_4h.toFixed(2)} (Price is $${Math.abs(currentPrice - sma50_4h).toFixed(2)} ${currentPrice > sma50_4h ? 'above' : 'below'} SMA50)\n\n`;
+
   semanticText += `[Key Technical Indicators]\n`;
   semanticText += `- 5-minute Volatility (ATR 14): $${atr5m.toFixed(2)}\n`;
   semanticText += `- 1-hour Volatility (ATR 14): $${atr1h.toFixed(2)}\n`;
+  semanticText += `- 4-hour Volatility (ATR 14): $${atr4h.toFixed(2)}\n`;
   semanticText += `- 5m RSI (14): ${rsi5m.toFixed(2)}\n`;
   semanticText += `- 15m RSI (14): ${rsi15m.toFixed(2)}\n`;
-  semanticText += `- 1h RSI (14): ${rsi1h.toFixed(2)}\n\n`;
+  semanticText += `- 1h RSI (14): ${rsi1h.toFixed(2)}\n`;
+  semanticText += `- 4h RSI (14): ${rsi4h.toFixed(2)}\n\n`;
 
   semanticText += `[Key Horizontal Support & Resistance Levels (Calculated by System)]\n`;
   semanticText += `* Short-Term (15m timeframe):\n`;
@@ -403,11 +428,16 @@ export function analyzeMarketState(
     trend1h,
     sma20_1h,
     sma50_1h,
+    trend4h,
+    sma20_4h,
+    sma50_4h,
     rsi5m,
     rsi15m,
     rsi1h,
+    rsi4h,
     atr5m,
     atr1h,
+    atr4h,
     keySupports,
     keyResistances,
     semanticText,

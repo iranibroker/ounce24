@@ -55,11 +55,16 @@ export interface MarketStateSummary {
   trend1h: 'Bullish' | 'Bearish' | 'Consolidating';
   sma20_1h: number;
   sma50_1h: number;
+  trend4h: 'Bullish' | 'Bearish' | 'Consolidating';
+  sma20_4h: number;
+  sma50_4h: number;
   rsi5m: number;
   rsi15m: number;
   rsi1h: number;
+  rsi4h: number;
   atr5m: number;
   atr1h: number;
+  atr4h: number;
   keySupports: number[];
   keyResistances: number[];
   semanticText: string;
