@@ -465,8 +465,16 @@ Recommendations (pick ONE):
 ACTIVE signals: "risk_free" (move SL to entry, only if profit >= 1.5x ATR and not already done), "extend_tp" (strong momentum continues), "early_exit" (trend clearly reversed), "trailing_sl" (lock profit), "none" (no change).
 PENDING signals: "cancel" (setup invalidated by market change), "none" (keep as is).
 
-Rules:
-1. Counter-trend + strong continuation = "early_exit" or "cancel".
+Rules for PENDING signals:
+1. PENDING orders are waiting for the price to pull back to the Entry Price. A pullback (price moving towards the Entry Price) is NORMAL and expected. NEVER recommend "cancel" just because the price is moving towards the Entry Price (e.g. short-term bearish trend for a BUY limit, or short-term bullish trend for a SELL limit).
+2. ONLY recommend "cancel" for PENDING signals if:
+   - The price has already hit the TP target price without triggering the entry first (the setup played out without us).
+   - The invalidation level (SL or major support/resistance backing the entry) is broken before activation.
+   - The entry price has become completely unreachable (e.g., price has moved away from the Entry Price by more than 3.0x ATR).
+   - A major long-term trend change or breakout occurs that completely invalidates the setup structure.
+
+Rules for ACTIVE signals:
+1. Counter-trend + strong continuation against the trade = "early_exit".
 2. S/R blocking TP + slowing momentum = "early_exit", NOT "extend_tp".
 3. Only suggest changes with clear technical justification.
 

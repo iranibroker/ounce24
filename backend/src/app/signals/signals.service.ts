@@ -482,7 +482,9 @@ Rules:
 4. SL must be behind a valid level or >= 1.5x ATR from entry.
 5. R:R ratio should be 1.5-3.0 for standard risk.
 6. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are opposing the direction.
-7. PENDING LIMIT ORDERS: For PENDING signals (where status is PENDING), do NOT rate the success chance as LOW or MEDIUM just because the current price is away from the entryPrice or because it requires a pullback/rise to trigger. You must evaluate the trade setup under the assumption that the entryPrice WILL be reached and triggered. Judge whether the entryPrice is a technically sound entry level (e.g., key support/resistance, FVG, or Order Block) and if the TP/SL levels are logically set relative to the entryPrice.
+7. PENDING LIMIT ORDERS: For PENDING signals (where status is PENDING), do not penalize the rating simply because the current price has not reached the entryPrice yet. Evaluate the setup's technical quality assuming it triggers. However, you MUST verify if the entryPrice is realistically reachable:
+   - If the entryPrice is extremely far from the current price (e.g., more than 3.0x ATR of the trading style's core timeframe), rate it LOW or MEDIUM, explaining that the entry point is highly unrealistic or unlikely to be filled.
+   - If the entryPrice is at a logical pullback/breakout zone (like a key S/R, fresh Order Block, or FVG) within a reasonable distance (typically 1.0x to 2.5x ATR of the core timeframe), evaluate the setup's quality on its technical merits once triggered.
 
 Output format (in ${langConfig.name}):
 - Line 1: "${langConfig.label}: [${langConfig.high}/${langConfig.medium}/${langConfig.low}] - [reason]"
