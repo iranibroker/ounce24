@@ -572,7 +572,7 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
 
       const promptMessage = `
 You are a strict Gold (XAUUSD) quantitative trading system for Ounce24.
-Generate ONLY high-confidence signals that pass ALL checks below. If no valid setup exists, return null.
+Generate ONLY high-confidence signals (either instant market entry or pending limit orders) that pass ALL checks below. If no valid setup exists, return null.
 
 Market State:
 ${marketState.semanticText}
@@ -580,11 +580,13 @@ ${marketState.semanticText}
 ${styleInstructions}
 
 Strict Rules (MUST ALL pass to generate a signal):
-1. Direction MUST align with the dominant trend. For BUY: price must be above 5m and 15m SMA20+SMA50. For SELL: below them. NEVER generate counter-trend signals.
-2. No key S/R level may block the path from Entry to TP.
-3. SL must be behind a valid swing level or >= 1.5x ATR from Entry.
-4. R:R ratio must be 1.5-3.0 for standard risk.
-5. Use instantEntry=true ONLY if current price is at an ideal level. Otherwise set a limit entry.
+1. Trend Alignment: The signal direction must align with the dominant trend (15m and 1h). For BUY: the 15m or 1h trend must be Bullish (never Bearish). For SELL: Bearish (never Bullish).
+2. Entry Type Selection:
+   - INSTANT ENTRY (instantEntry=true): Use ONLY if current price is at an ideal entry level (e.g., breakout confirmation or immediate bounce).
+   - LIMIT ENTRY (instantEntry=false): If current price is not at an ideal level (e.g. price is overextended or in a minor pullback), set a pending limit order (entryPrice at a key support/resistance, fresh Order Block, or FVG) where price is highly likely to retract and trigger the entry before continuing the trend.
+3. No key S/R level may block the path from Entry to TP.
+4. SL must be behind a valid swing level or >= 1.5x ATR from Entry.
+5. R:R ratio must be 1.5-3.0 for standard risk.
 6. SELF-CHECK: Before outputting, verify your signal would receive a HIGH success rating if analyzed. If it would receive MEDIUM or LOW, do NOT output it — return null instead.
 
 Output: Return ONLY a valid JSON object (no markdown, no backticks):
@@ -626,10 +628,10 @@ OR if no valid setup exists: {"type":null}
           ? (tp > entry && sl < entry)
           : (tp < entry && sl > entry);
 
-        // Trend alignment check
+        // Trend alignment check: dominant trend (15m or 1h) must not oppose the signal direction.
         const trendAligned = isBuy
-          ? (marketState.trend5m !== 'Bearish' && marketState.trend15m !== 'Bearish')
-          : (marketState.trend5m !== 'Bullish' && marketState.trend15m !== 'Bullish');
+          ? (marketState.trend15m !== 'Bearish' || marketState.trend1h !== 'Bearish')
+          : (marketState.trend15m !== 'Bullish' || marketState.trend1h !== 'Bullish');
 
         if (!logicallyValid || !trendAligned) {
           // Signal failed coherence check — discard it
