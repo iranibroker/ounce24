@@ -57,11 +57,20 @@ export class SignalCardComponent {
 
   currentPositionPercent = computed(() => {
     const sig = this.signal();
-    if (sig.status !== SignalStatus.Active) return null;
+    if (
+      sig.status !== SignalStatus.Active &&
+      sig.status !== SignalStatus.Pending &&
+      sig.status !== SignalStatus.Closed
+    ) {
+      return null;
+    }
     const loss = sig.loss;
     const profit = sig.profit;
     if (!loss || !profit || loss === profit) return null;
-    const current = this.ouncePrice.value();
+    const current =
+      sig.status === SignalStatus.Closed
+        ? sig.closedOuncePrice
+        : this.ouncePrice.value();
     if (!current) return null;
     const ratio = (current - profit) / (loss - profit);
     const clampedRatio = Math.max(0, Math.min(1, ratio));

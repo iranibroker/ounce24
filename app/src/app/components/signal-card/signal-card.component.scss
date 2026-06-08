@@ -328,6 +328,10 @@ mat-chip {
   user-select: none;
   height: 12px;
 
+  &.closed {
+    opacity: 0.55;
+  }
+
   .progress-bar-wrapper {
     position: relative;
     height: 12px;
@@ -373,6 +377,18 @@ mat-chip {
       height: 12px;
       display: block;
       border-radius: 1px;
+
+      &.green {
+        background-color: var(--mat-sys-secondary) !important;
+        width: 1.5px;
+        box-shadow: 0 0 4px var(--mat-sys-secondary);
+      }
+
+      &.red {
+        background-color: var(--mat-sys-error) !important;
+        width: 1.5px;
+        box-shadow: 0 0 4px var(--mat-sys-error);
+      }
     }
   }
 

@@ -104,8 +104,8 @@
       {{ 'signal.profit' | translate }}:
       {{ signal().profit | currency: 'USD' : 'symbol' : getPriceFormat(signal().profit) }}
     </span>
-    @if (signal().status === SignalStatus.Active && currentPositionPercent() !== null) {
-      <div class="signal-props-progress" (click)="$event.stopPropagation()">
+    @if ((signal().status === SignalStatus.Active || signal().status === SignalStatus.Pending || signal().status === SignalStatus.Closed) && currentPositionPercent() !== null) {
+      <div class="signal-props-progress" [class.closed]="signal().status === SignalStatus.Closed" (click)="$event.stopPropagation()">
         <div class="progress-bar-wrapper">
           <div class="progress-track" [style.background]="'linear-gradient(to right, var(--mat-sys-secondary) 0%, transparent ' + entryPositionPercent() + '%, var(--mat-sys-error) 100%)'"></div>
           
@@ -115,9 +115,11 @@
           </div>
 
           <!-- Current Price marker (active/live vertical line) -->
-          <div class="marker marker-current" [style.left.%]="currentPositionPercent()">
-            <span class="marker-line"></span>
-          </div>
+          @if (signal().status !== SignalStatus.Pending) {
+            <div class="marker marker-current" [style.left.%]="currentPositionPercent()">
+              <span class="marker-line" [class.green]="signal().status === SignalStatus.Closed && pip() > 0" [class.red]="signal().status === SignalStatus.Closed && pip() < 0"></span>
+            </div>
+          }
         </div>
         <span class="progress-rr-label">
           {{ 'signal.riskReward' | translate }}: {{ signal().riskReward | number: '1.0-2' }}
