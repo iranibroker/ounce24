@@ -46,15 +46,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   public translate = inject(TranslateService);
 
   get currentMonthName(): string {
-    const lang = this.translate.currentLang || 'en';
-    const localeMap: { [key: string]: string } = {
-      en: 'en-US',
-      fa: 'fa-IR',
-      ar: 'ar-EG',
-      tr: 'tr-TR',
-    };
-    const locale = localeMap[lang] || 'en-US';
-    return new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date());
+    return new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date());
   }
 
   monthCountdownText = signal<string>('');

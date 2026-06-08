@@ -19,7 +19,7 @@
         <div class="tab-header-timer">
           <span>{{ 'leaderboard.weeklyTitle' | translate }}</span>
           <span class="timer-val">
-            ⏰ {{ 'leaderboard.endsIn' | translate }} {{ weekCountdownText() }}
+            ⏰ {{ weekCountdownText() }}
           </span>
         </div>
         <app-leaderboard-table [data]="queryWeek.data()" period="week" />
@@ -30,7 +30,7 @@
         <div class="tab-header-timer">
           <span>{{ 'leaderboard.monthlyTitle' | translate: { month: currentMonthName } }}</span>
           <span class="timer-val">
-            ⏰ {{ 'leaderboard.endsIn' | translate }} {{ monthCountdownText() }}
+            ⏰ {{ monthCountdownText() }}
           </span>
         </div>
         <app-leaderboard-table [data]="queryMonth.data()" period="month" />
