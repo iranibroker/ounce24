@@ -357,7 +357,11 @@ export class SignalsService {
       const signalType = signal.type;
       const isSell = signalType === SignalType.Sell;
       const status = signal.status || (signal.instantEntry ? SignalStatus.Active : SignalStatus.Pending);
-      const entryPrice = typeof signal.entryPrice === 'string' ? parseFloat(signal.entryPrice) : (signal.entryPrice || 0);
+      
+      let entryPrice = typeof signal.entryPrice === 'string' ? parseFloat(signal.entryPrice) : (signal.entryPrice || 0);
+      if (!entryPrice && (signal.instantEntry || status === SignalStatus.Active)) {
+        entryPrice = this.ouncePriceService.current;
+      }
 
       // Determine profit and loss
       let profit = 0;
@@ -596,9 +600,13 @@ ${styleInstructions}
 
 Guidelines to generate the best setup:
 1. Trend & Market Structure: Align the signal direction with the dominant trend of higher timeframes (15m and 1h). If the market is consolidating (no clear trend), look for range-bound trade opportunities (e.g., buying near key support levels, selling near key resistance levels).
-2. Entry Type Selection:
-   - INSTANT ENTRY (instantEntry=true): Use if current price is at a very favorable level (breakout or support/resistance bounce).
-   - LIMIT ENTRY (instantEntry=false): If current price is not at an ideal entry zone, place a pending limit order (entryPrice) at a key support/resistance level, fresh Order Block, or FVG.
+2. Entry Type Selection & Minimum Distance:
+   - INSTANT ENTRY (instantEntry=true): Use ONLY if current price is at a very favorable level (breakout or support/resistance bounce).
+   - LIMIT ENTRY (instantEntry=false): If current price is not at an ideal entry zone, place a pending limit order (entryPrice) at a key support/resistance, fresh Order Block, or FVG.
+   - MINIMUM LIMIT DISTANCE: When placing a LIMIT ENTRY, the entryPrice MUST be at a logical, technically sound level that is at a meaningful distance from the current price. 
+     * For SCALPING: entryPrice must be at least 1.0x to 1.5x of the 5-minute ATR away from the current price.
+     * For DAY/SWING trading: entryPrice must be at least 1.0x to 1.5x of the 1-hour ATR away from the current price.
+     * Do NOT place limit entries that are extremely close to the current price (e.g. less than 1.0x ATR); if the pullback is smaller than that, either use instantEntry=true (if current price is favorable) or wait for a deeper limit level.
 3. Targets:
    - TP should be set before key S/R levels.
    - SL should be placed behind a valid swing level or >= 1.5x ATR from Entry.

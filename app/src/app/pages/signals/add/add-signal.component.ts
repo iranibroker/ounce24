@@ -181,7 +181,7 @@ export class AddSignalComponent {
   }
 
   analyzeWithAI(): void {
-    this.analyzeService.openSignalAnalyze(this.form.value);
+    this.analyzeService.openSignalAnalyze(this.form.getRawValue());
   }
 
   generateWithAI(): void {
