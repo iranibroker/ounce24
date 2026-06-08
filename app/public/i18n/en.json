@@ -649,5 +649,74 @@
     },
     "menuTitle": "Gems Wallet",
     "menuDescription": "View your transaction history and guide to earning gems"
+  },
+  "weeklyWrap": {
+    "banner": {
+      "title": "Ounce24 Weekly Recap! 🎬",
+      "desc": "Check the gold market highlights and top analysts for the past week"
+    },
+    "intro": {
+      "title": "Ounce24 Weekly Recap",
+      "subtitle": "A look at the gold market and the trading community this week",
+      "dateRange": "Trading Week: {{start}} to {{end}}",
+      "cta": "Let's Go!"
+    },
+    "activity": {
+      "title": "Your Activity",
+      "platformTitle": "Ounce24 Activity",
+      "platformDesc1": "This week, a total of",
+      "platformDesc2": "trading signals were placed by the community."
+    },
+    "performance": {
+      "title": "Performance",
+      "score": "Points Earned"
+    },
+    "bestTrade": {
+      "title": "Best Trade of the Week",
+      "desc": "The highest scoring signal closed across the platform this week:",
+      "score": "Score: +{{value}}",
+      "pips": "{{value}} Pips"
+    },
+    "gems": {
+      "earned": "Gems Earned"
+    },
+    "market": {
+      "title": "Weekly Gold Recap",
+      "desc": "Gold (XAUUSD) moved from ${{open}} to ${{close}} this week.",
+      "high": "High: ${{value}}",
+      "low": "Low: ${{value}}",
+      "netChange": "Net Change: {{sign}}${{value}} ({{percent}}%)"
+    },
+    "standing": {
+      "title": "Platform Standings",
+      "rank": "Weekly Rank",
+      "champion": "Weekly Champion",
+      "champScore": "{{value}} points"
+    },
+    "personal": {
+      "title": "Your Performance Recap",
+      "feedback": "AI Copilot analysis and Smart Shield can help you achieve more next week! 🚀",
+      "none": "You didn't submit any signals this week. Start posting next week to join the leaderboard! 💪"
+    },
+    "share": {
+      "title": "Share Weekly Wrap",
+      "desc": "Share the platform and your summary card with others!",
+      "shareBtn": "Share Wrap",
+      "downloadBtn": "Download Summary Card",
+      "copied": "Referral link copied to clipboard!",
+      "generating": "Generating summary card..."
+    },
+    "canvas": {
+      "platformSignals": "Platform Signals",
+      "bestTrader": "Best Signal",
+      "champion": "Weekly Champion",
+      "yourSignals": "Your Signals",
+      "yourScore": "Your Score",
+      "yourRank": "Your Rank"
+    },
+    "soundToggle": {
+      "mute": "Mute sound",
+      "unmute": "Play lo-fi beat"
+    }
   }
 }

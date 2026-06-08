@@ -115,6 +115,11 @@ export const appRoutes: Route[] = [
         canActivate: [loginActivator],
       },
       {
+        path: 'weekly-wrap',
+        loadComponent: () => import('./pages/weekly-wrap/weekly-wrap.component').then(m => m.WeeklyWrapComponent),
+        canActivate: [loginActivator],
+      },
+      {
         path: 'notifications',
         component: NotificationSettingsComponent,
         canActivate: [loginActivator],

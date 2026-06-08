@@ -635,5 +635,74 @@
     },
     "menuTitle": "GEM Cüzdanı",
     "menuDescription": "İşlem geçmişinizi ve GEM kazanma kılavuzunu görüntüleyin"
+  },
+  "weeklyWrap": {
+    "banner": {
+      "title": "Ounce24 Haftalık Özet! 🎬",
+      "desc": "Geçen haftaki altın piyasası özetini ve en iyi analistleri inceleyin"
+    },
+    "intro": {
+      "title": "Ounce24 Haftalık Özet",
+      "subtitle": "Bu hafta altın piyasasına ve işlem topluluğuna genel bir bakış",
+      "dateRange": "İşlem Haftası: {{start}} - {{end}}",
+      "cta": "Hadi Başlayalım!"
+    },
+    "activity": {
+      "title": "Aktiviteniz",
+      "platformTitle": "Ounce24 Aktivitesi",
+      "platformDesc1": "Bu hafta toplam",
+      "platformDesc2": "işlem sinyali topluluk tarafından paylaşıldı."
+    },
+    "performance": {
+      "title": "Performans",
+      "score": "Kazanılan Puan"
+    },
+    "bestTrade": {
+      "title": "Haftanın En İyi İşlemi",
+      "desc": "Bu hafta platform genelinde kapatılan en yüksek puanlı sinyal:",
+      "score": "Puan: +{{value}}",
+      "pips": "{{value}} Pip"
+    },
+    "gems": {
+      "earned": "Kazanılan GEM'ler"
+    },
+    "market": {
+      "title": "Haftalık Altın Özeti",
+      "desc": "Altın (XAUUSD) bu hafta ${{open}} seviyesinden ${{close}} seviyesine hareket etti.",
+      "high": "En Yüksek: ${{value}}",
+      "low": "En Düşük: ${{value}}",
+      "netChange": "Net Değişim: {{sign}}${{value}} ({{percent}}%)"
+    },
+    "standing": {
+      "title": "Platform Sıralaması",
+      "rank": "Haftalık Sıralamanız",
+      "champion": "Haftanın Şampiyonu",
+      "champScore": "{{value}} puan"
+    },
+    "personal": {
+      "title": "Kişisel Performans Özetiniz",
+      "feedback": "Yapay Zeka Asistanı analizleri ve Akıllı Kalkan gelecek hafta daha fazlasını başarmanıza yardımcı olabilir! 🚀",
+      "none": "Bu hafta hiç sinyal paylaşmadınız. Liderlik tablosuna katılmak için gelecek hafta paylaşmaya başlayın! 💪"
+    },
+    "share": {
+      "title": "Özeti Paylaş",
+      "desc": "Platform özetini ve kişisel performans kartınızı başkalarıyla paylaşın!",
+      "shareBtn": "Özeti Paylaş",
+      "downloadBtn": "Özet Kartını İndir",
+      "copied": "Davet linki kopyalandı!",
+      "generating": "Özet kartı oluşturuluyor..."
+    },
+    "canvas": {
+      "platformSignals": "Platform Sinyalleri",
+      "bestTrader": "En İyi Sinyal",
+      "champion": "Haftanın Şampiyonu",
+      "yourSignals": "Sinyalleriniz",
+      "yourScore": "Puanınız",
+      "yourRank": "Sıralamanız"
+    },
+    "soundToggle": {
+      "mute": "Sesi kapat",
+      "unmute": "Lo-Fi müzik çal"
+    }
   }
 }

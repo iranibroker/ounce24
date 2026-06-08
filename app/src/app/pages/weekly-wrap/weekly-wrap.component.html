@@ -1,0 +1,322 @@
+<div class="wrap-container" (mousedown)="onTouchStart()" (mouseup)="onTouchEnd()" (touchstart)="onTouchStart()" (touchend)="onTouchEnd()">
+  @if (weeklyWrapQuery.isLoading()) {
+    <div class="loading-overlay">
+      <app-data-loading></app-data-loading>
+    </div>
+  }
+  @if (data(); as data) {
+    <!-- Top Progress Bars -->
+    <div class="stories-timeline">
+      <div 
+        *ngFor="let slide of slides(); let i = index" 
+        class="timeline-segment"
+      >
+        <div 
+          class="segment-progress"
+          [style.width.%]="i < activeSlide ? 100 : (i === activeSlide ? currentSlideProgress : 0)"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Top Action Bar (Mute and Close) -->
+    <div class="top-action-bar" dir="ltr">
+      <button mat-icon-button (click)="toggleMute()" class="action-btn">
+        <ng-icon [name]="isMuted ? 'saxVolumeCrossOutline' : 'saxVolumeHighOutline'" size="22px"></ng-icon>
+      </button>
+      <span class="spacer"></span>
+      <button mat-icon-button (click)="closeWrap()" class="action-btn">
+        <ng-icon name="saxCloseCircleOutline" size="22px"></ng-icon>
+      </button>
+    </div>
+
+    <!-- Background visual blobs -->
+    <div class="background-blobs">
+      <div class="blob gold-blob-1"></div>
+      <div class="blob gold-blob-2"></div>
+    </div>
+
+    <!-- Slide Content Wrapper -->
+    <div class="slide-wrapper">
+
+      <!-- SLIDE 0: INTRO -->
+      @if (slides()[activeSlide]?.type === 'intro') {
+        <div class="slide intro-slide">
+          <div class="text-center slide-content">
+            <span class="wrapped-badge">OUNCE24 WRAPPED</span>
+            <h1 class="main-title gradient-text">{{ 'weeklyWrap.intro.title' | translate }}</h1>
+            <p class="subtitle">{{ 'weeklyWrap.intro.subtitle' | translate }}</p>
+            
+            <div class="date-badge">
+              <span>{{ 'weeklyWrap.intro.dateRange' | translate:{start: (data.startOfTradingWeek | date:'MMM d'), end: (data.endOfTradingWeek | date:'MMM d')} }}</span>
+            </div>
+
+            <button mat-flat-button class="cta-button primary-btn" (click)="startWrap()">
+              {{ 'weeklyWrap.intro.cta' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- SLIDE 1: PLATFORM ACTIVITY -->
+      @if (slides()[activeSlide]?.type === 'platformActivity') {
+        <div class="slide activity-slide">
+          <div class="slide-content text-center">
+            <h2>{{ 'weeklyWrap.activity.platformTitle' | translate }}</h2>
+            <div class="giant-number-container">
+              <span class="giant-number">{{ data.platformSignals }}</span>
+            </div>
+            <p class="activity-desc">
+              {{ 'weeklyWrap.activity.platformDesc1' | translate }} 
+              <span class="highlight">{{ data.platformSignals }}</span> 
+              {{ 'weeklyWrap.activity.platformDesc2' | translate }}
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- SLIDE 2: BEST TRADE -->
+      @if (slides()[activeSlide]?.type === 'bestTrade') {
+        <div class="slide best-trade-slide">
+          <div class="slide-content text-center">
+            <h2>{{ 'weeklyWrap.bestTrade.title' | translate }}</h2>
+            <p class="slide-desc">{{ 'weeklyWrap.bestTrade.desc' | translate }}</p>
+
+            <div class="masterpiece-card glass-card gold-border">
+              <!-- Creator profile -->
+              @if (data.bestSignal.owner) {
+                <div class="best-trade-author">
+                  <img [src]="data.bestSignal.owner.avatar" [appAvatar]="data.bestSignal.owner" [size]="40" class="author-avatar" />
+                  <div class="author-info">
+                    <span class="name">{{ data.bestSignal.owner.name || data.bestSignal.owner.telegramUsername }}</span>
+                    <span class="title">{{ data.bestSignal.owner.title || 'Top Trader' }}</span>
+                  </div>
+                </div>
+              }
+
+              <div class="signal-direction-tag" [ngClass]="data.bestSignal.isSell ? 'sell' : 'buy'">
+                {{ data.bestSignal.type | uppercase }}
+              </div>
+              
+              <div class="trade-prices">
+                <div class="price-row">
+                  <span>Entry:</span>
+                  <span class="price-val">${{ data.bestSignal.entryPrice | number:'1.2-2' }}</span>
+                </div>
+                <div class="price-row">
+                  <span>Closed:</span>
+                  <span class="price-val">${{ data.bestSignal.closedOuncePrice | number:'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <div class="trade-metrics">
+                <div class="metric">
+                  <ng-icon name="saxStarOutline" class="gold" size="18px"></ng-icon>
+                  <span>{{ 'weeklyWrap.bestTrade.score' | translate:{value: (data.bestSignal.score | number:'1.0-1')} }}</span>
+                </div>
+                <div class="metric">
+                  <ng-icon name="saxDiamondsBold" class="blue" size="18px"></ng-icon>
+                  <span>{{ 'weeklyWrap.bestTrade.pips' | translate:{value: data.bestSignal.pip} }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- SLIDE 3: MARKET -->
+      @if (slides()[activeSlide]?.type === 'market') {
+        <div class="slide market-slide">
+          <div class="slide-content text-center">
+            <h2>{{ 'weeklyWrap.market.title' | translate }}</h2>
+            <p class="slide-desc" dir="ltr">
+              {{ 'weeklyWrap.market.desc' | translate:{open: (data.marketStats?.open | number:'1.1-1'), close: (data.marketStats?.close | number:'1.1-1')} }}
+            </p>
+
+            <div class="market-range-box glass-card">
+              <div class="range-row">
+                <span class="range-label">{{ 'weeklyWrap.market.high' | translate:{value: (data.marketStats?.high | number:'1.1-1')} }}</span>
+              </div>
+              
+              <!-- Custom range slider track visualization -->
+              <div class="range-bar-visual">
+                <div class="bar-fill"></div>
+              </div>
+
+              <div class="range-row">
+                <span class="range-label">{{ 'weeklyWrap.market.low' | translate:{value: (data.marketStats?.low | number:'1.1-1')} }}</span>
+              </div>
+
+              <div class="net-change-box" [ngClass]="data.marketStats?.change >= 0 ? 'bullish' : 'bearish'">
+                <span>
+                  {{ 'weeklyWrap.market.netChange' | translate:{
+                    sign: (data.marketStats?.change >= 0 ? '+' : ''),
+                    value: (data.marketStats?.change | number:'1.1-1'),
+                    percent: (data.marketStats?.changePercent | number:'1.2-2')
+                  } }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- SLIDE 4: STANDING -->
+      @if (slides()[activeSlide]?.type === 'standing') {
+        <div class="slide standing-slide">
+          <div class="slide-content text-center">
+            <h2>{{ 'weeklyWrap.standing.title' | translate }}</h2>
+
+            @if (data.topTrader) {
+              <div class="champion-showcase glass-card">
+                <div class="champ-header">
+                  <ng-icon name="saxCupBold" class="gold" size="24px"></ng-icon>
+                  <h3>{{ 'weeklyWrap.standing.champion' | translate }}</h3>
+                </div>
+                <div class="champ-profile">
+                  <img [src]="data.topTrader.avatar" [appAvatar]="data.topTrader" [size]="48" class="champ-avatar" />
+                  <div class="champ-info">
+                    <span class="name">{{ data.topTrader.name }}</span>
+                    <span class="title">{{ data.topTrader.title }}</span>
+                  </div>
+                </div>
+                <div class="champ-score">
+                  <span>{{ 'weeklyWrap.standing.champScore' | translate:{value: (data.topTrader.weekScore | number:'1.0-1')} }}</span>
+                  <span class="separator">•</span>
+                  <span>{{ data.topTrader.weekWinRate | number:'1.0-0' }}% WR</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- SLIDE 5: PERSONAL SUMMARY -->
+      @if (slides()[activeSlide]?.type === 'personal') {
+        <div class="slide performance-slide">
+          <div class="slide-content text-center">
+            <h2>{{ 'weeklyWrap.personal.title' | translate }}</h2>
+
+            @if (data.weekSignals > 0) {
+              <div class="personal-summary-card glass-card">
+                <div class="personal-welcome">
+                  <img [src]="data.avatar" [appAvatar]="data" [size]="56" class="user-avatar" />
+                  <h3>{{ data.title || data.username }}</h3>
+                </div>
+
+                <div class="grid-stats">
+                  <div class="stat-card glass-card">
+                    <span class="label">{{ 'weeklyWrap.activity.title' | translate }}</span>
+                    <span class="value">{{ data.weekSignals }} SIGS</span>
+                  </div>
+                  <div class="stat-card glass-card">
+                    <span class="label">{{ 'weeklyWrap.performance.score' | translate }}</span>
+                    <span class="value" [ngClass]="data.weekScore >= 0 ? 'green' : 'red'">
+                      {{ data.weekScore >= 0 ? '+' : '' }}{{ data.weekScore | number:'1.0-1' }}
+                    </span>
+                  </div>
+                  <div class="stat-card glass-card">
+                    <span class="label">{{ 'weeklyWrap.gems.earned' | translate }}</span>
+                    <span class="value blue">+{{ data.gemsEarned }} GEM</span>
+                  </div>
+                  <div class="stat-card glass-card">
+                    <span class="label">{{ 'weeklyWrap.standing.rank' | translate }}</span>
+                    <span class="value gold">#{{ data.weeklyRank || 'N/A' }}</span>
+                  </div>
+                </div>
+                
+                <p class="personal-feedback text-muted">
+                  {{ 'weeklyWrap.personal.feedback' | translate }}
+                </p>
+              </div>
+            } @else {
+              <div class="personal-summary-card glass-card quiet-card">
+                <div class="tonal-icon-large slate">
+                  <ng-icon name="saxStarOutline" size="48px"></ng-icon>
+                </div>
+                <p class="personal-desc">
+                  {{ 'weeklyWrap.personal.none' | translate }}
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- SLIDE 6: SHARE -->
+      @if (slides()[activeSlide]?.type === 'share') {
+        <div class="slide share-slide">
+          <div class="slide-content text-center">
+            <h2>{{ 'weeklyWrap.share.title' | translate }}</h2>
+            <p class="slide-desc">{{ 'weeklyWrap.share.desc' | translate }}</p>
+
+            <!-- Consolidated Summary Card (Styled to look like the canvas export) -->
+            <div class="consolidated-card glass-card gold-border">
+              <span class="app-tag">OUNCE24</span>
+              <div class="user-info-row">
+                <img [src]="data.avatar" [appAvatar]="data" [size]="48" class="summary-avatar" />
+                <div class="user-meta">
+                  <h4>{{ data.title || data.username }}</h4>
+                  <span class="date-range">{{ 'weeklyWrap.intro.dateRange' | translate:{start: (data.startOfTradingWeek | date:'MMM d'), end: (data.endOfTradingWeek | date:'MMM d')} }}</span>
+                </div>
+              </div>
+
+              <div class="summary-stats-list">
+                <!-- Platform-wide stats -->
+                <div class="summary-stat">
+                  <span class="lbl text-muted">{{ 'weeklyWrap.canvas.platformSignals' | translate }}</span>
+                  <span class="val">{{ data.platformSignals }} SIGS</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="lbl text-muted">{{ 'weeklyWrap.canvas.bestTrader' | translate }}</span>
+                  <span class="val">{{ data.bestSignal?.owner?.name || 'N/A' }}</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="lbl text-muted">{{ 'weeklyWrap.canvas.champion' | translate }}</span>
+                  <span class="val">{{ data.topTrader?.name || 'N/A' }}</span>
+                </div>
+
+                <!-- Divider -->
+                <div class="summary-divider"></div>
+
+                <!-- Personal stats -->
+                <div class="summary-stat">
+                  <span class="lbl">{{ 'weeklyWrap.canvas.yourSignals' | translate }}</span>
+                  <span class="val">{{ data.weekSignals }} SIGS</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="lbl">{{ 'weeklyWrap.canvas.yourScore' | translate }}</span>
+                  <span class="val" [ngClass]="data.weekScore >= 0 ? 'green' : 'red'">
+                    {{ data.weekScore >= 0 ? '+' : '' }}{{ data.weekScore | number:'1.0-1' }}
+                  </span>
+                </div>
+                <div class="summary-stat">
+                  <span class="lbl">{{ 'weeklyWrap.canvas.yourRank' | translate }}</span>
+                  <span class="val">{{ data.weeklyRank ? '#' + data.weeklyRank : 'N/A' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Share and Download Buttons -->
+            <div class="action-buttons-row">
+              <button mat-flat-button color="primary" class="share-btn primary-gradient" (click)="shareWrap()">
+                <ng-icon name="saxShareOutline" size="18px"></ng-icon>
+                {{ 'weeklyWrap.share.shareBtn' | translate }}
+              </button>
+              <button mat-stroked-button color="primary" class="download-btn" (click)="downloadCard()">
+                <ng-icon name="saxDocumentDownloadOutline" size="18px"></ng-icon>
+                {{ 'weeklyWrap.share.downloadBtn' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- Tap overlays for screen navigation -->
+    <div class="nav-overlays" dir="ltr">
+      <div class="nav-tap-area tap-left" (click)="prevSlide()"></div>
+      <div class="nav-tap-area tap-right" (click)="nextSlide()"></div>
+    </div>
+  }
+</div>

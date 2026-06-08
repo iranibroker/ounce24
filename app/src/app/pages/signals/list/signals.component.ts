@@ -13,7 +13,8 @@ import { SignalCardComponent } from '../../../components/signal-card/signal-card
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxAddOutline } from '@ng-icons/iconsax/outline';
+import { saxAddOutline, saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
+import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 
 import { AuthService } from '../../../services/auth.service';
 
@@ -34,7 +35,7 @@ const PAGE_SIZE = 20;
     DataLoadingComponent,
     EmptyStateComponent
   ],
-  providers: [provideIcons({ saxAddOutline })],
+  providers: [provideIcons({ saxAddOutline, saxDiamondsBold, saxArrowLeftOutline })],
   templateUrl: './signals.component.html',
   styleUrls: ['./signals.component.scss']
 })
@@ -49,6 +50,38 @@ export class SignalsComponent {
   SignalStatus = SignalStatus;
 
   isLoggedIn = computed(() => !!this.auth.userQuery.data());
+
+  isWeekend = computed(() => {
+    const now = new Date();
+    const nyParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    }).formatToParts(now);
+
+    const partVal = (type: string) => parseInt(nyParts.find(p => p.type === type)!.value, 10);
+    const nyHour = partVal('hour');
+    const nyWeekdayStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short'
+    }).format(now);
+    
+    if (nyWeekdayStr === 'Fri') {
+      return nyHour >= 17;
+    }
+    if (nyWeekdayStr === 'Sat') {
+      return true;
+    }
+    if (nyWeekdayStr === 'Sun') {
+      return nyHour < 17;
+    }
+    return false;
+  });
 
   constructor() {
     // Initialize status and filter from query params

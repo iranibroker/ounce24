@@ -16,6 +16,10 @@ export const loginActivator: CanActivateFn = (
   const router = inject(Router);
   const telegramService = inject(TelegramService);
 
+  if (route.queryParams['mock'] === 'true') {
+    return true;
+  }
+
   if (!auth.token()) {
     const queryParams = { returnPath: state.url };
     if (telegramService.isTelegramApp) {

@@ -10,6 +10,7 @@ import {
   Follow,
   GemLog,
   GemLogAction,
+  OuncePriceCandle,
 } from '@ounce24/types';
 import mongoose, { Model } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -27,6 +28,7 @@ export class UsersService {
     @InjectModel(OctopusPrediction.name) private predictionModel: Model<OctopusPrediction>,
     @InjectModel(Follow.name) private followModel: Model<Follow>,
     @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
+    @InjectModel(OuncePriceCandle.name) private candleModel: Model<OuncePriceCandle>,
     @InjectBot('main') private readonly bot: Telegraf<Context>,
   ) {}
 
@@ -796,5 +798,248 @@ export class UsersService {
       .skip(skip)
       .limit(limit)
       .exec();
+  }
+
+  async getWeeklyWrap(userId: string) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
+    }
+
+    const now = new Date();
+    // Calculate Friday 17:00 NY time that occurred most recently
+    const nyParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    }).formatToParts(now);
+
+    const partVal = (type: string) => parseInt(nyParts.find(p => p.type === type)!.value, 10);
+    const nyYear = partVal('year');
+    const nyMonth = partVal('month') - 1; // 0-indexed
+    const nyDay = partVal('day');
+    const nyHour = partVal('hour');
+
+    const nyWeekdayStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short'
+    }).format(now);
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const nyDayOfWeek = weekdays.indexOf(nyWeekdayStr);
+
+    let daysToFriday = 0;
+    if (nyDayOfWeek === 5) { // Friday
+      daysToFriday = nyHour < 17 ? 7 : 0;
+    } else {
+      daysToFriday = (nyDayOfWeek - 5 + 7) % 7;
+      if (daysToFriday === 0) daysToFriday = 7;
+    }
+
+    const endOfTradingWeek = new Date(Date.UTC(nyYear, nyMonth, nyDay - daysToFriday, 22, 0, 0, 0));
+    const targetNYHour = parseInt(new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      hour12: false
+    }).format(endOfTradingWeek), 10);
+    endOfTradingWeek.setUTCHours(22 + (17 - targetNYHour));
+
+    const startOfTradingWeek = new Date(endOfTradingWeek.getTime() - 5 * 24 * 60 * 60 * 1000);
+
+    // A. Weekly stats computed from user's signals closed during target completed week
+    const userSignals = await this.signalModel.find({
+      owner: userId,
+      status: SignalStatus.Closed,
+      closedAt: { $gte: startOfTradingWeek, $lte: endOfTradingWeek },
+      deletedAt: null,
+    }).exec();
+
+    const weekSignals = userSignals.length;
+    const weekWinSignals = userSignals.filter((s) => s.pip > 0).length;
+    const weekScore = userSignals.reduce((acc, s) => acc + s.score, 0);
+    const weekWinRate = weekSignals > 0 ? (weekWinSignals / weekSignals) * 100 : 0;
+
+    // B. Platform-wide stats (total signals created during target completed week)
+    const platformSignals = await this.signalModel.countDocuments({
+      createdAt: { $gte: startOfTradingWeek, $lte: endOfTradingWeek },
+      deletedAt: null,
+    }).exec();
+
+    // C. Best signal of the week platform-wide (highest closed score during target completed week)
+    const bestSignal = await this.signalModel
+      .findOne({
+        status: SignalStatus.Closed,
+        closedAt: { $gte: startOfTradingWeek, $lte: endOfTradingWeek },
+        deletedAt: null,
+      })
+      .populate('owner')
+      .sort({ score: -1 })
+      .exec();
+
+    // D. Gems earned this week
+    const gemLogs = await this.gemLogModel
+      .find({
+        user: userId,
+        createdAt: { $gte: startOfTradingWeek, $lte: endOfTradingWeek },
+        gemsChange: { $gt: 0 },
+      })
+      .exec();
+    const gemsEarned = gemLogs.reduce((acc, log) => acc + log.gemsChange, 0);
+
+    // E. Weekly leaderboard standing from weekly aggregation of the target week
+    const weeklyAggregate = await this.signalModel.aggregate([
+      {
+        $match: {
+          status: SignalStatus.Closed,
+          closedAt: { $gte: startOfTradingWeek, $lte: endOfTradingWeek },
+          deletedAt: null,
+        }
+      },
+      {
+        $group: {
+          _id: '$owner',
+          weekScore: { $sum: '$score' },
+          weekSignals: { $sum: 1 },
+          weekWinSignals: {
+            $sum: {
+              $cond: [{ $gt: ['$pip', 0] }, 1, 0]
+            }
+          }
+        }
+      },
+      {
+        $sort: { weekScore: -1 }
+      }
+    ]).exec();
+
+    const userRankIndex = weeklyAggregate.findIndex(
+      (item) => item._id?.toString() === userId,
+    );
+    const weeklyRank = userRankIndex !== -1 ? userRankIndex + 1 : null;
+
+    // F. Weekly market stats (open, close, high, low, net change of Gold/XAUUSD during target completed week)
+    const candles = await this.candleModel
+      .find({
+        timestamp: { $gte: startOfTradingWeek, $lte: endOfTradingWeek },
+      })
+      .sort({ timestamp: 1 })
+      .exec();
+
+    let marketStats = null;
+    if (candles.length > 0) {
+      const high = Math.max(...candles.map((c) => c.high));
+      const low = Math.min(...candles.map((c) => c.low));
+      const open = candles[0].open;
+      const close = candles[candles.length - 1].close;
+      const change = close - open;
+      const changePercent = (change / open) * 100;
+      marketStats = {
+        open,
+        close,
+        high,
+        low,
+        change,
+        changePercent,
+      };
+    }
+
+    // G. Weekly leaderboard champion (Top user from target completed week)
+    let topTrader = null;
+    if (weeklyAggregate.length > 0) {
+      const champ = weeklyAggregate[0];
+      const champUser = await this.userModel.findById(champ._id).exec();
+      if (champUser) {
+        topTrader = {
+          name: champUser.name || champUser.telegramUsername || 'Top Analyst',
+          avatar: champUser.avatar,
+          title: champUser.title,
+          weekScore: champ.weekScore,
+          weekWinRate: champ.weekSignals > 0 ? (champ.weekWinSignals / champ.weekSignals) * 100 : 0,
+        };
+      }
+    }
+
+    return {
+      username: user.name || user.telegramUsername || 'User',
+      avatar: user.avatar,
+      title: user.title,
+      platformSignals,
+      weekSignals,
+      weekWinSignals,
+      weekScore,
+      weekWinRate,
+      gemsEarned,
+      weeklyRank,
+      bestSignal,
+      marketStats,
+      topTrader,
+      startOfTradingWeek,
+      endOfTradingWeek,
+    };
+  }
+
+  async getMockWeeklyWrap(userId: string) {
+    let user = null;
+    try {
+      if (userId && userId.match(/^[0-9a-fA-F]{24}$/)) {
+        user = await this.userModel.findById(userId).exec();
+      }
+    } catch (e) {
+      // ignore query or cast errors
+    }
+    const username = user?.name || user?.telegramUsername || 'Elite Trader';
+    const avatar = user?.avatar || 'assets/images/default-avatar.png';
+    const title = user?.title || 'Gold Master';
+
+    return {
+      username,
+      avatar,
+      title,
+      platformSignals: 342,
+      weekSignals: 4,
+      weekWinSignals: 3,
+      weekScore: 18.5,
+      weekWinRate: 75.0,
+      gemsEarned: 10,
+      weeklyRank: 15,
+      bestSignal: {
+        type: 'buy',
+        isSell: false,
+        entryPrice: 2315.4,
+        closedOuncePrice: 2368.8,
+        pip: 534,
+        score: 42.5,
+        status: 'CLOSED',
+        closedAt: new Date(),
+        owner: {
+          name: 'Arash_Gold',
+          avatar: 'assets/images/avatar-1.png',
+          title: 'Master Scalper',
+        }
+      },
+      marketStats: {
+        open: 2305.2,
+        close: 2372.5,
+        high: 2385.0,
+        low: 2298.1,
+        change: 67.3,
+        changePercent: 2.92,
+      },
+      topTrader: {
+        name: 'Arash_Gold',
+        avatar: 'assets/images/avatar-1.png',
+        title: 'Master Scalper',
+        weekScore: 142.0,
+        weekWinRate: 85.0,
+      },
+      startOfTradingWeek: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      endOfTradingWeek: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    };
   }
 }

@@ -203,4 +203,13 @@ export class UsersController {
       return u;
     });
   }
+
+  @Public()
+  @Get(':id/weekly-wrap')
+  async getWeeklyWrap(@Param('id') id: string, @Query('mock') mock?: string) {
+    if (mock === 'true') {
+      return this.usersService.getMockWeeklyWrap(id);
+    }
+    return this.usersService.getWeeklyWrap(id);
+  }
 }
