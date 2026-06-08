@@ -60,6 +60,10 @@ export class User {
   score?: number;
   weekScore?: number;
   monthScore?: number;
+  weekSignals?: number;
+  weekWinSignals?: number;
+  monthSignals?: number;
+  monthWinSignals?: number;
   tag: string;
   rank?: number;
   gem?: number;

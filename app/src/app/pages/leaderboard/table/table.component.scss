@@ -3,38 +3,193 @@
   max-width: 800px;
   margin: 0 auto;
 }
-.spacer {
-  flex: 1 1 auto;
+
+.league-table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
 }
 
-.owner {
-  background-color: var(--mat-sys-surface-container-high) !important;
-}
-
-.score {
-  font-size: 1.2rem !important;
-  font-weight: 600 !important;
-}
-
-a.mat-mdc-list-item {
-  height: 56px !important;
-}
-
-img.mat-mdc-list-item-avatar {
-  border-radius: 4px !important;
-  margin-left: 32px !important;
-}
-
-.rank {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  line-height: 56px;
+.league-header-row {
+  display: grid;
+  grid-template-columns: 32px minmax(80px, 1fr) 48px 48px 48px 64px;
+  gap: 4px;
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
   text-align: center;
-  font-size: 0.8rem;
-  margin: 0 !important;
+  align-items: center;
 }
 
-.mat-mdc-list-item-title {
-  margin-top: -10px !important;
+.league-row {
+  display: grid;
+  grid-template-columns: 32px minmax(80px, 1fr) 48px 48px 48px 64px;
+  gap: 4px;
+  padding: 10px 8px;
+  align-items: center;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.995);
+  }
+
+  &.owner {
+    background-color: rgba(255, 215, 0, 0.04) !important;
+    border-left: 3px solid #ffd700;
+    
+    &:hover {
+      background-color: rgba(255, 215, 0, 0.07) !important;
+    }
+  }
+}
+
+.col-rank {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+}
+
+.rank-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-family: 'Outfit', monospace;
+
+  &.rank-1 {
+    background: linear-gradient(135deg, #ffe066, #f5a623);
+    color: #000;
+    font-weight: 700;
+    box-shadow: 0 0 8px rgba(245, 166, 35, 0.4);
+  }
+  &.rank-2 {
+    background: linear-gradient(135deg, #e6e6e6, #9b9b9b);
+    color: #000;
+    font-weight: 700;
+    box-shadow: 0 0 6px rgba(155, 155, 155, 0.3);
+  }
+  &.rank-3 {
+    background: linear-gradient(135deg, #d39e82, #8c5b40);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 6px rgba(140, 91, 64, 0.3);
+  }
+}
+
+.col-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: #fff;
+}
+
+.col-signals {
+  font-family: 'Outfit', monospace;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.col-success {
+  font-family: 'Outfit', monospace;
+  font-weight: 600;
+  color: #00e676;
+}
+
+.col-loss {
+  font-family: 'Outfit', monospace;
+  font-weight: 600;
+  color: #ff5252;
+}
+
+.col-score {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-weight: 700;
+  color: #ffd700;
+  font-family: 'Outfit', monospace;
+  padding-right: 4px;
+
+  .star-icon {
+    font-size: 14px;
+    color: #ffd700;
+    margin-top: -1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-container {
+    padding: 8px;
+  }
+
+  .league-header-row,
+  .league-row {
+    grid-template-columns: 28px minmax(70px, 1fr) 42px 42px 42px 60px;
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+
+  .user-avatar {
+    width: 22px;
+    height: 22px;
+  }
+
+  .user-name {
+    font-size: 11px;
+  }
+
+  .league-row {
+    font-size: 11px;
+  }
 }

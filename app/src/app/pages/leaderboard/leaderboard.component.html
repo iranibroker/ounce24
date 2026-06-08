@@ -17,9 +17,9 @@
     <mat-tab label="{{ 'leaderboard.week' | translate }}">
       <ng-template matTabContent>
         <div class="tab-header-timer">
-          <span>Weekly Leaderboard</span>
+          <span>{{ 'leaderboard.weeklyTitle' | translate }}</span>
           <span class="timer-val">
-            ⏰ Ends in: {{ weekCountdownText() }}
+            ⏰ {{ 'leaderboard.endsIn' | translate }} {{ weekCountdownText() }}
           </span>
         </div>
         <app-leaderboard-table [data]="queryWeek.data()" period="week" />
@@ -28,9 +28,9 @@
     <mat-tab label="{{ 'leaderboard.month' | translate }}">
       <ng-template matTabContent>
         <div class="tab-header-timer">
-          <span>{{ currentMonthName }} Leaderboard</span>
+          <span>{{ 'leaderboard.monthlyTitle' | translate: { month: currentMonthName } }}</span>
           <span class="timer-val">
-            ⏰ Ends in: {{ monthCountdownText() }}
+            ⏰ {{ 'leaderboard.endsIn' | translate }} {{ monthCountdownText() }}
           </span>
         </div>
         <app-leaderboard-table [data]="queryMonth.data()" period="month" />

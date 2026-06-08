@@ -25,4 +25,40 @@ export class LeaderboardTableComponent {
   data = input<User[]>();
   period = input<'week' | 'month' | 'total'>('total');
   authService = inject(AuthService);
+
+  getSignalsCount(user: User): number {
+    const period = this.period();
+    if (period === 'week') {
+      return user.weekSignals || 0;
+    } else if (period === 'month') {
+      return user.monthSignals || 0;
+    }
+    return user.totalSignals || 0;
+  }
+
+  getWinSignalsCount(user: User): number {
+    const period = this.period();
+    if (period === 'week') {
+      return user.weekWinSignals || 0;
+    } else if (period === 'month') {
+      return user.monthWinSignals || 0;
+    }
+    return Math.round(((user.winRate || 0) * (user.totalSignals || 0)) / 100);
+  }
+
+  getLossSignalsCount(user: User): number {
+    const period = this.period();
+    if (period === 'week') {
+      const total = user.weekSignals || 0;
+      const wins = user.weekWinSignals || 0;
+      return total - wins;
+    } else if (period === 'month') {
+      const total = user.monthSignals || 0;
+      const wins = user.monthWinSignals || 0;
+      return total - wins;
+    }
+    const total = user.totalSignals || 0;
+    const wins = this.getWinSignalsCount(user);
+    return total - wins;
+  }
 }

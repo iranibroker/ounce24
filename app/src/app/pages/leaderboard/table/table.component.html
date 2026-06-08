@@ -3,41 +3,67 @@
   @if (!userList) {
     <app-data-loading />
   } @else {
-    <mat-nav-list dir="ltr">
-      @for (user of userList; track user._id; let i = $index) {
-        <a
-          mat-list-item
-          routerLink="/profile/{{ user.id }}"
-          [class.owner]="user.id === authService.userQuery.data()?.id"
-        >
-          <span matListItemIcon class="rank">{{ user.rank }}</span>
-          <img
-            matListItemAvatar
-            [appAvatar]="user"
-            [alt]="user.title || user.name"
-          />
-          <span matListItemTitle>{{ user.title || user.name }}</span>
-          @if (period() === 'total') {
-            <span matListItemLine>{{
-              'leaderboard.signalCount'
-                | translate: { value: user.totalSignals }
-            }}</span>
-          }
+    <div class="league-table" dir="ltr">
+      <!-- Table Header -->
+      <div class="league-header-row">
+        <div class="col-rank">{{ 'leaderboard.rank' | translate }}</div>
+        <div class="col-user">{{ 'leaderboard.user' | translate }}</div>
+        <div class="col-signals">{{ 'leaderboard.signals' | translate }}</div>
+        <div class="col-success">{{ 'leaderboard.success' | translate }}</div>
+        <div class="col-loss">{{ 'leaderboard.loss' | translate }}</div>
+        <div class="col-score">{{ 'leaderboard.score' | translate }}</div>
+      </div>
 
-          <span matListItemMeta class="score">
-            {{
-              period() === 'week'
-                ? user.weekScore?.toFixed(1)
-                : period() === 'month'
-                  ? user.monthScore?.toFixed(1)
-                  : user.totalScore?.toFixed(1)
-            }}
-            <ng-icon name="saxStarOutline"></ng-icon>
-          </span>
-          <mat-divider></mat-divider>
-        </a>
-        @if (!$last) {}
-      }
-    </mat-nav-list>
+      <!-- Table Body -->
+      <div class="league-body">
+        @for (user of userList; track user._id; let i = $index) {
+          <a
+            [routerLink]="'/profile/' + user.id"
+            class="league-row"
+            [class.owner]="user.id === authService.userQuery.data()?.id"
+          >
+            <!-- Rank -->
+            <div class="col-rank">
+              <span class="rank-badge" [class]="'rank-' + user.rank">
+                {{ user.rank }}
+              </span>
+            </div>
+
+            <!-- User Info (Avatar & Name) -->
+            <div class="col-user">
+              <img
+                [appAvatar]="user"
+                [alt]="user.title || user.name"
+                class="user-avatar"
+              />
+              <span class="user-name">{{ user.title || user.name }}</span>
+            </div>
+
+            <!-- Total Signals -->
+            <div class="col-signals">{{ getSignalsCount(user) }}</div>
+
+            <!-- Successful Signals -->
+            <div class="col-success">{{ getWinSignalsCount(user) }}</div>
+
+            <!-- Failed Signals -->
+            <div class="col-loss">{{ getLossSignalsCount(user) }}</div>
+
+            <!-- Score -->
+            <div class="col-score">
+              <span class="score-val">
+                {{
+                  period() === 'week'
+                    ? (user.weekScore?.toFixed(1) || '0.0')
+                    : period() === 'month'
+                      ? (user.monthScore?.toFixed(1) || '0.0')
+                      : (user.totalScore?.toFixed(1) || '0.0')
+                }}
+              </span>
+              <ng-icon name="saxStarOutline" class="star-icon"></ng-icon>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
   }
 </div>

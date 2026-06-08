@@ -6,7 +6,7 @@ import { User } from '@ounce24/types';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { SHARED } from '../../shared';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,8 +43,20 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private dialog = inject(MatDialog);
   public authService = inject(AuthService);
+  public translate = inject(TranslateService);
 
-  currentMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date());
+  get currentMonthName(): string {
+    const lang = this.translate.currentLang || 'en';
+    const localeMap: { [key: string]: string } = {
+      en: 'en-US',
+      fa: 'fa-IR',
+      ar: 'ar-EG',
+      tr: 'tr-TR',
+    };
+    const locale = localeMap[lang] || 'en-US';
+    return new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date());
+  }
+
   monthCountdownText = signal<string>('');
   weekCountdownText = signal<string>('');
   private timer: any = null;

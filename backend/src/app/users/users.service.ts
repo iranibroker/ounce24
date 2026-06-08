@@ -94,26 +94,27 @@ export class UsersService {
         totalSignals || 0;
     const totalScore = userSignals.reduce((acc, s) => acc + s.score, 0);
 
-    const weekScore = userSignals.reduce((acc, s) => {
-      if (
+    const weekSignalsList = userSignals.filter((s) => {
+      return (
         s.closedAt &&
         new Date(s.createdAt).valueOf() >= startOfTradingWeek.valueOf()
-      ) {
-        return acc + s.score;
-      }
-      return acc;
-    }, 0);
+      );
+    });
+    const weekSignals = weekSignalsList.length;
+    const weekWinSignals = weekSignalsList.filter((s) => s.pip > 0).length;
 
     const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-    const monthScore = userSignals.reduce((acc, s) => {
-      if (
+    const monthSignalsList = userSignals.filter((s) => {
+      return (
         s.closedAt &&
         new Date(s.createdAt).valueOf() >= startOfMonth.valueOf()
-      ) {
-        return acc + s.score;
-      }
-      return acc;
-    }, 0);
+      );
+    });
+    const monthSignals = monthSignalsList.length;
+    const monthWinSignals = monthSignalsList.filter((s) => s.pip > 0).length;
+
+    const weekScore = weekSignalsList.reduce((acc, s) => acc + s.score, 0);
+    const monthScore = monthSignalsList.reduce((acc, s) => acc + s.score, 0);
 
     return this.userModel
       .findByIdAndUpdate(
@@ -126,6 +127,10 @@ export class UsersService {
           score: totalScore,
           weekScore,
           monthScore,
+          weekSignals,
+          weekWinSignals,
+          monthSignals,
+          monthWinSignals,
         },
         {
           new: true,
@@ -141,7 +146,7 @@ export class UsersService {
     } else if (month) {
       sort = { monthScore: -1 };
     }
-    const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore monthScore createdAt';
+    const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore monthScore createdAt weekSignals weekWinSignals monthSignals monthWinSignals';
 
     const users = await this.userModel
       .find()

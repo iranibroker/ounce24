@@ -30,6 +30,10 @@ export const UserSchema = new mongoose.Schema<User>(
     alternativeTelegramToken: { type: String, required: false },
     weekScore: { type: Number, required: true, default: 0 },
     monthScore: { type: Number, required: true, default: 0 },
+    weekSignals: { type: Number, required: true, default: 0 },
+    weekWinSignals: { type: Number, required: true, default: 0 },
+    monthSignals: { type: Number, required: true, default: 0 },
+    monthWinSignals: { type: Number, required: true, default: 0 },
     language: { type: String, required: false, default: 'en' },
     tradingStyle: {
       type: String,
