@@ -142,7 +142,7 @@ export class SignalInfoComponent implements OnInit {
     const userGems = user?.gem || 0;
     const nextVal = !this.subscription.aiShield;
 
-    if (nextVal && userGems < 100) {
+    if (nextVal && userGems < 20) {
       this.dialog.open(GemRequiredDialogComponent, {
         width: '400px',
         data: {

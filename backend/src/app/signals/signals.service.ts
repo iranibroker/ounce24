@@ -184,10 +184,8 @@ export class SignalsService {
       .populate('owner')
       .exec();
 
-    // const gemPerScore = Number(process.env.GEM_PER_SCORE) || 10;
-    const minScore = Number(process.env.MIN_SCORE_FOR_GEM) || 0;
-    if (savedSignal.score > minScore) {
-      const giftGems = 1;
+    const giftGems = savedSignal.score >= 10 ? Math.floor(savedSignal.score / 10) : 0;
+    if (giftGems > 0) {
       await this.userModel
         .findByIdAndUpdate(savedSignal.owner._id, {
           $inc: { gem: giftGems },
@@ -573,7 +571,7 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
         });
       }
 
-      if (!user.gem || user.gem < 20) {
+      if (!user.gem || user.gem < 2) {
         throw new NotAcceptableException({
           translationKey: 'insufficientGems',
         });
@@ -692,19 +690,19 @@ Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments)
       console.log('Parse Error:\n', parseError);
       console.log('=== [AI GENERATE SIGNAL END] ===');
 
-      // Deduct 20 gems from user only if a signal was successfully generated
+      // Deduct 2 gems from user only if a signal was successfully generated
       if (generatedSignal && !parseError) {
         await this.userModel
           .findByIdAndUpdate(user.id, {
-            $inc: { gem: -20 },
+            $inc: { gem: -2 },
           })
           .exec();
 
         this.gemLogModel.create({
           user: user.id,
-          gemsChange: -20,
+          gemsChange: -2,
           gemsBefore: user.gem,
-          gemsAfter: user.gem - 20,
+          gemsAfter: user.gem - 2,
           action: GemLogAction.GenerateSignal,
         });
       }
@@ -731,16 +729,27 @@ Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments)
     userId: string,
     subDto: { followStatus?: boolean; aiShield?: boolean },
   ): Promise<SignalSubscription> {
-    if (subDto.aiShield === true) {
+    const sub = await this.signalSubModel.findOne({ signal: signalId, user: userId }).exec();
+    const isEnablingShield = subDto.aiShield === true && (!sub || !sub.aiShield);
+
+    if (isEnablingShield) {
       const user = await this.userModel.findById(userId).exec();
-      if (!user || !user.gem || user.gem < 100) {
+      if (!user || !user.gem || user.gem < 20) {
         throw new NotAcceptableException({
           translationKey: 'insufficientGems',
         });
       }
+
+      await this.userModel.findByIdAndUpdate(userId, { $inc: { gem: -1 } }).exec();
+      await this.gemLogModel.create({
+        user: userId,
+        gemsChange: -1,
+        gemsBefore: user.gem,
+        gemsAfter: user.gem - 1,
+        action: GemLogAction.AiShieldEnable,
+      });
     }
 
-    const sub = await this.signalSubModel.findOne({ signal: signalId, user: userId }).exec();
     let savedSub: SignalSubscription;
     if (sub) {
       if (subDto.followStatus !== undefined) sub.followStatus = subDto.followStatus;

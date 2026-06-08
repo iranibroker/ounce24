@@ -5,6 +5,8 @@ export enum GemLogAction {
   ChangeAvatar = 'change_avatar',
   CloseSignal = 'close_signal',
   GenerateSignal = 'generate_signal',
+  UnlockAchievement = 'unlock_achievement',
+  AiShieldEnable = 'ai_shield_enable',
 }
 
 export class GemLog {

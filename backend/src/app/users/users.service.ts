@@ -8,6 +8,8 @@ import {
   User,
   OctopusPrediction,
   Follow,
+  GemLog,
+  GemLogAction,
 } from '@ounce24/types';
 import mongoose, { Model } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -24,6 +26,7 @@ export class UsersService {
     @InjectModel(Achievement.name) private achievementModel: Model<Achievement>,
     @InjectModel(OctopusPrediction.name) private predictionModel: Model<OctopusPrediction>,
     @InjectModel(Follow.name) private followModel: Model<Follow>,
+    @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
     @InjectBot('main') private readonly bot: Telegraf<Context>,
   ) {}
 
@@ -365,6 +368,9 @@ export class UsersService {
 
     if (toInsert.length > 0) {
       await this.achievementModel.insertMany(toInsert);
+      for (const ach of toInsert) {
+        await this.awardGemsForAchievement(userId, ach.type);
+      }
     }
   }
 
@@ -447,6 +453,9 @@ export class UsersService {
 
     if (toInsert.length > 0) {
       await this.achievementModel.insertMany(toInsert);
+      for (const ach of toInsert) {
+        await this.awardGemsForAchievement(userId, ach.type);
+      }
     }
   }
 
@@ -468,10 +477,12 @@ export class UsersService {
     const leaderboard = await this.getLeaderboard(0, 10, undefined, true);
     const winner = leaderboard[0];
     if (winner) {
+      const winnerId = winner.id || winner._id?.toString() || winner;
       await this.achievementModel.create({
         type: AchievementType.WeekWin,
-        user: winner,
+        user: winnerId,
       });
+      await this.awardGemsForAchievement(winnerId, AchievementType.WeekWin);
     }
 
     // 2. Best signals in week (highest scoring signal closed in the week)
@@ -519,10 +530,12 @@ export class UsersService {
     }
 
     if (bestSignal && bestSignal.owner) {
+      const bestSignalOwnerId = bestSignal.owner.id || bestSignal.owner._id?.toString() || bestSignal.owner.toString();
       await this.achievementModel.create({
         type: AchievementType.BestSignalWeek,
-        user: bestSignal.owner,
+        user: bestSignalOwnerId,
       });
+      await this.awardGemsForAchievement(bestSignalOwnerId, AchievementType.BestSignalWeek);
     }
 
     // 3. Octopus weekly winners
@@ -540,10 +553,12 @@ export class UsersService {
 
     if (topOctopusWeekly.length > 0) {
       const winnerId = topOctopusWeekly[0]._id;
+      const winnerIdStr = winnerId.toString();
       await this.achievementModel.create({
         type: AchievementType.OctopusWeekWin,
-        user: winnerId,
+        user: winnerIdStr,
       });
+      await this.awardGemsForAchievement(winnerIdStr, AchievementType.OctopusWeekWin);
     }
   }
 
@@ -586,6 +601,7 @@ export class UsersService {
         type: AchievementType.MonthWin,
         user: winnerId,
       });
+      await this.awardGemsForAchievement(winnerId, AchievementType.MonthWin);
     }
 
     // B. Best signals in month (highest scoring signal closed in the Gregorian month)
@@ -596,10 +612,12 @@ export class UsersService {
     }
 
     if (bestSignalMonth && bestSignalMonth.owner) {
+      const bestSignalOwnerId = bestSignalMonth.owner.id || bestSignalMonth.owner._id?.toString() || bestSignalMonth.owner.toString();
       await this.achievementModel.create({
         type: AchievementType.BestSignalMonth,
-        user: bestSignalMonth.owner,
+        user: bestSignalOwnerId,
       });
+      await this.awardGemsForAchievement(bestSignalOwnerId, AchievementType.BestSignalMonth);
     }
 
     // C. Octopus monthly winners
@@ -617,10 +635,12 @@ export class UsersService {
 
     if (topOctopusMonthly.length > 0) {
       const winnerId = topOctopusMonthly[0]._id;
+      const winnerIdStr = winnerId.toString();
       await this.achievementModel.create({
         type: AchievementType.OctopusMonthWin,
-        user: winnerId,
+        user: winnerIdStr,
       });
+      await this.awardGemsForAchievement(winnerIdStr, AchievementType.OctopusMonthWin);
     }
   }
 
@@ -730,5 +750,51 @@ export class UsersService {
       if (!userObj) return null;
       return userObj;
     }).filter(Boolean);
+  }
+
+  async awardGemsForAchievement(userId: string, type: AchievementType) {
+    const rewardMap: Record<AchievementType, number> = {
+      [AchievementType.WeekWin]: 30,
+      [AchievementType.MonthWin]: 100,
+      [AchievementType.BestSignalWeek]: 10,
+      [AchievementType.BestSignalMonth]: 40,
+      [AchievementType.Hatrik20Points]: 30,
+      [AchievementType.FiftyPoint]: 30,
+      [AchievementType.FiveStreakR1]: 30,
+      [AchievementType.Winrate60In30]: 50,
+      [AchievementType.OctopusWeekWin]: 0,
+      [AchievementType.OctopusMonthWin]: 0,
+      [AchievementType.Octopus5Streak]: 0,
+      [AchievementType.Octopus10Streak]: 0,
+    };
+
+    const reward = rewardMap[type] || 0;
+    if (reward <= 0) return;
+
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) return;
+
+    const currentGems = user.gem || 0;
+    await this.userModel.findByIdAndUpdate(userId, {
+      $inc: { gem: reward }
+    }).exec();
+
+    await this.gemLogModel.create({
+      user: userId,
+      gemsChange: reward,
+      gemsBefore: currentGems,
+      gemsAfter: currentGems + reward,
+      action: GemLogAction.UnlockAchievement,
+    });
+  }
+
+  async getGemHistory(userId: string, page: number, limit: number) {
+    const skip = page * limit;
+    return this.gemLogModel
+      .find({ user: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 }

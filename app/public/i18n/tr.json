@@ -76,10 +76,10 @@
       "followSuccess": "Sinyal başarıyla yer imlerine eklendi",
       "unfollowSuccess": "Sinyal başarıyla yer imlerinden kaldırıldı",
       "aiShield": "Akıllı Kalkan",
-      "aiShieldDesc": "Yapay zeka tabanlı risksiz, takip eden ve erken çıkış uyarıları alın (tavsiye başına 3 GEM)",
+      "aiShieldDesc": "Yapay zeka tabanlı risksiz, takip eden ve erken çıkış uyarıları alın (tavsiye başına 1 GEM)",
       "aiShieldSuccess": "Akıllı Kalkan etkinleştirildi! 🛡️",
       "aiShieldDeactivated": "Akıllı Kalkan devre dışı bırakıldı",
-      "aiShieldPremiumGemsRequired": "Bu bölüm premium erişim gerektiriyor. En az 100 GEM'e sahip olmalısınız.",
+      "aiShieldPremiumGemsRequired": "Bu bölüm premium erişim gerektiriyor. En az 20 GEM'e sahip olmalısınız.",
       "premium": "Premium"
     }
   },
@@ -256,7 +256,7 @@
     },
     "submit": "Sinyal Oluştur",
     "analyzeWithAI": "Yapay Zeka ile Analiz Et",
-    "generateWithAI": "Yapay Zeka ile Sinyal Oluştur (20 GEM)",
+    "generateWithAI": "Yapay Zeka ile Sinyal Oluştur (2 GEM)",
     "generating": "Yapay zekadan sinyal oluşturuluyor...",
     "gemRequired": "İşlem sinyalinizi yapay zeka ile analiz etmek için gem'lere ihtiyacınız var",
     "generateError": "Sinyal yapay zeka tarafından oluşturuldu ancak otomatik olarak ayrıştırılamadı. Lütfen değerleri manuel olarak girin:\n\n{{rawText}}",
@@ -543,5 +543,42 @@
         "description": "Diğer yatırımcılarla rekabet edin, haftalık/genel liderlik tablolarında yükselin ve kazanılan başarıları inceleyin."
       }
     }
+  },
+  "gems": {
+    "pageTitle": "GEM'lerim",
+    "balanceCardTitle": "GEM Bakiyesi",
+    "balanceCardDesc": "GEM'ler, Yapay Zeka Analizi ve Akıllı Kalkan uyarıları gibi premium özelliklere erişmek için kullanılır.",
+    "tabHistory": "İşlem Geçmişi",
+    "tabGuide": "Nasıl Kazanılır",
+    "balanceBefore": "Önce: {{value}}",
+    "balanceAfter": "Sonra: {{value}}",
+    "howToEarn": {
+      "intro": "Ounce24'te mükemmel işlem performansı göstererek ve rekabet ederek GEM kazanabilirsiniz:",
+      "signalCloseTitle": "Kapanan Sinyaller",
+      "signalCloseDesc": "Başarıyla kapatılan sinyallerde her 10 puan için 1 GEM kazanın. Bir sinyal 10 puandan az puan alırsa GEM verilmez.",
+      "weekWinTitle": "Haftalık Liderlik Tablosu Birincisi",
+      "weekWinDesc": "Haftalık liderlik tablosunu birinci sırada tamamlayarak 30 GEM kazanın.",
+      "monthWinTitle": "Aylık Liderlik Tablosu Birincisi",
+      "monthWinDesc": "Aylık liderlik tablosunu birinci sırada tamamlayarak 100 GEM kazanın.",
+      "bestSignalWeekTitle": "Haftanın En İyi Sinyali",
+      "bestSignalWeekDesc": "Hafta boyunca kapatılan en yüksek puanlı sinyali paylaşarak 10 GEM kazanın.",
+      "bestSignalMonthTitle": "Ayın En İyi Sinyali",
+      "bestSignalMonthDesc": "Ay boyunca kapatılan en yüksek puanlı sinyali paylaşarak 40 GEM kazanın.",
+      "individualTitle": "Bireysel Başarılar",
+      "individualDesc": "20 puanlık sinyal hat-trick'i, 50+ puanlık sinyal veya 5 kazanç serisi kilidini açarak 30 GEM kazanın. %60+ kazanma oranı başarısının kilidini açarak 50 GEM kazanın.",
+      "octopusTitle": "Ahtapot Tahmin Mücadelesi",
+      "octopusDesc": "Ahtapot başarıları ve günlük tahminler şu anda GEM kazandırmamaktadır."
+    },
+    "historyEmpty": "İşlem geçmişi bulunamadı",
+    "actions": {
+      "signal_analyze": "Sinyal Analizi",
+      "change_avatar": "Profil Resmi Değişikliği",
+      "close_signal": "Kapanan Sinyal Ödülü",
+      "generate_signal": "Yapay Zeka Sinyal Oluşturma",
+      "unlock_achievement": "Başarı Kilidi Açma",
+      "ai_shield_enable": "Akıllı Kalkan Aktivasyonu"
+    },
+    "menuTitle": "GEM Cüzdanı",
+    "menuDescription": "İşlem geçmişinizi ve GEM kazanma kılavuzunu görüntüleyin"
   }
 }

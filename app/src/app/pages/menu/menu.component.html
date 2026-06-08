@@ -11,8 +11,24 @@
             <span class="view-profile-text">{{ 'menu.viewProfile' | translate }}</span>
           </div>
           <span class="spacer"></span>
-          <div class="profile-card-gems">
-            <ng-icon name="saxDiamondsBold" class="blue" size="18px"></ng-icon>
+          <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="settings-card clickable-card gems-menu-card" routerLink="/gems">
+      <mat-card-content>
+        <div class="settings-row">
+          <div class="settings-info">
+            <div class="icon-container gems-icon-container">
+              <ng-icon name="saxDiamondsBold" class="blue" size="20px"></ng-icon>
+            </div>
+            <div class="settings-texts">
+              <h3>{{ 'gems.menuTitle' | translate }}</h3>
+              <p>{{ 'gems.menuDescription' | translate }}</p>
+            </div>
+          </div>
+          <div class="gems-count-badge">
             <span>{{ user.gem || 0 | number }}</span>
           </div>
           <ng-icon name="saxArrowLeftOutline" class="disclosure-arrow" size="20px" style="color: var(--mat-sys-outline);"></ng-icon>

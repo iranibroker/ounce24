@@ -90,6 +90,19 @@ export class UsersController {
     return this.usersService.getUserAchievements(id, page, limit);
   }
 
+  @Get(':id/gems/history')
+  async getGemHistory(
+    @Param('id') id: string,
+    @LoginUser() currentUser: User,
+    @Query('page') page = 0,
+    @Query('limit') limit = 50,
+  ) {
+    if (currentUser.id !== id) {
+      throw new NotAcceptableException('Unauthorized');
+    }
+    return this.usersService.getGemHistory(id, Number(page), Number(limit));
+  }
+
   @Public()
   @Get(':id/signals')
   async getUserSignals(

@@ -287,7 +287,7 @@ export class SignalCopilotService implements OnModuleInit {
                     const userDb = await this.userModel.findById(sub.userId).select('gem').exec();
                     const currentGems = userDb?.gem || 0;
                     sub.gem = currentGems;
-                    if (currentGems >= 100) {
+                    if (currentGems >= 20) {
                       verifiedSubs.push(sub);
                     }
                   }
@@ -346,7 +346,7 @@ export class SignalCopilotService implements OnModuleInit {
                     const currentGems = userDb?.gem || 0;
                     // Sync the fresh count to our cache
                     sub.gem = currentGems;
-                    if (currentGems >= 100) {
+                    if (currentGems >= 20) {
                       verifiedSubs.push(sub);
                     }
                   }
@@ -544,7 +544,7 @@ Return ONLY a valid JSON object (no markdown, no backticks, no comments):
 
         // Dispatch notifications to subscribers in this group
         for (const sub of group.subs) {
-          if (sub.gem < 100) continue;
+          if (sub.gem < 20) continue;
           if (!sub.notifAiShield) continue;
 
           const isPersonal = signal.owner && (
@@ -590,19 +590,19 @@ Return ONLY a valid JSON object (no markdown, no backticks, no comments):
               });
           }
 
-          // Deduct 3 Gems
-          await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -3 } }).exec();
+          // Deduct 1 Gems
+          await this.userModel.findByIdAndUpdate(sub.userId, { $inc: { gem: -1 } }).exec();
 
           // Log Gem deduction
           await this.gemLogModel.create({
             user: sub.userId,
-            gemsChange: -3,
+            gemsChange: -1,
             gemsBefore: sub.gem,
-            gemsAfter: sub.gem - 3,
+            gemsAfter: sub.gem - 1,
             action: GemLogAction.SignalAnalyze,
           });
 
-          sub.gem = sub.gem - 3;
+          sub.gem = sub.gem - 1;
         }
       }
 

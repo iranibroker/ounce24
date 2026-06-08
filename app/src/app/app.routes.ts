@@ -110,6 +110,11 @@ export const appRoutes: Route[] = [
         canActivate: [loginActivator],
       },
       {
+        path: 'gems',
+        loadComponent: () => import('./pages/gems/gems.component').then(m => m.GemsComponent),
+        canActivate: [loginActivator],
+      },
+      {
         path: 'notifications',
         component: NotificationSettingsComponent,
         canActivate: [loginActivator],

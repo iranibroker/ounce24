@@ -1,0 +1,337 @@
+.gems-toolbar {
+  background: var(--mat-sys-surface-container-low) !important;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  .back-icon {
+    display: flex;
+    color: var(--mat-sys-on-surface);
+  }
+  
+  .toolbar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.gems-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// Balance Card Styling
+.balance-card {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.15) 0%, rgba(33, 150, 243, 0.02) 100%), var(--mat-sys-surface-container-low) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(33, 150, 243, 0.25);
+  box-shadow: none !important;
+  overflow: hidden;
+
+  .balance-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 4px;
+  }
+
+  .balance-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+
+    h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--mat-sys-on-surface);
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: var(--mat-sys-outline);
+    }
+  }
+
+  .balance-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gem-badge-large {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(33, 150, 243, 0.12);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    padding: 10px 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+
+    .blue-gem {
+      color: #2196f3;
+      filter: drop-shadow(0 2px 4px rgba(33, 150, 243, 0.3));
+      display: flex;
+    }
+
+    .gem-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--mat-sys-on-surface);
+      line-height: 1;
+    }
+  }
+}
+
+// Navigation Tabs Styling
+.gems-tabs {
+  ::ng-deep {
+    .mat-mdc-tab-group {
+      font-family: inherit;
+    }
+    
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    .mat-mdc-tab {
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: normal;
+      color: var(--mat-sys-outline);
+      height: 48px;
+
+      &.mdc-tab--active {
+        color: var(--mat-sys-primary);
+      }
+    }
+
+    .mat-mdc-tab-labels {
+      justify-content: space-evenly;
+    }
+  }
+}
+
+.tab-content {
+  padding: 1.25rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// Transaction List & Items
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 14px;
+  padding: 12px 14px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+    transform: translateY(-1px);
+  }
+
+  .tx-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    
+    ng-icon {
+      display: flex;
+    }
+
+    &.positive {
+      background: rgba(76, 175, 80, 0.12);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.15);
+    }
+
+    &.negative {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f44336;
+      border: 1px solid rgba(239, 68, 68, 0.12);
+    }
+  }
+
+  .tx-details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+
+    .tx-action {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--mat-sys-on-surface);
+    }
+
+    .tx-date {
+      font-size: 0.72rem;
+      color: var(--mat-sys-outline);
+    }
+
+    .tx-balance-info {
+      font-size: 0.68rem;
+      color: var(--mat-sys-outline);
+      opacity: 0.85;
+      margin-top: 1px;
+    }
+  }
+
+  .tx-amount {
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: nowrap;
+
+    &.positive {
+      color: #4caf50;
+    }
+
+    &.negative {
+      color: #f44336;
+    }
+  }
+  
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  
+  button {
+    border-radius: 12px !important;
+    font-weight: 600;
+    height: 40px;
+    min-width: 140px;
+  }
+}
+
+// Guide Tab Styling
+.guide-tab {
+  .guide-intro {
+    background: rgba(33, 150, 243, 0.05);
+    border-left: 4px solid #2196f3;
+    padding: 12px 16px;
+    border-radius: 4px 12px 12px 4px;
+    margin-bottom: 4px;
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .guide-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .guide-item {
+    display: flex;
+    gap: 16px;
+    background: var(--mat-sys-surface-container-low);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 16px;
+    padding: 14px 16px;
+    align-items: flex-start;
+
+    .guide-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(33, 150, 243, 0.1);
+      color: #2196f3;
+      flex-shrink: 0;
+
+      ng-icon {
+        display: flex;
+      }
+    }
+
+    .guide-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--mat-sys-on-surface);
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.76rem;
+        line-height: 1.45;
+        color: var(--mat-sys-outline);
+      }
+    }
+    
+    &.locked-earnings {
+      background: rgba(255, 255, 255, 0.02) !important;
+      opacity: 0.65;
+      
+      .guide-icon {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--mat-sys-outline);
+      }
+    }
+  }
+}
+
+// RTL Support
+:host-context([dir='rtl']) {
+  .gems-toolbar {
+    .back-icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  .guide-tab {
+    .guide-intro {
+      border-left: none;
+      border-right: 4px solid #2196f3;
+      border-radius: 12px 4px 4px 12px;
+    }
+  }
+}

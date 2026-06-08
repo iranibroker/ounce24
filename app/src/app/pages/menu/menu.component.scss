@@ -229,3 +229,20 @@
     }
   }
 }
+
+.gems-menu-card {
+  .gems-icon-container {
+    background: rgba(33, 150, 243, 0.1) !important;
+    color: #2196f3 !important;
+  }
+
+  .gems-count-badge {
+    background: rgba(33, 150, 243, 0.1);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+}
+

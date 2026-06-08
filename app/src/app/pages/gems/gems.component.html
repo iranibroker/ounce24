@@ -1,0 +1,142 @@
+<mat-toolbar color="default" class="gems-toolbar">
+  <button mat-icon-button (click)="goBack()">
+    <ng-icon name="saxArrowLeftOutline" size="24px" class="back-icon"></ng-icon>
+  </button>
+  <span class="toolbar-title">{{ 'gems.pageTitle' | translate }}</span>
+</mat-toolbar>
+
+<div class="gems-page-container">
+  <!-- Balance Header Card -->
+  <mat-card class="balance-card">
+    <mat-card-content>
+      <div class="balance-content">
+        <div class="balance-info">
+          <h2>{{ 'gems.balanceCardTitle' | translate }}</h2>
+          <p>{{ 'gems.balanceCardDesc' | translate }}</p>
+        </div>
+        <div class="balance-value">
+          <div class="gem-badge-large">
+            <ng-icon name="saxDiamondsBold" size="32px" class="blue-gem"></ng-icon>
+            <span class="gem-number">{{ user()?.gem || 0 | number }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Content Tabs -->
+  <mat-tab-group animationDuration="200ms" class="gems-tabs">
+    <!-- Transactions History Tab -->
+    <mat-tab [label]="'gems.tabHistory' | translate">
+      <div class="tab-content history-tab">
+        @if (historyQuery.isPending()) {
+          <app-data-loading></app-data-loading>
+        } @else if (transactions().length === 0) {
+          <app-empty-state [text]="'gems.historyEmpty' | translate"></app-empty-state>
+        } @else {
+          <div class="transactions-list">
+            @for (log of transactions(); track log._id) {
+              <div class="transaction-item">
+                <div class="tx-icon-wrapper" [class.positive]="log.gemsChange > 0" [class.negative]="log.gemsChange <= 0">
+                  <ng-icon [name]="getActionIcon(log.action)" size="20px"></ng-icon>
+                </div>
+                <div class="tx-details">
+                  <span class="tx-action">{{ 'gems.actions.' + log.action | translate }}</span>
+                  <span class="tx-date">{{ formatTransactionDate(log.createdAt) }}</span>
+                  <span class="tx-balance-info">
+                    {{ 'gems.balanceBefore' | translate: { value: log.gemsBefore } }} 
+                    | 
+                    {{ 'gems.balanceAfter' | translate: { value: log.gemsAfter } }}
+                  </span>
+                </div>
+                <span class="spacer"></span>
+                <div class="tx-amount" [class.positive]="log.gemsChange > 0" [class.negative]="log.gemsChange <= 0">
+                  {{ log.gemsChange > 0 ? '+' : '' }}{{ log.gemsChange }}
+                </div>
+              </div>
+            }
+
+            @if (historyQuery.hasNextPage()) {
+              <div class="load-more-container">
+                <button mat-stroked-button color="primary" [disabled]="historyQuery.isFetchingNextPage()" (click)="historyQuery.fetchNextPage()">
+                  @if (historyQuery.isFetchingNextPage()) {
+                    <app-data-loading></app-data-loading>
+                  } @else {
+                    {{ 'app.loadMore' | translate }}
+                  }
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Guide Tab -->
+    <mat-tab [label]="'gems.tabGuide' | translate">
+      <div class="tab-content guide-tab">
+        <div class="guide-intro">
+          <p>{{ 'gems.howToEarn.intro' | translate }}</p>
+        </div>
+
+        <div class="guide-items">
+          <div class="guide-item">
+            <div class="guide-icon"><ng-icon name="lucideTrendingUp" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.signalCloseTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.signalCloseDesc' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-icon"><ng-icon name="lucideAward" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.individualTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.individualDesc' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-icon"><ng-icon name="lucideZap" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.bestSignalWeekTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.bestSignalWeekDesc' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-icon"><ng-icon name="lucideZap" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.bestSignalMonthTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.bestSignalMonthDesc' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-icon"><ng-icon name="lucideShield" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.weekWinTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.weekWinDesc' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-icon"><ng-icon name="lucideShield" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.monthWinTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.monthWinDesc' | translate }}</p>
+            </div>
+          </div>
+
+          <div class="guide-item locked-earnings">
+            <div class="guide-icon"><ng-icon name="lucideGem" size="20px"></ng-icon></div>
+            <div class="guide-details">
+              <h3>{{ 'gems.howToEarn.octopusTitle' | translate }}</h3>
+              <p>{{ 'gems.howToEarn.octopusDesc' | translate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
