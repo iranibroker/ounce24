@@ -23,6 +23,6 @@ import { MatDividerModule } from '@angular/material/divider';
 })
 export class LeaderboardTableComponent {
   data = input<User[]>();
-  isWeek = input<boolean>(false);
+  period = input<'week' | 'month' | 'total'>('total');
   authService = inject(AuthService);
 }

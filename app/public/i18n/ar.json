@@ -185,6 +185,7 @@
   },
   "leaderboard": {
     "week": "الأسبوع",
+    "month": "Month",
     "total": "الإجمالي",
     "signalCount": "{{value}} إشارات",
     "scoreInfo": {
@@ -364,6 +365,7 @@
     "leaderboard": {
       "title": "لوحة متصدري الأخطبوط",
       "weekly": "أسبوعي",
+      "monthly": "Monthly",
       "total": "الإجمالي",
       "starsCount": "{{value}} نجوم",
       "empty": "لا يوجد ترتيب بعد"

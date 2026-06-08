@@ -59,6 +59,7 @@ export class User {
 
   score?: number;
   weekScore?: number;
+  monthScore?: number;
   tag: string;
   rank?: number;
   gem?: number;

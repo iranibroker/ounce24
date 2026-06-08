@@ -185,6 +185,7 @@
   },
   "leaderboard": {
     "week": "Haftalık",
+    "month": "Month",
     "total": "Toplam",
     "signalCount": "{{value}} sinyal",
     "scoreInfo": {
@@ -364,6 +365,7 @@
     "leaderboard": {
       "title": "Ahtapot Liderlik Tablosu",
       "weekly": "Haftalık",
+      "monthly": "Monthly",
       "total": "Toplam",
       "starsCount": "{{value}} Yıldız",
       "empty": "Henüz sıralama yok"

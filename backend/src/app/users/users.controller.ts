@@ -40,6 +40,7 @@ export class UsersController {
           name: user.name,
           title: user.title,
           weekScore: updatedUser?.weekScore || 0,
+          monthScore: updatedUser?.monthScore || 0,
           totalScore: updatedUser?.totalScore || 0,
           score: updatedUser?.score || 0,
           totalSignals: updatedUser?.totalSignals || 0,
@@ -63,6 +64,12 @@ export class UsersController {
   @Get('leaderboard/week')
   async getLeaderboardWeek(@Query('userId') userId?: string) {
     return this.usersService.getLeaderboard(0, 30, userId, true);
+  }
+
+  @Public()
+  @Get('leaderboard/month')
+  async getLeaderboardMonth(@Query('userId') userId?: string) {
+    return this.usersService.getLeaderboard(0, 30, userId, false, true);
   }
 
   @Public()

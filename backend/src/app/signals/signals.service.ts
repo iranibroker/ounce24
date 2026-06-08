@@ -188,22 +188,23 @@ export class SignalsService {
     const minScore = Number(process.env.MIN_SCORE_FOR_GEM) || 0;
     if (savedSignal.score > minScore) {
       const giftGems = 1;
-      this.userModel
+      await this.userModel
         .findByIdAndUpdate(savedSignal.owner._id, {
           $inc: { gem: giftGems },
         })
         .exec();
 
-      this.gemLogModel.create({
+      const currentGems = savedSignal.owner.gem || 0;
+      await this.gemLogModel.create({
         user: savedSignal.owner._id,
         gemsChange: giftGems,
-        gemsBefore: savedSignal.owner.gem,
-        gemsAfter: savedSignal.owner.gem + giftGems,
+        gemsBefore: currentGems,
+        gemsAfter: currentGems + giftGems,
         action: GemLogAction.CloseSignal,
       });
 
       savedSignal.gem = giftGems;
-      savedSignal.save();
+      await savedSignal.save();
     }
 
     this.eventEmitter.emit(EVENTS.SIGNAL_CLOSED, savedSignal);

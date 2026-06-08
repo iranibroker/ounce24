@@ -647,3 +647,24 @@
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.8); }
 }
+
+.tab-header-timer {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+
+  .timer-val {
+    font-family: 'Outfit', monospace;
+    font-weight: 500;
+    color: #ffd700; // Gold highlight
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}

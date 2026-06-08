@@ -199,6 +199,7 @@
   },
   "leaderboard": {
     "week": "هفته",
+    "month": "Month",
     "total": "کل",
     "signalCount": "{{value}} سیگنال",
     "scoreInfo": {
@@ -378,6 +379,7 @@
     "leaderboard": {
       "title": "جدول امتیازات اختاپوس",
       "weekly": "هفتگی",
+      "monthly": "Monthly",
       "total": "کل",
       "starsCount": "{{value}} ستاره",
       "empty": "لیست خالی است"

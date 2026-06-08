@@ -37,10 +37,44 @@ export class UsersService {
 
   async calculateUserStats(user: User) {
     const now = new Date();
-    const daysSinceMonday = (now.getUTCDay() + 6) % 7; // Days since last Monday (Monday = 1, Sunday = 0)
-    const lastMonday = new Date(now);
-    lastMonday.setUTCDate(now.getUTCDate() - daysSinceMonday);
-    lastMonday.setUTCHours(0, 0, 0, 0);
+    
+    // Calculate start of the current trading week (Sunday 17:00 America/New_York close)
+    const nyParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    }).formatToParts(now);
+
+    const partVal = (type: string) => parseInt(nyParts.find(p => p.type === type)!.value, 10);
+    const nyYear = partVal('year');
+    const nyMonth = partVal('month') - 1; // 0-indexed
+    const nyDay = partVal('day');
+    const nyHour = partVal('hour');
+
+    const nyWeekdayStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short'
+    }).format(now);
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const nyDayOfWeek = weekdays.indexOf(nyWeekdayStr);
+
+    let daysSinceSunday = nyDayOfWeek;
+    if (nyDayOfWeek === 0 && nyHour < 17) {
+      daysSinceSunday = 7;
+    }
+
+    const startOfTradingWeek = new Date(Date.UTC(nyYear, nyMonth, nyDay - daysSinceSunday, 22, 0, 0, 0));
+    const targetNYHour = parseInt(new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      hour12: false
+    }).format(startOfTradingWeek), 10);
+    startOfTradingWeek.setUTCHours(22 + (17 - targetNYHour));
 
     const userSignals = await this.signalModel.find({
       owner: user,
@@ -63,7 +97,18 @@ export class UsersService {
     const weekScore = userSignals.reduce((acc, s) => {
       if (
         s.closedAt &&
-        new Date(s.createdAt).valueOf() >= lastMonday.valueOf()
+        new Date(s.createdAt).valueOf() >= startOfTradingWeek.valueOf()
+      ) {
+        return acc + s.score;
+      }
+      return acc;
+    }, 0);
+
+    const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const monthScore = userSignals.reduce((acc, s) => {
+      if (
+        s.closedAt &&
+        new Date(s.createdAt).valueOf() >= startOfMonth.valueOf()
       ) {
         return acc + s.score;
       }
@@ -80,6 +125,7 @@ export class UsersService {
           totalScore,
           score: totalScore,
           weekScore,
+          monthScore,
         },
         {
           new: true,
@@ -88,9 +134,14 @@ export class UsersService {
       .exec();
   }
 
-  async getLeaderboard(skip = 0, limit = 10, userId?: string, week = false) {
-    const sort: any = week ? { weekScore: -1 } : { totalScore: -1 };
-    const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore createdAt';
+  async getLeaderboard(skip = 0, limit = 10, userId?: string, week = false, month = false) {
+    let sort: any = { totalScore: -1 };
+    if (week) {
+      sort = { weekScore: -1 };
+    } else if (month) {
+      sort = { monthScore: -1 };
+    }
+    const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore monthScore createdAt';
 
     const users = await this.userModel
       .find()
@@ -112,17 +163,24 @@ export class UsersService {
         .findById(userId)
         .select(publicFields)
         .exec();
-      const condition = week
-        ? {
-            weekScore: {
-              $gt: user?.weekScore || 0,
-            },
-          }
-        : {
-            totalScore: {
-              $gt: user?.totalScore || 0,
-            },
-          };
+      let condition: any = {
+        totalScore: {
+          $gt: user?.totalScore || 0,
+        },
+      };
+      if (week) {
+        condition = {
+          weekScore: {
+            $gt: user?.weekScore || 0,
+          },
+        };
+      } else if (month) {
+        condition = {
+          monthScore: {
+            $gt: user?.monthScore || 0,
+          },
+        };
+      }
       const userPosition = await this.userModel
         .countDocuments({
           ...condition,
@@ -387,18 +445,18 @@ export class UsersService {
     }
   }
 
-  @Cron('0 15 0 * * 1', {
-    timeZone: 'UTC',
+  @Cron('15 17 * * *', {
+    timeZone: 'America/New_York',
   })
-  async resetWeekScore() {
+  async dailyMarketCloseReset() {
     const users = await this.userModel.find().exec();
     for (const user of users) {
       await this.calculateUserStats(user);
     }
   }
 
-  @Cron('0 30 0 * * 6', {
-    timeZone: 'UTC',
+  @Cron('30 17 * * 6', {
+    timeZone: 'America/New_York',
   })
   async weekWinners() {
     // 1. Week winners signal (Leaderboard weekly winner)
@@ -413,23 +471,47 @@ export class UsersService {
 
     // 2. Best signals in week (highest scoring signal closed in the week)
     const now = new Date();
-    const daysSinceMonday = (now.getUTCDay() + 6) % 7;
-    const startOfPrevWeek = new Date(now);
-    startOfPrevWeek.setUTCDate(now.getUTCDate() - daysSinceMonday - 7);
-    startOfPrevWeek.setUTCHours(0, 0, 0, 0);
+    const nyParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    }).formatToParts(now);
 
-    const endOfPrevWeek = new Date(startOfPrevWeek);
-    endOfPrevWeek.setUTCDate(startOfPrevWeek.getUTCDate() + 7);
+    const partVal = (type: string) => parseInt(nyParts.find(p => p.type === type)!.value, 10);
+    const nyYear = partVal('year');
+    const nyMonth = partVal('month') - 1;
+    const nyDay = partVal('day');
 
-    const bestSignal = await this.signalModel
-      .findOne({
+    const endOfPrevWeek = new Date(Date.UTC(nyYear, nyMonth, nyDay - 1, 22, 0, 0, 0));
+    const targetNYHourEnd = parseInt(new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      hour12: false
+    }).format(endOfPrevWeek), 10);
+    endOfPrevWeek.setUTCHours(22 + (17 - targetNYHourEnd));
+
+    const startOfPrevWeek = new Date(endOfPrevWeek);
+    startOfPrevWeek.setUTCDate(endOfPrevWeek.getUTCDate() - 5);
+
+    const weeklySignals = await this.signalModel
+      .find({
         status: SignalStatus.Closed,
         closedAt: { $gte: startOfPrevWeek, $lt: endOfPrevWeek },
         deletedAt: null,
         owner: { $ne: null },
       })
-      .sort({ score: -1 })
       .exec();
+
+    let bestSignal = null;
+    if (weeklySignals.length > 0) {
+      weeklySignals.sort((a, b) => b.score - a.score);
+      bestSignal = weeklySignals[0];
+    }
 
     if (bestSignal && bestSignal.owner) {
       await this.achievementModel.create({
@@ -460,37 +542,41 @@ export class UsersService {
     }
   }
 
-  @Cron('0 45 0 1 * *', {
-    timeZone: 'UTC',
+  @Cron('45 17 1 * *', {
+    timeZone: 'America/New_York',
   })
   async monthWinners() {
     const now = new Date();
-    // 1st day of the Gregorian month at 00:45 UTC. Prev month range:
+    // 1st day of the Gregorian month at 17:45 NY time. Prev month range:
     const startOfPrevMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0));
     const endOfPrevMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999));
 
-    // A. Month winners signal (highest score accumulated from signals closed during the Gregorian month)
-    const topUsers = await this.signalModel.aggregate([
-      {
-        $match: {
-          status: SignalStatus.Closed,
-          closedAt: { $gte: startOfPrevMonth, $lte: endOfPrevMonth },
-          deletedAt: null,
-          owner: { $ne: null },
-        },
-      },
-      {
-        $group: {
-          _id: '$owner',
-          totalScore: { $sum: '$score' },
-        },
-      },
-      { $sort: { totalScore: -1 } },
-      { $limit: 1 },
-    ]).exec();
+    const monthlySignals = await this.signalModel
+      .find({
+        status: SignalStatus.Closed,
+        closedAt: { $gte: startOfPrevMonth, $lte: endOfPrevMonth },
+        deletedAt: null,
+        owner: { $ne: null },
+      })
+      .exec();
 
-    if (topUsers.length > 0) {
-      const winnerId = topUsers[0]._id;
+    // A. Month winners signal (highest score accumulated from signals closed during the Gregorian month)
+    const userScoresMap: { [key: string]: number } = {};
+    for (const sig of monthlySignals) {
+      const ownerId = sig.owner.toString();
+      userScoresMap[ownerId] = (userScoresMap[ownerId] || 0) + sig.score;
+    }
+
+    let winnerId = null;
+    let maxScore = -Infinity;
+    for (const [userId, score] of Object.entries(userScoresMap)) {
+      if (score > maxScore) {
+        maxScore = score;
+        winnerId = userId;
+      }
+    }
+
+    if (winnerId) {
       await this.achievementModel.create({
         type: AchievementType.MonthWin,
         user: winnerId,
@@ -498,15 +584,11 @@ export class UsersService {
     }
 
     // B. Best signals in month (highest scoring signal closed in the Gregorian month)
-    const bestSignalMonth = await this.signalModel
-      .findOne({
-        status: SignalStatus.Closed,
-        closedAt: { $gte: startOfPrevMonth, $lte: endOfPrevMonth },
-        deletedAt: null,
-        owner: { $ne: null },
-      })
-      .sort({ score: -1 })
-      .exec();
+    let bestSignalMonth = null;
+    if (monthlySignals.length > 0) {
+      monthlySignals.sort((a, b) => b.score - a.score);
+      bestSignalMonth = monthlySignals[0];
+    }
 
     if (bestSignalMonth && bestSignalMonth.owner) {
       await this.achievementModel.create({

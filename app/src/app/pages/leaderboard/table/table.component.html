@@ -17,7 +17,7 @@
             [alt]="user.title || user.name"
           />
           <span matListItemTitle>{{ user.title || user.name }}</span>
-          @if (!isWeek()) {
+          @if (period() === 'total') {
             <span matListItemLine>{{
               'leaderboard.signalCount'
                 | translate: { value: user.totalSignals }
@@ -26,9 +26,11 @@
 
           <span matListItemMeta class="score">
             {{
-              isWeek()
+              period() === 'week'
                 ? user.weekScore?.toFixed(1)
-                : user.totalScore?.toFixed(1)
+                : period() === 'month'
+                  ? user.monthScore?.toFixed(1)
+                  : user.totalScore?.toFixed(1)
             }}
             <ng-icon name="saxStarOutline"></ng-icon>
           </span>

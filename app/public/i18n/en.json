@@ -199,6 +199,7 @@
   },
   "leaderboard": {
     "week": "Week",
+    "month": "Month",
     "total": "Total",
     "signalCount": "{{value}} signals",
     "scoreInfo": {
@@ -378,6 +379,7 @@
     "leaderboard": {
       "title": "Octopus Leaderboard",
       "weekly": "Weekly",
+      "monthly": "Monthly",
       "total": "Total",
       "starsCount": "{{value}} Stars",
       "empty": "No rankings yet"

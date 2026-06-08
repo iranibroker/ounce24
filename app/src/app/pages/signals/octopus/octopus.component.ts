@@ -121,6 +121,9 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
   votingState = signal<{ enabled: boolean; nextTransition: Date }>({ enabled: true, nextTransition: new Date() });
   countdownText = signal<string>('00:00:00');
+  currentMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date());
+  monthCountdownText = signal<string>('');
+  weekCountdownText = signal<string>('');
   isSubmitting = signal<boolean>(false);
   isEditing = signal<boolean>(false);
   private timer: any = null;
@@ -178,6 +181,13 @@ export class OctopusComponent implements OnInit, OnDestroy {
     refetchInterval: 30000,
   }));
 
+  // Monthly Octopus Leaderboard query
+  monthlyLeaderboardQuery = injectQuery(() => ({
+    queryKey: ['octopusLeaderboardMonthly'],
+    queryFn: () => lastValueFrom(this.http.get<any[]>('/api/octopus/leaderboard/monthly')),
+    refetchInterval: 30000,
+  }));
+
   // Total Octopus Leaderboard query
   totalLeaderboardQuery = injectQuery(() => ({
     queryKey: ['octopusLeaderboardTotal'],
@@ -228,6 +238,67 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
     const pad = (n: number) => n.toString().padStart(2, '0');
     this.countdownText.set(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
+
+    // Calculate month countdown
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth();
+    const nextMonthStart = new Date(Date.UTC(currentYear, currentMonth + 1, 1, 0, 0, 0, 0));
+    const monthDiff = nextMonthStart.getTime() - now.getTime();
+    if (monthDiff <= 0) {
+      this.monthCountdownText.set('0d 0h 0m');
+    } else {
+      const days = Math.floor(monthDiff / 86400000);
+      const hoursLeft = Math.floor((monthDiff % 86400000) / 3600000);
+      const minsLeft = Math.floor((monthDiff % 3600000) / 60000);
+      this.monthCountdownText.set(`${days}d ${hoursLeft}h ${minsLeft}m`);
+    }
+
+    // Calculate week countdown (ends on Friday 17:00 America/New_York trading close)
+    const nyParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    }).formatToParts(now);
+
+    const partVal = (type: string) => parseInt(nyParts.find(p => p.type === type)!.value, 10);
+    const nyYear = partVal('year');
+    const nyMonth = partVal('month') - 1; // 0-indexed
+    const nyDay = partVal('day');
+
+    const nyWeekdayStr = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'short'
+    }).format(now);
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const nyDayOfWeek = weekdays.indexOf(nyWeekdayStr);
+
+    const diffDays = 5 - nyDayOfWeek;
+    // Base guess: Friday at 22:00 UTC (which is 17:00 EST / UTC-5)
+    const targetDate = new Date(Date.UTC(nyYear, nyMonth, nyDay + diffDays, 22, 0, 0, 0));
+    
+    // Adjust based on the actual New York hour to handle Daylight Saving Time (EDT vs EST)
+    const targetNYHour = parseInt(new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      hour12: false
+    }).format(targetDate), 10);
+
+    targetDate.setUTCHours(22 + (17 - targetNYHour));
+
+    const weekDiff = targetDate.getTime() - now.getTime();
+    if (weekDiff <= 0) {
+      this.weekCountdownText.set('0d 0h 0m');
+    } else {
+      const days = Math.floor(weekDiff / 86400000);
+      const hoursLeft = Math.floor((weekDiff % 86400000) / 3600000);
+      const minsLeft = Math.floor((weekDiff % 3600000) / 60000);
+      this.weekCountdownText.set(`${days}d ${hoursLeft}h ${minsLeft}m`);
+    }
   }
 
   async submitVote(direction: 'up' | 'down') {
@@ -248,6 +319,7 @@ export class OctopusComponent implements OnInit, OnDestroy {
       this.queryClient.invalidateQueries({ queryKey: ['octopusSentiment'] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusScores', user?.id] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusLeaderboardWeekly'] });
+      this.queryClient.invalidateQueries({ queryKey: ['octopusLeaderboardMonthly'] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusLeaderboardTotal'] });
     } catch (err: any) {
       const errMsg = err?.error?.message || 'Failed to submit prediction';

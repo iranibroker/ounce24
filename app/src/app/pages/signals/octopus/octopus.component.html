@@ -152,9 +152,65 @@
       <!-- Weekly Leaderboard Tab -->
       <mat-tab [label]="'octopus.leaderboard.weekly' | translate">
         <div class="tab-content">
+          <div class="tab-header-timer">
+            <span>Weekly Leaderboard</span>
+            <span class="timer-val">
+              ⏰ Ends in: {{ weekCountdownText() }}
+            </span>
+          </div>
           <app-data-loading *ngIf="weeklyLeaderboardQuery.isLoading()"></app-data-loading>
           
           <mat-nav-list *ngIf="!weeklyLeaderboardQuery.isLoading() && weeklyLeaderboardQuery.data() as leaderboard">
+            <div class="empty-state" *ngIf="leaderboard.length === 0">
+              {{ 'octopus.leaderboard.empty' | translate }}
+            </div>
+            
+            <a 
+              mat-list-item 
+              *ngFor="let user of leaderboard"
+              [routerLink]="['/profile', user.userId]"
+              [class.current-user]="user.userId === authService.userQuery.data()?.id"
+              class="leader-row"
+            >
+              <!-- Rank -->
+              <span matListItemIcon class="rank-badge" [class]="'rank-' + user.rank">
+                {{ user.rank }}
+              </span>
+
+              <!-- Avatar -->
+              <img 
+                matListItemAvatar 
+                [appAvatar]="mapToUserShape(user)"
+                [alt]="user.title || user.name"
+                class="user-avatar"
+              />
+
+              <!-- Name & Title -->
+              <span matListItemTitle class="user-name">{{ user.title || user.name }}</span>
+
+              <!-- Star Score -->
+              <span matListItemMeta class="user-score">
+                {{ 'octopus.leaderboard.starsCount' | translate:{ value: user.totalPoints } }}
+                <ng-icon name="saxStarOutline" class="row-star-icon"></ng-icon>
+              </span>
+              <mat-divider></mat-divider>
+            </a>
+          </mat-nav-list>
+        </div>
+      </mat-tab>
+
+      <!-- Monthly Leaderboard Tab -->
+      <mat-tab [label]="'octopus.leaderboard.monthly' | translate">
+        <div class="tab-content">
+          <div class="tab-header-timer">
+            <span>{{ currentMonthName }} Leaderboard</span>
+            <span class="timer-val">
+              ⏰ Ends in: {{ monthCountdownText() }}
+            </span>
+          </div>
+          <app-data-loading *ngIf="monthlyLeaderboardQuery.isLoading()"></app-data-loading>
+          
+          <mat-nav-list *ngIf="!monthlyLeaderboardQuery.isLoading() && monthlyLeaderboardQuery.data() as leaderboard">
             <div class="empty-state" *ngIf="leaderboard.length === 0">
               {{ 'octopus.leaderboard.empty' | translate }}
             </div>
