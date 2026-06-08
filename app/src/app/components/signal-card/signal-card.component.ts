@@ -42,6 +42,32 @@ export class SignalCardComponent {
   Signal = Signal;
   SignalStatus = SignalStatus;
 
+  currentPrice = computed(() => this.ouncePrice.value());
+
+  entryPositionPercent = computed(() => {
+    const sig = this.signal();
+    const loss = sig.loss;
+    const profit = sig.profit;
+    if (!loss || !profit || loss === profit) return 50;
+    const entry = sig.entryPrice;
+    const ratio = (entry - profit) / (loss - profit);
+    const clampedRatio = Math.max(0, Math.min(1, ratio));
+    return clampedRatio * 100;
+  });
+
+  currentPositionPercent = computed(() => {
+    const sig = this.signal();
+    if (sig.status !== SignalStatus.Active) return null;
+    const loss = sig.loss;
+    const profit = sig.profit;
+    if (!loss || !profit || loss === profit) return null;
+    const current = this.ouncePrice.value();
+    if (!current) return null;
+    const ratio = (current - profit) / (loss - profit);
+    const clampedRatio = Math.max(0, Math.min(1, ratio));
+    return clampedRatio * 100;
+  });
+
   getPriceFormat(value: number | undefined | null): string {
     if (value === undefined || value === null) {
       return '1.0-0';
