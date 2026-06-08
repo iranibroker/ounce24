@@ -25,12 +25,35 @@ export class SignalsController {
 
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
+    @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Follow.name) private followModel: Model<Follow>,
     @InjectModel(SignalSubscription.name) private signalSubModel: Model<SignalSubscription>,
     private readonly signalService: SignalsService,
     private readonly ouncePriceService: OuncePriceService,
     private readonly auth: AuthService,
   ) {}
+
+  private async populateOwnersRank(signals: any[]): Promise<void> {
+    const uniqueOwners = new Map<string, any>();
+    for (const signal of signals) {
+      if (signal && signal.owner && typeof signal.owner === 'object') {
+        const ownerId = (signal.owner._id || signal.owner.id)?.toString();
+        if (ownerId && !uniqueOwners.has(ownerId)) {
+          uniqueOwners.set(ownerId, signal.owner);
+        }
+      }
+    }
+
+    if (uniqueOwners.size === 0) return;
+
+    await Promise.all(
+      Array.from(uniqueOwners.entries()).map(async ([ownerId, owner]) => {
+        const totalScore = owner.totalScore ?? 0;
+        const rank = await this.userModel.countDocuments({ totalScore: { $gt: totalScore } }).exec();
+        owner.rank = rank + 1;
+      })
+    );
+  }
 
   private sanitizeSignal(signal: any): any {
     if (!signal) return signal;
@@ -83,6 +106,7 @@ export class SignalsController {
       .sort({
         updatedAt: -1
       }).exec();
+    await this.populateOwnersRank(signals);
     return this.sanitizeSignals(signals);
   }
   
@@ -119,6 +143,9 @@ export class SignalsController {
   @Get(':id')
   async getSignal(@Param('id') id: string) {
     const signal = await this.signalModel.findById(id).populate('owner', this.publicUserFields).exec();
+    if (signal) {
+      await this.populateOwnersRank([signal]);
+    }
     return this.sanitizeSignal(signal);
   }
 
@@ -145,6 +172,7 @@ export class SignalsController {
         createdAt: -1,
       })
       .limit(20);
+    await this.populateOwnersRank(signals);
     return this.sanitizeSignals(signals);
   }
 
@@ -195,6 +223,7 @@ export class SignalsController {
       })
       .limit(PAGE_SIZE)
       .skip(page ? Number(page) * PAGE_SIZE : 0);
+    await this.populateOwnersRank(signals);
     return this.sanitizeSignals(signals);
   }
 
@@ -206,6 +235,9 @@ export class SignalsController {
       createdOuncePrice: this.ouncePriceService.current,
       source: SignalSource.Web,
     });
+    if (res) {
+      await this.populateOwnersRank([res]);
+    }
     return this.sanitizeSignal(res);
   }
 
@@ -222,6 +254,7 @@ export class SignalsController {
       { tradingStyle, riskTolerance },
     );
     if (res && res.signal) {
+      await this.populateOwnersRank([res.signal]);
       res.signal = this.sanitizeSignal(res.signal);
     }
     return res;
@@ -243,6 +276,9 @@ export class SignalsController {
   async cancelSignal(@Param('id') id: string, @LoginUser() user: User) {
     const userId = user.id || (user as any)._id?.toString();
     const res = await this.signalService.cancelSignal(id, userId);
+    if (res) {
+      await this.populateOwnersRank([res]);
+    }
     return this.sanitizeSignal(res);
   }
 
@@ -250,6 +286,9 @@ export class SignalsController {
   async manualCloseSignal(@Param('id') id: string, @LoginUser() user: User) {
     const userId = user.id || (user as any)._id?.toString();
     const res = await this.signalService.manualCloseSignal(id, userId);
+    if (res) {
+      await this.populateOwnersRank([res]);
+    }
     return this.sanitizeSignal(res);
   }
 
@@ -257,6 +296,9 @@ export class SignalsController {
   async makeSignalRiskFree(@Param('id') id: string, @LoginUser() user: User) {
     const userId = user.id || (user as any)._id?.toString();
     const res = await this.signalService.makeSignalRiskFree(id, userId);
+    if (res) {
+      await this.populateOwnersRank([res]);
+    }
     return this.sanitizeSignal(res);
   }
 

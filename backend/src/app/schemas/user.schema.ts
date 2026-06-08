@@ -16,7 +16,7 @@ export const UserSchema = new mongoose.Schema<User>(
     telegramId: { type: Number, index: { unique: false } },
     avgRiskReward: { type: Number, required: true, default: 0 },
     score: { type: Number, required: true, default: 0 },
-    totalScore: { type: Number, required: true, default: 0 },
+    totalScore: { type: Number, required: true, default: 0, index: true },
     totalSignals: { type: Number, required: true, default: 0 },
     winRate: { type: Number, required: true, default: 0 },
     phone: { type: String, required: false, unique: true, sparse: true },
