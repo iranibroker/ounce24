@@ -892,7 +892,7 @@ export function getStyleInstructions(
   const finalRisk = risk || RiskTolerance.Moderate;
 
   if (finalStyle === TradingStyle.Scalp) {
-    styleInstructions += `- Trading Style: SCALPING (Very short-term trading). Focus heavily on the 5-minute and 15-minute timeframes. Use the 5m and 15m SMA20/SMA50 to determine momentum. For BUY setups, price should be above 5m and 15m SMAs. For SELL setups, price should be below 5m and 15m SMAs. Check short-term Price Action (candle rejections or breakout candles) at the 15m support/resistance levels. Ignore 1h/4h structures except as minor background direction. Suggest tighter stop loss levels (e.g. 1.0x ATR) and closer take profit levels.\n`;
+    styleInstructions += `- Trading Style: SCALPING (Very short-term trading). Focus heavily on the 5-minute and 15-minute timeframes. Use the 5m and 15m SMA20/SMA50 to determine momentum. For BUY setups, the entry price should be above 5m/15m SMAs or at a key support/OB/FVG. For SELL setups, the entry price should be below 5m/15m SMAs or at a key resistance/OB/FVG. Check short-term Price Action (candle rejections or breakout candles) at the 15m support/resistance levels. Ignore 1h/4h structures except as minor background direction. Suggest tighter stop loss levels (e.g. 1.0x ATR) and closer take profit levels.\n`;
   } else if (finalStyle === TradingStyle.Swing) {
     styleInstructions += `- Trading Style: SWING TRADING (Medium to long-term trading). Focus on the 1-hour and 4-hour horizontal S/R structures. Completely ignore 5-minute and 15-minute noise. Suggest wider stop losses and larger take profit targets (at least 2.0x to 3.0x risk move) to allow the trade room to develop.\n`;
   } else {
@@ -900,7 +900,7 @@ export function getStyleInstructions(
   }
 
   if (finalRisk === RiskTolerance.Conservative) {
-    styleInstructions += `- Risk Tolerance: CONSERVATIVE (Low Risk). You must strictly follow the trend direction (BUY when trend is BULLISH, SELL when trend is BEARISH). Reject any trade if there is a major horizontal barrier blocking the path to the TP. Risk-Reward ratio must be at least 2.0.\n`;
+    styleInstructions += `- Risk Tolerance: CONSERVATIVE (Low Risk). You must strictly follow the dominant trend direction (BUY when dominant trend is BULLISH, SELL when dominant trend is BEARISH). Reject any trade if there is a major horizontal barrier blocking the path to the TP. Risk-Reward ratio must be at least 2.0.\n`;
   } else if (finalRisk === RiskTolerance.Aggressive) {
     styleInstructions += `- Risk Tolerance: AGGRESSIVE (High Risk). You are allowed to suggest counter-trend breakout setups if momentum (RSI) is extremely strong in that direction. The Risk-Reward ratio can be as low as 1.2 if the momentum supports a quick target touch.\n`;
   } else {
