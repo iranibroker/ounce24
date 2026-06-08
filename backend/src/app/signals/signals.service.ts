@@ -476,15 +476,22 @@ ${marketState.semanticText}
 ${styleInstructions}
 
 Rules:
-1. Trend & Entry Alignment: For BUY, the entryPrice (or currentPrice if live) should be aligned with the dominant trend of higher timeframes (15m/1h SMA20+SMA50) or placed at a key support/Order Block/FVG. For SELL, aligned with the dominant downtrend or placed at key resistance/OB/FVG.
-2. Counter-trend trades (against dominant 15m/1h trend) = MEDIUM or LOW unless strong S/R rejection exists.
-3. If a key S/R level blocks the path to TP, rate LOW or MEDIUM.
-4. SL must be behind a valid level or >= 1.5x ATR from entry.
-5. R:R ratio should be 1.5-3.0 for standard risk.
-6. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are opposing the direction.
-7. PENDING LIMIT ORDERS: For PENDING signals (where status is PENDING), do not penalize the rating simply because the current price has not reached the entryPrice yet. Evaluate the setup's technical quality assuming it triggers. However, you MUST verify if the entryPrice is realistically reachable:
+1. Directional Logic:
+   - For SELL signals: ONLY Support levels (below entryPrice) can block or hinder the path to Take Profit. Resistance levels (above entryPrice) are completely irrelevant for blocking SELL targets and instead act as a positive shield/ceiling to protect the Stop Loss.
+   - For BUY signals: ONLY Resistance levels (above entryPrice) can block or hinder the path to Take Profit. Support levels (below entryPrice) are completely irrelevant for blocking BUY targets and instead act as a positive shield/floor to protect the Stop Loss.
+2. Pending Order Projection:
+   - When evaluating PENDING signals, simulate the trade path starting FROM the entryPrice, NOT the currentPrice. Check for blocking S/R levels strictly between the entryPrice and the takeProfit.
+3. Target Sanity Check:
+   - Calculate the distance between entryPrice and Take Profit. If this distance exceeds 5.0x the core timeframe's ATR (5m ATR for Scalping, 1h ATR for Day/Swing), penalize the success chance heavily, rating it LOW or MEDIUM for being highly unrealistic and unlikely to reach, regardless of trend strength.
+4. Trend & Entry Alignment: For BUY, the entryPrice (or currentPrice if live) should be aligned with the dominant trend of higher timeframes (15m/1h SMA20+SMA50) or placed at a key support/Order Block/FVG. For SELL, aligned with the dominant downtrend or placed at key resistance/OB/FVG.
+5. Counter-trend trades (against dominant 15m/1h trend) = MEDIUM or LOW unless strong S/R rejection exists.
+6. SL must be behind a valid level or >= 1.5x ATR from entry.
+7. R:R ratio should be 1.5-3.0 for standard risk.
+8. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are opposing the direction.
+9. PENDING LIMIT ORDERS: For PENDING signals (where status is PENDING), do not penalize the rating simply because the current price has not reached the entryPrice yet. Evaluate the setup's technical quality assuming it triggers. However, you MUST verify if the entryPrice is realistically reachable:
    - If the entryPrice is extremely far from the current price (e.g., more than 3.0x ATR of the trading style's core timeframe), rate it LOW or MEDIUM, explaining that the entry point is highly unrealistic or unlikely to be filled.
    - If the entryPrice is at a logical pullback/breakout zone (like a key S/R, fresh Order Block, or FVG) within a reasonable distance (typically 1.0x to 2.5x ATR of the core timeframe), evaluate the setup's quality on its technical merits once triggered.
+   - A pending BUY limit entryPrice must be below the current price; a pending SELL limit entryPrice must be above the current price. If the order is reversed, flag it as a misconfiguration.
 
 Output format (in ${langConfig.name}):
 - Line 1: "${langConfig.label}: [${langConfig.high}/${langConfig.medium}/${langConfig.low}] - [reason]"
@@ -601,19 +608,31 @@ ${marketState.semanticText}
 
 ${styleInstructions}
 
-Guidelines to generate the best setup:
-1. Trend & Market Structure: Align the signal direction with the dominant trend of higher timeframes (15m and 1h). If the market is consolidating (no clear trend), look for range-bound trade opportunities (e.g., buying near key support levels, selling near key resistance levels).
-2. Entry Type Selection & Minimum Distance:
-   - INSTANT ENTRY (instantEntry=true): Use ONLY if current price is at a very favorable level (breakout or support/resistance bounce).
-   - LIMIT ENTRY (instantEntry=false): If current price is not at an ideal entry zone, place a pending limit order (entryPrice) at a key support/resistance, fresh Order Block, or FVG.
-   - MINIMUM LIMIT DISTANCE: When placing a LIMIT ENTRY, the entryPrice MUST be at a logical, technically sound level that is at a meaningful distance from the current price. 
-     * For SCALPING: entryPrice must be at least 1.0x to 1.5x of the 5-minute ATR away from the current price.
-     * For DAY/SWING trading: entryPrice must be at least 1.0x to 1.5x of the 1-hour ATR away from the current price.
-     * Do NOT place limit entries that are extremely close to the current price (e.g. less than 1.0x ATR); if the pullback is smaller than that, either use instantEntry=true (if current price is favorable) or wait for a deeper limit level.
-3. Targets:
-   - TP should be set before key S/R levels.
-   - SL should be placed behind a valid swing level or >= 1.5x ATR from Entry.
-   - Risk to Reward (R:R) ratio should ideally be between 1.5 and 3.0.
+CORE SCIENTIFIC & TECHNICAL GENERATION RULES:
+
+1. Entry Type & Direction Constraints:
+   - If generating a BUY signal:
+     * Instant Entry (instantEntry = true): entryPrice MUST equal currentPrice ($${currentPrice.toFixed(2)}). Use ONLY if current price is bouncing off a key support, or breaking out with high bullish momentum.
+     * Limit Entry (instantEntry = false): entryPrice MUST be strictly *below* the currentPrice (entryPrice < $${currentPrice.toFixed(2)}). Place the pending limit at a key support, bullish Order Block, or bullish FVG.
+     * Take Profit (takeProfit) MUST be strictly *above* the entryPrice (takeProfit > entryPrice). Do not place takeProfit beyond major resistance levels (resistances block BUY TP).
+     * Stop Loss (stopLoss) MUST be strictly *below* the entryPrice (stopLoss < entryPrice). Place it below a key support level or swing low.
+   - If generating a SELL signal:
+     * Instant Entry (instantEntry = true): entryPrice MUST equal currentPrice ($${currentPrice.toFixed(2)}). Use ONLY if current price is rejecting a key resistance, or breaking down with high bearish momentum.
+     * Limit Entry (instantEntry = false): entryPrice MUST be strictly *above* the currentPrice (entryPrice > $${currentPrice.toFixed(2)}). Place the pending limit at a key resistance, bearish Order Block, or bearish FVG.
+     * Take Profit (takeProfit) MUST be strictly *below* the entryPrice (takeProfit < entryPrice). Do not place takeProfit beyond major support levels (supports block SELL TP).
+     * Stop Loss (stopLoss) MUST be strictly *above* the entryPrice (stopLoss > entryPrice). Place it above a key resistance level or swing high.
+
+2. Minimum Limit Distance Rules:
+   - For pending Limit Entries (instantEntry = false), the entryPrice must be at a logical, technically sound level at a meaningful distance to allow a normal pullback:
+     * For SCALPING: Distance from currentPrice to entryPrice must be at least 1.0x to 1.5x of the 5-minute ATR ($${marketState.atr5m.toFixed(2)}).
+     * For DAY/SWING trading: Distance from currentPrice to entryPrice must be at least 1.0x to 1.5x of the 1-hour ATR ($${marketState.atr1h.toFixed(2)}).
+     * Do NOT place limit entries closer than these distances. If the required pullback is smaller than this, either generate an instantEntry=true (if currentPrice is at a highly favorable bounce/breakout point) or identify a deeper, more robust limit level.
+
+3. Target Sanity Check & Volatility Validation:
+   - Calculate the distance between entryPrice and takeProfit. This distance MUST NOT exceed 5.0x the core timeframe's ATR (5m ATR for Scalping, 1h ATR for Day/Swing). Any distance greater than 5.0x ATR is highly unrealistic and forbidden.
+   - TP should be set before key S/R levels (resistances for BUY, supports for SELL).
+   - SL should be placed behind a valid swing level or key S/R zone (supports for BUY, resistances for SELL) at a minimum distance of 1.5x ATR.
+   - Risk to Reward (R:R) ratio must be between 1.5 and 3.0.
 
 Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments):
 {"type":"buy"|"sell","entryPrice":number,"takeProfit":number,"stopLoss":number,"instantEntry":boolean,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName}. No asterisks or markdown."}
