@@ -69,6 +69,7 @@ export class User {
   gem?: number;
   alternativeTelegramToken?: string;
   language?: string;
+  firstSignalRewardClaimed?: boolean;
 
   /** Notification channel flags — stored in DB */
   notifPrice?: boolean;        // قیمت لحظه‌ای اونس

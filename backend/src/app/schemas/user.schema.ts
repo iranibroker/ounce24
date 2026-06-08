@@ -27,6 +27,7 @@ export const UserSchema = new mongoose.Schema<User>(
     resetAt: { type: Date, required: false },
     iban: { type: String, required: false },
     gem: { type: Number, required: true, default: 0 },
+    firstSignalRewardClaimed: { type: Boolean, required: false, default: false },
     alternativeTelegramToken: { type: String, required: false },
     weekScore: { type: Number, required: true, default: 0 },
     monthScore: { type: Number, required: true, default: 0 },

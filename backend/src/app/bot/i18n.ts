@@ -1,6 +1,7 @@
 export interface BotTranslation {
   welcome: (count: number) => string;
   welcomeSignalMenu: string;
+  firstSignalRewardMessage: string;
   joinChannelRequired: string;
   languageSelected: (lang: string) => string;
   selectLanguage: string;
@@ -59,6 +60,13 @@ export interface BotTranslation {
 
 export const BOT_TRANSLATIONS: Record<string, BotTranslation> = {
   en: {
+    firstSignalRewardMessage: `🎉 <b>Welcome!</b>\n\n` +
+      `On the occasion of submitting your first signal on Ounce24, you have received a welcome reward of <b>10 Gems 💎</b>!\n\n` +
+      `<b>What are Gems used for?</b>\n` +
+      `• <b>AI Analysis:</b> Scientifically evaluate the success chance of signals (Cost: 1 Gem) 📊\n` +
+      `• <b>Smart Shield:</b> Protect your trades from unexpected market volatility (Cost: 1 Gem) 🛡️\n` +
+      `• <b>AI Assistant:</b> Automatically generate the best trading signals tailored to your style (Cost: 2 Gems) 🤖\n\n` +
+      `Click the button below to enter the Ounce24 Web App and explore these advanced AI features. 👇`,
     welcome: (count: number) => `
 Hi, I'm Ounce24 🥇
 Use the options below to get started.
@@ -162,6 +170,13 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
   },
 
   fa: {
+    firstSignalRewardMessage: `🎉 <b>خوش آمدید!</b>\n\n` +
+      `به مناسبت ثبت اولین سیگنال شما در اونس۲۴، جایزه اولین ورود به مقدار <b>۱۰ الماس 💎</b> به شما تعلق گرفت!\n\n` +
+      `<b>الماس‌ها چه کاربردی دارند؟</b>\n` +
+      `• <b>تحلیل هوش مصنوعی:</b> بررسی علمی شانس موفقیت سیگنال‌ها (هزینه: ۱ الماس) 📊\n` +
+      `• <b>سپر هوشمند:</b> محافظت از معاملات شما در برابر نوسانات شدید بازار (هزینه: ۱ الماس) 🛡️\n` +
+      `• <b>دستیار معاملاتی:</b> ساخت خودکار بهترین سیگنال‌ها متناسب با سبک شما (هزینه: ۲ الماس) 🤖\n\n` +
+      `با کلیک بر روی دکمه زیر وارد وب‌اپلیکیشن اونس۲۴ شوید و از امکانات پیشرفته هوش مصنوعی استفاده کنید. 👇`,
     welcome: (count: number) => `
 سلام، من اونس۲۴ هستم 🥇
 برای شروع از گزینه‌های زیر استفاده کن.
@@ -265,6 +280,13 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
   },
 
   ar: {
+    firstSignalRewardMessage: `🎉 <b>مرحباً بك!</b>\n\n` +
+      `بمناسبة تقديم إشارتك الأولى على Ounce24، حصلت على مكافأة ترحيبية بقيمة <b>10 جواهر 💎</b>!\n\n` +
+      `<b>فيمَ تستخدم الجواهر؟</b>\n` +
+      `• <b>تحليل الذكاء الاصطناعي:</b> تقييم علمي لفرصة نجاح الإشارات (التكلفة: جوهرة واحدة) 📊\n` +
+      `• <b>الدرع الذكي:</b> حماية صفقاتك من تقلبات السوق المفاجئة (التكلفة: جوهرة واحدة) 🛡️\n` +
+      `• <b>مساعد الذكاء الاصطناعي:</b> توليد إشارات التداول المثلى تلقائياً (التكلفة: جوهرتان) 🤖\n\n` +
+      `انقر على الزر أدناه للدخول إلى تطبيق ويب Ounce24 واستكشاف ميزات الذكاء الاصطناعي. 👇`,
     welcome: (count: number) => `
 مرحباً، أنا Ounce24 🥇
 استخدم الخيارات أدناه للبدء.
@@ -368,6 +390,13 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
   },
 
   tr: {
+    firstSignalRewardMessage: `🎉 <b>Hoş geldiniz!</b>\n\n` +
+      `Ounce24'te ilk sinyalinizi oluşturduğunuz için <b>10 Elmas 💎</b> hoş geldin ödülü kazandınız!\n\n` +
+      `<b>Elmaslar ne işe yarar?</b>\n` +
+      `• <b>YZ Analizi:</b> Sinyallerin başarı şansını bilimsel olarak değerlendirin (Maliyet: 1 Elmas) 📊\n` +
+      `• <b>Akıllı Kalkan:</b> İşlemlerinizi ani piyasa dalgalanmalarından koruyun (Maliyet: 1 Elmas) 🛡️\n` +
+      `• <b>YZ Asistanı:</b> Tarzınıza uygun en iyi işlem sinyallerini otomatik olarak oluşturun (Maliyet: 2 Elmas) 🤖\n\n` +
+      `Gelişmiş yapay zeka özelliklerini keşfetmek için aşağıdaki düğmeye tıklayarak Ounce24 Web Uygulamasına girin. 👇`,
     welcome: (count: number) => `
 Merhaba, ben Ounce24 🥇
 Başlamak için aşağıdaki seçenekleri kullan.

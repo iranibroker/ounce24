@@ -281,6 +281,33 @@ export class SignalBotService extends BaseBot {
       })
       .exec();
     this.publishSignal(populatedSignal, this.ouncePriceService.current);
+
+    if ((signal as any).isFirstSignalReward && populatedSignal.owner?.telegramId) {
+      try {
+        const lang = populatedSignal.owner.language || 'fa';
+        const t = getTranslation(lang);
+        const welcomeMessage = t.firstSignalRewardMessage;
+        await this.bot.telegram.sendMessage(
+          populatedSignal.owner.telegramId,
+          welcomeMessage,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: t.buttons.webApp,
+                    web_app: { url: APP_URL },
+                  },
+                ],
+              ],
+            },
+          }
+        );
+      } catch (err) {
+        console.error('Failed to send welcome reward telegram message:', err);
+      }
+    }
   }
 
   @Action('new_signal')

@@ -7,6 +7,7 @@ export enum GemLogAction {
   GenerateSignal = 'generate_signal',
   UnlockAchievement = 'unlock_achievement',
   AiShieldEnable = 'ai_shield_enable',
+  FirstSignalReward = 'first_signal_reward',
 }
 
 export class GemLog {

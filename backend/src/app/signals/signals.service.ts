@@ -160,6 +160,13 @@ export class SignalsService {
       owner.totalScore >= MIN_SIGNAL_SCORE ||
       owner.weekScore >= MIN_SIGNAL_SCORE;
 
+
+    const signalCount = await this.signalModel.countDocuments({
+      owner: owner._id,
+      deletedAt: null,
+    });
+    const isFirstSignal = signalCount === 0;
+
     const savedSignal = await this.signalModel.create(signal);
     await this.signalSubModel.create({
       signal: savedSignal._id,
@@ -167,12 +174,37 @@ export class SignalsService {
       followStatus: true,
       aiShield: false,
     });
+
+    let isFirstSignalReward = false;
+    if (!owner.firstSignalRewardClaimed && isFirstSignal) {
+      isFirstSignalReward = true;
+      const currentGems = owner.gem || 0;
+      await this.userModel.findByIdAndUpdate(owner._id, {
+        $inc: { gem: 10 },
+        $set: { firstSignalRewardClaimed: true }
+      }).exec();
+
+      await this.gemLogModel.create({
+        user: owner._id,
+        gemsChange: 10,
+        gemsBefore: currentGems,
+        gemsAfter: currentGems + 10,
+        action: GemLogAction.FirstSignalReward,
+      });
+    }
+
     const populatedSignal = await this.signalModel
       .findById(savedSignal._id)
       .populate('owner')
       .exec();
-    this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, populatedSignal || savedSignal);
-    return populatedSignal || savedSignal;
+
+    const resSignal = populatedSignal || savedSignal;
+    if (isFirstSignalReward) {
+      (resSignal as any).isFirstSignalReward = true;
+    }
+
+    this.eventEmitter.emit(EVENTS.SIGNAL_CREATED, resSignal);
+    return resSignal;
   }
 
   async closeSignal(signal: Signal, price: number) {
