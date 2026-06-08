@@ -100,7 +100,7 @@ SignalSchema.virtual('score').get(function () {
     if (res > 500 || res < -500) return 0;
 
     if (pip >= 0 && this.riskReward < 1) {
-      res = res / 3;
+      res = res / 2;
     }
 
     return res;
