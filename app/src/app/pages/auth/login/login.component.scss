@@ -87,6 +87,39 @@
         transform: translateY(0) scale(0.99) !important;
       }
     }
+
+    .or-divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 8px 0;
+      color: var(--mat-sys-outline, rgba(255, 255, 255, 0.4));
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &::before,
+      &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: var(--mat-sys-outline, rgba(255, 255, 255, 0.1));
+        margin: 0 12px;
+      }
+    }
+
+    .google-btn-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      min-height: 44px;
+
+      ::ng-deep iframe {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
   }
 }
 

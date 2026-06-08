@@ -7,6 +7,7 @@ import {
   inject,
   viewChild,
   OnInit,
+  AfterViewInit,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -22,6 +23,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AnalyticsService } from '../../../services/analytics.service';
 import { LanguageService } from '../../../services/language.service';
 import { environment } from '../../../../environments/environment';
+
+declare var google: any;
 
 @Component({
   selector: 'app-login',
@@ -46,9 +49,12 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   loading = signal(false);
   errorMessage = signal<string | null>(null);
+
+  googleBtn = viewChild<ElementRef>('googleBtn');
+  showGoogleLogin = environment.enableGoogleLogin;
 
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -62,6 +68,59 @@ export class LoginComponent implements OnInit {
     const code = this.route.snapshot.queryParams['code'];
     if (code) {
       this.handleTelegramOidcCallback(code);
+    }
+  }
+
+  ngAfterViewInit() {
+    if (environment.enableGoogleLogin) {
+      this.initializeGoogleSignIn();
+    }
+  }
+
+  initializeGoogleSignIn() {
+    if (typeof google !== 'undefined' && google.accounts?.id) {
+      google.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: (response: any) => this.handleGoogleCredentialResponse(response),
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+
+      const element = this.googleBtn()?.nativeElement;
+      if (element) {
+        google.accounts.id.renderButton(element, {
+          type: 'standard',
+          theme: 'filled_black',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: 320,
+        });
+      }
+    } else {
+      // Retry if Google script is still loading
+      setTimeout(() => this.initializeGoogleSignIn(), 100);
+    }
+  }
+
+  async handleGoogleCredentialResponse(response: any) {
+    const credential = response.credential;
+    if (!credential) return;
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    try {
+      await this.auth.googleLoginMutation.mutateAsync(credential);
+      this.analyticsService.trackEvent('login', { method: 'google' });
+      const returnPath = this.route.snapshot.queryParams?.['returnPath'];
+      this.router.navigate([returnPath || '/'], { replaceUrl: true });
+    } catch (err) {
+      console.error('Google login error:', err);
+      this.errorMessage.set('login.googleError');
+    } finally {
+      this.loading.set(false);
     }
   }
 

@@ -11,6 +11,7 @@ export const environment = {
   googleClientId: '11344143099-c1mu2t5lfk04ifi4shnnsohf9u84vtu3.apps.googleusercontent.com',
   telegramBotName: 'my_iiniit_bot',
   telegramOidcClientId: 'my_iiniit_bot_id',
+  enableGoogleLogin: true,
 };
 
 /*
