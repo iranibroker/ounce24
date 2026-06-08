@@ -95,9 +95,14 @@ SignalSchema.virtual('score').get(function () {
       part1 = ratio;
     }
 
-    const res = part1 * (Math.abs(pip) / 50 + 10) + 1;
+    let res = part1 * (Math.abs(pip) / 50 + 10) + 1;
     // const res = (pip / lossPip) * (Math.abs(pip) / 50 + 10) + 1;
     if (res > 500 || res < -500) return 0;
+
+    if (pip >= 0 && this.riskReward < 1) {
+      res = res / 3;
+    }
+
     return res;
   }
 

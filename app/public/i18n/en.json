@@ -212,7 +212,7 @@
       },
       "riskReward": {
         "title": "Risk/Reward Ratio",
-        "description": "The ratio between potential profit and potential loss. Better risk/reward ratios lead to higher scores."
+        "description": "The ratio between potential profit and potential loss. Better risk/reward ratios lead to higher scores, while closing trades early with a poor risk/reward ratio (less than 1) will heavily reduce your score."
       },
       "totalSignals": {
         "title": "Total Signals",

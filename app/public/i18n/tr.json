@@ -198,7 +198,7 @@
       },
       "riskReward": {
         "title": "Risk/Ödül Oranı",
-        "description": "Potansiyel kâr ile potansiyel zarar arasındaki oran. Daha iyi risk/ödül oranları daha yüksek puanlara yol açar."
+        "description": "Potansiyel kâr ile potansiyel zarar arasındaki oran. Daha iyi risk/ödül oranları daha yüksek puanlar kazandırırken, işlemleri zayıf bir risk/ödül oranıyla (1'den küçük) erken kapatmak puanınızı ciddi şekilde düşürür."
       },
       "totalSignals": {
         "title": "Toplam Sinyal",
