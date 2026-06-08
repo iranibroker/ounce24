@@ -489,7 +489,21 @@ Output format (in ${langConfig.name}):
 ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss distance to entry and touch probability.' : ''}${status === SignalStatus.Closed || status === SignalStatus.Canceled ? '- CLOSED/CANCELED: write a brief educational review of the outcome.' : ''}
 `;
 
+      console.log('=== [AI ANALYZE SIGNAL START] ===');
+      console.log('Signal under analysis:', {
+        type: signalType,
+        status: status,
+        entryPrice: entryPrice,
+        tp: profit,
+        sl: loss,
+        currentPrice: currentPrice
+      });
+      console.log('AI Prompt Message:\n', promptMessage);
+
       const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
+
+      console.log('AI Raw Output:\n', result.text);
+      console.log('=== [AI ANALYZE SIGNAL END] ===');
 
       // // Deduct 1 gem from user
       await this.userModel
@@ -594,7 +608,13 @@ Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments)
 {"type":"buy"|"sell","entryPrice":number,"takeProfit":number,"stopLoss":number,"instantEntry":boolean,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName}. No asterisks or markdown."}
 `;
 
+      console.log('=== [AI GENERATE SIGNAL START] ===');
+      console.log('Market State Semantic Text:\n', marketState.semanticText);
+      console.log('AI Prompt Message:\n', promptMessage);
+
       const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
+
+      console.log('AI Raw Output:\n', result.text);
 
       // Clean the AI response in case it returned markdown code block
       let cleanText = result.text.trim();
@@ -635,6 +655,11 @@ Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments)
           cleanText = cleanText + '\n\n[Signal rejected by coherence check: failed logical validation (TP/SL orientation)]';
         }
       }
+
+      console.log('Cleaned Text:\n', cleanText);
+      console.log('Generated Signal Object:\n', generatedSignal);
+      console.log('Parse Error:\n', parseError);
+      console.log('=== [AI GENERATE SIGNAL END] ===');
 
       // Deduct 20 gems from user only if a signal was successfully generated
       if (generatedSignal && !parseError) {

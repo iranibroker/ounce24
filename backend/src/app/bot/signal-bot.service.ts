@@ -1151,13 +1151,13 @@ You can do this once every 15 days. ${
                   [
                     {
                       text: '✨ Analyze signal',
-                      web_app: { url: `${APP_URL}/signals/${signal.id}` },
+                      url: `${APP_URL}/signals/${signal.id}`,
                     },
                   ],
                   [
                     {
                       text: 'Signal list',
-                      web_app: { url: `${APP_URL}/signals` },
+                      url: `${APP_URL}/signals`,
                     },
                   ],
                 ],
@@ -1177,13 +1177,13 @@ You can do this once every 15 days. ${
                 [
                   {
                     text: '✨ Analyze signal',
-                    web_app: { url: `${APP_URL}/signals/${signal.id}` },
+                    url: `${APP_URL}/signals/${signal.id}`,
                   },
                 ],
                 [
                   {
                     text: 'Signal list',
-                    web_app: { url: `${APP_URL}/signals` },
+                    url: `${APP_URL}/signals`,
                   },
                 ],
               ],
@@ -1201,7 +1201,7 @@ You can do this once every 15 days. ${
                 process.env.ALTERNATIVE_PUBLISH_CHANNEL_ID,
                 process.env.PUBLISH_CHANNEL_ID,
                 message.message_id,
-              );
+              ).catch(() => {});
             }
           })
           .catch((er) => {

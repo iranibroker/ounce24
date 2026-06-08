@@ -46,7 +46,7 @@ export class OuncePublishBotService {
                 [
                   {
                     text: 'Signal list',
-                    web_app: { url: `${APP_URL}/signals` },
+                    url: `${APP_URL}/signals`,
                   },
                 ],
               ],
@@ -57,7 +57,7 @@ export class OuncePublishBotService {
           this.errorCount = 0;
         })
         .catch((er) => {
-          if (er.response.error_code !== 429) this.errorCount++;
+          if (er.response?.error_code !== 429) this.errorCount++;
           if (this.errorCount === MAX_ERROR) {
             this.bot.telegram
               .deleteMessage(
@@ -71,7 +71,7 @@ export class OuncePublishBotService {
           }
         });
     } else {
-      this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID);
+      this.bot.telegram.unpinAllChatMessages(process.env.PUBLISH_CHANNEL_ID).catch(() => {});
       this.bot.telegram
         .sendMessage(
           process.env.PUBLISH_CHANNEL_ID,
@@ -82,7 +82,7 @@ export class OuncePublishBotService {
                 [
                   {
                     text: 'Signal list',
-                    web_app: { url: `${APP_URL}/signals` },
+                    url: `${APP_URL}/signals`,
                   },
                 ],
               ],
@@ -99,7 +99,10 @@ export class OuncePublishBotService {
           this.bot.telegram.pinChatMessage(
             process.env.PUBLISH_CHANNEL_ID,
             message.message_id,
-          );
+          ).catch(() => {});
+        })
+        .catch((err) => {
+          console.error('Error sending gold price message to channel:', err);
         });
     }
   }
