@@ -557,7 +557,7 @@ export class SignalsService {
 
       const currentPrice = this.ouncePriceService.current;
       const userLang = user.language || 'fa';
-      const risk = overrides?.riskTolerance || user.riskTolerance || RiskTolerance.Moderate;
+      const risk = overrides?.riskTolerance || RiskTolerance.Moderate;
 
       if (!user.gem || user.gem <= 0) {
         throw new NotAcceptableException({

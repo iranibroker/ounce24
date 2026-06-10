@@ -28,6 +28,7 @@ import { AnalyticsService } from '../../../services/analytics.service';
 import { AuthService } from '../../../services/auth.service';
 import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 import { AlertDialogComponent } from '../../../components/alert-dialog/alert-dialog.component';
+import { AiSettingsDialogComponent } from '../../../components/ai-settings-dialog/ai-settings-dialog.component';
 
 @Component({
   selector: 'app-add-signal',
@@ -196,108 +197,114 @@ export class AddSignalComponent {
     if (this.isGenerating) return;
 
     const hasGems = (this.auth.userQuery.data()?.gem ?? 0) >= 2;
-    const desc = this.translateService.instant('addSignal.confirmAiGenerateDesc') + 
-      (!hasGems ? '\n\n' + this.translateService.instant('apiError.insufficientGems') : '');
+    if (!hasGems) {
+      this.dialog.open(GemRequiredDialogComponent, {
+        width: '400px',
+        data: {
+          description: this.translateService.instant('apiError.insufficientGems'),
+        }
+      });
+      return;
+    }
 
-    this.dialog.open(GemRequiredDialogComponent, {
+    this.dialog.open(AiSettingsDialogComponent, {
       width: '400px',
       data: {
-        description: desc,
-        accept: hasGems,
-        acceptText: this.translateService.instant('app.confirm')
+        title: 'addSignal.confirmAiGenerate',
+        description: 'addSignal.confirmAiGenerateDesc',
+        confirmLabel: 'addSignal.generate',
+        tradingStyle: TradingStyle.Day,
+        riskTolerance: RiskTolerance.Moderate,
+        hideTradingStyle: false,
       }
-    }).afterClosed().subscribe((result) => {
-      if (result) {
-        this.isGenerating = true;
-        const user = this.auth.userQuery.data();
-        const style = user?.tradingStyle || TradingStyle.Day;
-        const risk = user?.riskTolerance || RiskTolerance.Moderate;
+    }).afterClosed().subscribe((result: { tradingStyle: TradingStyle; riskTolerance: RiskTolerance } | undefined) => {
+      if (!result) return;
+      this.isGenerating = true;
 
-        this.http.post<{
-          signal: {
-            type: 'buy' | 'sell';
-            entryPrice: number;
-            takeProfit: number;
-            stopLoss: number;
-            instantEntry: boolean;
-            generationAnalysis?: string;
-            successProbability?: number;
-          } | null;
-          rawText: string;
-          parseError: boolean;
-        }>(`/api/signals/generate?tradingStyle=${style}&riskTolerance=${risk}`, {}).subscribe({
-          next: (response) => {
-            this.isGenerating = false;
-            
-            if (response.parseError) {
-              const alertMessage = this.translateService.instant('addSignal.generateError', { rawText: response.rawText });
-              this.dialog.open(AlertDialogComponent, {
-                width: '400px',
-                data: {
-                  title: this.translateService.instant('apiError.signal.invalidEntry'),
-                  message: alertMessage,
-                  isError: true
-                }
-              });
-              return;
-            }
-
-            if (!response.signal) {
-              let reasonMessage = this.translateService.instant('addSignal.noSetupFound');
-              try {
-                const parsedRaw = JSON.parse(response.rawText);
-                if (parsedRaw && parsedRaw.generationAnalysis) {
-                  reasonMessage = parsedRaw.generationAnalysis;
-                }
-              } catch (e) {
-                if (response.rawText && response.rawText.trim().length > 0) {
-                  reasonMessage = response.rawText;
-                }
+      this.http.post<{
+        signal: {
+          type: 'buy' | 'sell';
+          entryPrice: number;
+          takeProfit: number;
+          stopLoss: number;
+          instantEntry: boolean;
+          generationAnalysis?: string;
+          successProbability?: number;
+        } | null;
+        rawText: string;
+        parseError: boolean;
+      }>(`/api/signals/generate?tradingStyle=${result.tradingStyle}&riskTolerance=${result.riskTolerance}`, {}).subscribe({
+        next: (response) => {
+          this.isGenerating = false;
+          
+          if (response.parseError) {
+            const alertMessage = this.translateService.instant('addSignal.generateError', { rawText: response.rawText });
+            this.dialog.open(AlertDialogComponent, {
+              width: '400px',
+              data: {
+                title: this.translateService.instant('apiError.signal.invalidEntry'),
+                message: alertMessage,
+                isError: true
               }
-              this.dialog.open(AlertDialogComponent, {
-                width: '400px',
-                data: {
-                  title: this.translateService.instant('addSignal.title'),
-                  message: reasonMessage,
-                  isError: false
-                }
-              });
-              return;
-            }
-
-            const generated = response.signal;
-            const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
-            
-            this.form.patchValue({
-              type: type,
-              entryPrice: generated.entryPrice,
-              takeProfit: generated.takeProfit,
-              stopLoss: generated.stopLoss,
-              instantEntry: generated.instantEntry,
-              generationAnalysis: generated.generationAnalysis || '',
-              successProbability: generated.successProbability || null,
             });
-
-            this.snackBar.open(
-              this.translateService.instant('addSignal.generateSuccess'),
-              this.translateService.instant('app.close'),
-              { duration: 3000 }
-            );
-          },
-          error: (err) => {
-            this.isGenerating = false;
-            let errorMessage = this.translateService.instant('addSignal.aiGenerateError');
-            if (err.error && err.error.translationKey) {
-              errorMessage = this.translateService.instant('apiError.' + err.error.translationKey);
-            }
-            this.snackBar.open(
-              errorMessage,
-              this.translateService.instant('app.close'),
-              { duration: 3000 }
-            );
+            return;
           }
-        });
-      }
+
+          if (!response.signal) {
+            let reasonMessage = this.translateService.instant('addSignal.noSetupFound');
+            try {
+              const parsedRaw = JSON.parse(response.rawText);
+              if (parsedRaw && parsedRaw.generationAnalysis) {
+                reasonMessage = parsedRaw.generationAnalysis;
+              }
+            } catch (e) {
+              if (response.rawText && response.rawText.trim().length > 0) {
+                reasonMessage = response.rawText;
+              }
+            }
+            this.dialog.open(AlertDialogComponent, {
+              width: '400px',
+              data: {
+                title: this.translateService.instant('addSignal.title'),
+                message: reasonMessage,
+                isError: false
+              }
+            });
+            return;
+          }
+
+          const generated = response.signal;
+          const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
+          
+          this.form.patchValue({
+            type: type,
+            entryPrice: generated.entryPrice,
+            takeProfit: generated.takeProfit,
+            stopLoss: generated.stopLoss,
+            instantEntry: generated.instantEntry,
+            generationAnalysis: generated.generationAnalysis || '',
+            successProbability: generated.successProbability || null,
+          });
+
+          this.snackBar.open(
+            this.translateService.instant('addSignal.generateSuccess'),
+            this.translateService.instant('app.close'),
+            { duration: 3000 }
+          );
+        },
+        error: (err) => {
+          this.isGenerating = false;
+          let errorMessage = this.translateService.instant('addSignal.aiGenerateError');
+          if (err.error && err.error.translationKey) {
+            errorMessage = this.translateService.instant('apiError.' + err.error.translationKey);
+          }
+          this.snackBar.open(
+            errorMessage,
+            this.translateService.instant('app.close'),
+            { duration: 3000 }
+          );
+        }
+      });
     });
   }
 }

@@ -301,7 +301,7 @@ export function analyzeMarketState(
     tradingSession = 'London-NY Overlap';
   } else if (hour >= 8 && hour < 13) {
     tradingSession = 'London';
-  } else if (hour >= 13 && hour < 21) {
+  } else if (hour > 16 && hour < 21) {
     tradingSession = 'New York';
   }
 

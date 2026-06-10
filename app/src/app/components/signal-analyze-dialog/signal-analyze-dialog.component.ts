@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
-import { Signal, TradingStyle, RiskTolerance } from '@ounce24/types';
+import { Signal } from '@ounce24/types';
 import { SHARED } from '../../shared';
 import { DataLoadingComponent } from '../data-loading/data-loading.component';
 import { injectMutation } from '@tanstack/angular-query-experimental';
@@ -63,12 +63,8 @@ export class SignalAnalyzeDialogComponent implements OnInit {
   ) {}
 
   analyzeMutation = injectMutation(() => ({
-    mutationFn: (args: { signal: Signal; tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }) => {
-      let url = '/api/signals/analyze';
-      const params: string[] = [];
-      if (args.tradingStyle) params.push(`tradingStyle=${args.tradingStyle}`);
-      if (args.riskTolerance) params.push(`riskTolerance=${args.riskTolerance}`);
-      if (params.length > 0) url += `?${params.join('&')}`;
+    mutationFn: (args: { signal: Signal }) => {
+      const url = '/api/signals/analyze';
       return lastValueFrom(
         this.http.post<SignalAnalysisResponse>(url, args.signal),
       );
@@ -101,15 +97,8 @@ export class SignalAnalyzeDialogComponent implements OnInit {
 
   analyzeSignal() {
     this.analyticsService.trackEvent('analyze_signal');
-    
-    const user = this.auth.userQuery.data();
-    const style = user?.tradingStyle || TradingStyle.Day;
-    const risk = user?.riskTolerance || RiskTolerance.Moderate;
-
     this.analyzeMutation.mutate({
       signal: this.signal,
-      tradingStyle: style,
-      riskTolerance: risk,
     });
   }
 }

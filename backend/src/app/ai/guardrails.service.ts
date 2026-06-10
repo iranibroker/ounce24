@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SignalType, TradingStyle } from '@ounce24/types';
+import { SignalType, TradingStyle, RiskTolerance } from '@ounce24/types';
 
 export interface GuardrailInput {
   type: SignalType;
@@ -11,6 +11,8 @@ export interface GuardrailInput {
   atr5m: number;
   atr1h: number;
   currentPrice: number;
+  tradingStyle?: TradingStyle;
+  riskTolerance?: RiskTolerance;
 }
 
 export interface GuardrailResult {
@@ -22,9 +24,17 @@ export interface GuardrailResult {
 export class GuardrailsService {
   /**
    * Validates generated signals against technical, risk, and logical criteria.
+   * Now style/risk-aware: thresholds adjust based on tradingStyle and riskTolerance.
    */
   validateSignal(input: GuardrailInput): GuardrailResult {
-    const { type, entryPrice, takeProfit, stopLoss, instantEntry, isVolatile, atr5m, atr1h, currentPrice } = input;
+    const {
+      type, entryPrice, takeProfit, stopLoss, instantEntry,
+      isVolatile, atr5m, atr1h, currentPrice,
+      tradingStyle, riskTolerance,
+    } = input;
+
+    const style = tradingStyle || TradingStyle.Day;
+    const risk = riskTolerance || RiskTolerance.Moderate;
 
     // 1. Check basic mathematical sanity
     if (entryPrice <= 0 || takeProfit <= 0 || stopLoss <= 0 || currentPrice <= 0) {
@@ -65,25 +75,33 @@ export class GuardrailsService {
       }
     }
 
-    // 5. Stop Loss distance sanity (Dynamic check based on ATR to prevent too narrow SL)
+    // 5. Stop Loss distance sanity — Dynamic based on tradingStyle
     const slDistance = Math.abs(entryPrice - stopLoss);
-    const minSlAllowed = Math.max(1.5, 0.8 * (atr1h || 2.0));
+    const slAtrFactor = style === TradingStyle.Scalp ? 0.5
+      : style === TradingStyle.Swing ? 1.0
+      : 0.8;
+    const minSlAllowed = Math.max(1.5, slAtrFactor * (atr1h || 2.0));
     if (slDistance < minSlAllowed) {
-      return { isValid: false, reason: `Stop Loss distance ($${slDistance.toFixed(2)}) is too narrow. Minimum required for Gold is $${minSlAllowed.toFixed(2)} based on current market noise (ATR).` };
+      return { isValid: false, reason: `Stop Loss distance ($${slDistance.toFixed(2)}) is too narrow. Minimum required is $${minSlAllowed.toFixed(2)} (${slAtrFactor}x ATR for ${style} style).` };
     }
 
-    // 6. Risk-Reward Ratio (R:R) sanity check
+    // 6. Risk-Reward Ratio (R:R) sanity check — Dynamic based on riskTolerance
     const tpDistance = Math.abs(takeProfit - entryPrice);
     const rr = slDistance > 0 ? tpDistance / slDistance : 0;
-    if (rr < 1.0) {
-      return { isValid: false, reason: `Risk-to-Reward ratio (${rr.toFixed(2)}) is below the absolute minimum requirement of 1.0.` };
+    const minRR = risk === RiskTolerance.Conservative ? 1.5
+      : risk === RiskTolerance.Aggressive ? 1.0
+      : 1.2;
+    if (rr < minRR) {
+      return { isValid: false, reason: `Risk-to-Reward ratio (${rr.toFixed(2)}) is below the minimum requirement of ${minRR} for ${risk} risk tolerance.` };
     }
 
-    // 7. Maximum target distance sanity (TP shouldn't exceed 6.0x ATR to avoid dream targets)
-    const maxTpAtrFactor = 6.0;
+    // 7. Maximum target distance sanity — Dynamic based on tradingStyle
+    const maxTpAtrFactor = style === TradingStyle.Scalp ? 3.0
+      : style === TradingStyle.Swing ? 10.0
+      : 6.0;
     const atrLimit = atr1h || 1.5;
     if (tpDistance > maxTpAtrFactor * atrLimit) {
-      return { isValid: false, reason: `Take Profit distance ($${tpDistance.toFixed(2)}) is unrealistically wide (exceeds ${maxTpAtrFactor}x 1h ATR of $${(maxTpAtrFactor * atrLimit).toFixed(2)}).` };
+      return { isValid: false, reason: `Take Profit distance ($${tpDistance.toFixed(2)}) is unrealistically wide (exceeds ${maxTpAtrFactor}x 1h ATR of $${(maxTpAtrFactor * atrLimit).toFixed(2)} for ${style} style).` };
     }
 
     return { isValid: true };

@@ -36,8 +36,6 @@ interface CachedSubscription {
   /** User-level notification flags */
   notifSignalFollow: boolean;
   notifAiShield: boolean;
-  tradingStyle?: TradingStyle;
-  riskTolerance?: RiskTolerance;
 }
 
 interface CachedSignal {
@@ -111,8 +109,6 @@ export class SignalCopilotService implements OnModuleInit {
               aiShield: sub.aiShield,
               notifSignalFollow: userObj.notifSignalFollow !== false,
               notifAiShield: userObj.notifAiShield !== false,
-              tradingStyle: userObj.tradingStyle,
-              riskTolerance: userObj.riskTolerance,
             });
           }
         }
@@ -163,8 +159,6 @@ export class SignalCopilotService implements OnModuleInit {
           aiShield: sub.aiShield,
           notifSignalFollow: userObj.notifSignalFollow !== false,
           notifAiShield: userObj.notifAiShield !== false,
-          tradingStyle: userObj.tradingStyle,
-          riskTolerance: userObj.riskTolerance,
         });
       }
     }
@@ -240,8 +234,6 @@ export class SignalCopilotService implements OnModuleInit {
         aiShield: sub.aiShield,
         notifSignalFollow: userObj.notifSignalFollow !== false,
         notifAiShield: userObj.notifAiShield !== false,
-        tradingStyle: userObj.tradingStyle,
-        riskTolerance: userObj.riskTolerance,
       });
     }
   }
@@ -440,7 +432,7 @@ export class SignalCopilotService implements OnModuleInit {
       }>();
 
       for (const sub of subscriptions) {
-        const risk = sub.riskTolerance || RiskTolerance.Moderate;
+        const risk = RiskTolerance.Moderate;
         const key = `${risk}`;
         if (!groups.has(key)) {
           groups.set(key, { style, risk, subs: [] });

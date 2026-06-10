@@ -32,26 +32,7 @@
               </div>
             </div>
             
-            <div class="probability-info">
-              <div class="probability-badge">
-                @if (analyzeMutation.data()!.successProbability! >= 75) {
-                  {{ 'signalAnalyze.highProbability' | translate }}
-                } @else if (analyzeMutation.data()!.successProbability! >= 50) {
-                  {{ 'signalAnalyze.mediumProbability' | translate }}
-                } @else {
-                  {{ 'signalAnalyze.lowProbability' | translate }}
-                }
-              </div>
-              <p class="description">
-                @if (analyzeMutation.data()!.successProbability! >= 75) {
-                  {{ 'signalAnalyze.highProbabilityDesc' | translate }}
-                } @else if (analyzeMutation.data()!.successProbability! >= 50) {
-                  {{ 'signalAnalyze.mediumProbabilityDesc' | translate }}
-                } @else {
-                  {{ 'signalAnalyze.lowProbabilityDesc' | translate }}
-                }
-              </p>
-            </div>
+
           </div>
         }
         <div class="analysis-text">

@@ -79,6 +79,71 @@ export class ContextBuilderService {
   }
 
   /**
+   * Generates dynamic Core Rules for signal generation/analysis based on style & risk.
+   * This eliminates contradictions between Style instructions and hardcoded Core Rules.
+   */
+  buildDynamicCoreRules(
+    style: TradingStyle,
+    risk: RiskTolerance,
+    atr5m: number,
+    atr1h: number,
+    langName: string,
+  ): string {
+    // Dynamic success probability threshold
+    const threshold = risk === RiskTolerance.Conservative ? 75
+      : risk === RiskTolerance.Aggressive ? 60
+      : 70;
+
+    // Dynamic minimum R:R ratio
+    const minRR = risk === RiskTolerance.Conservative ? 2.0
+      : risk === RiskTolerance.Aggressive ? 1.2
+      : 1.5;
+
+    // Dynamic target distance range (ATR multipliers)
+    const [minTarget, maxTarget] = style === TradingStyle.Scalp ? [0.8, 2.5]
+      : style === TradingStyle.Swing ? [2.5, 8.0]
+      : [1.5, 5.0];
+
+    // Trend timeframe reference — resolves "Ignore 1h/4h" vs "Trend 20%" contradiction
+    const trendTimeframe = style === TradingStyle.Scalp
+      ? '5m and 15m timeframes ONLY (ignore 1h/4h for trend scoring)'
+      : style === TradingStyle.Swing
+      ? '1h and 4h timeframes (ignore 5m/15m noise for trend scoring)'
+      : '15m and 1h timeframes (use 4h as directional bias only)';
+
+    let rules = `CORE SCIENTIFIC & TECHNICAL GENERATION RULES:\n`;
+    rules += `1. Calculate the success probability based on: Trend alignment (20% — derived from ${trendTimeframe}), Correlation confluence (5%), SMC & OBs (30%), R:R & Target feasibility (20%), Momentum indicators (15%), Session/News timing (10%).\n`;
+    rules += `2. If success probability is below ${threshold}%, do NOT generate a trade. Set the "type" field to null.\n`;
+    rules += `3. For BUY setups: entry price must be equal to current price (if instant entry) or below current price (if limit entry). Stop loss must be below entry. Take profit must be above entry.\n`;
+    rules += `4. For SELL setups: entry price must be equal to current price (if instant entry) or above current price (if limit entry). Stop loss must be above entry. Take profit must be below entry.\n`;
+    rules += `5. If volatility is HIGH, you MUST set instantEntry = false (limit order only).\n`;
+    rules += `6. Target distance must be at least ${minTarget}x ATR and no more than ${maxTarget}x ATR. Minimum R:R ratio is ${minRR}.\n`;
+    rules += `7. Write the "generationAnalysis" text directly in ${langName}.\n`;
+
+    return rules;
+  }
+
+  /**
+   * Generates dynamic Core Rules for signal analysis (evaluate existing signal).
+   */
+  buildDynamicAnalysisRules(
+    risk: RiskTolerance,
+    atr1h: number,
+    langName: string,
+  ): string {
+    let rules = `CORE EVALUATION RULES (MUST FOLLOW STRICTLY):\n`;
+    rules += `1. Rate Success Probability out of 100 based on Trend Alignment (20%), Correlation confluence (5%), S/R structural blocks (30%), R:R limits (20%), Momentum indicators (15%), and Session/News timings (10%).\n`;
+    rules += `2. For SELL signals, support levels below entry Price block TP, resistance levels above are Protective Stop Loss floors.\n`;
+    rules += `3. For BUY signals, resistance levels above entry Price block TP, support levels below are Protective Stop Loss floors.\n`;
+    rules += `4. Limit Order Entry Distance penalty: If this is a pending limit order and the Entry Price is extremely far from the Current Market Price (more than 4.0x 1-hour ATR, i.e., $${(4 * (atr1h || 4.0)).toFixed(2)}), you MUST penalize the success probability heavily (maximum score of 40%) because it is highly unrealistic to trigger.\n`;
+    rules += `5. Narrow Stop Loss penalty: Gold has natural price noise. If the Stop Loss distance is narrower than 0.8x 1-hour ATR (i.e., less than $${(0.8 * (atr1h || 4.0)).toFixed(2)}), you MUST penalize the success probability severely (maximum score of 30%), regardless of how high the Risk-to-Reward ratio is, because it is extremely prone to being stopped out by standard market noise before any development.\n`;
+    rules += `6. The response explanation must be written in the user's selected language: ${langName}. Make it a brief summary of 1-2 technical paragraphs.\n`;
+    rules += `7. Absolute maximum success probability for an active/pending signal is 95% due to default market uncertainty.\n`;
+
+    return rules;
+  }
+
+  /**
    * Translates language code to human readable name.
    */
   getLanguageName(lang: string): string {
