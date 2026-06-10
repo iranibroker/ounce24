@@ -140,8 +140,10 @@ CORE EVALUATION RULES (MUST FOLLOW STRICTLY):
 1. Rate Success Probability out of 100 based on Trend Alignment (20%), Correlation confluence (5%), S/R structural blocks (30%), R:R limits (20%), Momentum indicators (15%), and Session/News timings (10%).
 2. For SELL signals, support levels below entry Price block TP, resistance levels above are Protective Stop Loss floors.
 3. For BUY signals, resistance levels above entry Price block TP, support levels below are Protective Stop Loss floors.
-4. The response explanation must be written in the user's selected language: ${langName}. Make it a brief summary of 1-2 technical paragraphs.
-5. Absolute maximum success probability for an active/pending signal is 95% due to default market uncertainty.
+4. Limit Order Entry Distance penalty: If this is a pending limit order and the Entry Price is extremely far from the Current Market Price (more than 4.0x 1-hour ATR, i.e., $${(4 * (marketState.atr1h || 4.0)).toFixed(2)}), you MUST penalize the success probability heavily (maximum score of 40%) because it is highly unrealistic to trigger.
+5. Narrow Stop Loss penalty: Gold has natural price noise. If the Stop Loss distance is narrower than 0.8x 1-hour ATR (i.e., less than $${(0.8 * (marketState.atr1h || 4.0)).toFixed(2)}), you MUST penalize the success probability severely (maximum score of 30%), regardless of how high the Risk-to-Reward ratio is, because it is extremely prone to being stopped out by standard market noise before any development.
+6. The response explanation must be written in the user's selected language: ${langName}. Make it a brief summary of 1-2 technical paragraphs.
+7. Absolute maximum success probability for an active/pending signal is 95% due to default market uncertainty.
 
 JSON Schema format to return:
 {
@@ -262,6 +264,7 @@ JSON Schema format to return:
         isVolatile: marketState.isVolatile,
         atr5m: marketState.atr5m,
         atr1h: marketState.atr1h,
+        currentPrice: currentPrice,
       });
 
       if (!guardResult.isValid) {
