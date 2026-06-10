@@ -267,6 +267,7 @@ JSON Schema format to return:
         currentPrice: currentPrice,
         tradingStyle: style,
         riskTolerance: risk,
+        successProbability: validatedData.successProbability,
       });
 
       if (!guardResult.isValid) {
