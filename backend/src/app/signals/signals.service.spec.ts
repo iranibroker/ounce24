@@ -4,7 +4,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Signal, User, GemLog, SignalSubscription, SignalAnalyze, OuncePriceCandle } from '@ounce24/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
-import { AiChatService } from '../ai-chat/ai-chat.service';
+import { AiOrchestratorService } from '../ai/ai-orchestrator.service';
 
 describe('SignalsService', () => {
   let service: SignalsService;
@@ -59,9 +59,10 @@ describe('SignalsService', () => {
           },
         },
         {
-          provide: AiChatService,
+          provide: AiOrchestratorService,
           useValue: {
-            createResponse: jest.fn(),
+            analyzeSignal: jest.fn(),
+            generateSignal: jest.fn(),
           },
         },
       ],

@@ -18,7 +18,7 @@ import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf, Context } from 'telegraf';
 import { EVENTS } from '../consts';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
-import { AiChatService } from '../ai-chat/ai-chat.service';
+import { AiOrchestratorService } from '../ai/ai-orchestrator.service';
 import { WebPushService } from '../web-push/web-push.service';
 import { SignalsService, getStyleInstructions } from './signals.service';
 import { getTranslation } from '../bot/i18n';
@@ -72,7 +72,7 @@ export class SignalCopilotService implements OnModuleInit {
     @InjectModel(OuncePriceCandle.name)
     private readonly candleModel: Model<OuncePriceCandle>,
     private readonly ouncePriceService: OuncePriceService,
-    private readonly aiChatService: AiChatService,
+    private readonly aiOrchestratorService: AiOrchestratorService,
     private readonly webPushService: WebPushService,
     private readonly eventEmitter: EventEmitter2,
     private readonly signalsService: SignalsService,
@@ -449,78 +449,15 @@ export class SignalCopilotService implements OnModuleInit {
       }
 
       for (const [key, group] of groups.entries()) {
-        const styleInstructions = getStyleInstructions(group.style, group.risk);
+        const result = await this.aiOrchestratorService.evaluateCopilot(
+          signal,
+          currentPrice,
+          marketState,
+          { tradingStyle: group.style, riskTolerance: group.risk }
+        );
 
-        const promptMessage = `
-Smart Shield AI Guard for Ounce24. Monitor this Gold (XAUUSD) signal in real-time.
-
-Signal: ${isSell ? 'SELL' : 'BUY'} | Status: ${signal.status.toUpperCase()} | Entry: $${entryPrice.toFixed(2)} | Current: $${currentPrice.toFixed(2)} | TP: $${tp.toFixed(2)} | SL: $${sl.toFixed(2)} | Risk-Free: ${alreadyRecommendedRiskFree ? 'YES' : 'NO'}
-
-Market State:
-${marketState.semanticText}
-
-${styleInstructions}
-
-Recommendations (pick ONE):
-ACTIVE signals: "risk_free" (move SL to entry, only if profit >= 1.5x ATR and not already done), "extend_tp" (strong momentum continues), "early_exit" (trend clearly reversed), "trailing_sl" (lock profit), "none" (no change).
-PENDING signals: "cancel" (setup invalidated by market change), "none" (keep as is).
-
-CORE SCIENTIFIC & TECHNICAL EVALUATION RULES:
-
-1. Support & Resistance (S/R) and SMC Zones (Order Blocks, FVG) Logic:
-   - For a BUY signal:
-     * Support levels, bullish Order Blocks, and bullish FVGs *below* the entryPrice are protective features. They act as floors safeguarding the Stop Loss.
-     * Resistance levels, bearish Order Blocks, and bearish FVGs *above* the entryPrice act as key obstacles. If a resistance level lies between the entryPrice and Take Profit (TP), it represents a major obstacle that can block the trade. This is a negative feature.
-   - For a SELL signal:
-     * Resistance levels, bearish Order Blocks, and bearish FVGs *above* the entryPrice are protective features. They act as ceilings safeguarding the Stop Loss.
-     * Support levels, bullish Order Blocks, and bullish FVGs *below* the entryPrice act as key obstacles. If a support level lies between the entryPrice and Take Profit (TP), it represents a major obstacle that can block the trade. This is a negative feature.
-
-2. Pending Order Projection (Status = PENDING):
-   - A pending limit order is waiting for the price to pull back/retrace to the entryPrice. Retracements are normal and expected. Do not recommend "cancel" simply because the price moves towards the entryPrice (e.g. short-term bearish pullback for a BUY limit, or short-term bullish pullback for a SELL limit).
-   - Simulate the trade path starting FROM the entryPrice, NOT the currentPrice. Check for blocking S/R levels strictly between the entryPrice and the Take Profit.
-   - Recommend "cancel" ONLY if:
-     * The price has touched/crossed the Take Profit (TP) level ($${tp.toFixed(2)}) without first triggering the entryPrice.
-     * The price has broken past the Stop Loss (SL) level ($${sl.toFixed(2)}) or a major S/R level backing the entry before activation.
-     * The entryPrice has become completely unreachable (e.g., price has moved away from the entryPrice by more than 3.0x ATR of the core timeframe).
-     * A major structural market trend change occurs that invalidates the setup structure.
-
-3. Active Signal Management Rules (Status = ACTIVE):
-   - Recommend "early_exit" (exit at current market price $${currentPrice.toFixed(2)}) if:
-     * The price breaks a critical trend level or SMA50 in the opposite direction with high momentum.
-     * A strong opposing Order Block or FVG has formed between the current price and TP, showing signs of price rejection.
-     * For BUY: Price shows clear rejection at a major resistance level, and momentum is reversing (RSI falling below 50).
-     * For SELL: Price shows clear rejection at a major support level, and momentum is reversing (RSI rising above 50).
-   - Recommend "risk_free" (move Stop Loss to entryPrice) if:
-     * The trade is currently in profit by at least 1.5x of the core ATR, and the trade is not already marked as Risk-Free.
-   - Recommend "trailing_sl" if:
-     * The trade has completed at least 50% of the progress from entryPrice to TP.
-     * There is a newly formed swing point or SMA20/50 level that can act as a technical trailing stop (supports for BUY, resistances for SELL). Specify the new SL price level in the "price" field.
-   - Recommend "extend_tp" if:
-     * The trade moves strongly in our favor with high momentum, with no overhead S/R barriers or fresh opposing Order Blocks until a much further price level. Specify the new TP price level in the "price" field.
-
-4. Target Sanity Check:
-   - Verify the distance between entryPrice and TP. If it exceeds 5.0x the core timeframe's ATR (5m ATR for Scalping, 1h ATR for Day/Swing), penalize the setup heavily as being highly unrealistic.
-
-Return ONLY a valid JSON object (no markdown, no backticks, no comments):
-{"recommendation":"risk_free"|"trailing_sl"|"extend_tp"|"early_exit"|"cancel"|"none","price":number,"messageFa":"...","messageEn":"...","messageAr":"...","messageTr":"..."}
-`;
-
-        const result = await this.aiChatService.createResponse(promptMessage, 'fa', { temperature: 0.1 });
-
-        let cleanText = result.text.trim();
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
-        }
-
-        let copilotResponse: any = null;
-        try {
-          copilotResponse = JSON.parse(cleanText);
-        } catch (e) {
-          this.logger.error(`Failed to parse AI Shield response JSON: ${cleanText}`);
-          continue;
-        }
-
-        const recommendationType = copilotResponse?.recommendation;
+        const copilotResponse = result.data;
+        const recommendationType = copilotResponse.recommendation;
 
         if (!recommendationType || recommendationType === 'none') {
           continue;

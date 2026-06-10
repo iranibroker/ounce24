@@ -16,7 +16,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './users/users.module';
 import { PodcastModule } from './podcast/podcast.module';
 import { HttpModule } from '@nestjs/axios';
-import { AiChatModule } from './ai-chat/ai-chat.module';
+import { AiModule } from './ai/ai.module';
 import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
 import { AppTokenModule } from './app-token/app-token.module';
 import { OctopusModule } from './octopus/octopus.module';
@@ -55,7 +55,7 @@ import { WebPushModule } from './web-push/web-push.module';
     OuncePriceModule,
     UsersModule,
     PodcastModule,
-    AiChatModule,
+    AiModule,
     OunceAlarmsModule,
     AppTokenModule,
     OctopusModule,

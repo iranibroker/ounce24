@@ -24,7 +24,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
-import { AiChatService } from '../ai-chat/ai-chat.service';
+import { AiOrchestratorService } from '../ai/ai-orchestrator.service';
 import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
 import axios from 'axios';
 
@@ -100,7 +100,7 @@ export class SignalsService {
     private signalSubModel: Model<SignalSubscription>,
     private eventEmitter: EventEmitter2,
     private ouncePriceService: OuncePriceService,
-    private aiChatService: AiChatService,
+    private aiOrchestratorService: AiOrchestratorService,
     @InjectModel(SignalAnalyze.name)
     private signalAnalyzeModel: Model<SignalAnalyze>,
     @InjectModel(OuncePriceCandle.name)
@@ -612,103 +612,16 @@ export class SignalsService {
       // Fetch economic calendar news check
       const newsCheck = await this.isNearHighImpactUSDNews();
 
-      // Math confluences calculated by backend
-      const targetDistance = Math.abs(profit - entryPrice);
-      const slDistance = Math.abs(entryPrice - loss);
-      const rrRatio = slDistance > 0 ? (targetDistance / slDistance) : 0;
-
-      const mathTruthText = `
-[MATHEMATICAL & RISK CONFLUENCES (CALCULATED BY SYSTEM)]
-- Target Distance: $${targetDistance.toFixed(2)} (${(targetDistance / marketState.atr1h).toFixed(2)}x 1h ATR)
-- Stop Loss Distance: $${slDistance.toFixed(2)} (${(slDistance / marketState.atr1h).toFixed(2)}x 1h ATR)
-- Risk-to-Reward Ratio (R:R): ${rrRatio.toFixed(2)}
-- Current Price to Entry Distance: $${Math.abs(currentPrice - entryPrice).toFixed(2)}
-${dxy ? `- US Dollar Index (DXY) price: ${dxy.toFixed(2)}` : ''}
-${us10y ? `- US 10-Year Bond Yield (US10Y) yield: ${us10y.toFixed(2)}%` : ''}
-${newsCheck.near ? `- [WARNING] HIGH-IMPACT USD ECONOMIC NEWS: "${newsCheck.eventName}" is scheduled in ${newsCheck.timeDiffMinutes} minutes. Expect extreme volatility, slippage, and unpredictable breakouts.` : ''}
-`;
-
-      // Auto-detect trading style based on target distance relative to 1h ATR
-      const style = detectTradingStyle(targetDistance, marketState.atr1h);
-
-      const langConfig = {
-        fa: { name: 'Persian (Farsi)' },
-        en: { name: 'English' },
-        ar: { name: 'Arabic' },
-        tr: { name: 'Turkish' }
-      }[userLang as 'fa' | 'en' | 'ar' | 'tr'] || { name: 'English' };
-
-      const styleInstructions = getStyleInstructions(style, risk);
-
-      const promptMessage = `
-You are an expert Gold (XAUUSD) technical analyst AI for Ounce24.
-Analyze this signal objectively using the market data below.
-
-Signal: ${signalType === SignalType.Buy ? 'BUY' : 'SELL'} | Status: ${status.toUpperCase()} | Entry: $${entryPrice.toFixed(2)} | TP: $${profit.toFixed(2)} | SL: $${loss.toFixed(2)} | Current: $${currentPrice.toFixed(2)}
-${signal.createdAt ? `Created: ${new Date(signal.createdAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}${signal.activeAt ? ` | Active: ${new Date(signal.activeAt).toISOString().replace('T', ' ').substring(5, 16)}` : ''}${signal.closedAt ? ` | Closed: ${new Date(signal.closedAt).toISOString().replace('T', ' ').substring(5, 16)} at $${signal.closedOuncePrice?.toFixed(2)}` : ''}
-
-Market State:
-${marketState.semanticText}
-
-${mathTruthText}
-
-${styleInstructions}
-
-CORE SCIENTIFIC & TECHNICAL EVALUATION RULES (MUST FOLLOW STRICTLY):
-
-1. Success Probability Scoring Rubric (Rate out of 100):
-   - Trend Alignment (Weight: 20%): Match with 15m/1h/4h trends.
-   - Correlation Confluence (Weight: 5%): Confirm negative correlation with DXY and US10Y.
-   - Structure & Key Areas (Weight: 30%): Entry at a fresh OB/FVG/Support/Resistance. TP path clear of opposing blockers.
-   - Risk-to-Reward & Target (Weight: 20%): Minimum R:R is 1.5. Target placed at logical liquidity or S/R (not dream targets).
-   - Momentum & Confluences (Weight: 15%): RSI alignment and recent BOS/CHoCH.
-   - Time & Session (Weight: 10%): Session volume and news distance.
-   * Note: The absolute maximum probability for a pending/active signal is 95% due to default market uncertainty.
-
-2. Directional Logic:
-   - For SELL: ONLY Support levels (below entryPrice) can block TP. Resistance levels are protective ceilings for SL.
-   - For BUY: ONLY Resistance levels (above entryPrice) can block TP. Support levels are protective floors for SL.
-
-3. Pending Order Projection:
-   - For PENDING signals, assume entry is triggered, but if entry price is extremely far (> 3.0x ATR), penalize the success chance.
-
-4. Closed/Canceled Signals:
-   - Write an educational review of the outcome.
-
-Return ONLY a valid JSON object (no markdown, no backticks, no comments):
-{"successProbability":number,"analysis":"Brief 1-line summary followed by 1-2 paragraphs of technical reasoning in ${langConfig.name}."}
-`;
-
-      console.log('=== [AI ANALYZE SIGNAL START] ===');
-      console.log('Signal under analysis:', {
-        type: signalType,
-        status: status,
-        entryPrice: entryPrice,
-        tp: profit,
-        sl: loss,
-        currentPrice: currentPrice
-      });
-      console.log('AI Prompt Message:\n', promptMessage);
-
-      const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
-
-      console.log('AI Raw Output:\n', result.text);
-      console.log('=== [AI ANALYZE SIGNAL END] ===');
-
-      let successProbability = 50;
-      let analysisText = result.text.trim();
-
-      try {
-        const parsed = parseLLMJson(result.text);
-        if (parsed.successProbability !== undefined) {
-          successProbability = parsed.successProbability;
-        }
-        if (parsed.analysis) {
-          analysisText = parsed.analysis;
-        }
-      } catch (e) {
-        console.error('Failed to parse AI Analyze response JSON:', e);
-      }
+      const result = await this.aiOrchestratorService.analyzeSignal(
+        signal,
+        userLang,
+        currentPrice,
+        marketState,
+        dxy,
+        us10y,
+        newsCheck,
+        overrides
+      );
 
       // Deduct 1 gem from user
       await this.userModel
@@ -725,14 +638,16 @@ Return ONLY a valid JSON object (no markdown, no backticks, no comments):
         action: GemLogAction.SignalAnalyze,
       });
 
+      const style = overrides?.tradingStyle || detectTradingStyle(Math.abs(profit - entryPrice), marketState.atr1h);
+
       await this.signalAnalyzeModel.create({
         signal: signal.id || signal._id || null,
         ouncePrice: currentPrice,
         totalTokens: result.totalTokens,
-        analyzeText: analysisText,
-        successProbability: successProbability,
+        analyzeText: result.data.analysis,
+        successProbability: result.data.successProbability,
         creator: user.id,
-        prompt: promptMessage,
+        prompt: `Telemetry logged in AiEvaluation table.`,
         model: result.model,
         tradingStyle: style,
         riskTolerance: risk,
@@ -740,8 +655,8 @@ Return ONLY a valid JSON object (no markdown, no backticks, no comments):
       });
 
       return {
-        analysis: analysisText,
-        successProbability: successProbability,
+        analysis: result.data.analysis,
+        successProbability: result.data.successProbability,
         signal,
         user,
         currentPrice: currentPrice,
@@ -840,117 +755,28 @@ Return ONLY a valid JSON object (no markdown, no backticks, no comments):
       const dxy = await this.getCachedYahooPrice('DX-Y.NYB');
       const us10y = await this.getCachedYahooPrice('^TNX');
 
-      const mathTruthText = `
-[MATHEMATICAL & RISK PARAMETERS]
-${dxy ? `- US Dollar Index (DXY) price: ${dxy.toFixed(2)}` : ''}
-${us10y ? `- US 10-Year Bond Yield (US10Y) yield: ${us10y.toFixed(2)}%` : ''}
-- Volatility state: ${marketState.isVolatile ? 'HIGH (Mandatory Limit Orders only)' : 'NORMAL'}
-- Trading Session: ${marketState.tradingSession}
-- ADR 14: $${marketState.adr14?.toFixed(2)}
-`;
+      const result = await this.aiOrchestratorService.generateSignal(
+        userLang,
+        currentPrice,
+        marketState,
+        dxy,
+        us10y,
+        newsCheck,
+        overrides
+      );
 
-      const style = overrides?.tradingStyle || user.tradingStyle || TradingStyle.Day;
-      const risk = overrides?.riskTolerance || user.riskTolerance || RiskTolerance.Moderate;
-      const styleInstructions = getStyleInstructions(style, risk);
-
-      const promptMessage = `
-You are a Gold (XAUUSD) quantitative trading assistant for Ounce24.
-Analyze the current market state and generate the best possible trading signal (either instant market entry or pending limit order) based on the conditions.
-
-Market State:
-${marketState.semanticText}
-
-${mathTruthText}
-
-${styleInstructions}
-
-CORE SCIENTIFIC & TECHNICAL GENERATION RULES (MUST FOLLOW STRICTLY):
-
-1. Threshold Requirement:
-   - Calculate the success probability using the scoring rubric (Trend: 20%, DXY/US10Y: 5%, SMC & OBs: 30%, R:R & Target: 20%, Momentum: 15%, Session: 10%).
-   - If the calculated probability is BELOW ${AI_GENERATION_THRESHOLD}%, you MUST NOT generate a trade setup. Instead, set the "type" field to null.
-
-2. Entry Type & Direction Constraints:
-   - If generating a BUY signal:
-     * Instant Entry (instantEntry = true): entryPrice MUST equal currentPrice ($${currentPrice.toFixed(2)}). Use ONLY if current price is bouncing off a key support, or breaking out with high bullish momentum.
-     * Limit Entry (instantEntry = false): entryPrice MUST be strictly *below* the currentPrice (entryPrice < $${currentPrice.toFixed(2)}). Place the pending limit at a key support, bullish Order Block, or bullish FVG.
-     * Take Profit (takeProfit) MUST be strictly *above* the entryPrice (takeProfit > entryPrice). Do not place takeProfit beyond major resistance levels (resistances block BUY TP).
-     * Stop Loss (stopLoss) MUST be strictly *below* the entryPrice (stopLoss < entryPrice). Place it below a key support level or swing low.
-   - If generating a SELL signal:
-     * Instant Entry (instantEntry = true): entryPrice MUST equal currentPrice ($${currentPrice.toFixed(2)}). Use ONLY if current price is rejecting a key resistance, or breaking down with high bearish momentum.
-     * Limit Entry (instantEntry = false): entryPrice MUST be strictly *above* the currentPrice (entryPrice > $${currentPrice.toFixed(2)}). Place the pending limit at a key resistance, bearish Order Block, or bearish FVG.
-     * Take Profit (takeProfit) MUST be strictly *below* the entryPrice (takeProfit < entryPrice). Do not place takeProfit beyond major support levels (supports block SELL TP).
-     * Stop Loss (stopLoss) MUST be strictly *above* the entryPrice (stopLoss > entryPrice). Place it above a key resistance level or swing high.
-
-3. Volatility Constraints:
-   - If MARKET VOLATILITY STATE is HIGH VOLATILITY, you MUST set instantEntry = false (Limit Order only). Do not suggest instant entries.
-
-4. Minimum Limit Distance Rules:
-   - For pending Limit Entries (instantEntry = false), the entryPrice must be at least:
-     * For SCALPING: Distance from currentPrice to entryPrice must be at least 1.0x to 1.5x of the 5-minute ATR ($${marketState.atr5m.toFixed(2)}).
-     * For DAY/SWING trading: Distance from currentPrice to entryPrice must be at least 1.0x to 1.5x of the 1-hour ATR ($${marketState.atr1h.toFixed(2)}).
-     * Do NOT place limit entries closer than these distances.
-
-5. Target Sanity Check & Volatility Validation:
-   - Calculate the distance between entryPrice and takeProfit. This distance MUST NOT exceed 5.0x the core timeframe's ATR.
-   - TP should be set before key S/R levels.
-   - SL should be placed behind a valid swing level or key S/R zone at a minimum distance of 1.5x ATR.
-   - Risk to Reward (R:R) ratio must be at least 1.5.
-
-Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments):
-{"type":"buy"|"sell"|null,"entryPrice":number|null,"takeProfit":number|null,"stopLoss":number|null,"instantEntry":boolean,"successProbability":number,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName} explaining the setup and its success probability, or explaining why no high-probability setup could be found."}
-`;
-
-      console.log('=== [AI GENERATE SIGNAL START] ===');
-      console.log('Market State Semantic Text:\n', marketState.semanticText);
-      console.log('AI Prompt Message:\n', promptMessage);
-
-      const result = await this.aiChatService.createResponse(promptMessage, userLang, { temperature: 0.1 });
-
-      console.log('AI Raw Output:\n', result.text);
-
-      let cleanText = result.text.trim();
-      let generatedSignal = null;
-      let parseError = false;
-      try {
-        const parsed = parseLLMJson(result.text);
-        // If AI returned null signal (no valid setup)
-        if (!parsed || parsed.type === null || parsed.type === 'null') {
-          generatedSignal = null;
-        } else {
-          generatedSignal = parsed;
-        }
-      } catch (e) {
-        parseError = true;
-      }
-
-      // Coherence check: if signal was generated, do a quick validation
-      if (generatedSignal && !parseError) {
-        const isBuy = generatedSignal.type === 'buy';
-        const entry = generatedSignal.entryPrice || 0;
-        const tp = generatedSignal.takeProfit || 0;
-        const sl = generatedSignal.stopLoss || 0;
-
-        // Basic logical validation
-        const logicallyValid = isBuy
-          ? (tp > entry && sl < entry)
-          : (tp < entry && sl > entry);
-
-        if (!logicallyValid) {
-          // Signal failed coherence check — discard it
-          generatedSignal = null;
-          parseError = true;
-          cleanText = cleanText + '\n\n[Signal rejected by coherence check: failed logical validation (TP/SL orientation)]';
-        }
-      }
-
-      console.log('Cleaned Text:\n', cleanText);
-      console.log('Generated Signal Object:\n', generatedSignal);
-      console.log('Parse Error:\n', parseError);
-      console.log('=== [AI GENERATE SIGNAL END] ===');
+      const generatedSignal = result.data.type ? {
+        type: result.data.type,
+        entryPrice: result.data.entryPrice,
+        takeProfit: result.data.takeProfit,
+        stopLoss: result.data.stopLoss,
+        instantEntry: result.data.instantEntry,
+        successProbability: result.data.successProbability,
+        generationAnalysis: result.data.generationAnalysis
+      } : null;
 
       // Deduct 2 gems from user only if a signal was successfully generated
-      if (generatedSignal && !parseError) {
+      if (generatedSignal) {
         await this.userModel
           .findByIdAndUpdate(user.id, {
             $inc: { gem: -2 },
@@ -968,8 +794,8 @@ Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments)
 
       return {
         signal: generatedSignal,
-        rawText: cleanText,
-        parseError,
+        rawText: result.data.generationAnalysis,
+        parseError: false,
         user,
         model: result.model,
       };

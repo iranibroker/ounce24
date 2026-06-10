@@ -8,3 +8,4 @@ export * from './lib/podcast';
 export * from './lib/ounce-price-candle';
 export * from './lib/signal-subscription';
 export * from './lib/follow';
+export * from './lib/ai-evaluation';
