@@ -80,9 +80,10 @@ export class GuardrailsService {
     const slAtrFactor = style === TradingStyle.Scalp ? 0.5
       : style === TradingStyle.Swing ? 1.0
       : 0.8;
-    const minSlAllowed = Math.max(1.5, slAtrFactor * (atr1h || 2.0));
+    const atr = style === TradingStyle.Scalp ? (atr5m || 1.0) : (atr1h || 2.0);
+    const minSlAllowed = Math.max(1.5, slAtrFactor * atr);
     if (slDistance < minSlAllowed) {
-      return { isValid: false, reason: `Stop Loss distance ($${slDistance.toFixed(2)}) is too narrow. Minimum required is $${minSlAllowed.toFixed(2)} (${slAtrFactor}x ATR for ${style} style).` };
+      return { isValid: false, reason: `Stop Loss distance ($${slDistance.toFixed(2)}) is too narrow. Minimum required is $${minSlAllowed.toFixed(2)} (${slAtrFactor}x ${style === TradingStyle.Scalp ? '5m' : '1h'} ATR for ${style} style).` };
     }
 
     // 6. Risk-Reward Ratio (R:R) sanity check — Dynamic based on riskTolerance
@@ -99,9 +100,9 @@ export class GuardrailsService {
     const maxTpAtrFactor = style === TradingStyle.Scalp ? 3.0
       : style === TradingStyle.Swing ? 10.0
       : 6.0;
-    const atrLimit = atr1h || 1.5;
+    const atrLimit = style === TradingStyle.Scalp ? (atr5m || 1.0) : (atr1h || 1.5);
     if (tpDistance > maxTpAtrFactor * atrLimit) {
-      return { isValid: false, reason: `Take Profit distance ($${tpDistance.toFixed(2)}) is unrealistically wide (exceeds ${maxTpAtrFactor}x 1h ATR of $${(maxTpAtrFactor * atrLimit).toFixed(2)} for ${style} style).` };
+      return { isValid: false, reason: `Take Profit distance ($${tpDistance.toFixed(2)}) is unrealistically wide (exceeds ${maxTpAtrFactor}x ${style === TradingStyle.Scalp ? '5m' : '1h'} ATR of $${(maxTpAtrFactor * atrLimit).toFixed(2)} for ${style} style).` };
     }
 
     return { isValid: true };
