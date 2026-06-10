@@ -7,6 +7,7 @@ export const SignalAnalyzeSchema = new mongoose.Schema<SignalAnalyze>(
     ouncePrice: { type: Number, required: true },
     analyzeText: { type: String, required: true },
     creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    successProbability: { type: Number, required: false },
     totalTokens: { type: Number, required: true, default: 0 },
     prompt: { type: String, required: false },
     model: { type: String, required: false },

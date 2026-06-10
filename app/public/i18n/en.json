@@ -94,6 +94,13 @@
     "analysis": "AI Analysis",
     "currentPrice": "Current Price",
     "getAnalysis": "Get AI Analysis",
+    "successProbability": "Success Probability",
+    "highProbability": "High Success Rate",
+    "mediumProbability": "Moderate Success Rate",
+    "lowProbability": "Low Success Rate",
+    "highProbabilityDesc": "Excellent technical setup with a high probability of reaching target profit.",
+    "mediumProbabilityDesc": "Decent setup with an average success rate, manage risk carefully.",
+    "lowProbabilityDesc": "Highly speculative setup, proceed with caution or tight stop loss.",
     "description": "Get an intelligent analysis of your trading signal using AI (1GEM required)",
     "analyze": "Analyze Signal",
     "noGems": "You don't have any GEMs to analyze your signal"

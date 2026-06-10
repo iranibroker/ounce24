@@ -26,6 +26,14 @@ import { Cron } from '@nestjs/schedule';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { AiChatService } from '../ai-chat/ai-chat.service';
 import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
+import axios from 'axios';
+
+interface EconomicEvent {
+  title: string;
+  country: string;
+  date: string;
+  impact: string;
+}
 
 const MAX_ACTIVE_SIGNAL = isNaN(Number(process.env.MAX_ACTIVE_SIGNAL))
   ? 3
@@ -39,8 +47,17 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
   ? 20
   : Number(process.env.MIN_SIGNAL_SCORE);
 
+const AI_GENERATION_THRESHOLD = isNaN(Number(process.env.AI_GENERATION_THRESHOLD))
+  ? 75
+  : Number(process.env.AI_GENERATION_THRESHOLD);
+
+
 @Injectable()
 export class SignalsService {
+  private priceCache = new Map<string, { price: number; timestamp: number }>();
+  private calendarCache: EconomicEvent[] = [];
+  private lastCalendarFetch = 0;
+
   constructor(
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
     @InjectModel(User.name) private userModel: Model<User>,
@@ -55,6 +72,81 @@ export class SignalsService {
     @InjectModel(OuncePriceCandle.name)
     private candleModel: Model<OuncePriceCandle>,
   ) {}
+
+  private async fetchYahooPrice(symbol: string): Promise<number | null> {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+        timeout: 5000,
+      });
+      const price = response.data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      return price || null;
+    } catch (error: any) {
+      console.error(`Failed to fetch Yahoo Finance price for ${symbol}: ${error.message}`);
+      return null;
+    }
+  }
+
+  async getCachedYahooPrice(symbol: string): Promise<number | null> {
+    const cached = this.priceCache.get(symbol);
+    const now = Date.now();
+    if (cached && (now - cached.timestamp < 10 * 60 * 1000)) {
+      return cached.price;
+    }
+    const price = await this.fetchYahooPrice(symbol);
+    if (price !== null) {
+      this.priceCache.set(symbol, { price, timestamp: now });
+      return price;
+    }
+    return cached ? cached.price : null;
+  }
+
+  async fetchEconomicCalendar(): Promise<EconomicEvent[]> {
+    const now = Date.now();
+    if (this.calendarCache.length > 0 && (now - this.lastCalendarFetch < 2 * 60 * 60 * 1000)) {
+      return this.calendarCache;
+    }
+    try {
+      const response = await axios.get<EconomicEvent[]>('https://nfs.faireconomy.media/ff_calendar_thisweek.json', {
+        timeout: 5000,
+      });
+      if (Array.isArray(response.data)) {
+        this.calendarCache = response.data;
+        this.lastCalendarFetch = now;
+        return this.calendarCache;
+      }
+    } catch (error: any) {
+      console.error(`Failed to fetch economic calendar: ${error.message}`);
+    }
+    return this.calendarCache;
+  }
+
+  async isNearHighImpactUSDNews(): Promise<{ near: boolean; eventName?: string; timeDiffMinutes?: number }> {
+    try {
+      const events = await this.fetchEconomicCalendar();
+      const now = new Date();
+      for (const event of events) {
+        if (event.country === 'USD' && event.impact === 'High') {
+          const eventDate = new Date(event.date);
+          const diffMs = Math.abs(eventDate.getTime() - now.getTime());
+          const diffMinutes = diffMs / (60 * 1000);
+          if (diffMinutes <= 30) {
+            return {
+              near: true,
+              eventName: event.title,
+              timeDiffMinutes: Math.round(diffMinutes),
+            };
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error(`Error checking high impact news: ${error.message}`);
+    }
+    return { near: false };
+  }
 
 
 
@@ -449,48 +541,64 @@ export class SignalsService {
         throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
       }
 
-      const marketState = analyzeMarketState(currentPrice, candles5m);
+      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation
+      const dailyAgg = await this.candleModel.aggregate([
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$timestamp" }
+            },
+            high: { $max: "$high" },
+            low: { $min: "$low" },
+            date: { $first: "$timestamp" }
+          }
+        },
+        { $sort: { _id: -1 } },
+        { $skip: 1 }, // skip ongoing day
+        { $limit: 14 }
+      ]).exec();
+
+      let pdh = currentPrice;
+      let pdl = currentPrice;
+      let adr14 = 4.0;
+      if (dailyAgg.length > 0) {
+        pdh = dailyAgg[0].high;
+        pdl = dailyAgg[0].low;
+        const ranges = dailyAgg.map((d: any) => d.high - d.low);
+        const sum = ranges.reduce((a: number, b: number) => a + b, 0);
+        adr14 = sum / dailyAgg.length;
+      }
+
+      const marketState = analyzeMarketState(currentPrice, candles5m, { pdh, pdl, adr14 });
+
+      // Fetch external index prices
+      const dxy = await this.getCachedYahooPrice('DX-Y.NYB');
+      const us10y = await this.getCachedYahooPrice('^TNX');
+
+      // Math confluences calculated by backend
+      const targetDistance = Math.abs(profit - entryPrice);
+      const slDistance = Math.abs(entryPrice - loss);
+      const rrRatio = slDistance > 0 ? (targetDistance / slDistance) : 0;
+
+      const mathTruthText = `
+[MATHEMATICAL & RISK CONFLUENCES (CALCULATED BY SYSTEM)]
+- Target Distance: $${targetDistance.toFixed(2)} (${(targetDistance / marketState.atr1h).toFixed(2)}x 1h ATR)
+- Stop Loss Distance: $${slDistance.toFixed(2)} (${(slDistance / marketState.atr1h).toFixed(2)}x 1h ATR)
+- Risk-to-Reward Ratio (R:R): ${rrRatio.toFixed(2)}
+- Current Price to Entry Distance: $${Math.abs(currentPrice - entryPrice).toFixed(2)}
+${dxy ? `- US Dollar Index (DXY) price: ${dxy.toFixed(2)}` : ''}
+${us10y ? `- US 10-Year Bond Yield (US10Y) yield: ${us10y.toFixed(2)}%` : ''}
+`;
 
       // Auto-detect trading style based on target distance relative to 1h ATR
-      const targetDistance = Math.abs(profit - entryPrice);
       const style = detectTradingStyle(targetDistance, marketState.atr1h);
 
       const langConfig = {
-        fa: {
-          name: 'Persian (Farsi)',
-          label: '📊 شانس موفقیت سیگنال',
-          high: '🟢 بالا',
-          medium: '🟡 متوسط',
-          low: '🔴 پایین',
-        },
-        en: {
-          name: 'English',
-          label: '📊 Signal Success Chance',
-          high: '🟢 High',
-          medium: '🟡 Medium',
-          low: '🔴 Low',
-        },
-        ar: {
-          name: 'Arabic',
-          label: '📊 فرصة نجاح الإشارة',
-          high: '🟢 مرتفعة',
-          medium: '🟡 متوسطة',
-          low: '🔴 منخفضة',
-        },
-        tr: {
-          name: 'Turkish',
-          label: '📊 Sinyal Başarı Şansı',
-          high: '🟢 Yüksek',
-          medium: '🟡 Orta',
-          low: '🔴 Düşük',
-        }
-      }[userLang as 'fa' | 'en' | 'ar' | 'tr'] || {
-        name: 'English',
-        label: '📊 Signal Success Chance',
-        high: '🟢 High',
-        medium: '🟡 Medium',
-        low: '🔴 Low',
-      };
+        fa: { name: 'Persian (Farsi)' },
+        en: { name: 'English' },
+        ar: { name: 'Arabic' },
+        tr: { name: 'Turkish' }
+      }[userLang as 'fa' | 'en' | 'ar' | 'tr'] || { name: 'English' };
 
       const styleInstructions = getStyleInstructions(style, risk);
 
@@ -504,34 +612,33 @@ ${signal.createdAt ? `Created: ${new Date(signal.createdAt).toISOString().replac
 Market State:
 ${marketState.semanticText}
 
+${mathTruthText}
+
 ${styleInstructions}
 
-Rules:
-1. Directional Logic:
-   - For SELL signals: ONLY Support levels (below entryPrice) can block or hinder the path to Take Profit. Resistance levels (above entryPrice) are completely irrelevant for blocking SELL targets and instead act as a positive shield/ceiling to protect the Stop Loss.
-   - For BUY signals: ONLY Resistance levels (above entryPrice) can block or hinder the path to Take Profit. Support levels (below entryPrice) are completely irrelevant for blocking BUY targets and instead act as a positive shield/floor to protect the Stop Loss.
-2. Pending Order Projection:
-   - When evaluating PENDING signals, simulate the trade path starting FROM the entryPrice, NOT the currentPrice. Check for blocking S/R levels strictly between the entryPrice and the takeProfit.
-3. Target Sanity Check:
-   - Calculate the distance between entryPrice and Take Profit. If this distance exceeds 5.0x the core timeframe's ATR (5m ATR for Scalping, 1h ATR for Day/Swing), penalize the success chance heavily, rating it LOW or MEDIUM for being highly unrealistic and unlikely to reach, regardless of trend strength.
-4. Trend & Entry Alignment: For BUY, the entryPrice (or currentPrice if live) should be aligned with the dominant trend of higher timeframes (15m/1h SMA20+SMA50) or placed at a key support/Order Block/FVG. For SELL, aligned with the dominant downtrend or placed at key resistance/OB/FVG.
-5. Counter-trend trades (against dominant 15m/1h trend) = MEDIUM or LOW unless strong S/R rejection exists.
-6. SL must be behind a valid level or >= 1.5x ATR from entry.
-7. R:R ratio should be 1.5-3.0 for standard risk.
-8. Your rating MUST match your technical findings. Do NOT rate HIGH if indicators are opposing the direction.
-9. PENDING LIMIT ORDERS: For PENDING signals (where status is PENDING), do not penalize the rating simply because the current price has not reached the entryPrice yet. Evaluate the setup's technical quality assuming it triggers. However, you MUST verify if the entryPrice is realistically reachable:
-   - If the entryPrice is extremely far from the current price (e.g., more than 3.0x ATR of the trading style's core timeframe), rate it LOW or MEDIUM, explaining that the entry point is highly unrealistic or unlikely to be filled.
-   - If the entryPrice is at a logical pullback/breakout zone (like a key S/R, fresh Order Block, or FVG) within a reasonable distance (typically 1.0x to 2.5x ATR of the core timeframe), evaluate the setup's quality on its technical merits once triggered.
-   - A pending BUY limit entryPrice must be below the current price; a pending SELL limit entryPrice must be above the current price. If the order is reversed, flag it as a misconfiguration.
+CORE SCIENTIFIC & TECHNICAL EVALUATION RULES (MUST FOLLOW STRICTLY):
 
-Output format (in ${langConfig.name}):
-- Line 1: "${langConfig.label}: [${langConfig.high}/${langConfig.medium}/${langConfig.low}] - [reason]"
-- Line 2: Brief 1-line summary
-- 1-2 short paragraphs of technical reasoning
-- Do NOT repeat signal details. Do NOT use markdown (*/_). Use plain text + emojis.
-- All numbers in English digits. Always state exact price levels.
-- Be decisive, not fence-sitting.
-${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss distance to entry and touch probability.' : ''}${status === SignalStatus.Closed || status === SignalStatus.Canceled ? '- CLOSED/CANCELED: write a brief educational review of the outcome.' : ''}
+1. Success Probability Scoring Rubric (Rate out of 100):
+   - Trend Alignment (Weight: 20%): Match with 15m/1h/4h trends.
+   - Correlation Confluence (Weight: 5%): Confirm negative correlation with DXY and US10Y.
+   - Structure & Key Areas (Weight: 30%): Entry at a fresh OB/FVG/Support/Resistance. TP path clear of opposing blockers.
+   - Risk-to-Reward & Target (Weight: 20%): Minimum R:R is 1.5. Target placed at logical liquidity or S/R (not dream targets).
+   - Momentum & Confluences (Weight: 15%): RSI alignment and recent BOS/CHoCH.
+   - Time & Session (Weight: 10%): Session volume and news distance.
+   * Note: The absolute maximum probability for a pending/active signal is 95% due to default market uncertainty.
+
+2. Directional Logic:
+   - For SELL: ONLY Support levels (below entryPrice) can block TP. Resistance levels are protective ceilings for SL.
+   - For BUY: ONLY Resistance levels (above entryPrice) can block TP. Support levels are protective floors for SL.
+
+3. Pending Order Projection:
+   - For PENDING signals, assume entry is triggered, but if entry price is extremely far (> 3.0x ATR), penalize the success chance.
+
+4. Closed/Canceled Signals:
+   - Write an educational review of the outcome.
+
+Return ONLY a valid JSON object (no markdown, no backticks, no comments):
+{"successProbability":number,"analysis":"Brief 1-line summary followed by 1-2 paragraphs of technical reasoning in ${langConfig.name}."}
 `;
 
       console.log('=== [AI ANALYZE SIGNAL START] ===');
@@ -550,7 +657,26 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
       console.log('AI Raw Output:\n', result.text);
       console.log('=== [AI ANALYZE SIGNAL END] ===');
 
-      // // Deduct 1 gem from user
+      let successProbability = 50;
+      let analysisText = result.text.trim();
+
+      try {
+        let cleanText = result.text.trim();
+        if (cleanText.startsWith('```')) {
+          cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+        }
+        const parsed = JSON.parse(cleanText);
+        if (parsed.successProbability !== undefined) {
+          successProbability = parsed.successProbability;
+        }
+        if (parsed.analysis) {
+          analysisText = parsed.analysis;
+        }
+      } catch (e) {
+        console.error('Failed to parse AI Analyze response JSON:', e);
+      }
+
+      // Deduct 1 gem from user
       await this.userModel
         .findByIdAndUpdate(user.id, {
           $inc: { gem: -1 },
@@ -565,11 +691,12 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
         action: GemLogAction.SignalAnalyze,
       });
 
-      this.signalAnalyzeModel.create({
+      await this.signalAnalyzeModel.create({
         signal: signal.id || signal._id || null,
         ouncePrice: currentPrice,
         totalTokens: result.totalTokens,
-        analyzeText: result.text,
+        analyzeText: analysisText,
+        successProbability: successProbability,
         creator: user.id,
         prompt: promptMessage,
         model: result.model,
@@ -579,7 +706,8 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
       });
 
       return {
-        analysis: result.text,
+        analysis: analysisText,
+        successProbability: successProbability,
         signal,
         user,
         currentPrice: currentPrice,
@@ -609,6 +737,28 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
         });
       }
 
+      // 1. High-Impact USD News Kill Switch Check
+      const newsCheck = await this.isNearHighImpactUSDNews();
+      if (newsCheck.near) {
+        console.log(`News Kill Switch triggered: high impact news "${newsCheck.eventName}" in ${newsCheck.timeDiffMinutes} mins.`);
+        return {
+          signal: null,
+          rawText: JSON.stringify({
+            type: null,
+            entryPrice: null,
+            takeProfit: null,
+            stopLoss: null,
+            instantEntry: false,
+            generationAnalysis: user.language === 'fa' 
+              ? `به دلیل انتشار خبر مهم اقتصادی آمریکا (${newsCheck.eventName}) در محدوده ۳۰ دقیقه‌ای، جهت ایمنی سرمایه شما سیگنال جدیدی صادر نمی‌شود.`
+              : `Due to the release of high-impact US economic news (${newsCheck.eventName}) within 30 minutes, no new signal is generated to protect your capital.`
+          }),
+          parseError: false,
+          user,
+          model: 'News Kill Switch',
+        };
+      }
+
       const currentPrice = this.ouncePriceService.current;
 
       // Fetch recent 5m candles from the past 30 days
@@ -621,9 +771,49 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
         throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
       }
 
-      const marketState = analyzeMarketState(currentPrice, candles5m);
+      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation
+      const dailyAgg = await this.candleModel.aggregate([
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$timestamp" }
+            },
+            high: { $max: "$high" },
+            low: { $min: "$low" },
+            date: { $first: "$timestamp" }
+          }
+        },
+        { $sort: { _id: -1 } },
+        { $skip: 1 }, // skip ongoing day
+        { $limit: 14 }
+      ]).exec();
+
+      let pdh = currentPrice;
+      let pdl = currentPrice;
+      let adr14 = 4.0;
+      if (dailyAgg.length > 0) {
+        pdh = dailyAgg[0].high;
+        pdl = dailyAgg[0].low;
+        const ranges = dailyAgg.map((d: any) => d.high - d.low);
+        const sum = ranges.reduce((a: number, b: number) => a + b, 0);
+        adr14 = sum / dailyAgg.length;
+      }
+
+      const marketState = analyzeMarketState(currentPrice, candles5m, { pdh, pdl, adr14 });
       const userLang = user.language || 'fa';
       const langName = userLang === 'fa' ? 'Persian (Farsi)' : 'English';
+
+      const dxy = await this.getCachedYahooPrice('DX-Y.NYB');
+      const us10y = await this.getCachedYahooPrice('^TNX');
+
+      const mathTruthText = `
+[MATHEMATICAL & RISK PARAMETERS]
+${dxy ? `- US Dollar Index (DXY) price: ${dxy.toFixed(2)}` : ''}
+${us10y ? `- US 10-Year Bond Yield (US10Y) yield: ${us10y.toFixed(2)}%` : ''}
+- Volatility state: ${marketState.isVolatile ? 'HIGH (Mandatory Limit Orders only)' : 'NORMAL'}
+- Trading Session: ${marketState.tradingSession}
+- ADR 14: $${marketState.adr14?.toFixed(2)}
+`;
 
       const style = overrides?.tradingStyle || user.tradingStyle || TradingStyle.Day;
       const risk = overrides?.riskTolerance || user.riskTolerance || RiskTolerance.Moderate;
@@ -632,16 +822,21 @@ ${status === SignalStatus.Pending ? '- PENDING: trade is not live yet. Discuss d
       const promptMessage = `
 You are a Gold (XAUUSD) quantitative trading assistant for Ounce24.
 Analyze the current market state and generate the best possible trading signal (either instant market entry or pending limit order) based on the conditions.
-You MUST ALWAYS return a valid signal. Do not return null.
 
 Market State:
 ${marketState.semanticText}
 
+${mathTruthText}
+
 ${styleInstructions}
 
-CORE SCIENTIFIC & TECHNICAL GENERATION RULES:
+CORE SCIENTIFIC & TECHNICAL GENERATION RULES (MUST FOLLOW STRICTLY):
 
-1. Entry Type & Direction Constraints:
+1. Threshold Requirement:
+   - Calculate the success probability using the scoring rubric (Trend: 20%, DXY/US10Y: 5%, SMC & OBs: 30%, R:R & Target: 20%, Momentum: 15%, Session: 10%).
+   - If the calculated probability is BELOW ${AI_GENERATION_THRESHOLD}%, you MUST NOT generate a trade setup. Instead, set the "type" field to null.
+
+2. Entry Type & Direction Constraints:
    - If generating a BUY signal:
      * Instant Entry (instantEntry = true): entryPrice MUST equal currentPrice ($${currentPrice.toFixed(2)}). Use ONLY if current price is bouncing off a key support, or breaking out with high bullish momentum.
      * Limit Entry (instantEntry = false): entryPrice MUST be strictly *below* the currentPrice (entryPrice < $${currentPrice.toFixed(2)}). Place the pending limit at a key support, bullish Order Block, or bullish FVG.
@@ -653,20 +848,23 @@ CORE SCIENTIFIC & TECHNICAL GENERATION RULES:
      * Take Profit (takeProfit) MUST be strictly *below* the entryPrice (takeProfit < entryPrice). Do not place takeProfit beyond major support levels (supports block SELL TP).
      * Stop Loss (stopLoss) MUST be strictly *above* the entryPrice (stopLoss > entryPrice). Place it above a key resistance level or swing high.
 
-2. Minimum Limit Distance Rules:
-   - For pending Limit Entries (instantEntry = false), the entryPrice must be at a logical, technically sound level at a meaningful distance to allow a normal pullback:
+3. Volatility Constraints:
+   - If MARKET VOLATILITY STATE is HIGH VOLATILITY, you MUST set instantEntry = false (Limit Order only). Do not suggest instant entries.
+
+4. Minimum Limit Distance Rules:
+   - For pending Limit Entries (instantEntry = false), the entryPrice must be at least:
      * For SCALPING: Distance from currentPrice to entryPrice must be at least 1.0x to 1.5x of the 5-minute ATR ($${marketState.atr5m.toFixed(2)}).
      * For DAY/SWING trading: Distance from currentPrice to entryPrice must be at least 1.0x to 1.5x of the 1-hour ATR ($${marketState.atr1h.toFixed(2)}).
-     * Do NOT place limit entries closer than these distances. If the required pullback is smaller than this, either generate an instantEntry=true (if currentPrice is at a highly favorable bounce/breakout point) or identify a deeper, more robust limit level.
+     * Do NOT place limit entries closer than these distances.
 
-3. Target Sanity Check & Volatility Validation:
-   - Calculate the distance between entryPrice and takeProfit. This distance MUST NOT exceed 5.0x the core timeframe's ATR (5m ATR for Scalping, 1h ATR for Day/Swing). Any distance greater than 5.0x ATR is highly unrealistic and forbidden.
-   - TP should be set before key S/R levels (resistances for BUY, supports for SELL).
-   - SL should be placed behind a valid swing level or key S/R zone (supports for BUY, resistances for SELL) at a minimum distance of 1.5x ATR.
-   - Risk to Reward (R:R) ratio must be between 1.5 and 3.0.
+5. Target Sanity Check & Volatility Validation:
+   - Calculate the distance between entryPrice and takeProfit. This distance MUST NOT exceed 5.0x the core timeframe's ATR.
+   - TP should be set before key S/R levels.
+   - SL should be placed behind a valid swing level or key S/R zone at a minimum distance of 1.5x ATR.
+   - Risk to Reward (R:R) ratio must be at least 1.5.
 
 Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments):
-{"type":"buy"|"sell","entryPrice":number,"takeProfit":number,"stopLoss":number,"instantEntry":boolean,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName}. No asterisks or markdown."}
+{"type":"buy"|"sell"|null,"entryPrice":number|null,"takeProfit":number|null,"stopLoss":number|null,"instantEntry":boolean,"successProbability":number,"generationAnalysis":"Brief 1-2 paragraph reasoning in ${langName} explaining the setup and its success probability, or explaining why no high-probability setup could be found."}
 `;
 
       console.log('=== [AI GENERATE SIGNAL START] ===');

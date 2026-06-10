@@ -23,6 +23,7 @@ import { AuthService } from '../../services/auth.service';
 
 interface SignalAnalysisResponse {
   analysis: string;
+  successProbability?: number;
   signal: Signal;
   currentPrice: number;
 }

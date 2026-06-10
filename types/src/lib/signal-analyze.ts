@@ -25,6 +25,8 @@ export class SignalAnalyze {
 
   language?: string;
 
+  successProbability?: number;
+
   createdAt: Date;
 }
 

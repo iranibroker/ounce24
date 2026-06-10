@@ -19,6 +19,83 @@
       </div>
     } @else if (analyzeMutation.data()) {
       <div class="analysis-result">
+        @if (analyzeMutation.data()?.successProbability !== undefined) {
+          <div class="probability-card" [class.high]="analyzeMutation.data()!.successProbability! >= 75" [class.medium]="analyzeMutation.data()!.successProbability! >= 50 && analyzeMutation.data()!.successProbability! < 75" [class.low]="analyzeMutation.data()!.successProbability! < 50">
+            
+            <div class="gauge-container">
+              <!-- Glow background -->
+              <div class="gauge-glow"></div>
+              
+              <div class="radial-progress">
+                <svg viewBox="0 0 120 120" class="gauge-svg">
+                  <!-- Define Gradients -->
+                  <defs>
+                    <linearGradient id="highGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#10b981" />
+                      <stop offset="100%" stop-color="#34d399" />
+                    </linearGradient>
+                    <linearGradient id="mediumGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#f59e0b" />
+                      <stop offset="100%" stop-color="#fbbf24" />
+                    </linearGradient>
+                    <linearGradient id="lowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#ef4444" />
+                      <stop offset="100%" stop-color="#f87171" />
+                    </linearGradient>
+                  </defs>
+                  
+                  <!-- Outer Track -->
+                  <circle cx="60" cy="60" r="50" class="track-outer"></circle>
+                  
+                  <!-- Inner Track -->
+                  <circle cx="60" cy="60" r="44" class="track-inner"></circle>
+                  
+                  <!-- Main Progress Bar -->
+                  <circle cx="60" cy="60" r="50" class="progress-bar"
+                          [style.strokeDasharray]="314.16"
+                          [style.strokeDashoffset]="314.16 - (314.16 * analyzeMutation.data()!.successProbability!) / 100">
+                  </circle>
+                  
+                  <!-- Dynamic status ticks -->
+                  <g class="gauge-ticks">
+                    <line x1="60" y1="10" x2="60" y2="14" class="tick"></line>
+                    <line x1="110" y1="60" x2="106" y2="60" class="tick"></line>
+                    <line x1="60" y1="110" x2="60" y2="106" class="tick"></line>
+                    <line x1="10" y1="60" x2="14" y2="60" class="tick"></line>
+                  </g>
+                </svg>
+                
+                <div class="percentage-content">
+                  <span class="value">{{ analyzeMutation.data()?.successProbability }}%</span>
+                  <span class="probability-badge">
+                    @if (analyzeMutation.data()!.successProbability! >= 75) {
+                      {{ 'signalAnalyze.highProbability' | translate }}
+                    } @else if (analyzeMutation.data()!.successProbability! >= 50) {
+                      {{ 'signalAnalyze.mediumProbability' | translate }}
+                    } @else {
+                      {{ 'signalAnalyze.lowProbability' | translate }}
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Side analysis metadata details -->
+            <div class="gauge-meta">
+              <span class="meta-title">{{ 'signalAnalyze.successProbability' | translate }}</span>
+              <p class="meta-desc">
+                @if (analyzeMutation.data()!.successProbability! >= 75) {
+                  {{ 'signalAnalyze.highProbabilityDesc' | translate }}
+                } @else if (analyzeMutation.data()!.successProbability! >= 50) {
+                  {{ 'signalAnalyze.mediumProbabilityDesc' | translate }}
+                } @else {
+                  {{ 'signalAnalyze.lowProbabilityDesc' | translate }}
+                }
+              </p>
+            </div>
+            
+          </div>
+        }
         <div class="analysis-text">
           {{ analyzeMutation.data()?.analysis }}
         </div>

@@ -23,6 +23,12 @@ export interface SMCMarketStructure {
   timeframe: '15m' | '1h';
 }
 
+export interface DailyStats {
+  pdh: number;
+  pdl: number;
+  adr14: number;
+}
+
 export interface MarketStateSummary {
   currentPrice: number;
   trend5m: 'Bullish' | 'Bearish' | 'Consolidating';
@@ -50,7 +56,13 @@ export interface MarketStateSummary {
   smcOrderBlocks: SMCOrderBlock[];
   smcFVGs: SMCFairValueGap[];
   marketStructure: SMCMarketStructure[];
+  tradingSession?: string;
+  isVolatile?: boolean;
+  pdh?: number;
+  pdl?: number;
+  adr14?: number;
 }
+
 
 export function detectTradingStyle(targetDistance: number, atr1h: number): TradingStyle {
   const vol = atr1h && atr1h > 0 ? atr1h : 4.0;
@@ -240,6 +252,7 @@ export function findSupportResistance(
 export function analyzeMarketState(
   currentPrice: number,
   candles5m: OuncePriceCandle[],
+  dailyStats?: DailyStats,
 ): MarketStateSummary {
   const closes5m = candles5m.map((c) => c.close);
   const rsi5m = calculateRSI(closes5m, 14);
@@ -265,6 +278,31 @@ export function analyzeMarketState(
     trend15m = 'Bullish';
   } else if (currentPrice < sma20_15m && currentPrice < sma50_15m && sma20_15m < sma50_15m) {
     trend15m = 'Bearish';
+  }
+
+  // Volatility evaluation: 15m ATR > 1.5 * baseline ATR
+  const trs15m: number[] = [];
+  for (let i = 1; i < candles15m.length; i++) {
+    const h = candles15m[i].high;
+    const l = candles15m[i].low;
+    const pc = candles15m[i - 1].close;
+    const tr = Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc));
+    trs15m.push(tr);
+  }
+  const currentAtr15m = trs15m.slice(-14).reduce((a, b) => a + b, 0) / 14;
+  const baselineAtr15m = trs15m.reduce((a, b) => a + b, 0) / (trs15m.length || 1);
+  const isVolatile = currentAtr15m > 1.5 * baselineAtr15m;
+
+  // Trading Session detection
+  const date = new Date();
+  const hour = date.getUTCHours();
+  let tradingSession = 'Asian';
+  if (hour >= 13 && hour <= 16) {
+    tradingSession = 'London-NY Overlap';
+  } else if (hour >= 8 && hour < 13) {
+    tradingSession = 'London';
+  } else if (hour >= 13 && hour < 21) {
+    tradingSession = 'New York';
   }
 
   const candles1h = aggregateTo1h(candles5m);
@@ -324,7 +362,15 @@ export function analyzeMarketState(
     .sort((a, b) => a - b)
     .slice(0, 3);
 
-  let semanticText = `CURRENT GOLD PRICE: $${currentPrice.toFixed(2)}\n\n`;
+  let semanticText = `CURRENT GOLD PRICE: $${currentPrice.toFixed(2)}\n`;
+  semanticText += `TRADING SESSION: ${tradingSession.toUpperCase()}\n`;
+  semanticText += `MARKET VOLATILITY STATE: ${isVolatile ? 'HIGH VOLATILITY (Use deep limit orders only)' : 'NORMAL VOLATILITY'}\n`;
+  if (dailyStats) {
+    semanticText += `PREVIOUS DAY HIGH (PDH): $${dailyStats.pdh.toFixed(2)}\n`;
+    semanticText += `PREVIOUS DAY LOW (PDL): $${dailyStats.pdl.toFixed(2)}\n`;
+    semanticText += `AVERAGE DAILY RANGE (ADR 14): $${dailyStats.adr14.toFixed(2)}\n`;
+  }
+  semanticText += `\n`;
 
   semanticText += `[Trend & Moving Averages (5-minute timeframe - Short-Term)]\n`;
   semanticText += `- 5m Trend: ${trend5m.toUpperCase()}\n`;
@@ -444,6 +490,11 @@ export function analyzeMarketState(
     smcOrderBlocks,
     smcFVGs,
     marketStructure,
+    tradingSession,
+    isVolatile,
+    pdh: dailyStats?.pdh,
+    pdl: dailyStats?.pdl,
+    adr14: dailyStats?.adr14,
   };
 }
 

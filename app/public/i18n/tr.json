@@ -94,6 +94,13 @@
     "analysis": "Yapay Zeka Analizi",
     "currentPrice": "Mevcut Fiyat",
     "getAnalysis": "Yapay Zeka Analizini Al",
+    "successProbability": "Başarı Şansı",
+    "highProbability": "Yüksek Başarı Şansı",
+    "mediumProbability": "Orta Başarı Şansı",
+    "lowProbability": "Düşük Başarı Şansı",
+    "highProbabilityDesc": "Kâr hedefine ulaşma olasılığı yüksek olan mükemmel teknik kurulum.",
+    "mediumProbabilityDesc": "Ortalama başarı oranına sahip makul kurulum, riski dikkatli yönetin.",
+    "lowProbabilityDesc": "Yüksek spekülatif kurulum, dikkatli olun veya sıkı zarar durdurma kullanın.",
     "description": "Yapay zeka kullanarak işlem sinyalinizin akıllı bir analizini alın (1 GEM gereklidir)",
     "analyze": "Sinyali Analiz Et",
     "noGems": "Sinyalinizi analiz etmek için yeterli GEM'iniz yok"
