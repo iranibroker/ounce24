@@ -29,7 +29,6 @@ import { AuthService } from '../../../services/auth.service';
 import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
 import { AlertDialogComponent } from '../../../components/alert-dialog/alert-dialog.component';
 import { AiSettingsDialogComponent } from '../../../components/ai-settings-dialog/ai-settings-dialog.component';
-import { SignalGenerateDialogComponent } from '../../../components/signal-generate-dialog/signal-generate-dialog.component';
 
 @Component({
   selector: 'app-add-signal',
@@ -216,38 +215,26 @@ export class AddSignalComponent {
         riskTolerance: RiskTolerance.Moderate,
         hideTradingStyle: false,
       }
-    }).afterClosed().subscribe((result: { tradingStyle: TradingStyle; riskTolerance: RiskTolerance } | undefined) => {
-      if (!result) return;
+    }).afterClosed().subscribe((generated) => {
+      if (!generated) return;
       
-      this.isGenerating = true;
-      this.dialog.open(SignalGenerateDialogComponent, {
-        width: '440px',
-        data: {
-          tradingStyle: result.tradingStyle,
-          riskTolerance: result.riskTolerance,
-        }
-      }).afterClosed().subscribe((generated) => {
-        this.isGenerating = false;
-        if (!generated) return;
-        
-        const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
-        
-        this.form.patchValue({
-          type: type,
-          entryPrice: generated.entryPrice,
-          takeProfit: generated.takeProfit,
-          stopLoss: generated.stopLoss,
-          instantEntry: generated.instantEntry,
-          generationAnalysis: generated.generationAnalysis || '',
-          successProbability: generated.successProbability || null,
-        });
-
-        this.snackBar.open(
-          this.translateService.instant('addSignal.generateSuccess'),
-          this.translateService.instant('app.close'),
-          { duration: 3000 }
-        );
+      const type = generated.type === 'buy' ? SignalType.Buy : SignalType.Sell;
+      
+      this.form.patchValue({
+        type: type,
+        entryPrice: generated.entryPrice,
+        takeProfit: generated.takeProfit,
+        stopLoss: generated.stopLoss,
+        instantEntry: generated.instantEntry,
+        generationAnalysis: generated.generationAnalysis || '',
+        successProbability: generated.successProbability || null,
       });
+
+      this.snackBar.open(
+        this.translateService.instant('addSignal.generateSuccess'),
+        this.translateService.instant('app.close'),
+        { duration: 3000 }
+      );
     });
   }
 }

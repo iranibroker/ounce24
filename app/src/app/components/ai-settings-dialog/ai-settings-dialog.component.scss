@@ -89,4 +89,74 @@
 .dialog-actions {
   padding: 8px 24px 24px 24px;
   gap: 8px;
+  display: flex;
+  align-items: center;
+
+  .flex-spacer {
+    flex: 1;
+  }
+
+  .copy-prompt-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--mat-sys-on-surface-variant, rgba(255, 255, 255, 0.7));
+    font-size: 13px;
+    padding-left: 8px;
+    padding-right: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--mat-sys-primary, #ffd254);
+      border-color: var(--mat-sys-primary, #ffd254);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+  gap: 16px;
+
+  .loading-text {
+    font-size: 14px;
+    color: var(--mat-sys-on-surface-variant, rgba(255, 255, 255, 0.7));
+    margin: 0;
+    text-align: center;
+    font-family: 'Estedad', sans-serif;
+  }
+}
+
+.no-signal-box {
+  display: flex;
+  background-color: rgba(255, 179, 0, 0.08);
+  border: 1px solid rgba(255, 179, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  direction: rtl;
+
+  .no-signal-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--mat-sys-on-surface-variant, rgba(255, 255, 255, 0.85));
+    font-family: 'Estedad', sans-serif;
+    text-align: justify;
+    white-space: pre-line;
+    width: 100%;
+  }
 }

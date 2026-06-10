@@ -1,58 +1,88 @@
 <h2 mat-dialog-title>{{ data.title | translate }}</h2>
 
 <mat-dialog-content class="dialog-content">
-  @if (data.description) {
-    <p class="description-text">{{ data.description | translate }}</p>
-  }
+  @if (isGenerating) {
+    <!-- Loading State -->
+    <div class="loading-state">
+      <app-data-loading />
+      <p class="loading-text">{{ 'addSignal.generating' | translate }}</p>
+    </div>
+  } @else if (errorText) {
+    <!-- Failure / Guardrail Rejected State -->
+    <div class="no-signal-box">
+      <p class="no-signal-desc">{{ errorText }}</p>
+    </div>
+  } @else {
+    <!-- Settings Form State -->
+    @if (data.description) {
+      <p class="description-text">{{ data.description | translate }}</p>
+    }
 
-  @if (!data.hideTradingStyle) {
+    @if (!data.hideTradingStyle) {
+      <div class="settings-group">
+        <label class="group-label">{{ 'aiSettings.tradingStyle.label' | translate }}</label>
+        <mat-button-toggle-group 
+          [(ngModel)]="tradingStyle" 
+          [ngModelOptions]="{standalone: true}"
+          class="modern-toggle-group"
+        >
+          <mat-button-toggle [value]="TradingStyle.Scalp">
+            {{ 'aiSettings.tradingStyle.SCALP_SHORT' | translate }}
+          </mat-button-toggle>
+          <mat-button-toggle [value]="TradingStyle.Day">
+            {{ 'aiSettings.tradingStyle.DAY_SHORT' | translate }}
+          </mat-button-toggle>
+          <mat-button-toggle [value]="TradingStyle.Swing">
+            {{ 'aiSettings.tradingStyle.SWING_SHORT' | translate }}
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        
+        <span class="group-hint">{{ 'aiSettings.tradingStyle.hint' | translate }}</span>
+      </div>
+    }
+
     <div class="settings-group">
-      <label class="group-label">{{ 'aiSettings.tradingStyle.label' | translate }}</label>
+      <label class="group-label">{{ 'aiSettings.riskTolerance.label' | translate }}</label>
       <mat-button-toggle-group 
-        [(ngModel)]="tradingStyle" 
+        [(ngModel)]="riskTolerance" 
         [ngModelOptions]="{standalone: true}"
         class="modern-toggle-group"
       >
-        <mat-button-toggle [value]="TradingStyle.Scalp">
-          {{ 'aiSettings.tradingStyle.SCALP_SHORT' | translate }}
+        <mat-button-toggle [value]="RiskTolerance.Conservative">
+          {{ 'aiSettings.riskTolerance.CONSERVATIVE_SHORT' | translate }}
         </mat-button-toggle>
-        <mat-button-toggle [value]="TradingStyle.Day">
-          {{ 'aiSettings.tradingStyle.DAY_SHORT' | translate }}
+        <mat-button-toggle [value]="RiskTolerance.Moderate">
+          {{ 'aiSettings.riskTolerance.MODERATE_SHORT' | translate }}
         </mat-button-toggle>
-        <mat-button-toggle [value]="TradingStyle.Swing">
-          {{ 'aiSettings.tradingStyle.SWING_SHORT' | translate }}
+        <mat-button-toggle [value]="RiskTolerance.Aggressive">
+          {{ 'aiSettings.riskTolerance.AGGRESSIVE_SHORT' | translate }}
         </mat-button-toggle>
       </mat-button-toggle-group>
-      
-      <span class="group-hint">{{ 'aiSettings.tradingStyle.hint' | translate }}</span>
+
+      <span class="group-hint">{{ 'aiSettings.riskTolerance.hint' | translate }}</span>
     </div>
   }
-
-  <div class="settings-group">
-    <label class="group-label">{{ 'aiSettings.riskTolerance.label' | translate }}</label>
-    <mat-button-toggle-group 
-      [(ngModel)]="riskTolerance" 
-      [ngModelOptions]="{standalone: true}"
-      class="modern-toggle-group"
-    >
-      <mat-button-toggle [value]="RiskTolerance.Conservative">
-        {{ 'aiSettings.riskTolerance.CONSERVATIVE_SHORT' | translate }}
-      </mat-button-toggle>
-      <mat-button-toggle [value]="RiskTolerance.Moderate">
-        {{ 'aiSettings.riskTolerance.MODERATE_SHORT' | translate }}
-      </mat-button-toggle>
-      <mat-button-toggle [value]="RiskTolerance.Aggressive">
-        {{ 'aiSettings.riskTolerance.AGGRESSIVE_SHORT' | translate }}
-      </mat-button-toggle>
-    </mat-button-toggle-group>
-
-    <span class="group-hint">{{ 'aiSettings.riskTolerance.hint' | translate }}</span>
-  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-button (click)="cancel()">{{ 'app.cancel' | translate }}</button>
-  <button mat-flat-button color="primary" (click)="confirm()">
-    {{ data.confirmLabel | translate }}
-  </button>
+  @if (isGenerating) {
+    <!-- Empty or minimal buttons during generation -->
+    <button mat-button disabled type="button">{{ 'app.cancel' | translate }}</button>
+  } @else if (errorText) {
+    <!-- Buttons shown when there is an error/no signal -->
+    @if (prompt) {
+      <button mat-button class="copy-prompt-btn" (click)="copyPrompt(prompt)" type="button">
+        <mat-icon>{{ isPromptCopied ? 'check' : 'content_copy' }}</mat-icon>
+        <span>{{ (isPromptCopied ? 'app.copied' : 'app.copyPrompt') | translate }}</span>
+      </button>
+    }
+    <div class="flex-spacer"></div>
+    <button mat-button (click)="cancel()" type="button">{{ 'app.close' | translate }}</button>
+  } @else {
+    <!-- Form Action Buttons -->
+    <button mat-button (click)="cancel()" type="button">{{ 'app.cancel' | translate }}</button>
+    <button mat-flat-button color="primary" (click)="generateSignal()" type="button">
+      {{ data.confirmLabel | translate }}
+    </button>
+  }
 </mat-dialog-actions>
