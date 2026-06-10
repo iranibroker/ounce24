@@ -288,6 +288,8 @@
     "success": "Signal created successfully",
     "generateSuccess": "Signal generated and filled successfully!",
     "aiGenerateError": "Failed to generate signal",
+    "confirmAiGenerate": "AI Signal Generation",
+    "generate": "Generate Signal",
     "confirmAiGenerateDesc": "Intelligent trading signal generation based on live market trends using AI (Requires 2 Gems)"
   },
   "languageSelection": {

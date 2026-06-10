@@ -274,6 +274,8 @@
     "success": "Sinyal başarıyla oluşturuldu",
     "generateSuccess": "Sinyal yapay zeka ile başarıyla oluşturuldu ve yerleştirildi!",
     "aiGenerateError": "Sinyal yapay zeka ile oluşturulamadı",
+    "confirmAiGenerate": "Yapay Zeka Sinyal Oluşturma",
+    "generate": "Sinyal Oluştur",
     "confirmAiGenerateDesc": "Yapay zeka kullanarak canlı piyasa trendlerine göre akıllı işlem sinyali üretimi (2 Gem gerekir)"
   },
   "languageSelection": {

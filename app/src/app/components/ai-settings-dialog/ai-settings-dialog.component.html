@@ -24,15 +24,6 @@
         </mat-button-toggle>
       </mat-button-toggle-group>
       
-      <div class="selected-desc-box">
-        @if (tradingStyle === TradingStyle.Scalp) {
-          {{ 'aiSettings.tradingStyle.SCALP_DESC' | translate }}
-        } @else if (tradingStyle === TradingStyle.Day) {
-          {{ 'aiSettings.tradingStyle.DAY_DESC' | translate }}
-        } @else if (tradingStyle === TradingStyle.Swing) {
-          {{ 'aiSettings.tradingStyle.SWING_DESC' | translate }}
-        }
-      </div>
       <span class="group-hint">{{ 'aiSettings.tradingStyle.hint' | translate }}</span>
     </div>
   }
@@ -55,15 +46,6 @@
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <div class="selected-desc-box">
-      @if (riskTolerance === RiskTolerance.Conservative) {
-        {{ 'aiSettings.riskTolerance.CONSERVATIVE_DESC' | translate }}
-      } @else if (riskTolerance === RiskTolerance.Moderate) {
-        {{ 'aiSettings.riskTolerance.MODERATE_DESC' | translate }}
-      } @else if (riskTolerance === RiskTolerance.Aggressive) {
-        {{ 'aiSettings.riskTolerance.AGGRESSIVE_DESC' | translate }}
-      }
-    </div>
     <span class="group-hint">{{ 'aiSettings.riskTolerance.hint' | translate }}</span>
   </div>
 </mat-dialog-content>
