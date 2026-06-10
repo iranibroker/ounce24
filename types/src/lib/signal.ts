@@ -84,6 +84,7 @@ export class Signal {
   }>;
 
   generationAnalysis?: string;
+  successProbability?: number;
 
   //virtual props
   isSell: boolean;

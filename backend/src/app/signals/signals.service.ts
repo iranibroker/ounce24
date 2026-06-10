@@ -51,6 +51,40 @@ const AI_GENERATION_THRESHOLD = isNaN(Number(process.env.AI_GENERATION_THRESHOLD
   ? 75
   : Number(process.env.AI_GENERATION_THRESHOLD);
 
+function parseLLMJson(text: string): any {
+  let cleanText = text.trim();
+  
+  // Extract JSON substring from first '{' to last '}'
+  const start = cleanText.indexOf('{');
+  const end = cleanText.lastIndexOf('}');
+  if (start !== -1 && end !== -1 && end > start) {
+    cleanText = cleanText.substring(start, end + 1);
+  } else {
+    if (cleanText.startsWith('```')) {
+      cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+    }
+  }
+
+  // Escape any raw unescaped newlines inside double quotes
+  let insideString = false;
+  let escapedText = '';
+  for (let i = 0; i < cleanText.length; i++) {
+    const char = cleanText[i];
+    if (char === '"' && (i === 0 || cleanText[i - 1] !== '\\')) {
+      insideString = !insideString;
+      escapedText += char;
+    } else if (char === '\n' && insideString) {
+      escapedText += '\\n';
+    } else if (char === '\r' && insideString) {
+      escapedText += '\\r';
+    } else {
+      escapedText += char;
+    }
+  }
+
+  return JSON.parse(escapedText);
+}
+
 
 @Injectable()
 export class SignalsService {
@@ -575,6 +609,9 @@ export class SignalsService {
       const dxy = await this.getCachedYahooPrice('DX-Y.NYB');
       const us10y = await this.getCachedYahooPrice('^TNX');
 
+      // Fetch economic calendar news check
+      const newsCheck = await this.isNearHighImpactUSDNews();
+
       // Math confluences calculated by backend
       const targetDistance = Math.abs(profit - entryPrice);
       const slDistance = Math.abs(entryPrice - loss);
@@ -588,6 +625,7 @@ export class SignalsService {
 - Current Price to Entry Distance: $${Math.abs(currentPrice - entryPrice).toFixed(2)}
 ${dxy ? `- US Dollar Index (DXY) price: ${dxy.toFixed(2)}` : ''}
 ${us10y ? `- US 10-Year Bond Yield (US10Y) yield: ${us10y.toFixed(2)}%` : ''}
+${newsCheck.near ? `- [WARNING] HIGH-IMPACT USD ECONOMIC NEWS: "${newsCheck.eventName}" is scheduled in ${newsCheck.timeDiffMinutes} minutes. Expect extreme volatility, slippage, and unpredictable breakouts.` : ''}
 `;
 
       // Auto-detect trading style based on target distance relative to 1h ATR
@@ -661,11 +699,7 @@ Return ONLY a valid JSON object (no markdown, no backticks, no comments):
       let analysisText = result.text.trim();
 
       try {
-        let cleanText = result.text.trim();
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
-        }
-        const parsed = JSON.parse(cleanText);
+        const parsed = parseLLMJson(result.text);
         if (parsed.successProbability !== undefined) {
           successProbability = parsed.successProbability;
         }
@@ -875,16 +909,11 @@ Output: Return ONLY a valid JSON object (no markdown, no backticks, no comments)
 
       console.log('AI Raw Output:\n', result.text);
 
-      // Clean the AI response in case it returned markdown code block
       let cleanText = result.text.trim();
-      if (cleanText.startsWith('```')) {
-        cleanText = cleanText.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
-      }
-
       let generatedSignal = null;
       let parseError = false;
       try {
-        const parsed = JSON.parse(cleanText);
+        const parsed = parseLLMJson(result.text);
         // If AI returned null signal (no valid setup)
         if (!parsed || parsed.type === null || parsed.type === 'null') {
           generatedSignal = null;

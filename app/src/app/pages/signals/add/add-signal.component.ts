@@ -69,6 +69,7 @@ export class AddSignalComponent {
       stopLoss: ['', [Validators.required, Validators.min(0)]],
       instantEntry: [false],
       generationAnalysis: [''],
+      successProbability: [null],
     });
 
     // Add validators based on signal type
@@ -164,6 +165,7 @@ export class AddSignalComponent {
             : formValue.takeProfit,
         instantEntry: formValue.instantEntry,
         generationAnalysis: formValue.generationAnalysis,
+        successProbability: formValue.successProbability,
       };
 
       this.http.post('/api/signals', signal).subscribe({
@@ -218,6 +220,7 @@ export class AddSignalComponent {
             stopLoss: number;
             instantEntry: boolean;
             generationAnalysis?: string;
+            successProbability?: number;
           } | null;
           rawText: string;
           parseError: boolean;
@@ -232,8 +235,18 @@ export class AddSignalComponent {
             }
 
             if (!response.signal) {
-              const alertMessage = this.translateService.instant('addSignal.noSetupFound');
-              window.alert(alertMessage);
+              let reasonMessage = this.translateService.instant('addSignal.noSetupFound');
+              try {
+                const parsedRaw = JSON.parse(response.rawText);
+                if (parsedRaw && parsedRaw.generationAnalysis) {
+                  reasonMessage = parsedRaw.generationAnalysis;
+                }
+              } catch (e) {
+                if (response.rawText && response.rawText.trim().length > 0) {
+                  reasonMessage = response.rawText;
+                }
+              }
+              window.alert(reasonMessage);
               return;
             }
 
@@ -247,6 +260,7 @@ export class AddSignalComponent {
               stopLoss: generated.stopLoss,
               instantEntry: generated.instantEntry,
               generationAnalysis: generated.generationAnalysis || '',
+              successProbability: generated.successProbability || null,
             });
 
             this.snackBar.open(
