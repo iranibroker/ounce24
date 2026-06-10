@@ -1,0 +1,21 @@
+<div class="dialog-wrapper">
+  <h2 class="dialog-header">
+    <ng-icon 
+      [name]="data.isError ? 'saxCloseCircleOutline' : 'saxInfoCircleOutline'" 
+      size="24px" 
+      [class.error-icon]="data.isError"
+      [class.info-icon]="!data.isError"
+    ></ng-icon>
+    <span>{{ data.title || (data.isError ? ('apiError.signal.invalidEntry' | translate) : ('signal.info.title' | translate)) }}</span>
+  </h2>
+  
+  <div class="dialog-content">
+    <p class="dialog-message">{{ data.message }}</p>
+  </div>
+  
+  <div class="dialog-actions">
+    <button mat-flat-button class="confirm-btn" (click)="onClose()">
+      {{ data.buttonText || ('app.close' | translate) }}
+    </button>
+  </div>
+</div>

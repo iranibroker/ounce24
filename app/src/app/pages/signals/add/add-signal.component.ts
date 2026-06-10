@@ -27,6 +27,7 @@ import { OuncePriceService } from '../../../services/ounce-price.service';
 import { AnalyticsService } from '../../../services/analytics.service';
 import { AuthService } from '../../../services/auth.service';
 import { GemRequiredDialogComponent } from '../../../components/gem-required-dialog/gem-required-dialog.component';
+import { AlertDialogComponent } from '../../../components/alert-dialog/alert-dialog.component';
 
 @Component({
   selector: 'app-add-signal',
@@ -230,7 +231,14 @@ export class AddSignalComponent {
             
             if (response.parseError) {
               const alertMessage = this.translateService.instant('addSignal.generateError', { rawText: response.rawText });
-              window.alert(alertMessage);
+              this.dialog.open(AlertDialogComponent, {
+                width: '400px',
+                data: {
+                  title: this.translateService.instant('apiError.signal.invalidEntry'),
+                  message: alertMessage,
+                  isError: true
+                }
+              });
               return;
             }
 
@@ -246,7 +254,14 @@ export class AddSignalComponent {
                   reasonMessage = response.rawText;
                 }
               }
-              window.alert(reasonMessage);
+              this.dialog.open(AlertDialogComponent, {
+                width: '400px',
+                data: {
+                  title: this.translateService.instant('addSignal.title'),
+                  message: reasonMessage,
+                  isError: false
+                }
+              });
               return;
             }
 
