@@ -1,0 +1,103 @@
+<h2 mat-dialog-title>
+  <div class="title-with-icon">
+    <svg viewBox="0 0 24 24" class="ai-sparkles-icon-header" width="20px" height="20px">
+      <path d="M12 3l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z" />
+      <path d="M19 8l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" />
+      <path d="M6 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" />
+    </svg>
+    <span>{{ 'addSignal.confirmAiGenerate' | translate }}</span>
+  </div>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (generateMutation.isPending()) {
+    <div class="loading-state">
+      <app-data-loading />
+      <p class="loading-text">{{ 'addSignal.generating' | translate }}</p>
+    </div>
+  } @else if (generateMutation.data()) {
+    <div class="result-section">
+      <!-- Case 1: No signal generated (Guardrails rejected or no high-probability setup found) -->
+      @if (!generateMutation.data()?.signal) {
+        <div class="no-signal-box">
+          <mat-icon class="warning-icon">info</mat-icon>
+          <div class="no-signal-content">
+            <h3 class="no-signal-title">{{ 'addSignal.noSetupFound' | translate }}</h3>
+            <p class="no-signal-desc">
+              {{ generateMutation.data()?.rawText || generateMutation.data()?.signal?.generationAnalysis }}
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- Case 2: Signal generated successfully -->
+      @if (generateMutation.data()?.signal) {
+        <div class="signal-result-card" [class.buy-signal]="generateMutation.data()?.signal?.type === 'buy'" [class.sell-signal]="generateMutation.data()?.signal?.type === 'sell'">
+          <div class="signal-header">
+            <div class="direction-badge" [class.buy]="generateMutation.data()?.signal?.type === 'buy'" [class.sell]="generateMutation.data()?.signal?.type === 'sell'">
+              {{ (generateMutation.data()?.signal?.type === 'buy' ? 'addSignal.type.buy' : 'addSignal.type.sell') | translate | uppercase }}
+            </div>
+            @if (generateMutation.data()?.signal?.successProbability) {
+              <div class="probability-badge">
+                <span class="prob-label">{{ 'signalAnalyze.successProbability' | translate }}:</span>
+                <span class="prob-val">{{ generateMutation.data()?.signal?.successProbability }}%</span>
+              </div>
+            }
+          </div>
+
+          <div class="signal-metrics-grid">
+            <div class="metric-item">
+              <span class="metric-label">{{ 'addSignal.entryPrice.label' | translate }}</span>
+              <span class="metric-value">{{ generateMutation.data()?.signal?.entryPrice }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">{{ 'addSignal.takeProfit.label' | translate }}</span>
+              <span class="metric-value tp">{{ generateMutation.data()?.signal?.takeProfit }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">{{ 'addSignal.stopLoss.label' | translate }}</span>
+              <span class="metric-value sl">{{ generateMutation.data()?.signal?.stopLoss }}</span>
+            </div>
+          </div>
+
+          <mat-divider class="card-divider"></mat-divider>
+
+          @if (generateMutation.data()?.signal?.generationAnalysis) {
+            <div class="analysis-box">
+              <h4 class="analysis-title">{{ 'signalAnalyze.analysis' | translate }}</h4>
+              <p class="analysis-text">{{ generateMutation.data()?.signal?.generationAnalysis }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <!-- Copy Prompt Button (Enabled once data is loaded and prompt is available) -->
+  @if (!generateMutation.isPending() && generateMutation.data()?.prompt) {
+    <button mat-button class="copy-prompt-btn" (click)="copyPrompt(generateMutation.data()!.prompt!)">
+      <mat-icon>{{ isPromptCopied ? 'check' : 'content_copy' }}</mat-icon>
+      <span>{{ (isPromptCopied ? 'app.copied' : 'app.copyPrompt') | translate }}</span>
+    </button>
+  }
+  
+  <div class="flex-spacer"></div>
+
+  <!-- Close Button -->
+  <button mat-button (click)="close()">
+    {{ 'app.close' | translate }}
+  </button>
+  
+  <!-- Apply Signal Button (Only visible if a signal is successfully generated) -->
+  @if (!generateMutation.isPending() && generateMutation.data()?.signal) {
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="close(generateMutation.data()!.signal!)"
+    >
+      {{ 'addSignal.submit' | translate }}
+    </button>
+  }
+</mat-dialog-actions>

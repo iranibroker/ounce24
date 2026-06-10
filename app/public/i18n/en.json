@@ -4,7 +4,9 @@
     "save": "save",
     "close": "close",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "copyPrompt": "Copy Prompt",
+    "copied": "Copied! ✅"
   },
   "bottomNav": {
     "home": "Home",

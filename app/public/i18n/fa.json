@@ -4,7 +4,9 @@
     "save": "ذخیره",
     "close": "بستن",
     "cancel": "لغو",
-    "confirm": "تایید"
+    "confirm": "تایید",
+    "copyPrompt": "کپی پرامپت",
+    "copied": "کپی شد! ✅"
   },
   "bottomNav": {
     "home": "خانه",

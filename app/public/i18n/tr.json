@@ -4,7 +4,9 @@
     "save": "Kaydet",
     "close": "Kapat",
     "cancel": "İptal",
-    "confirm": "Onayla"
+    "confirm": "Onayla",
+    "copyPrompt": "İpucunu Kopyala",
+    "copied": "Kopyalandı! ✅"
   },
   "bottomNav": {
     "home": "Ana Sayfa",

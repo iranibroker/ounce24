@@ -192,7 +192,7 @@ JSON Schema format to return:
     us10yYield?: number | null,
     news?: NewsContext,
     overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
-  ): Promise<{ data: SignalGenerationType; latencyMs: number; totalTokens: number; model: string }> {
+  ): Promise<{ data: SignalGenerationType; latencyMs: number; totalTokens: number; model: string; prompt?: string }> {
     this.logger.log(`Orchestrator: Running signal generation...`);
 
     const style = overrides?.tradingStyle || TradingStyle.Day;
@@ -297,6 +297,7 @@ JSON Schema format to return:
       latencyMs: response.latencyMs,
       totalTokens: response.usage.totalTokens,
       model: response.model,
+      prompt: userPrompt,
     };
   }
 

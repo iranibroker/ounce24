@@ -4,7 +4,9 @@
     "save": "حفظ",
     "close": "إغلاق",
     "cancel": "إلغاء",
-    "confirm": "تأكيد"
+    "confirm": "تأكيد",
+    "copyPrompt": "نسخ البرومبت",
+    "copied": "تم النسخ! ✅"
   },
   "bottomNav": {
     "home": "الرئيسية",

@@ -798,6 +798,7 @@ export class SignalsService {
         parseError: false,
         user,
         model: result.model,
+        prompt: (result as any).prompt,
       };
     } catch (error) {
       console.error('Error in generateSignal service:', error);
