@@ -202,9 +202,19 @@ export class OunceAlarmsService implements OnModuleDestroy {
     return undefined;
   }
 
-  @Cron('0 15 0 * * 6', {
-    timeZone: 'UTC',
-  })
+  @OnEvent(EVENTS.MARKET_CLOSED)
+  async handleMarketClosed() {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'long',
+    });
+    const weekday = formatter.format(new Date());
+    if (weekday === 'Friday') {
+      OunceAlarmsService.logger.log('Market weekend closed, resetting weekly alarms...');
+      await this.resetAlarms();
+    }
+  }
+
   async resetAlarms() {
     await this.clearAllAlarms();
   }

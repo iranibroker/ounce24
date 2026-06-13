@@ -1,10 +1,10 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { OuncePriceService } from '../../services/ounce-price.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { lastValueFrom } from 'rxjs';
-import { injectQuery } from '@tanstack/angular-query-experimental';
+import { injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -108,6 +108,7 @@ export class MarketComponent {
   public readonly priceService = inject(OuncePriceService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly queryClient = inject(QueryClient);
   activeTab = signal<'analysis' | 'chart'>('analysis');
   currentTime = signal(Date.now());
 
@@ -137,6 +138,11 @@ export class MarketComponent {
         this.currentTime.set(Date.now());
       }, 10000);
     }
+
+    effect(() => {
+      this.priceService.isMarketOpen();
+      this.queryClient.invalidateQueries({ queryKey: ['marketState'] });
+    });
   }
 
   openInfo(key: string) {

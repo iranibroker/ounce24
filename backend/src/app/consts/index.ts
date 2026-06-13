@@ -9,4 +9,5 @@ export const EVENTS = {
   SIGNAL_SUBSCRIPTION_UPDATED: 'signal.subscription.updated',
   MARKET_CLOSED: 'market.closed',
   MARKET_OPENED: 'market.opened',
+  WEEKLY_SIGNALS_RESET: 'weekly.signals.reset',
 };

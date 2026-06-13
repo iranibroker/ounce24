@@ -23,12 +23,18 @@ export class OuncePriceService implements OnModuleInit {
     // Initialize market state from current UTC time on startup
     this.marketOpen = this.calculateMarketOpen(new Date());
 
+    if (this.marketOpen) {
+      this.quoteService.start();
+    } else {
+      this.quoteService.stop();
+    }
+
     this.quoteService.data.subscribe((data) => {
       const oldPrice = this.currentPrice;
       const price = data;
       if (price != oldPrice) {
         this.currentPrice = price;
-        this.eventEmitter.emit(OUNCE_PRICE_UPDATED, price);
+        this.eventEmitter.emit(EVENTS.OUNCE_PRICE_UPDATED, price);
       }
     });
   }
@@ -93,6 +99,7 @@ export class OuncePriceService implements OnModuleInit {
   @Cron('0 17 * * 1-5', { timeZone: 'America/New_York' })
   triggerMarketClose() {
     this.marketOpen = false;
+    this.quoteService.stop();
     this.eventEmitter.emit(EVENTS.MARKET_CLOSED);
   }
 
@@ -100,6 +107,7 @@ export class OuncePriceService implements OnModuleInit {
   @Cron('0 18 * * 0-4', { timeZone: 'America/New_York' })
   triggerMarketOpen() {
     this.marketOpen = true;
+    this.quoteService.start();
     this.eventEmitter.emit(EVENTS.MARKET_OPENED);
   }
 }

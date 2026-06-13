@@ -20,7 +20,11 @@
       </span>
     }
     <span class="price-text" [style.color]="color() || '#f1f5f9'">
-      {{ (price > 0 ? price : 2345.67) | currency:'USD':'symbol':'1.2-2' }}
+      @if (price > 0) {
+        {{ price | currency:'USD':'symbol':'1.2-2' }}
+      } @else {
+        —
+      }
     </span>
   </div>
 </a>

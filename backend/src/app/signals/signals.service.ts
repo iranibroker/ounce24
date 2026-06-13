@@ -524,9 +524,20 @@ export class SignalsService {
     return updatedSignal;
   }
 
-  @Cron('0 15 0 * * 6', {
-    timeZone: 'UTC',
-  })
+  @OnEvent(EVENTS.MARKET_CLOSED)
+  async handleMarketClosed() {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'long',
+    });
+    const weekday = formatter.format(new Date());
+    if (weekday === 'Friday') {
+      console.log('Market weekend closed, resetting weekly signals...');
+      await this.resetSignals();
+      this.eventEmitter.emit(EVENTS.WEEKLY_SIGNALS_RESET);
+    }
+  }
+
   async resetSignals() {
     const signals = await this.signalModel
       .find({

@@ -11,17 +11,38 @@ export class QuoteService {
   private quote: Quote;
   private quoteUpdateSubject = new Subject<number>();
   public data = this.quoteUpdateSubject.asObservable();
+  private isRunning = false;
 
-  constructor() {
+  constructor() {}
+
+  public start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
     this.startListening();
   }
 
+  public stop() {
+    if (!this.isRunning) return;
+    this.isRunning = false;
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+    try {
+      this.quote?.pause();
+    } catch (e) {
+      console.error('Pause error:', e);
+    }
+  }
+
   private startListening() {
+    if (!this.isRunning) return;
     this.adapter = new TvApiAdapter();
     this.quote = this.adapter.Quote('XAUUSD', 'OANDA', ['lp']);
 
     const resetTimer = () => {
       if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
+      if (!this.isRunning) return;
       this.reconnectTimeout = setTimeout(() => {
         console.warn('No data received. Reconnecting...');
         this.restartListening();
@@ -29,6 +50,7 @@ export class QuoteService {
     };
 
     this.quote.listen((data) => {
+      if (!this.isRunning) return;
       this.quoteUpdateSubject.next(data['lp']);
       resetTimer(); // Reset watchdog timer on each update
     });
@@ -37,6 +59,7 @@ export class QuoteService {
   }
 
   private restartListening() {
+    if (!this.isRunning) return;
     try {
       this.quote?.pause();
     } catch (e) {

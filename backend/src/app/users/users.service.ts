@@ -505,9 +505,19 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  @Cron('15 17 * * *', {
-    timeZone: 'America/New_York',
-  })
+  @OnEvent(EVENTS.MARKET_CLOSED)
+  async handleMarketClosed() {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'long',
+    });
+    const weekday = formatter.format(new Date());
+    if (weekday !== 'Friday') {
+      console.log('Daily market closed, updating user stats...');
+      await this.dailyMarketCloseReset();
+    }
+  }
+
   async dailyMarketCloseReset() {
     const users = await this.userModel.find().exec();
     for (const user of users) {
@@ -545,9 +555,15 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  @Cron('30 17 * * 6', {
-    timeZone: 'America/New_York',
-  })
+  @OnEvent(EVENTS.WEEKLY_SIGNALS_RESET)
+  async handleWeeklySignalsReset() {
+    console.log('Weekly signals reset complete. Updating user stats and awarding week winners...');
+    // First, recalculate all user stats so they reflect the closed weekly signals
+    await this.dailyMarketCloseReset();
+    // Then calculate the winners for the week
+    await this.weekWinners();
+  }
+
   async weekWinners() {
     // 1. Week winners signal (Leaderboard weekly winner)
     const leaderboard = await this.getLeaderboard(0, 10, undefined, true);

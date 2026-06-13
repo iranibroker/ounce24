@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
@@ -127,6 +127,17 @@ export class OctopusComponent implements OnInit, OnDestroy {
   isSubmitting = signal<boolean>(false);
   isEditing = signal<boolean>(false);
   private timer: any = null;
+
+  constructor() {
+    effect(() => {
+      this.priceService.isMarketOpen();
+      const user = this.authService.userQuery.data();
+      const userId = user?.id || (user as any)?._id;
+      this.queryClient.invalidateQueries({ queryKey: ['octopusVote', userId] });
+      this.queryClient.invalidateQueries({ queryKey: ['octopusSentiment'] });
+      this.queryClient.invalidateQueries({ queryKey: ['octopusScores', userId] });
+    });
+  }
 
   // Configuration query for Octopus game parameters
   configQuery = injectQuery(() => ({

@@ -1,5 +1,6 @@
 import { Injectable, signal, OnDestroy, inject, effect } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -11,8 +12,10 @@ export class OuncePriceService implements OnDestroy {
   isMarketOpen = signal<boolean>(false);
   private eventSource: EventSource | null = null;
   private readonly titleService = inject(Title);
+  private readonly http = inject(HttpClient);
 
   constructor() {
+    this.fetchCurrentPrice();
     this.connectToStream();
 
     effect(() => {
@@ -27,6 +30,19 @@ export class OuncePriceService implements OnDestroy {
         this.titleService.setTitle('Ounce24');
       }
     });
+  }
+
+  private fetchCurrentPrice() {
+    this.http.get<{ price: number; isMarketOpen: boolean }>(`${environment.apiUrl}/api/ounce-price/current`)
+      .subscribe({
+        next: (data) => {
+          if (data.price > 0) {
+            this.value.set(data.price);
+          }
+          this.isMarketOpen.set(data.isMarketOpen);
+        },
+        error: (err) => console.error('Failed to fetch initial ounce price:', err),
+      });
   }
 
   private connectToStream() {
