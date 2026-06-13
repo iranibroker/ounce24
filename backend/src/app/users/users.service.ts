@@ -240,6 +240,11 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async findById(id: string) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new NotFoundException({
+        translationKey: 'userNotFound',
+      });
+    }
     const user = await this.userModel.findById(id).exec();
     if (!user) {
       throw new NotFoundException({
@@ -250,6 +255,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getUserSignals(id: string, page: number, limit: number) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     const skip = page * limit;
     return this.signalModel
       .find({
@@ -263,6 +271,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getUserAchievements(id: string, page: number, limit: number) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     // Dynamically backfill individual achievements and Octopus predictions streaks
     await this.checkIndividualAchievements(id);
     await this.checkOctopusStreakAchievements(id);
@@ -279,6 +290,7 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async checkIndividualAchievements(userId: string) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return;
     const userSignals = await this.signalModel
       .find({
         owner: userId,
@@ -408,6 +420,7 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async checkOctopusStreakAchievements(userId: string) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return;
     const predictions = await this.predictionModel
       .find({
         user: userId,
@@ -708,6 +721,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async followUser(followerId: string, followingId: string) {
+    if (!followerId || !mongoose.Types.ObjectId.isValid(followerId) || !followingId || !mongoose.Types.ObjectId.isValid(followingId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     if (followerId === followingId) {
       throw new BadRequestException('You cannot follow yourself');
     }
@@ -776,6 +792,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async unfollowUser(followerId: string, followingId: string) {
+    if (!followerId || !mongoose.Types.ObjectId.isValid(followerId) || !followingId || !mongoose.Types.ObjectId.isValid(followingId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     await this.followModel.deleteOne({
       follower: followerId,
       following: followingId,
@@ -784,6 +803,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getUserFollowing(userId: string, page: number, limit: number) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     const skip = page * limit;
     const follows = await this.followModel
       .find({ follower: userId })
@@ -800,6 +822,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getUserFollowers(userId: string, page: number, limit: number) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     const skip = page * limit;
     const follows = await this.followModel
       .find({ following: userId })
@@ -864,6 +889,7 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async awardGemsForAchievement(userId: string, type: AchievementType) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return;
     const rewardMap: Record<AchievementType, number> = {
       [AchievementType.WeekWin]: 30,
       [AchievementType.MonthWin]: 100,
@@ -900,6 +926,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getGemHistory(userId: string, page: number, limit: number) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     const skip = page * limit;
     return this.gemLogModel
       .find({ user: userId })
@@ -910,6 +939,9 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getWeeklyWrap(userId: string) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
       throw new NotFoundException({
