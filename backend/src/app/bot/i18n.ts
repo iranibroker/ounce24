@@ -40,6 +40,7 @@ export interface BotTranslation {
     aiShieldTitle: string;
     signalStatusTitle: string;
     signalCreated: (type: string) => string;
+    signalCreatedByFollowing: (traderName: string, type: string) => string;
     signalActive: (type: string, price: string) => string;
     signalClosed: (type: string, result: string) => string;
     signalCanceled: (type: string) => string;
@@ -151,6 +152,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       aiShieldTitle: 'Smart Shield',
       signalStatusTitle: 'Signal Status Update',
       signalCreated: (type: string) => `➕ Gold ${type} signal has been created!`,
+      signalCreatedByFollowing: (traderName: string, type: string) => `📢 Trader ${traderName} you follow posted a new Gold ${type} signal!`,
       signalActive: (type: string, price: string) => `🔔 Gold ${type} signal is now ACTIVE!\nTrigger price: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 Gold ${type} signal is now CLOSED!\nResult: ${result}`,
       signalCanceled: (type: string) => `🚫 Gold ${type} signal has been CANCELED.`,
@@ -261,6 +263,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       aiShieldTitle: 'سپر هوشمند',
       signalStatusTitle: 'به‌روزرسانی وضعیت سیگنال',
       signalCreated: (type: string) => `➕ سیگنال ${type} طلا با موفقیت ثبت شد!`,
+      signalCreatedByFollowing: (traderName: string, type: string) => `📢 تریدر ${traderName} که دنبال می‌کنید، یک سیگنال جدید ${type} طلا ثبت کرد!`,
       signalActive: (type: string, price: string) => `🔔 سیگنال ${type} طلا فعال شد!\nقیمت فعال‌سازی: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 سیگنال ${type} طلا بسته شد!\nنتیجه: ${result}`,
       signalCanceled: (type: string) => `🚫 سیگنال ${type} طلا لغو گردید.`,
@@ -371,6 +374,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
       aiShieldTitle: 'درع الذكاء الاصطناعي الذكي',
       signalStatusTitle: 'تحديث حالة الإشارة',
       signalCreated: (type: string) => `➕ تم إنشاء إشارة الذهب ${type} بنجاح!`,
+      signalCreatedByFollowing: (traderName: string, type: string) => `📢 المتداول ${traderName} الذي تتابعه نشر إشارة ${type} ذهب جديدة!`,
       signalActive: (type: string, price: string) => `🔔 تم تفعيل إشارة الذهب ${type}!\nسعر التفعيل: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 تم إغلاق إشارة الذهب ${type}!\nالنتيجة: ${result}`,
       signalCanceled: (type: string) => `🚫 تم إلغاء إشارة الذهب ${type}.`,
@@ -481,6 +485,7 @@ Podcast\'ler her hafta resmi Ounce24 kanalında yayınlanır. Tam liste için ka
       aiShieldTitle: 'Yapay Zeka Akıllı Kalkan',
       signalStatusTitle: 'Sinyal Durumu Güncellemesi',
       signalCreated: (type: string) => `➕ Altın ${type} sinyali başarıyla oluşturuldu!`,
+      signalCreatedByFollowing: (traderName: string, type: string) => `📢 Takip ettiğiniz yatırımcı ${traderName}, yeni bir Altın ${type} sinyali oluşturdu!`,
       signalActive: (type: string, price: string) => `🔔 Altın ${type} sinyali artık AKTİF!\nTetikleme fiyatı: $${price}`,
       signalClosed: (type: string, result: string) => `🎯 Altın ${type} sinyali KAPATILDI!\nSonuç: ${result}`,
       signalCanceled: (type: string) => `🚫 Altın ${type} sinyali İPTAL EDİLDİ.`,

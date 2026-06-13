@@ -46,7 +46,7 @@ export class SignalsComponent {
   private readonly auth = inject(AuthService);
 
   status = signal<string>(SignalStatus.Active);
-  filter = signal<'all' | 'myself' | 'following' | 'bookmarked'>('all');
+  filter = signal<'all' | 'myself' | 'following'>('all');
   SignalStatus = SignalStatus;
 
   isLoggedIn = computed(() => !!this.auth.userQuery.data());
@@ -90,7 +90,7 @@ export class SignalsComponent {
       this.status.set(statusParam);
     }
     const filterParam = this.route.snapshot.queryParams['filter'];
-    if (filterParam && ['all', 'myself', 'following', 'bookmarked'].includes(filterParam)) {
+    if (filterParam && ['all', 'myself', 'following'].includes(filterParam)) {
       this.filter.set(filterParam as any);
     }
 

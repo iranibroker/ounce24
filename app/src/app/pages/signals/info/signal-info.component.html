@@ -33,28 +33,6 @@
 
     <!-- Subscription Controls (Follow & Smart Shield) -->
     <div class="subscription-controls-container">
-      <!-- Follow Signal -->
-      <mat-card class="settings-card">
-        <mat-card-content>
-          <div class="settings-row">
-            <div class="settings-info">
-              <div class="icon-container signal-icon">
-                <ng-icon name="saxBookmarkOutline" size="20px"></ng-icon>
-              </div>
-              <div class="settings-texts">
-                <h3>{{ 'signal.actions.follow' | translate }}</h3>
-                <p>{{ 'signal.actions.followDesc' | translate }}</p>
-              </div>
-            </div>
-            <mat-slide-toggle
-              [checked]="subscription.followStatus"
-              (change)="toggleFollow()"
-              color="primary"
-            ></mat-slide-toggle>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
       <!-- AI Smart Shield -->
       <mat-card class="settings-card">
         <mat-card-content>

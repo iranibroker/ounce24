@@ -12,6 +12,7 @@ import {
   GemLogAction,
   TradingStyle,
   RiskTolerance,
+  Follow,
 } from '@ounce24/types';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectBot } from 'nestjs-telegraf';
@@ -66,6 +67,8 @@ export class SignalCopilotService implements OnModuleInit {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(SignalSubscription.name)
     private readonly signalSubModel: Model<SignalSubscription>,
+    @InjectModel(Follow.name)
+    private readonly followModel: Model<Follow>,
     @InjectModel(GemLog.name) private readonly gemLogModel: Model<GemLog>,
     @InjectModel(OuncePriceCandle.name)
     private readonly candleModel: Model<OuncePriceCandle>,
@@ -173,10 +176,11 @@ export class SignalCopilotService implements OnModuleInit {
       createdOuncePrice: signal.createdOuncePrice || 0,
       riskFree: signal.riskFree || false,
       lastAiCheckedAt: signal.lastAiCheckedAt,
-      lastAiCheckedPrice: signal.lastAiCheckedPrice,
       ownerId: signal.owner ? ((signal.owner as any)._id || (signal.owner as any).id || (signal.owner as any)).toString() : '',
       subscriptions: subsMap,
     });
+
+    await this.notifyFollowersOnSignalCreated(signal);
   }
 
   @OnEvent(EVENTS.SIGNAL_ACTIVE)
@@ -551,6 +555,60 @@ export class SignalCopilotService implements OnModuleInit {
     }
   }
 
+  // Handle new signal notifications to followers of the signal owner
+  private async notifyFollowersOnSignalCreated(signal: Signal) {
+    try {
+      const signalIdStr = (signal.id || (signal as any)._id).toString();
+      const ownerId = signal.owner ? ((signal.owner as any)._id || (signal.owner as any).id || signal.owner).toString() : '';
+      if (!ownerId) return;
+
+      const ownerObj = signal.owner as any;
+      let traderName = ownerObj?.title || ownerObj?.name || '';
+      if (!traderName) {
+        const ownerDb = await this.userModel.findById(ownerId).exec();
+        traderName = ownerDb?.title || ownerDb?.name || 'یک کاربر';
+      }
+
+      const follows = await this.followModel.find({ following: ownerId }).populate('follower').exec();
+
+      for (const follow of follows) {
+        const follower = follow.follower as any;
+        if (!follower) continue;
+        if (follower.notifSignalFollow === false) continue;
+
+        const lang = follower.language || 'fa';
+        const t = getTranslation(lang);
+        const typeStr = signal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+
+        const title = `📢 ${t.pushNotifications.signalStatusTitle}`;
+        const message = t.pushNotifications.signalCreatedByFollowing(traderName, typeStr);
+
+        if (follower.telegramId) {
+          const signalInfo = formatSignalDetails(signal, lang);
+          const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n${signalInfo}`;
+          await this.bot.telegram
+            .sendMessage(follower.telegramId, telegramMessage, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: t.pushNotifications.viewAndApply,
+                      web_app: { url: `${APP_URL}/signals/${signalIdStr}` },
+                    },
+                  ],
+                ],
+              },
+            })
+            .catch((err) => {
+              this.logger.error(`Failed to send signal-created Telegram alert to follower user ${follower._id}:`, err);
+            });
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error notifying followers on signal creation:', error);
+    }
+  }
 
   // Handle follow notifications
   private async notifyFollowers(signal: Signal, state: 'active' | 'closed' | 'canceled') {

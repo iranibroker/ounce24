@@ -381,8 +381,8 @@
       "priceDesc": "Receive gold ounce price updates every 5 seconds",
       "telegramTitle": "Telegram Notifications",
       "telegramDesc": "Receive these alerts directly via the Ounce24 Telegram Bot. Make sure your Telegram account is connected to the bot.",
-      "signalFollowTitle": "Bookmark Signal",
-      "signalFollowDesc": "Notifications when bookmarked signals open or close",
+      "signalFollowTitle": "Signals from Following",
+      "signalFollowDesc": "Get notified when traders you follow post a new signal",
       "aiShieldTitle": "Smart Shield",
       "aiShieldDesc": "AI recommendations for managing trades",
       "warningNotSupported": "Browser notifications are not supported in this browser."

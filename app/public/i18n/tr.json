@@ -367,8 +367,8 @@
       "priceDesc": "Her 5 saniyede bir altın ons fiyatı güncellemelerini alın",
       "telegramTitle": "Telegram Bildirimleri",
       "telegramDesc": "Bu uyarıları doğrudan Ounce24 Telegram Botu aracılığıyla alın. Telegram hesabınızın bota bağlı olduğundan emin olun.",
-      "signalFollowTitle": "Yer İmli Sinyaller",
-      "signalFollowDesc": "Yer imlerine eklenen sinyaller açıldığında veya kapandığında bildirimler",
+      "signalFollowTitle": "Takip Edilen Sinyaller",
+      "signalFollowDesc": "Takip ettiğiniz yatırımcılar yeni bir sinyal oluşturduğunda bildirim alın",
       "aiShieldTitle": "Yapay Zeka Akıllı Kalkan",
       "aiShieldDesc": "İşlemleri yönetmek için yapay zeka önerileri",
       "warningNotSupported": "Bu tarayıcıda bildirim alma desteklenmiyor."
