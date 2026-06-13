@@ -4,7 +4,9 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  OnModuleDestroy,
 } from '@nestjs/common';
+import { Redis } from 'ioredis';
 import * as Kavenegar from 'kavenegar';
 import { isValidUserTitle, PersianNumberService, sanitizeUserTitle } from '@ounce24/utils';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,9 +20,10 @@ import { OAuth2Client } from 'google-auth-library';
 let kavenegarApi;
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleDestroy {
   mobilePhoneTokens: { [key: string]: string } = {};
   private cachedBotUsername: string | null = null;
+  private readonly redis: Redis;
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Follow.name) private followModel: Model<Follow>,
@@ -30,6 +33,15 @@ export class AuthService {
     kavenegarApi = Kavenegar.KavenegarApi({
       apikey: process.env.KAVENEGAR_API_KEY,
     });
+    this.redis = new Redis(process.env.REDIS_URI + process.env.REDIS_APP_CONFIG_DB);
+  }
+
+  async onModuleDestroy() {
+    try {
+      await this.redis.quit();
+    } catch (err) {
+      console.error('Failed to close Redis client in AuthService:', err);
+    }
   }
 
   async validateUser(username: string, pass: string): Promise<User> {
@@ -135,6 +147,32 @@ export class AuthService {
       .toPromise();
   }
 
+  async populateUsersRank(users: any[]): Promise<void> {
+    const validUsers = (users || []).filter((u) => u && (u._id || u.id));
+    if (validUsers.length === 0) return;
+
+    const pipeline = this.redis.pipeline();
+    const userIds = validUsers.map((u) => (u._id || u.id).toString());
+
+    for (const id of userIds) {
+      pipeline.zrevrank('ounce:leaderboard:totalScore', id);
+    }
+
+    const results = await pipeline.exec();
+
+    validUsers.forEach((user, index) => {
+      const res = results[index];
+      const err = res ? res[0] : null;
+      const rankVal = res ? res[1] : null;
+      const rank = err || rankVal === null ? null : (rankVal as number) + 1;
+      
+      user.rank = rank;
+      if (user._doc) {
+        user._doc.rank = rank;
+      }
+    });
+  }
+
   async getUserInfo(userId: string, isOwner = false, loggedInUserId?: string | null) {
     let user = (await this.userModel.findById(userId)).toJSON();
 
@@ -144,12 +182,7 @@ export class AuthService {
       });
     }
 
-    const rank = await this.userModel
-      .countDocuments({
-        totalScore: { $gt: user.totalScore },
-      })
-      .exec();
-    user.rank = rank + 1;
+    await this.populateUsersRank([user]);
 
     const followersCount = await this.followModel.countDocuments({ following: userId }).exec();
     const followingCount = await this.followModel.countDocuments({ follower: userId }).exec();

@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Redis } from 'ioredis';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Achievement,
@@ -20,7 +21,9 @@ import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf, Context } from 'telegraf';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit, OnModuleDestroy {
+  private readonly redis: Redis;
+
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Signal.name) private signalModel: Model<Signal>,
@@ -30,7 +33,21 @@ export class UsersService {
     @InjectModel(GemLog.name) private gemLogModel: Model<GemLog>,
     @InjectModel(OuncePriceCandle.name) private candleModel: Model<OuncePriceCandle>,
     @InjectBot('main') private readonly bot: Telegraf<Context>,
-  ) {}
+  ) {
+    this.redis = new Redis(process.env.REDIS_URI + process.env.REDIS_APP_CONFIG_DB);
+  }
+
+  async onModuleInit() {
+    await this.syncRanksToRedis();
+  }
+
+  async onModuleDestroy() {
+    try {
+      await this.redis.quit();
+    } catch (err) {
+      console.error('Failed to close Redis client in UsersService:', err);
+    }
+  }
 
   @OnEvent(EVENTS.SIGNAL_CLOSED)
   async handleSignalClosed(signal: Signal) {
@@ -121,7 +138,7 @@ export class UsersService {
     const weekScore = weekSignalsList.reduce((acc, s) => acc + s.score, 0);
     const monthScore = monthSignalsList.reduce((acc, s) => acc + s.score, 0);
 
-    return this.userModel
+    const updatedUser = await this.userModel
       .findByIdAndUpdate(
         user,
         {
@@ -142,6 +159,27 @@ export class UsersService {
         },
       )
       .exec();
+
+    if (updatedUser) {
+      const userIdStr = (updatedUser._id || updatedUser.id)?.toString();
+      if (userIdStr) {
+        if (updatedUser.totalSignals > 0) {
+          const pipeline = this.redis.pipeline();
+          pipeline.zadd('ounce:leaderboard:totalScore', updatedUser.totalScore || 0, userIdStr);
+          pipeline.zadd('ounce:leaderboard:weekScore', updatedUser.weekScore || 0, userIdStr);
+          pipeline.zadd('ounce:leaderboard:monthScore', updatedUser.monthScore || 0, userIdStr);
+          await pipeline.exec();
+        } else {
+          const pipeline = this.redis.pipeline();
+          pipeline.zrem('ounce:leaderboard:totalScore', userIdStr);
+          pipeline.zrem('ounce:leaderboard:weekScore', userIdStr);
+          pipeline.zrem('ounce:leaderboard:monthScore', userIdStr);
+          await pipeline.exec();
+        }
+      }
+    }
+
+    return updatedUser;
   }
 
   async getLeaderboard(skip = 0, limit = 10, userId?: string, week = false, month = false) {
@@ -153,8 +191,9 @@ export class UsersService {
     }
     const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore monthScore createdAt weekSignals weekWinSignals monthSignals monthWinSignals';
 
+    // Only return users who have at least 1 signal to match the leaderboard requirement
     const users = await this.userModel
-      .find()
+      .find({ totalSignals: { $gt: 0 } })
       .select(publicFields)
       .sort(sort)
       .skip(skip)
@@ -173,35 +212,24 @@ export class UsersService {
         .findById(userId)
         .select(publicFields)
         .exec();
-      let condition: any = {
-        totalScore: {
-          $gt: user?.totalScore || 0,
-        },
-      };
-      if (week) {
-        condition = {
-          weekScore: {
-            $gt: user?.weekScore || 0,
-          },
-        };
-      } else if (month) {
-        condition = {
-          monthScore: {
-            $gt: user?.monthScore || 0,
-          },
-        };
-      }
-      const userPosition = await this.userModel
-        .countDocuments({
-          ...condition,
-        })
-        .exec();
 
-      if (user) {
-        usersWithRank.push({
-          ...user.toObject(),
-          rank: userPosition + 1,
-        });
+      if (user && user.totalSignals > 0) {
+        let key = 'ounce:leaderboard:totalScore';
+        if (week) {
+          key = 'ounce:leaderboard:weekScore';
+        } else if (month) {
+          key = 'ounce:leaderboard:monthScore';
+        }
+
+        const redisRank = await this.redis.zrevrank(key, userId);
+        const userPosition = redisRank !== null ? redisRank : null;
+
+        if (userPosition !== null) {
+          usersWithRank.push({
+            ...user.toObject(),
+            rank: userPosition + 1,
+          });
+        }
       }
     }
 
@@ -468,6 +496,36 @@ export class UsersService {
     const users = await this.userModel.find().exec();
     for (const user of users) {
       await this.calculateUserStats(user);
+    }
+  }
+
+  @Cron('0 */6 * * *') // Every 6 hours
+  async syncRanksToRedis() {
+    try {
+      const users = await this.userModel
+        .find(
+          { totalSignals: { $gt: 0 } },
+          { _id: 1, totalScore: 1, weekScore: 1, monthScore: 1 }
+        )
+        .exec();
+
+      const pipeline = this.redis.pipeline();
+      pipeline.del('ounce:leaderboard:totalScore');
+      pipeline.del('ounce:leaderboard:weekScore');
+      pipeline.del('ounce:leaderboard:monthScore');
+
+      for (const user of users) {
+        const userIdStr = (user._id || user.id)?.toString();
+        if (userIdStr) {
+          pipeline.zadd('ounce:leaderboard:totalScore', user.totalScore || 0, userIdStr);
+          pipeline.zadd('ounce:leaderboard:weekScore', user.weekScore || 0, userIdStr);
+          pipeline.zadd('ounce:leaderboard:monthScore', user.monthScore || 0, userIdStr);
+        }
+      }
+
+      await pipeline.exec();
+    } catch (err) {
+      console.error('Failed to sync ranks to Redis:', err);
     }
   }
 

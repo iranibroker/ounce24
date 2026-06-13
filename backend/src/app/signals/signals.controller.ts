@@ -46,13 +46,7 @@ export class SignalsController {
 
     if (uniqueOwners.size === 0) return;
 
-    await Promise.all(
-      Array.from(uniqueOwners.entries()).map(async ([ownerId, owner]) => {
-        const totalScore = owner.totalScore ?? 0;
-        const rank = await this.userModel.countDocuments({ totalScore: { $gt: totalScore } }).exec();
-        owner.rank = rank + 1;
-      })
-    );
+    await this.auth.populateUsersRank(Array.from(uniqueOwners.values()));
   }
 
   private sanitizeSignal(signal: any): any {

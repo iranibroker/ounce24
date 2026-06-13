@@ -176,6 +176,7 @@ export class UsersController {
   ) {
     const list = await this.usersService.getUserFollowing(id, Number(page), Number(limit));
     const loggedInUserId = this.auth.getUserIdFromRequest(req);
+    await this.auth.populateUsersRank(list);
     return list.map((u: any) => {
       const isOwner = loggedInUserId === u.id;
       if (!isOwner) {
@@ -195,6 +196,7 @@ export class UsersController {
   ) {
     const list = await this.usersService.getUserFollowers(id, Number(page), Number(limit));
     const loggedInUserId = this.auth.getUserIdFromRequest(req);
+    await this.auth.populateUsersRank(list);
     return list.map((u: any) => {
       const isOwner = loggedInUserId === u.id;
       if (!isOwner) {
