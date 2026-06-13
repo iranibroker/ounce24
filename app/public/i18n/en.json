@@ -64,7 +64,8 @@
       "title": "Signal Info",
       "createdAt": "Created at",
       "closedAt": "Closed at",
-      "activeAt": "Active at"
+      "activeAt": "Active at",
+      "marketContext": "Market status at creation"
     },
     "actions": {
       "cancel": "Cancel Signal",

@@ -45,6 +45,7 @@ export const SignalSchema = new mongoose.Schema<Signal>(
     ],
     generationAnalysis: { type: String, required: false },
     successProbability: { type: Number, required: false },
+    market_context: { type: String, enum: ['OPEN', 'CLOSED'], required: false },
   },
   {
     timestamps: true,

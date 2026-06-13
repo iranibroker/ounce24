@@ -23,7 +23,7 @@ import { AiOrchestratorService } from '../ai/ai-orchestrator.service';
 import { WebPushService } from '../web-push/web-push.service';
 import { SignalsService, getStyleInstructions } from './signals.service';
 import { getTranslation } from '../bot/i18n';
-import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
+import { analyzeMarketState, detectTradingStyle, buildMarketContextJson } from './market-analyzer.helper';
 
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 
@@ -419,9 +419,55 @@ export class SignalCopilotService implements OnModuleInit {
 
       if (candles5m.length === 0) return;
 
-      const marketState = analyzeMarketState(currentPrice, candles5m);
+      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation (sorted to correctly obtain open/close prices)
+      const dailyAgg = await this.candleModel.aggregate([
+        { $sort: { timestamp: 1 } },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$timestamp" }
+            },
+            high: { $max: "$high" },
+            low: { $min: "$low" },
+            open: { $first: "$open" },
+            close: { $last: "$close" },
+            date: { $first: "$timestamp" }
+          }
+        },
+        { $sort: { _id: -1 } },
+        { $skip: 1 }, // skip ongoing day
+        { $limit: 14 }
+      ]).exec();
 
-      const alreadyRecommendedRiskFree = signal.aiRecommendations?.some((rec) => rec.type === 'risk_free') || signal.riskFree;
+      let pdh = currentPrice;
+      let pdl = currentPrice;
+      let adr14 = 4.0;
+      if (dailyAgg.length > 0) {
+        pdh = dailyAgg[0].high;
+        pdl = dailyAgg[0].low;
+        const ranges = dailyAgg.map((d: any) => d.high - d.low);
+        const sum = ranges.reduce((a: number, b: number) => a + b, 0);
+        adr14 = sum / dailyAgg.length;
+      }
+
+      const marketState = analyzeMarketState(currentPrice, candles5m, { pdh, pdl, adr14 });
+
+      // Fetch external index prices and news
+      const dxyData = await this.signalsService.getCachedYahooPriceAndChange('DX-Y.NYB');
+      const us10yData = await this.signalsService.getCachedYahooPriceAndChange('^TNX');
+      
+      const newsCheck = await this.signalsService.isNearHighImpactUSDNews();
+
+      // Build the rich context JSON
+      const marketContextJson = buildMarketContextJson(
+        currentPrice,
+        candles5m,
+        dailyAgg,
+        dxyData,
+        us10yData,
+        newsCheck,
+        this.ouncePriceService.isMarketOpen()
+      );
 
       const ownerId = signal.owner ? ((signal.owner as any)._id || (signal.owner as any).id || (signal.owner as any)).toString() : '';
 
@@ -449,7 +495,8 @@ export class SignalCopilotService implements OnModuleInit {
           signal,
           currentPrice,
           marketState,
-          { tradingStyle: group.style, riskTolerance: group.risk }
+          { tradingStyle: group.style, riskTolerance: group.risk },
+          marketContextJson
         );
 
         const copilotResponse = result.data;

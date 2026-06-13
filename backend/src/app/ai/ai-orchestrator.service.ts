@@ -90,7 +90,8 @@ export class AiOrchestratorService {
     dxyPrice?: number | null,
     us10yYield?: number | null,
     news?: NewsContext,
-    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
+    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance },
+    marketContextJson?: any
   ): Promise<{ data: SignalAnalysisType; latencyMs: number; totalTokens: number; model: string }> {
     this.logger.log(`Orchestrator: Running signal analysis...`);
 
@@ -108,13 +109,7 @@ export class AiOrchestratorService {
     const rrRatio = slDistance > 0 ? targetDistance / slDistance : 0;
 
     // Context preparation
-    const marketContext = this.contextBuilder.buildMarketMetricsContext(
-      currentPrice,
-      marketState,
-      dxyPrice,
-      us10yYield,
-      news
-    );
+    const marketDataJsonStr = marketContextJson ? JSON.stringify(marketContextJson, null, 2) : '';
     const styleContext = this.contextBuilder.buildStyleInstructionsContext(style, risk);
     const langName = this.contextBuilder.getLanguageName(userLang);
 
@@ -139,7 +134,9 @@ Analyze the following trading setup:
 - Target Distance: $${targetDistance.toFixed(2)} (${(targetDistance / marketState.atr1h).toFixed(2)}x 1h ATR)
 - Risk-Reward (R:R) Ratio: ${rrRatio.toFixed(2)}
 
-${marketContext}
+[MARKET_DATA_CONTEXT_JSON]
+${marketDataJsonStr}
+
 ${styleContext}
 
 ${analysisRules}
@@ -191,20 +188,15 @@ JSON Schema format to return:
     dxyPrice?: number | null,
     us10yYield?: number | null,
     news?: NewsContext,
-    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
+    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance },
+    marketContextJson?: any
   ): Promise<{ data: SignalGenerationType; latencyMs: number; totalTokens: number; model: string; prompt?: string }> {
     this.logger.log(`Orchestrator: Running signal generation...`);
 
     const style = overrides?.tradingStyle || TradingStyle.Day;
     const risk = overrides?.riskTolerance || RiskTolerance.Moderate;
 
-    const marketContext = this.contextBuilder.buildMarketMetricsContext(
-      currentPrice,
-      marketState,
-      dxyPrice,
-      us10yYield,
-      news
-    );
+    const marketDataJsonStr = marketContextJson ? JSON.stringify(marketContextJson, null, 2) : '';
     const styleContext = this.contextBuilder.buildStyleInstructionsContext(style, risk);
     const langName = this.contextBuilder.getLanguageName(userLang);
 
@@ -223,10 +215,9 @@ Return ONLY a valid JSON object matching the requested schema. Do NOT return mar
     const userPrompt = `
 Generate a trading signal based on the current market data:
 
-Market State:
-${marketState.semanticText}
+[MARKET_DATA_CONTEXT_JSON]
+${marketDataJsonStr}
 
-${marketContext}
 ${styleContext}
 
 ${coreRules}
@@ -309,7 +300,8 @@ JSON Schema format to return:
     signal: Signal,
     currentPrice: number,
     marketState: MarketStateContext,
-    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
+    overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance },
+    marketContextJson?: any
   ): Promise<{ data: CopilotRecommendationType; latencyMs: number; totalTokens: number; model: string }> {
     this.logger.log(`Orchestrator: Running Copilot Smart Shield evaluation for signal ${signal._id}...`);
 
@@ -322,10 +314,7 @@ JSON Schema format to return:
     const sl = isSell ? signal.maxPrice : signal.minPrice;
     const alreadyRecommendedRiskFree = signal.aiRecommendations?.some((rec) => rec.type === 'risk_free') || signal.riskFree;
 
-    const marketContext = this.contextBuilder.buildMarketMetricsContext(
-      currentPrice,
-      marketState
-    );
+    const marketDataJsonStr = marketContextJson ? JSON.stringify(marketContextJson, null, 2) : '';
     const styleContext = this.contextBuilder.buildStyleInstructionsContext(style, risk);
 
     const systemPrompt = `You are a Smart Shield AI Guard for Ounce24.
@@ -342,10 +331,9 @@ Evaluate the current status of the following Gold signal:
 - Stop Loss (SL): $${sl.toFixed(2)}
 - Is Risk-Free: ${alreadyRecommendedRiskFree ? 'YES' : 'NO'}
 
-Market State:
-${marketState.semanticText}
+[MARKET_DATA_CONTEXT_JSON]
+${marketDataJsonStr}
 
-${marketContext}
 ${styleContext}
 
 CORE MANAGEMENT RULES:
@@ -358,6 +346,7 @@ CORE MANAGEMENT RULES:
 3. Recommend "early_exit" if price breaks critical trend levels in the opposite direction, or if a major opposing S/R zone has rejected price.
 4. Recommend "cancel" on pending limits if price reaches TP without triggering entry, or breaks past SL, or becomes unreachable (> 3.0x ATR).
 5. Translate/write the explanation message for all four requested languages: Farsi/Persian (messageFa), English (messageEn), Arabic (messageAr), and Turkish (messageTr).
+   [CRITICAL FORMATTING]: Start each message text with a short, one-line qualitative verdict sentence containing a simple emoji (e.g. 🟢, 🟡, 🔴) summarizing the recommendation. Do NOT include any success probability percentage numbers in the message.
 
 JSON Schema format to return:
 {

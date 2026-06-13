@@ -85,6 +85,8 @@ export class Signal {
 
   generationAnalysis?: string;
   successProbability?: number;
+  market_context?: 'OPEN' | 'CLOSED';
+
 
   //virtual props
   isSell: boolean;

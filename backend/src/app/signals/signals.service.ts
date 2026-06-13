@@ -25,7 +25,7 @@ import { EVENTS } from '../consts';
 import { Cron } from '@nestjs/schedule';
 import { OuncePriceService } from '../ounce-price/ounce-price.service';
 import { AiOrchestratorService } from '../ai/ai-orchestrator.service';
-import { analyzeMarketState, detectTradingStyle } from './market-analyzer.helper';
+import { analyzeMarketState, detectTradingStyle, buildMarketContextJson } from './market-analyzer.helper';
 import axios from 'axios';
 
 interface EconomicEvent {
@@ -89,6 +89,7 @@ function parseLLMJson(text: string): any {
 @Injectable()
 export class SignalsService {
   private priceCache = new Map<string, { price: number; timestamp: number }>();
+  private indexCache = new Map<string, { price: number; changePercent: number; timestamp: number }>();
   private calendarCache: EconomicEvent[] = [];
   private lastCalendarFetch = 0;
 
@@ -136,6 +137,45 @@ export class SignalsService {
       return price;
     }
     return cached ? cached.price : null;
+  }
+
+  private async fetchYahooPriceAndChange(symbol: string): Promise<{ price: number; changePercent: number } | null> {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+        timeout: 5000,
+      });
+      const price = response.data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      const prevClose = response.data?.chart?.result?.[0]?.meta?.chartPreviousClose;
+      if (price !== undefined && price !== null && prevClose) {
+        const changePercent = ((price - prevClose) / prevClose) * 100;
+        return {
+          price: Number(price.toFixed(3)),
+          changePercent: Number(changePercent.toFixed(2))
+        };
+      }
+      return null;
+    } catch (error: any) {
+      console.error(`Failed to fetch Yahoo Price and Change for ${symbol}: ${error.message}`);
+      return null;
+    }
+  }
+
+  async getCachedYahooPriceAndChange(symbol: string): Promise<{ price: number; changePercent: number } | null> {
+    const cached = this.indexCache.get(symbol);
+    const now = Date.now();
+    if (cached && (now - cached.timestamp < 10 * 60 * 1000)) {
+      return { price: cached.price, changePercent: cached.changePercent };
+    }
+    const data = await this.fetchYahooPriceAndChange(symbol);
+    if (data !== null) {
+      this.indexCache.set(symbol, { ...data, timestamp: now });
+      return data;
+    }
+    return cached ? { price: cached.price, changePercent: cached.changePercent } : null;
   }
 
   async fetchEconomicCalendar(): Promise<EconomicEvent[]> {
@@ -187,6 +227,7 @@ export class SignalsService {
   async addSignal(signal: Signal) {
     signal.createdOuncePrice = this.ouncePriceService.current;
     signal.status = SignalStatus.Pending;
+    signal.market_context = this.ouncePriceService.isMarketOpen() ? 'OPEN' : 'CLOSED';
     if (!signal.owner) return;
 
     if (signal.maxPrice < signal.minPrice) {
@@ -575,8 +616,9 @@ export class SignalsService {
         throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
       }
 
-      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation
+      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation (sorted to correctly obtain open/close prices)
       const dailyAgg = await this.candleModel.aggregate([
+        { $sort: { timestamp: 1 } },
         {
           $group: {
             _id: {
@@ -584,6 +626,8 @@ export class SignalsService {
             },
             high: { $max: "$high" },
             low: { $min: "$low" },
+            open: { $first: "$open" },
+            close: { $last: "$close" },
             date: { $first: "$timestamp" }
           }
         },
@@ -605,12 +649,25 @@ export class SignalsService {
 
       const marketState = analyzeMarketState(currentPrice, candles5m, { pdh, pdl, adr14 });
 
-      // Fetch external index prices
-      const dxy = await this.getCachedYahooPrice('DX-Y.NYB');
-      const us10y = await this.getCachedYahooPrice('^TNX');
+      // Fetch external index prices and their daily percent changes
+      const dxyData = await this.getCachedYahooPriceAndChange('DX-Y.NYB');
+      const us10yData = await this.getCachedYahooPriceAndChange('^TNX');
+      const dxy = dxyData ? dxyData.price : null;
+      const us10y = us10yData ? us10yData.price : null;
 
       // Fetch economic calendar news check
       const newsCheck = await this.isNearHighImpactUSDNews();
+
+      // Build the rich context JSON
+      const marketContextJson = buildMarketContextJson(
+        currentPrice,
+        candles5m,
+        dailyAgg,
+        dxyData,
+        us10yData,
+        newsCheck,
+        this.ouncePriceService.isMarketOpen()
+      );
 
       const result = await this.aiOrchestratorService.analyzeSignal(
         signal,
@@ -620,7 +677,8 @@ export class SignalsService {
         dxy,
         us10y,
         newsCheck,
-        overrides
+        overrides,
+        marketContextJson
       );
 
       // Deduct 1 gem from user
@@ -720,8 +778,9 @@ export class SignalsService {
         throw new HttpException("No market data available", HttpStatus.BAD_REQUEST);
       }
 
-      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation
+      // Calculate PDH/PDL and ADR14 using MongoDB Aggregation (sorted to correctly obtain open/close prices)
       const dailyAgg = await this.candleModel.aggregate([
+        { $sort: { timestamp: 1 } },
         {
           $group: {
             _id: {
@@ -729,6 +788,8 @@ export class SignalsService {
             },
             high: { $max: "$high" },
             low: { $min: "$low" },
+            open: { $first: "$open" },
+            close: { $last: "$close" },
             date: { $first: "$timestamp" }
           }
         },
@@ -750,10 +811,22 @@ export class SignalsService {
 
       const marketState = analyzeMarketState(currentPrice, candles5m, { pdh, pdl, adr14 });
       const userLang = user.language || 'fa';
-      const langName = userLang === 'fa' ? 'Persian (Farsi)' : 'English';
 
-      const dxy = await this.getCachedYahooPrice('DX-Y.NYB');
-      const us10y = await this.getCachedYahooPrice('^TNX');
+      const dxyData = await this.getCachedYahooPriceAndChange('DX-Y.NYB');
+      const us10yData = await this.getCachedYahooPriceAndChange('^TNX');
+      const dxy = dxyData ? dxyData.price : null;
+      const us10y = us10yData ? us10yData.price : null;
+
+      // Build the rich context JSON
+      const marketContextJson = buildMarketContextJson(
+        currentPrice,
+        candles5m,
+        dailyAgg,
+        dxyData,
+        us10yData,
+        newsCheck,
+        this.ouncePriceService.isMarketOpen()
+      );
 
       const result = await this.aiOrchestratorService.generateSignal(
         userLang,
@@ -762,7 +835,8 @@ export class SignalsService {
         dxy,
         us10y,
         newsCheck,
-        overrides
+        overrides,
+        marketContextJson
       );
 
       const generatedSignal = result.data.type ? {

@@ -64,7 +64,8 @@
       "title": "معلومات الإشارة",
       "createdAt": "أنشئت في",
       "closedAt": "أغلقت في",
-      "activeAt": "نشطت في"
+      "activeAt": "نشطت في",
+      "marketContext": "حالة السوق عند الإنشاء"
     },
     "actions": {
       "cancel": "إلغاء الإشارة",

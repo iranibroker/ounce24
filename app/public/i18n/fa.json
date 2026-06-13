@@ -64,7 +64,8 @@
       "title": "اطلاعات سیگنال",
       "createdAt": "ایجاد شده در",
       "closedAt": "بسته شده در",
-      "activeAt": "فعال شده در"
+      "activeAt": "فعال شده در",
+      "marketContext": "وضعیت بازار در زمان ثبت"
     },
     "actions": {
       "cancel": "لغو سیگنال",

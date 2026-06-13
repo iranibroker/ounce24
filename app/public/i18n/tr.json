@@ -64,7 +64,8 @@
       "title": "Sinyal Bilgisi",
       "createdAt": "Oluşturulma tarihi",
       "closedAt": "Kapanış tarihi",
-      "activeAt": "Etkinleştirilme tarihi"
+      "activeAt": "Etkinleştirilme tarihi",
+      "marketContext": "Oluşturulurken piyasa durumu"
     },
     "actions": {
       "cancel": "Sinyali İptal Et",

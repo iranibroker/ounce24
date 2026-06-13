@@ -19,22 +19,6 @@
       </div>
     } @else if (analyzeMutation.data()) {
       <div class="analysis-result">
-        @if (analyzeMutation.data()?.successProbability !== undefined) {
-          <div class="probability-card" [class.high]="analyzeMutation.data()!.successProbability! >= 75" [class.medium]="analyzeMutation.data()!.successProbability! >= 50 && analyzeMutation.data()!.successProbability! < 75" [class.low]="analyzeMutation.data()!.successProbability! < 50">
-            <div class="radial-progress">
-              <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" class="bg"></circle>
-                <circle cx="50" cy="50" r="42" class="fg" [style.strokeDashoffset]="263.89 - (263.89 * analyzeMutation.data()!.successProbability!) / 100"></circle>
-              </svg>
-              <div class="percentage-content">
-                <span class="value">{{ analyzeMutation.data()?.successProbability }}%</span>
-                <span class="label">{{ 'signalAnalyze.successProbability' | translate }}</span>
-              </div>
-            </div>
-            
-
-          </div>
-        }
         <div class="analysis-text">
           {{ analyzeMutation.data()?.analysis }}
         </div>
