@@ -111,9 +111,12 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     const totalSignals = userSignals.length;
     const winSignals = userSignals.filter((s) => s.pip > 0).length;
     const winRate = totalSignals > 0 ? (winSignals / totalSignals) * 100 : 0;
+    const positiveSignals = userSignals.filter((s) => s.pip > 0);
     const avgRiskReward =
-      userSignals.reduce((acc, s) => acc + (s.riskReward || 0), 0) /
-        totalSignals || 0;
+      positiveSignals.length > 0
+        ? positiveSignals.reduce((acc, s) => acc + (s.riskReward || 0), 0) /
+          positiveSignals.length
+        : 0;
     const totalScore = userSignals.reduce((acc, s) => acc + s.score, 0);
 
     const weekSignalsList = userSignals.filter((s) => {
