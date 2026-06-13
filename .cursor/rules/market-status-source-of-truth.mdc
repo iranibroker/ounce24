@@ -1,0 +1,45 @@
+---
+description: Enforce using the single source of truth for gold price and market status across backend and frontend
+globs: backend/src/app/**/*,app/src/app/**/*
+alwaysApply: true
+---
+
+# Market Status and Price Source of Truth Guidelines
+
+To prevent data discrepancies and performance issues, all feature developments must strictly adhere to the single source of truth for **gold price** and **market open/closed status**.
+
+## 1. Backend Source of Truth
+
+### Core Service
+- **Service**: `OuncePriceService` (located in `backend/src/app/ounce-price/ounce-price.service.ts`)
+- **Get Current Price**: `ouncePriceService.current`
+- **Get Market Status**: `ouncePriceService.isMarketOpen(date?: Date)`
+- **Dynamic Adaptor Pausing**: `QuoteService` automatically pauses streaming quote connections when the market is closed. Do **NOT** create custom websocket reconnect routines or watchdogs.
+
+### Event-Driven Tasks (No Arbitrary Crons)
+- Do **NOT** use time-based calendar crons for tasks dependent on market close/open transitions.
+- Use NestJS `@OnEvent` decorators to listen to market events:
+  - **`EVENTS.MARKET_CLOSED`** (`market.closed`): Fired at daily close/weekend close.
+    - Check if day in NY is Friday using:
+      ```typescript
+      const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'long' });
+      if (formatter.format(new Date()) === 'Friday') { /* weekend close */ }
+      ```
+  - **`EVENTS.MARKET_OPENED`** (`market.opened`): Fired at market open.
+  - **`EVENTS.WEEKLY_SIGNALS_RESET`** (`weekly.signals.reset`): Fired after the weekly signals are reset on Friday close. Use this for weekly calculations (leaderboards, week winners).
+
+---
+
+## 2. Frontend Source of Truth
+
+### Core Service
+- **Service**: `OuncePriceService` (located in `app/src/app/services/ounce-price.service.ts`)
+- **Signals**:
+  - Price: `priceService.value()`
+  - Market status: `priceService.isMarketOpen()`
+- **Initial Load**: The service automatically calls `/api/ounce-price/current` on startup. Do **NOT** hardcode fallback dummy prices (like `$2,345.67`) in HTML templates.
+
+### Reactive UI Updates
+- Do **NOT** use polling or intervals to check if the market has opened/closed.
+- Use Angular `effect()` or `computed()` to react to `priceService.isMarketOpen()` or `priceService.value()` changes.
+- Automatically invalidate query keys (e.g., `marketState`, `octopusVote`) when the market status transitions.
