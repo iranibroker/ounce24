@@ -33,6 +33,8 @@ import { AuthService } from '../../../services/auth.service';
 import { SHARED } from '../../../shared';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AchievementCardComponent } from '../../../components/achievement-card/achievement-card.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { AchievementLeaderboardDialogComponent } from '../../../components/achievement-leaderboard-dialog/achievement-leaderboard-dialog.component';
 
 const PAGE_SIZE = 20;
 
@@ -52,6 +54,7 @@ const PAGE_SIZE = 20;
     EmptyStateComponent,
     MatTabsModule,
     SHARED,
+    MatDialogModule,
   ],
   providers: [provideIcons({ 
     saxArrowLeftOutline, 
@@ -82,6 +85,7 @@ export class UserProfileComponent {
   private readonly location = inject(Location);
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   isOwnProfile = computed(() => {
     const currentUser = this.auth.userQuery.data();
@@ -280,6 +284,15 @@ export class UserProfileComponent {
       next: () => {
         this.userQuery.refetch();
       }
+    });
+  }
+
+  openAchievementLeaderboard(type: AchievementType): void {
+    this.dialog.open(AchievementLeaderboardDialogComponent, {
+      data: { type },
+      width: '400px',
+      maxWidth: '95vw',
+      panelClass: 'achievement-leaderboard-dialog-panel',
     });
   }
 }

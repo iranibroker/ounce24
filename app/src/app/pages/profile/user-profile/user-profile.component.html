@@ -124,6 +124,7 @@
               <div class="achievements-grid">
                 @for (type of competitionAchievements; track type) {
                   <div class="achievement-item-card" 
+                       (click)="openAchievementLeaderboard(type)"
                        [class.locked]="!achievementsSummary()[type]" 
                        [class.unlocked]="achievementsSummary()[type]"
                        [class]="achievementsSummary()[type] ? getAchievementClass(type) : 'locked'">
@@ -153,6 +154,7 @@
               <div class="achievements-grid">
                 @for (type of individualAchievements; track type) {
                   <div class="achievement-item-card" 
+                       (click)="openAchievementLeaderboard(type)"
                        [class.locked]="!achievementsSummary()[type]" 
                        [class.unlocked]="achievementsSummary()[type]"
                        [class]="achievementsSummary()[type] ? getAchievementClass(type) : 'locked'">
@@ -182,6 +184,7 @@
               <div class="achievements-grid">
                 @for (type of octopusAchievements; track type) {
                   <div class="achievement-item-card" 
+                       (click)="openAchievementLeaderboard(type)"
                        [class.locked]="!achievementsSummary()[type]" 
                        [class.unlocked]="achievementsSummary()[type]"
                        [class]="achievementsSummary()[type] ? getAchievementClass(type) : 'locked'">

@@ -318,6 +318,11 @@
   },
   "achievement": {
     "emptyState": "هیچ مدالی یافت نشد",
+    "leaderboard": {
+      "title": "لیدربورد مدال",
+      "empty": "هنوز کسی این مدال را کسب نکرده است",
+      "earnedTimes": "{{count}} بار"
+    },
     "newAchievementDialog": {
       "title": "مدال جدید 🎉"
     },

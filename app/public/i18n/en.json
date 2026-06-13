@@ -318,6 +318,11 @@
   },
   "achievement": {
     "emptyState": "No achievements found",
+    "leaderboard": {
+      "title": "Badge Leaderboard",
+      "empty": "No one has earned this badge yet",
+      "earnedTimes": "{{count}} times"
+    },
     "newAchievementDialog": {
       "title": "New Achievement 🎉"
     },

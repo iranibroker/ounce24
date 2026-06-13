@@ -812,6 +812,54 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     }).filter(Boolean);
   }
 
+  async getAchievementLeaderboard(type: AchievementType, limit = 10) {
+    return this.achievementModel
+      .aggregate([
+        {
+          $match: {
+            type,
+          },
+        },
+        {
+          $group: {
+            _id: '$user',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: '$user',
+        },
+        {
+          $sort: { count: -1, 'user.totalScore': -1 },
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $project: {
+            _id: 0,
+            count: 1,
+            user: {
+              id: '$user._id',
+              name: '$user.name',
+              title: '$user.title',
+              avatar: '$user.avatar',
+              avatarSource: '$user.avatarSource',
+            },
+          },
+        },
+      ])
+      .exec();
+  }
+
   async awardGemsForAchievement(userId: string, type: AchievementType) {
     const rewardMap: Record<AchievementType, number> = {
       [AchievementType.WeekWin]: 30,

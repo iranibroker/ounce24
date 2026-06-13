@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>
+  <ng-icon name="saxCupOutline" size="20px" class="title-icon"></ng-icon>
+  {{ 'achievement.leaderboard.title' | translate }}: {{ 'achievement.type.' + data.type | translate }}
+</h2>
+<mat-dialog-content class="dialog-content-container">
+  @if (leaderboardQuery.isLoading()) {
+    <app-data-loading />
+  } @else {
+    @let rows = leaderboardQuery.data();
+    @if (rows && rows.length > 0) {
+      <div class="achievement-leaderboard-list">
+        @for (row of rows; track row.user.id; let idx = $index) {
+          <div class="leaderboard-row" (click)="onUserClick(row.user.id)">
+            <!-- Rank Badge -->
+            <div class="rank-container">
+              <span class="rank-badge" [class]="'rank-' + (idx + 1)">
+                {{ idx + 1 }}
+              </span>
+            </div>
+
+            <!-- User Avatar & Title -->
+            <div class="user-info">
+              <img [appAvatar]="row.user" class="user-avatar" />
+              <span class="user-name">{{ row.user.title || row.user.name }}</span>
+            </div>
+
+            <!-- Achievement Count -->
+            <div class="achievement-count">
+              <span class="count-badge">
+                {{ 'achievement.leaderboard.earnedTimes' | translate: { count: row.count } }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <app-empty-state
+        iconName="saxCupOutline"
+        [text]="'achievement.leaderboard.empty' | translate"
+      />
+    }
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">
+    {{ 'app.close' | translate }}
+  </button>
+</mat-dialog-actions>

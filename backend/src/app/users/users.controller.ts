@@ -11,7 +11,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { GemLog, GemLogAction, User } from '@ounce24/types';
+import { GemLog, GemLogAction, User, AchievementType } from '@ounce24/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Public } from '../auth/public.decorator';
@@ -70,6 +70,15 @@ export class UsersController {
   @Get('leaderboard/month')
   async getLeaderboardMonth(@Query('userId') userId?: string) {
     return this.usersService.getLeaderboard(0, 30, userId, false, true);
+  }
+
+  @Public()
+  @Get('leaderboard/achievement/:type')
+  async getAchievementLeaderboard(
+    @Param('type') type: AchievementType,
+    @Query('limit') limit = 10,
+  ) {
+    return this.usersService.getAchievementLeaderboard(type, Number(limit));
   }
 
   @Public()
