@@ -104,6 +104,34 @@
       </mat-form-field>
     </div>
 
+    <!-- Real-time Risk-to-Reward Visualization (Compact & No Layout Shift) -->
+    <div class="rr-compact-container" dir="ltr">
+      <div class="signal-props-progress" [class.visible]="isSignalValidForStats">
+        <div class="progress-bar-wrapper">
+          <div
+            class="progress-track"
+            [style.background]="
+              'linear-gradient(to right, var(--mat-sys-secondary) 0%, transparent ' +
+              entryPositionPercent +
+              '%, var(--mat-sys-error) 100%)'
+            "
+          ></div>
+
+          <!-- Entry Price marker -->
+          <div
+            class="marker marker-entry"
+            [style.left.%]="entryPositionPercent"
+          >
+            <span class="marker-dot"></span>
+          </div>
+        </div>
+        <span class="progress-rr-label">
+          {{ 'signal.riskReward' | translate }}:
+          {{ (riskReward | number: '1.0-2') || '0.00' }}
+        </span>
+      </div>
+    </div>
+
     <button
       mat-flat-button
       color="primary"

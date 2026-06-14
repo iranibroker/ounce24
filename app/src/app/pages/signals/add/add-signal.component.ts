@@ -238,4 +238,62 @@ export class AddSignalComponent {
       );
     });
   }
+
+  get rawValues() {
+    return this.form.getRawValue();
+  }
+
+  get entryPositionPercent(): number {
+    const values = this.rawValues;
+    const entry = Number(values.entryPrice);
+    const profit = Number(values.takeProfit);
+    const loss = Number(values.stopLoss);
+    
+    if (!entry || !profit || !loss || loss === profit) {
+      return 50;
+    }
+    
+    const ratio = (entry - profit) / (loss - profit);
+    const clampedRatio = Math.max(0, Math.min(1, ratio));
+    return clampedRatio * 100;
+  }
+
+  get riskReward(): number | null {
+    const values = this.rawValues;
+    const entry = Number(values.entryPrice);
+    const profit = Number(values.takeProfit);
+    const loss = Number(values.stopLoss);
+    
+    if (!entry || !profit || !loss) {
+      return null;
+    }
+    
+    const profitDistance = Math.abs(profit - entry);
+    const lossDistance = Math.abs(entry - loss);
+    
+    if (lossDistance === 0) {
+      return 0;
+    }
+    
+    return Number((profitDistance / lossDistance).toFixed(2));
+  }
+
+  get isSignalValidForStats(): boolean {
+    const values = this.rawValues;
+    const entry = Number(values.entryPrice);
+    const profit = Number(values.takeProfit);
+    const loss = Number(values.stopLoss);
+    const type = values.type;
+
+    if (!entry || !profit || !loss || entry <= 0 || profit <= 0 || loss <= 0) {
+      return false;
+    }
+
+    if (type === SignalType.Buy) {
+      return profit > entry && loss < entry;
+    } else {
+      return profit < entry && loss > entry;
+    }
+  }
 }
+
