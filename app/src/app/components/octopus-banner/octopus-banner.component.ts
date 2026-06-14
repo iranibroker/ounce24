@@ -4,12 +4,14 @@ import { AuthService } from '../../services/auth.service';
 
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { NgIcon } from '@ng-icons/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxTrendUpBold, saxTrendDownBold } from '@ng-icons/iconsax/bold';
 
 @Component({
   selector: 'app-octopus-banner',
   standalone: true,
   imports: [CommonModule, TranslateModule, NgIcon],
+  providers: [provideIcons({ saxTrendUpBold, saxTrendDownBold })],
   templateUrl: './octopus-banner.component.html',
   styleUrl: './octopus-banner.component.scss',
 })

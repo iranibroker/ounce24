@@ -1,10 +1,6 @@
 <h2 mat-dialog-title class="dialog-header">
   <div class="title-with-icon">
-    <svg viewBox="0 0 24 24" class="ai-sparkles-icon-header" width="22px" height="22px">
-      <path d="M12 3l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z" />
-      <path d="M19 8l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" />
-      <path d="M6 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" />
-    </svg>
+    <ng-icon name="lucideSparkles" class="ai-sparkles-icon-header" size="22px"></ng-icon>
     <span>{{ 'addSignal.confirmAiGenerate' | translate }}</span>
   </div>
   <button mat-icon-button class="close-btn" (click)="close()" type="button">
@@ -66,9 +62,7 @@
           @if (generateMutation.data()?.signal?.generationAnalysis) {
             <div class="analysis-box">
               <h4 class="analysis-title">
-                <svg viewBox="0 0 24 24" class="inline-sparkle" width="14px" height="14px" style="vertical-align: middle; margin-left: 4px;">
-                  <path d="M12 3l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z" fill="currentColor" />
-                </svg>
+                <ng-icon name="lucideSparkles" class="inline-sparkle" size="14px" style="vertical-align: middle; margin-left: 4px;"></ng-icon>
                 <span>{{ 'signalAnalyze.analysis' | translate }}</span>
               </h4>
               <p class="analysis-text">{{ generateMutation.data()?.signal?.generationAnalysis }}</p>

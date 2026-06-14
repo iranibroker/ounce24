@@ -1,6 +1,18 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxStarOutline, saxActivityOutline, saxClockOutline, saxPlayOutline, saxStopOutline } from '@ng-icons/iconsax/outline';
-import { saxTrendUpBold, saxTrendDownBold, saxDiamondsBold, saxCupBold } from '@ng-icons/iconsax/bold';
+import {
+  saxStarOutline,
+  saxActivityOutline,
+  saxClockOutline,
+  saxPlayOutline,
+  saxStopOutline,
+  saxCalculatorOutline,
+} from '@ng-icons/iconsax/outline';
+import {
+  saxTrendUpBold,
+  saxTrendDownBold,
+  saxDiamondsBold,
+} from '@ng-icons/iconsax/bold';
+import { lucideSparkles } from '@ng-icons/lucide';
 import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -19,15 +31,31 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-signal-card',
-  imports: [NgIcon, CommonModule,
+  imports: [
+    NgIcon,
+    CommonModule,
     MatCardModule,
     SignalTypeChipComponent,
     MatDividerModule,
     SHARED,
     MatChipsModule,
     MatTooltipModule,
-    MatButtonModule,],
-  providers: [provideIcons({ saxStarOutline, saxActivityOutline, saxClockOutline, saxPlayOutline, saxStopOutline, saxDiamondsBold, saxTrendUpBold, saxTrendDownBold, saxCupBold })],
+    MatButtonModule,
+  ],
+  providers: [
+    provideIcons({
+      saxStarOutline,
+      saxActivityOutline,
+      saxClockOutline,
+      saxPlayOutline,
+      saxStopOutline,
+      saxDiamondsBold,
+      saxTrendUpBold,
+      saxTrendDownBold,
+      saxCalculatorOutline,
+      lucideSparkles,
+    }),
+  ],
   templateUrl: './signal-card.component.html',
   styleUrl: './signal-card.component.scss',
 })
@@ -36,7 +64,7 @@ export class SignalCardComponent {
   private readonly dialog = inject(MatDialog);
   private readonly signalAnalyzeService = inject(SignalAnalyzeService);
   private readonly router = inject(Router);
-  
+
   signal = input.required<Signal>();
   showScore = input(false);
   Signal = Signal;
@@ -86,7 +114,9 @@ export class SignalCardComponent {
 
   openCalculator(event: Event) {
     event.stopPropagation();
-    this.router.navigate(['/signals', this.signal().id], { fragment: 'calculator' });
+    this.router.navigate(['/signals', this.signal().id], {
+      fragment: 'calculator',
+    });
   }
 
   pip = computed(() => {

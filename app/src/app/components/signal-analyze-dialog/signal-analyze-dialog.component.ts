@@ -20,6 +20,8 @@ import { GemRequiredDialogComponent } from '../gem-required-dialog/gem-required-
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideSparkles } from '@ng-icons/lucide';
 
 interface SignalAnalysisResponse {
   analysis: string;
@@ -45,7 +47,9 @@ interface SignalAnalyzeData {
     TranslateModule,
     SHARED,
     DataLoadingComponent,
+    NgIcon,
   ],
+  providers: [provideIcons({ lucideSparkles })],
   templateUrl: './signal-analyze-dialog.component.html',
   styleUrls: ['./signal-analyze-dialog.component.scss'],
 })

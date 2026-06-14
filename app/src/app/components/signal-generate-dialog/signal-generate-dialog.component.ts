@@ -19,6 +19,8 @@ import { lastValueFrom } from 'rxjs';
 import { GemRequiredDialogComponent } from '../gem-required-dialog/gem-required-dialog.component';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AnalyticsService } from '../../services/analytics.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideSparkles } from '@ng-icons/lucide';
 
 interface GeneratedSignal {
   type: 'buy' | 'sell';
@@ -55,7 +57,9 @@ interface SignalGenerateData {
     TranslateModule,
     SHARED,
     DataLoadingComponent,
+    NgIcon,
   ],
+  providers: [provideIcons({ lucideSparkles })],
   templateUrl: './signal-generate-dialog.component.html',
   styleUrls: ['./signal-generate-dialog.component.scss'],
 })

@@ -1,6 +1,7 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxArrowLeftOutline, saxTrendUpOutline, saxTrendDownOutline } from '@ng-icons/iconsax/outline';
 import { saxTrendUpBold, saxTrendDownBold } from '@ng-icons/iconsax/bold';
+import { lucideSparkles } from '@ng-icons/lucide';
 import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
@@ -42,7 +43,7 @@ import { AiSettingsDialogComponent } from '../../../components/ai-settings-dialo
     ReactiveFormsModule,
     MatCheckboxModule,
     SHARED,],
-  providers: [provideIcons({ saxArrowLeftOutline, saxTrendUpBold, saxTrendDownBold, saxTrendUpOutline, saxTrendDownOutline })],
+  providers: [provideIcons({ saxArrowLeftOutline, saxTrendUpBold, saxTrendDownBold, saxTrendUpOutline, saxTrendDownOutline, lucideSparkles })],
   templateUrl: './add-signal.component.html',
   styleUrls: ['./add-signal.component.scss'],
 })

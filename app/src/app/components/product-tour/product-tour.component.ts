@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { LanguageService } from '../../services/language.service';
-import { NgIconComponent } from '@ng-icons/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxArrowLeftOutline } from '@ng-icons/iconsax/outline';
 
 interface TourStep {
   elementId: string;
@@ -14,7 +15,8 @@ interface TourStep {
 @Component({
   selector: 'app-product-tour',
   standalone: true,
-  imports: [CommonModule, TranslateModule, NgIconComponent],
+  imports: [CommonModule, TranslateModule, NgIcon],
+  providers: [provideIcons({ saxArrowLeftOutline })],
   templateUrl: './product-tour.component.html',
   styleUrl: './product-tour.component.scss'
 })

@@ -14,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { SHARED } from '../../shared';
 import { Signal, SignalStatus, SignalType } from '@ounce24/types';
 import { OuncePriceService } from '../../services/ounce-price.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { saxCalculatorOutline, saxDangerOutline } from '@ng-icons/iconsax/outline';
 
 @Component({
   selector: 'app-volume-calculator',
@@ -25,7 +27,9 @@ import { OuncePriceService } from '../../services/ounce-price.service';
     MatFormFieldModule,
     MatInputModule,
     SHARED,
+    NgIcon,
   ],
+  providers: [provideIcons({ saxCalculatorOutline, saxDangerOutline })],
   templateUrl: './volume-calculator.component.html',
   styleUrls: ['./volume-calculator.component.scss'],
 })

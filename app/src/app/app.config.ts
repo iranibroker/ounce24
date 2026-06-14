@@ -11,40 +11,6 @@ import {
   provideTanStackQuery,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
-import { provideIcons } from '@ng-icons/core';
-import {
-  saxDiamondsBold,
-  saxTrendUpBold,
-  saxTrendDownBold,
-} from '@ng-icons/iconsax/bold';
-import {
-  saxHomeOutline,
-  saxActivityOutline,
-  saxCupOutline,
-  saxUserOutline,
-  saxCloseCircleOutline,
-  saxCloseSquareOutline,
-  saxExportOutline,
-  saxStarOutline,
-  saxTrendUpOutline,
-  saxTrendDownOutline,
-  saxJudgeOutline,
-  saxClockOutline,
-  saxPlayOutline,
-  saxStopOutline,
-  saxArrowDownOutline,
-  saxArrowUpOutline,
-  saxArrowLeftOutline,
-  saxEditOutline,
-  saxInfoCircleOutline,
-  saxNotificationOutline,
-  saxEmojiSadOutline,
-  saxMicrophoneOutline,
-  saxAddOutline,
-  saxPercentageCircleOutline,
-} from '@ng-icons/iconsax/outline';
-import { simpleTelegram } from '@ng-icons/simple-icons';
-import { lucideSparkles } from '@ng-icons/lucide';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -56,34 +22,5 @@ export const appConfig: ApplicationConfig = {
     apiInterceptorProvider(),
     provideTranslation(),
     paginatorIntlProvider(),
-    provideIcons({
-      saxHomeOutline,
-      saxActivityOutline,
-      saxCupOutline,
-      saxUserOutline,
-      saxCloseCircleOutline,
-      saxCloseSquareOutline,
-      saxExportOutline,
-      saxStarOutline,
-      saxTrendUpOutline,
-      saxTrendDownOutline,
-      saxJudgeOutline,
-      saxClockOutline,
-      saxPlayOutline,
-      saxStopOutline,
-      saxArrowDownOutline,
-      saxArrowUpOutline,
-      saxArrowLeftOutline,
-      saxEditOutline,
-      saxInfoCircleOutline,
-      saxNotificationOutline,
-      saxDiamondsBold,
-      saxEmojiSadOutline,
-      saxMicrophoneOutline,
-      saxAddOutline,
-      saxPercentageCircleOutline,
-      simpleTelegram,
-      lucideSparkles,
-    }),
   ],
 };

@@ -1,9 +1,19 @@
 import { Component, Output, EventEmitter, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NgIconComponent } from '@ng-icons/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import { LanguageService } from '../../services/language.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  saxArrowLeftOutline,
+  saxHomeOutline,
+  saxActivityOutline,
+  saxCupOutline,
+  saxClockOutline,
+  saxTrendUpOutline,
+  saxTickCircleOutline,
+} from '@ng-icons/iconsax/outline';
+import { lucideSparkles } from '@ng-icons/lucide';
 
 interface Slide {
   title: string;
@@ -15,7 +25,19 @@ interface Slide {
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, TranslateModule, NgIconComponent],
+  imports: [CommonModule, TranslateModule, NgIcon],
+  providers: [
+    provideIcons({
+      saxHomeOutline,
+      saxActivityOutline,
+      lucideSparkles,
+      saxTrendUpOutline,
+      saxCupOutline,
+      saxClockOutline,
+      saxArrowLeftOutline,
+      saxTickCircleOutline,
+    }),
+  ],
   templateUrl: './onboarding.component.html',
   styleUrl: './onboarding.component.scss'
 })
