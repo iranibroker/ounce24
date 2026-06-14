@@ -2,6 +2,21 @@
   "name": "@ounce24/source",
   "version": "0.0.0",
   "license": "MIT",
+  "packageManager": "pnpm@10.34.3",
+  "engines": {
+    "node": ">=24"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@parcel/watcher",
+      "@swc/core",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract",
+      "nx"
+    ]
+  },
   "scripts": {
     "dev:backend": "nx run backend:serve",
     "build:backend": "nx run backend:build --skip-nx-cache",
@@ -39,9 +54,11 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "@tanstack/angular-query-experimental": "^5.66.0",
     "axios": "^1.10.0",
+    "express": "^5.2.1",
     "google-auth-library": "^9.14.0",
     "ioredis": "^5.4.1",
     "jalali-moment": "^3.3.11",
+    "jsonwebtoken": "^9.0.3",
     "kavenegar": "^1.1.4",
     "mongoose": "^8.3.4",
     "nestjs-telegraf": "^2.7.0",
@@ -85,7 +102,9 @@
     "@swc-node/register": "1.9.2",
     "@swc/core": "1.5.7",
     "@swc/helpers": "0.5.15",
+    "@types/express": "^5.0.6",
     "@types/jest": "29.5.14",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "18.16.9",
     "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "7.18.0",

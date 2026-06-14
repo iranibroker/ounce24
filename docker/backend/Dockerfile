@@ -1,16 +1,18 @@
-FROM node:20.19.0-alpine As development
+FROM node:24-alpine As development
 
 WORKDIR /usr/src/app
 
-COPY package.json .
+RUN corepack enable && corepack prepare pnpm@10.34.3 --activate
 
-RUN yarn
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN yarn build:backend
+RUN pnpm run build:backend
 
-FROM node:20.19.0-alpine As production
+FROM node:24-alpine As production
 
 WORKDIR /backend
 
