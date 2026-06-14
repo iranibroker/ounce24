@@ -13,6 +13,7 @@ import {
   lucideActivity 
 } from '@ng-icons/lucide';
 import { Component, inject, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -87,10 +88,17 @@ export class UserProfileComponent {
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
 
+  private readonly routeParams = toSignal(this.route.params);
+  
+  readonly userId = computed(() => {
+    const params = this.routeParams();
+    return params ? params['id'] : undefined;
+  });
+
   isOwnProfile = computed(() => {
     const currentUser = this.auth.userQuery.data();
-    const profileId = this.route.snapshot.params['id'];
-    return !profileId || currentUser?.id === profileId;
+    const id = this.userId();
+    return !id || currentUser?.id === id;
   });
 
   getRelativeJoinedDate(dateStr: string): string {
@@ -135,50 +143,62 @@ export class UserProfileComponent {
     return `${prefix}${dateFormatted}`;
   }
 
-  userQuery = injectQuery(() => ({
-    queryKey: ['user', this.route.snapshot.params['id']],
-    queryFn: () =>
-      lastValueFrom(
-        this.http.get<any>(
-          `/api/users/${this.route.snapshot.params['id'] || this.auth.userQuery.data()?.id}`,
+  userQuery = injectQuery(() => {
+    const id = this.userId() || this.auth.userQuery.data()?.id;
+    return {
+      queryKey: ['user', id],
+      queryFn: () =>
+        lastValueFrom(
+          this.http.get<any>(
+            `/api/users/${id}`,
+          ),
         ),
-      ),
-  }));
+      enabled: !!id,
+    };
+  });
 
-  signalsQuery = injectInfiniteQuery(() => ({
-    queryKey: ['user-signals', this.route.snapshot.params['id']],
-    queryFn: async ({ pageParam }) => {
-      return lastValueFrom(
-        this.http.get<Signal[]>(
-          `/api/users/${this.route.snapshot.params['id'] || this.auth.userQuery.data()?.id}/signals`,
-          {
-            params: {
-              page: pageParam,
+  signalsQuery = injectInfiniteQuery(() => {
+    const id = this.userId() || this.auth.userQuery.data()?.id;
+    return {
+      queryKey: ['user-signals', id],
+      queryFn: async ({ pageParam }) => {
+        return lastValueFrom(
+          this.http.get<Signal[]>(
+            `/api/users/${id}/signals`,
+            {
+              params: {
+                page: pageParam,
+              },
             },
-          },
-        ),
-      );
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPageData, allPages, lastPage) =>
-      lastPageData.length === PAGE_SIZE ? lastPage + 1 : null,
-  }));
+          ),
+        );
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPageData, allPages, lastPage) =>
+        lastPageData.length === PAGE_SIZE ? lastPage + 1 : null,
+      enabled: !!id,
+    };
+  });
 
-  achievementsQuery = injectQuery(() => ({
-    queryKey: ['user-achievements-all', this.route.snapshot.params['id']],
-    queryFn: async () => {
-      return lastValueFrom(
-        this.http.get<Achievement[]>(
-          `/api/users/${this.route.snapshot.params['id'] || this.auth.userQuery.data()?.id}/achievements`,
-          {
-            params: {
-              limit: 1000,
+  achievementsQuery = injectQuery(() => {
+    const id = this.userId() || this.auth.userQuery.data()?.id;
+    return {
+      queryKey: ['user-achievements-all', id],
+      queryFn: async () => {
+        return lastValueFrom(
+          this.http.get<Achievement[]>(
+            `/api/users/${id}/achievements`,
+            {
+              params: {
+                limit: 1000,
+              },
             },
-          },
-        ),
-      );
-    },
-  }));
+          ),
+        );
+      },
+      enabled: !!id,
+    };
+  });
 
   signals = computed(() => {
     return this.signalsQuery.data()?.pages?.flat();

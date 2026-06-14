@@ -25,50 +25,62 @@ mat-dialog-content.dialog-content-container {
   }
 }
 
-.achievement-leaderboard-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.achievement-table-container {
+  width: 100%;
   padding-bottom: 8px;
 }
 
-.leaderboard-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: var(--mat-sys-surface-container-low);
-  border: 1px solid var(--mat-sys-outline-variant);
-  cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
-              background-color 0.2s ease, 
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+.achievement-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
 
-  &:hover {
-    background: var(--mat-sys-surface-container-high);
-    border-color: var(--mat-sys-primary-container);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  th {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+    padding: 8px 12px;
+    border-bottom: 1.5px solid var(--mat-sys-outline-variant);
+    opacity: 0.8;
   }
 
-  &:active {
-    transform: translateY(0) scale(0.98);
+  .col-rank {
+    width: 60px;
+    text-align: center;
   }
-}
 
-.rank-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
+  .col-user {
+    text-align: start;
+    padding-inline-start: 16px;
+  }
+
+  .col-count {
+    width: 100px;
+    text-align: center;
+  }
+
+  .leaderboard-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+
+    &:hover {
+      background-color: var(--mat-sys-surface-container-low);
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--mat-sys-surface-container-high);
+      vertical-align: middle;
+    }
+  }
 }
 
 .rank-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 24px;
@@ -103,15 +115,12 @@ mat-dialog-content.dialog-content-container {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1;
-  margin-inline-start: 12px;
-  overflow: hidden;
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   object-fit: cover;
   border: 1px solid var(--mat-sys-outline-variant);
   background: var(--mat-sys-surface-container-highest);
@@ -125,21 +134,17 @@ mat-dialog-content.dialog-content-container {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.achievement-count {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+  max-width: 150px;
 }
 
 .count-badge {
+  display: inline-block;
   font-size: 0.8rem;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 20px;
   background: var(--mat-sys-primary-container);
   color: var(--mat-sys-on-primary-container);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   font-family: 'Outfit', sans-serif;
 }

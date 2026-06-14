@@ -8,30 +8,38 @@
   } @else {
     @let rows = leaderboardQuery.data();
     @if (rows && rows.length > 0) {
-      <div class="achievement-leaderboard-list">
-        @for (row of rows; track row.user.id; let idx = $index) {
-          <div class="leaderboard-row" (click)="onUserClick(row.user.id)">
-            <!-- Rank Badge -->
-            <div class="rank-container">
-              <span class="rank-badge" [class]="'rank-' + (idx + 1)">
-                {{ idx + 1 }}
-              </span>
-            </div>
-
-            <!-- User Avatar & Title -->
-            <div class="user-info">
-              <img [appAvatar]="row.user" class="user-avatar" />
-              <span class="user-name">{{ row.user.title || row.user.name }}</span>
-            </div>
-
-            <!-- Achievement Count -->
-            <div class="achievement-count">
-              <span class="count-badge">
-                {{ 'achievement.leaderboard.earnedTimes' | translate: { count: row.count } }}
-              </span>
-            </div>
-          </div>
-        }
+      <div class="achievement-table-container">
+        <table class="achievement-table">
+          <thead>
+            <tr>
+              <th class="col-rank">{{ 'leaderboard.rank' | translate }}</th>
+              <th class="col-user">{{ 'leaderboard.user' | translate }}</th>
+              <th class="col-count">{{ 'profile.achievements' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track row.user.id; let idx = $index) {
+              <tr class="leaderboard-row" (click)="onUserClick(row.user.id)">
+                <td class="col-rank">
+                  <span class="rank-badge" [class]="'rank-' + (idx + 1)">
+                    {{ idx + 1 }}
+                  </span>
+                </td>
+                <td class="col-user">
+                  <div class="user-info">
+                    <img [appAvatar]="row.user" class="user-avatar" />
+                    <span class="user-name">{{ row.user.title || row.user.name }}</span>
+                  </div>
+                </td>
+                <td class="col-count">
+                  <span class="count-badge">
+                    {{ row.count }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     } @else {
       <app-empty-state
