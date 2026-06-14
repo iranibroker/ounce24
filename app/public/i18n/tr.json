@@ -300,7 +300,8 @@
       "invalidEntry": "Geçersiz sinyal girişi",
       "maxActive": "Maksimum aktif sinyal sayısına ulaştınız ({{value}})",
       "maxDaily": "Maksimum günlük sinyal sayısına ulaştınız ({{value}})",
-      "near": "Bu giriş fiyatına yakın bir sinyaliniz var"
+      "near": "Bu giriş fiyatına yakın bir sinyaliniz var",
+      "marketClosed": "Piyasa kapalıyken sinyal oluşturulamaz"
     }
   },
   "achievement": {

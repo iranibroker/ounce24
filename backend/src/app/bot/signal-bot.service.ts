@@ -310,9 +310,20 @@ export class SignalBotService extends BaseBot {
     }
   }
 
+  @Command('new_signal')
   @Action('new_signal')
   async newSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
+    if (!this.ouncePriceService.isMarketOpen()) {
+      const user = await this.getUser(ctx.from.id);
+      const lang = user?.language || 'fa';
+      const t = getTranslation(lang);
+      if (ctx.callbackQuery) {
+        await ctx.answerCbQuery(t.marketClosed).catch(() => {});
+      }
+      await ctx.reply(t.marketClosed, { parse_mode: 'HTML' });
+      return;
+    }
     const user = await this.getUser(ctx.from.id);
     const signals = await this.signalModel
       .find({
@@ -371,6 +382,16 @@ export class SignalBotService extends BaseBot {
   @Action('new_sell_signal')
   async newSellSignal(@Ctx() ctx: Context) {
     if (!(await this.isValid(ctx))) return;
+    if (!this.ouncePriceService.isMarketOpen()) {
+      const user = await this.getUser(ctx.from.id);
+      const lang = user?.language || 'fa';
+      const t = getTranslation(lang);
+      if (ctx.callbackQuery) {
+        await ctx.answerCbQuery(t.marketClosed).catch(() => {});
+      }
+      await ctx.reply(t.marketClosed, { parse_mode: 'HTML' });
+      return;
+    }
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
     const signal = {
       type: isSell ? SignalType.Sell : SignalType.Buy,

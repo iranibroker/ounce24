@@ -56,6 +56,7 @@ describe('SignalsService', () => {
           provide: OuncePriceService,
           useValue: {
             current: 2300,
+            isMarketOpen: jest.fn().mockReturnValue(true),
           },
         },
         {
@@ -73,5 +74,14 @@ describe('SignalsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('addSignal market check', () => {
+    it('should throw HttpException if market is closed', async () => {
+      const ouncePriceService = service['ouncePriceService'];
+      jest.spyOn(ouncePriceService, 'isMarketOpen').mockReturnValue(false);
+
+      await expect(service.addSignal({} as any)).rejects.toThrow();
+    });
   });
 });

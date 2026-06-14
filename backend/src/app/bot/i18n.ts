@@ -3,6 +3,7 @@ export interface BotTranslation {
   welcomeSignalMenu: string;
   firstSignalRewardMessage: string;
   joinChannelRequired: string;
+  marketClosed: string;
   languageSelected: (lang: string) => string;
   selectLanguage: string;
   supportPrompt: string;
@@ -104,6 +105,7 @@ Please join the channel below to use the bot.
 
 @Ounce24_signal
 `,
+    marketClosed: `⚠️ <b>Market is Closed</b>\n\nSignals cannot be registered or created while the gold market is closed.`,
     languageSelected: (lang: string) => `✅ Language changed to ${lang}`,
     selectLanguage: '🌐 Select your preferred language:',
     supportPrompt: `For support and feedback, please contact our support team directly on Telegram:`,
@@ -215,6 +217,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
 
 @Ounce24_signal
 `,
+    marketClosed: `⚠️ <b>بازار بسته است</b>\n\nامکان ثبت سیگنال جدید در زمان بسته بودن بازار طلا وجود ندارد.`,
     languageSelected: (lang: string) => `✅ زبان به ${lang} تغییر کرد`,
     selectLanguage: '🌐 زبان مورد نظر خود را انتخاب کنید:',
     supportPrompt: `برای پشتیبانی و ارسال بازخورد، لطفاً مستقیماً با پشتیبانی ما در تلگرام در ارتباط باشید:`,
@@ -326,6 +329,7 @@ Podcasts are published weekly on the official Ounce24 channel. Join the channel 
 
 @Ounce24_signal
 `,
+    marketClosed: `⚠️ <b>السوق مغلق</b>\n\nلا يمكن تسجيل إشارة جديدة أثناء إغلاق سوق الذهب.`,
     languageSelected: (lang: string) => `✅ تم تغيير اللغة إلى ${lang}`,
     selectLanguage: '🌐 اختر لغتك المفضلة:',
     supportPrompt: `للدعم وإرسال الملاحظات، يرجى التواصل مباشرة مع فريق الدعم لدينا على تيليجرام:`,
@@ -437,6 +441,7 @@ Botu kullanmak için aşağıdaki kanala katıl.
 
 @Ounce24_signal
 `,
+    marketClosed: `⚠️ <b>Piyasa Kapalı</b>\n\nAltın piyasası kapalıyken yeni sinyal kaydedilemez.`,
     languageSelected: (lang: string) => `✅ Dil ${lang} olarak değiştirildi`,
     selectLanguage: '🌐 Tercih ettiğiniz dili seçin:',
     supportPrompt: `Destek ve geri bildirim için lütfen doğrudan Telegram üzerinden destek ekibimizle iletişime geçin:`,

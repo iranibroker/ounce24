@@ -10,7 +10,7 @@
     mat-stroked-button
     type="button"
     (click)="generateWithAI()"
-    [disabled]="isGenerating"
+    [disabled]="isGenerating || !isMarketOpen()"
     class="ai-generate-button"
   >
     <ng-icon name="lucideSparkles" class="ai-sparkles-icon" size="18px"></ng-icon>
@@ -136,7 +136,8 @@
       mat-flat-button
       color="primary"
       type="submit"
-      [disabled]="!form.valid || isSubmitting"
+      [disabled]="(!isMarketOpen() && form.valid) ? false : (!form.valid || isSubmitting)"
+      [class.market-closed-btn]="!isMarketOpen()"
     >
       {{ 'addSignal.submit' | translate }}
     </button>
@@ -146,6 +147,7 @@
         mat-button
         type="button"
         (click)="analyzeWithAI()"
+        [disabled]="!isMarketOpen()"
         class="analyze-button"
       >
         <ng-icon name="lucideSparkles" class="ai-sparkles-icon" size="18px"></ng-icon>

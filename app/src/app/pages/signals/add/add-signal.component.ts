@@ -53,6 +53,7 @@ export class AddSignalComponent {
   isSubmitting = false;
   isGenerating = false;
   private ounceService = inject(OuncePriceService);
+  isMarketOpen = this.ounceService.isMarketOpen;
   private auth = inject(AuthService);
   private translateService = inject(TranslateService);
   private dialog = inject(MatDialog);
@@ -151,6 +152,14 @@ export class AddSignalComponent {
   }
 
   onSubmit(): void {
+    if (!this.isMarketOpen()) {
+      this.snackBar.open(
+        this.translateService.instant('apiError.signal.marketClosed'),
+        this.translateService.instant('app.close'),
+        { duration: 3000 }
+      );
+      return;
+    }
     if (this.form.valid && !this.isSubmitting) {
       this.isSubmitting = true;
       const formValue = this.form.value;
@@ -191,10 +200,26 @@ export class AddSignalComponent {
   }
 
   analyzeWithAI(): void {
+    if (!this.isMarketOpen()) {
+      this.snackBar.open(
+        this.translateService.instant('apiError.signal.marketClosed'),
+        this.translateService.instant('app.close'),
+        { duration: 3000 }
+      );
+      return;
+    }
     this.analyzeService.openSignalAnalyze(this.form.getRawValue());
   }
 
   generateWithAI(): void {
+    if (!this.isMarketOpen()) {
+      this.snackBar.open(
+        this.translateService.instant('apiError.signal.marketClosed'),
+        this.translateService.instant('app.close'),
+        { duration: 3000 }
+      );
+      return;
+    }
     const hasGems = (this.auth.userQuery.data()?.gem ?? 0) >= 2;
     if (!hasGems) {
       this.dialog.open(GemRequiredDialogComponent, {

@@ -225,6 +225,15 @@ export class SignalsService {
 
 
   async addSignal(signal: Signal) {
+    if (!this.ouncePriceService.isMarketOpen()) {
+      throw new HttpException(
+        {
+          translationKey: 'signal.marketClosed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     signal.createdOuncePrice = this.ouncePriceService.current;
     signal.status = SignalStatus.Pending;
     signal.market_context = this.ouncePriceService.isMarketOpen() ? 'OPEN' : 'CLOSED';
@@ -561,6 +570,14 @@ export class SignalsService {
     userId?: string,
     overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
   ) {
+    if (!this.ouncePriceService.isMarketOpen()) {
+      throw new HttpException(
+        {
+          translationKey: 'signal.marketClosed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     try {
       // Normalize incoming signal properties in case it is a partial or form-based unsaved object.
       const signalType = signal.type;
@@ -741,6 +758,14 @@ export class SignalsService {
     userId: string,
     overrides?: { tradingStyle?: TradingStyle; riskTolerance?: RiskTolerance }
   ) {
+    if (!this.ouncePriceService.isMarketOpen()) {
+      throw new HttpException(
+        {
+          translationKey: 'signal.marketClosed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     try {
       const user = await this.userModel.findById(userId).exec();
       if (!user) {
