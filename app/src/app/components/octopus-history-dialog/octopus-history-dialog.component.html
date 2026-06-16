@@ -1,0 +1,47 @@
+<h2 mat-dialog-title class="dialog-title">
+  <ng-icon name="saxClockOutline" size="20px"></ng-icon>
+  <span>{{ 'octopus.leaderboard.history' | translate }}</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <app-data-loading *ngIf="historyQuery.isLoading()"></app-data-loading>
+  
+  <mat-nav-list *ngIf="!historyQuery.isLoading() && historyQuery.data() as history">
+    <div class="empty-state" *ngIf="history.length === 0">
+      {{ 'octopus.history.empty' | translate }}
+    </div>
+    
+    <div 
+      *ngFor="let item of history"
+      class="history-row"
+    >
+      <div class="history-left">
+        <span class="history-date">{{ item.voteDate | date:'mediumDate' }}</span>
+        <span class="history-price">&#64; ${{ item.votePrice | number:'1.2-2' }}</span>
+      </div>
+      <div class="history-right">
+        <div class="direction-indicator" [class.up]="item.direction === 'up'" [class.down]="item.direction === 'down'">
+          <ng-icon [name]="item.direction === 'up' ? 'saxTrendUpBold' : 'saxTrendDownBold'" size="16px"></ng-icon>
+          <span>{{ ('octopus.predict' + (item.direction === 'up' ? 'Up' : 'Down')) | translate }}</span>
+        </div>
+        <div class="history-outcome">
+          @if (item.points != null) {
+            <span class="outcome-price">Close: ${{ item.closePrice | number:'1.2-2' }}</span>
+            <span class="outcome-star" [class.win]="item.points > 0">
+              <span class="star-amount">{{ item.points > 0 ? '+1' : '0' }}</span>
+              <ng-icon name="saxStarOutline" size="14px" class="star-icon"></ng-icon>
+            </span>
+          } @else {
+            <span class="outcome-pending">{{ 'octopus.status.pending' | translate }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </mat-nav-list>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button class="close-btn" (click)="onClose()">
+    {{ 'app.close' | translate }}
+  </button>
+</mat-dialog-actions>

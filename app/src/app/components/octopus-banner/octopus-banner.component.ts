@@ -21,6 +21,6 @@ export class OctopusBannerComponent {
 
   goToOctopus(ev: Event) {
     ev.preventDefault();
-    this.router.navigate(['/signals/octopus']);
+    this.router.navigate(['/leaderboard/octopus']);
   }
 }

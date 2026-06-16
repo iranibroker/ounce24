@@ -1,6 +1,6 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxInfoCircleOutline, saxClockOutline } from '@ng-icons/iconsax/outline';
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '@ounce24/types';
 import { injectQuery } from '@tanstack/angular-query-experimental';
@@ -53,13 +53,29 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     return new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date());
   }
 
-  monthCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
-  weekCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
+  monthCountdown = signal<{ days: number; hours: number; minutes: number; seconds: number }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  weekCountdown = signal<{ days: number; hours: number; minutes: number; seconds: number }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   private timer: any = null;
+
+  weekCountdownText = computed(() => {
+    const time = this.weekCountdown();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return time.days > 0
+      ? `${time.days}d ${pad(time.hours)}:${pad(time.minutes)}`
+      : `${pad(time.hours)}:${pad(time.minutes)}`;
+  });
+
+  monthCountdownText = computed(() => {
+    const time = this.monthCountdown();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return time.days > 0
+      ? `${time.days}d ${pad(time.hours)}:${pad(time.minutes)}`
+      : `${pad(time.hours)}:${pad(time.minutes)}`;
+  });
 
   ngOnInit() {
     this.updateCountdowns();
-    this.timer = setInterval(() => this.updateCountdowns(), 60000);
+    this.timer = setInterval(() => this.updateCountdowns(), 1000);
   }
 
   ngOnDestroy() {
@@ -77,12 +93,13 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     const nextMonthStart = new Date(Date.UTC(currentYear, currentMonth + 1, 1, 0, 0, 0, 0));
     const monthDiff = nextMonthStart.getTime() - now.getTime();
     if (monthDiff <= 0) {
-      this.monthCountdown.set({ days: 0, hours: 0, minutes: 0 });
+      this.monthCountdown.set({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     } else {
       const days = Math.floor(monthDiff / 86400000);
       const hrs = Math.floor((monthDiff % 86400000) / 3600000);
       const mins = Math.floor((monthDiff % 3600000) / 60000);
-      this.monthCountdown.set({ days, hours: hrs, minutes: mins });
+      const secs = Math.floor((monthDiff % 60000) / 1000);
+      this.monthCountdown.set({ days, hours: hrs, minutes: mins, seconds: secs });
     }
 
     // Weekly Countdown (ends on Friday 17:00 America/New_York trading close)
@@ -124,12 +141,13 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
     const weekDiff = targetDate.getTime() - now.getTime();
     if (weekDiff <= 0) {
-      this.weekCountdown.set({ days: 0, hours: 0, minutes: 0 });
+      this.weekCountdown.set({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     } else {
       const days = Math.floor(weekDiff / 86400000);
       const hrs = Math.floor((weekDiff % 86400000) / 3600000);
       const mins = Math.floor((weekDiff % 3600000) / 60000);
-      this.weekCountdown.set({ days, hours: hrs, minutes: mins });
+      const secs = Math.floor((weekDiff % 60000) / 1000);
+      this.weekCountdown.set({ days, hours: hrs, minutes: mins, seconds: secs });
     }
   }
 

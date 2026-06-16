@@ -11,6 +11,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterModule, Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   saxArrowLeftOutline,
   saxStarOutline,
@@ -26,6 +28,7 @@ import { AuthService } from '../../../services/auth.service';
 import { LanguageService } from '../../../services/language.service';
 import { DataLoadingComponent } from '../../../components/data-loading/data-loading.component';
 import { AvatarDirective } from '../../../directives/avatar.directive';
+import { OctopusHistoryDialogComponent } from '../../../components/octopus-history-dialog/octopus-history-dialog.component';
 
 function getVotingState(now: Date, cutoffHour: number): { enabled: boolean; nextTransition: Date } {
   const day = now.getUTCDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
@@ -94,7 +97,9 @@ function getVotingState(now: Date, cutoffHour: number): { enabled: boolean; next
     RouterModule,
     NgIcon,
     DataLoadingComponent,
-    AvatarDirective
+    AvatarDirective,
+    MatDialogModule,
+    MatTooltipModule,
   ],
   providers: [
     provideIcons({
@@ -117,6 +122,7 @@ export class OctopusComponent implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
   private readonly queryClient = inject(QueryClient);
+  private readonly dialog = inject(MatDialog);
   
   public priceService = inject(OuncePriceService);
   public authService = inject(AuthService);
@@ -132,11 +138,27 @@ export class OctopusComponent implements OnInit, OnDestroy {
                    lang === 'tr' ? 'tr-TR' : 'en-US';
     return new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date());
   }
-  monthCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
-  weekCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
+  monthCountdown = signal<{ days: number; hours: number; minutes: number; seconds: number }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  weekCountdown = signal<{ days: number; hours: number; minutes: number; seconds: number }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   isSubmitting = signal<boolean>(false);
   isEditing = signal<boolean>(false);
   private timer: any = null;
+
+  weekCountdownText = computed(() => {
+    const time = this.weekCountdown();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return time.days > 0
+      ? `${time.days}d ${pad(time.hours)}:${pad(time.minutes)}`
+      : `${pad(time.hours)}:${pad(time.minutes)}`;
+  });
+
+  monthCountdownText = computed(() => {
+    const time = this.monthCountdown();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return time.days > 0
+      ? `${time.days}d ${pad(time.hours)}:${pad(time.minutes)}`
+      : `${pad(time.hours)}:${pad(time.minutes)}`;
+  });
 
   constructor() {
     effect(() => {
@@ -227,15 +249,7 @@ export class OctopusComponent implements OnInit, OnDestroy {
     };
   });
 
-  // User's past Octopus predictions history query
-  historyQuery = injectQuery(() => {
-    const user = this.authService.userQuery.data();
-    return {
-      queryKey: ['octopusHistory', user?.id],
-      queryFn: () => lastValueFrom(this.http.get<any[]>('/api/octopus/me/history')),
-      enabled: !!user?.id,
-    };
-  });
+
 
   private startCountdown() {
     this.updateCountdown();
@@ -259,16 +273,21 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
     const diff = state.nextTransition.getTime() - now.getTime();
     if (diff <= 0) {
-      this.countdownText.set('00:00:00');
+      this.countdownText.set('00:00');
       return;
     }
 
-    const hrs = Math.floor(diff / 3600000);
+    const totalHours = Math.floor(diff / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
+    const days = Math.floor(totalHours / 24);
+    const hrs = totalHours % 24;
 
     const pad = (n: number) => n.toString().padStart(2, '0');
-    this.countdownText.set(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
+    if (days > 0) {
+      this.countdownText.set(`${days}d ${pad(hrs)}:${pad(mins)}`);
+    } else {
+      this.countdownText.set(`${pad(hrs)}:${pad(mins)}`);
+    }
 
     // Calculate month countdown
     const currentYear = now.getUTCFullYear();
@@ -276,12 +295,13 @@ export class OctopusComponent implements OnInit, OnDestroy {
     const nextMonthStart = new Date(Date.UTC(currentYear, currentMonth + 1, 1, 0, 0, 0, 0));
     const monthDiff = nextMonthStart.getTime() - now.getTime();
     if (monthDiff <= 0) {
-      this.monthCountdown.set({ days: 0, hours: 0, minutes: 0 });
+      this.monthCountdown.set({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     } else {
       const days = Math.floor(monthDiff / 86400000);
       const hoursLeft = Math.floor((monthDiff % 86400000) / 3600000);
       const minsLeft = Math.floor((monthDiff % 3600000) / 60000);
-      this.monthCountdown.set({ days, hours: hoursLeft, minutes: minsLeft });
+      const secsLeft = Math.floor((monthDiff % 60000) / 1000);
+      this.monthCountdown.set({ days, hours: hoursLeft, minutes: minsLeft, seconds: secsLeft });
     }
 
     // Calculate week countdown (ends on Friday 17:00 America/New_York trading close)
@@ -323,12 +343,13 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
     const weekDiff = targetDate.getTime() - now.getTime();
     if (weekDiff <= 0) {
-      this.weekCountdown.set({ days: 0, hours: 0, minutes: 0 });
+      this.weekCountdown.set({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     } else {
       const days = Math.floor(weekDiff / 86400000);
       const hoursLeft = Math.floor((weekDiff % 86400000) / 3600000);
       const minsLeft = Math.floor((weekDiff % 3600000) / 60000);
-      this.weekCountdown.set({ days, hours: hoursLeft, minutes: minsLeft });
+      const secsLeft = Math.floor((weekDiff % 60000) / 1000);
+      this.weekCountdown.set({ days, hours: hoursLeft, minutes: minsLeft, seconds: secsLeft });
     }
   }
 
@@ -362,7 +383,14 @@ export class OctopusComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/signals']);
+    this.router.navigate(['/leaderboard']);
+  }
+
+  openHistoryDialog() {
+    this.dialog.open(OctopusHistoryDialogComponent, {
+      width: '450px',
+      maxWidth: '95vw',
+    });
   }
 
   mapToUserShape(entry: any): any {
