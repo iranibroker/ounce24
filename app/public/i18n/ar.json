@@ -206,6 +206,7 @@
     "signalCount": "{{value}} إشارات",
     "rank": "#",
     "user": "المستخدم",
+    "userWithCount": "المستخدم ({{count}})",
     "signals": "إشارات",
     "success": "TP",
     "loss": "SL",

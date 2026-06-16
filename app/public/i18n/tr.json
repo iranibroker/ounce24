@@ -206,6 +206,7 @@
     "signalCount": "{{value}} sinyal",
     "rank": "#",
     "user": "Kullanıcı",
+    "userWithCount": "Kullanıcı ({{count}})",
     "signals": "Sinyal",
     "success": "TP",
     "loss": "SL",

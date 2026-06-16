@@ -174,6 +174,15 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     refetchInterval: 30000,
   }));
 
+  userCountQuery = injectQuery(() => ({
+    queryKey: ['userCount'],
+    queryFn: () =>
+      lastValueFrom(
+        this.http.get<{ count: number }>('/api/users/count')
+      ),
+    refetchInterval: 30000,
+  }));
+
   openScoreInfo(): void {
     this.dialog.open(ScoreInfoDialogComponent, {
       width: '500px',

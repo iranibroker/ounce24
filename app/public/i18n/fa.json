@@ -220,6 +220,7 @@
     "signalCount": "{{value}} سیگنال",
     "rank": "#",
     "user": "کاربر",
+    "userWithCount": "کاربر ({{count}} نفر)",
     "signals": "سیگنال",
     "success": "TP",
     "loss": "SL",

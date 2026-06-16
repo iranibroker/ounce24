@@ -24,6 +24,7 @@ import { MatDividerModule } from '@angular/material/divider';
 export class LeaderboardTableComponent {
   data = input<User[]>();
   period = input<'week' | 'month' | 'total'>('total');
+  userCount = input<number>();
   authService = inject(AuthService);
 
   getSignalsCount(user: User): number {

@@ -21,7 +21,13 @@
           <thead>
             <tr>
               <th class="col-rank">{{ 'leaderboard.rank' | translate }}</th>
-              <th class="col-user">{{ 'leaderboard.user' | translate }}</th>
+              <th class="col-user">
+                @if (userCountQuery.data()?.count) {
+                  {{ 'leaderboard.userWithCount' | translate: { count: (userCountQuery.data()?.count | number) } }}
+                } @else {
+                  {{ 'leaderboard.user' | translate }}
+                }
+              </th>
               <th class="col-count">{{ 'profile.achievements' | translate }}</th>
             </tr>
           </thead>

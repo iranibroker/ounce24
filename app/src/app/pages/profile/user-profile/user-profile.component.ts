@@ -1,7 +1,7 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxArrowLeftOutline, saxEditOutline, saxCupOutline, saxStarOutline, saxActivityOutline, saxPercentageCircleOutline, saxJudgeOutline, saxCalendarOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { ACHIEVEMENT_ICONS_MAP, getAchievementIcon, getAchievementClass } from '../../../shared/utils/achievement-helper';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -71,6 +71,8 @@ export class UserProfileComponent {
   private readonly dialog = inject(MatDialog);
 
   private readonly routeParams = toSignal(this.route.params);
+  
+  isFollowingLoading = signal(false);
   
   readonly userId = computed(() => {
     const params = this.routeParams();
@@ -232,12 +234,20 @@ export class UserProfileComponent {
 
   toggleFollow() {
     const user = this.userQuery.data();
-    if (!user) return;
+    if (!user || this.isFollowingLoading()) return;
+    this.isFollowingLoading.set(true);
     const isFollowing = user.isFollowing;
     const url = `/api/users/${user.id}/${isFollowing ? 'unfollow' : 'follow'}`;
     this.http.post(url, {}).subscribe({
       next: () => {
-        this.userQuery.refetch();
+        this.userQuery.refetch().then(() => {
+          this.isFollowingLoading.set(false);
+        }).catch(() => {
+          this.isFollowingLoading.set(false);
+        });
+      },
+      error: () => {
+        this.isFollowingLoading.set(false);
       }
     });
   }

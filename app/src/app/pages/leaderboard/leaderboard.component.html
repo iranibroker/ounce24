@@ -22,7 +22,7 @@
             ⏰ {{ weekCountdownText() }}
           </span>
         </div>
-        <app-leaderboard-table [data]="queryWeek.data()" period="week" />
+        <app-leaderboard-table [data]="queryWeek.data()" period="week" [userCount]="userCountQuery.data()?.count" />
       </ng-template>
     </mat-tab>
     <mat-tab label="{{ 'leaderboard.month' | translate }}">
@@ -33,12 +33,12 @@
             ⏰ {{ monthCountdownText() }}
           </span>
         </div>
-        <app-leaderboard-table [data]="queryMonth.data()" period="month" />
+        <app-leaderboard-table [data]="queryMonth.data()" period="month" [userCount]="userCountQuery.data()?.count" />
       </ng-template>
     </mat-tab>
     <mat-tab label="{{ 'leaderboard.total' | translate }}">
       <ng-template matTabContent>
-        <app-leaderboard-table [data]="query.data()" period="total" />
+        <app-leaderboard-table [data]="query.data()" period="total" [userCount]="userCountQuery.data()?.count" />
       </ng-template>
     </mat-tab>
   </mat-tab-group>

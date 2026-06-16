@@ -263,6 +263,10 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     return usersWithRank;
   }
 
+  async countUsers(): Promise<number> {
+    return this.userModel.countDocuments({}).exec();
+  }
+
   async findById(id: string) {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new NotFoundException({

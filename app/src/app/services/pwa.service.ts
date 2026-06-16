@@ -1,5 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { TelegramService } from './telegram.service';
 
 const PWA_PROMPT_KEY = 'ounce_pwa_prompted';
 
@@ -7,6 +8,7 @@ const PWA_PROMPT_KEY = 'ounce_pwa_prompted';
   providedIn: 'root',
 })
 export class PwaService {
+  private telegramService = inject(TelegramService);
   private deferredPrompt: any = null;
   isInstallable = signal<boolean>(false);
   isStandalone = signal<boolean>(
@@ -31,6 +33,9 @@ export class PwaService {
   }
 
   isPwaSupported(): boolean {
+    if (this.telegramService.isTelegramApp) {
+      return false;
+    }
     if (!environment.production) {
       return true;
     }

@@ -7,7 +7,13 @@
       <!-- Table Header -->
       <div class="league-header-row">
         <div class="col-rank">{{ 'leaderboard.rank' | translate }}</div>
-        <div class="col-user">{{ 'leaderboard.user' | translate }}</div>
+        <div class="col-user">
+          @if (userCount()) {
+            {{ 'leaderboard.userWithCount' | translate: { count: (userCount() | number) } }}
+          } @else {
+            {{ 'leaderboard.user' | translate }}
+          }
+        </div>
         <div class="col-signals">{{ 'leaderboard.signals' | translate }}</div>
         <div class="col-success">{{ 'leaderboard.success' | translate }}</div>
         <div class="col-loss">{{ 'leaderboard.loss' | translate }}</div>

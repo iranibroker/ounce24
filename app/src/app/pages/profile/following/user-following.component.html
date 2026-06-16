@@ -30,9 +30,10 @@
                       [class.follow-btn-flat]="!user.isFollowing"
                       [class.follow-btn-stroked]="user.isFollowing"
                       class="follow-action-btn-compact" 
+                      [disabled]="loadingUserIds().has(user.id)"
                       (click)="toggleFollow(user); $event.stopPropagation()"
                     >
-                      {{ (user.isFollowing ? 'profile.unfollow' : 'profile.follow') | translate }}
+                      {{ loadingUserIds().has(user.id) ? '...' : ((user.isFollowing ? 'profile.unfollow' : 'profile.follow') | translate) }}
                     </button>
                   }
                 </mat-card-content>
@@ -80,9 +81,10 @@
                       [class.follow-btn-flat]="!user.isFollowing"
                       [class.follow-btn-stroked]="user.isFollowing"
                       class="follow-action-btn-compact" 
+                      [disabled]="loadingUserIds().has(user.id)"
                       (click)="toggleFollow(user); $event.stopPropagation()"
                     >
-                      {{ (user.isFollowing ? 'profile.unfollow' : 'profile.follow') | translate }}
+                      {{ loadingUserIds().has(user.id) ? '...' : ((user.isFollowing ? 'profile.unfollow' : 'profile.follow') | translate) }}
                     </button>
                   }
                 </mat-card-content>

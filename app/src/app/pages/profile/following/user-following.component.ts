@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
@@ -45,6 +45,7 @@ export class UserFollowingComponent implements OnInit {
   readonly auth = inject(AuthService);
 
   activeTabIndex = 0; // 0 = followers, 1 = following
+  loadingUserIds = signal<Set<string>>(new Set());
 
   targetUserId = computed(() => {
     return this.route.snapshot.params['id'] || this.auth.userQuery.data()?.id;
@@ -116,14 +117,42 @@ export class UserFollowingComponent implements OnInit {
   }
 
   toggleFollow(user: any) {
+    const userId = user.id || user._id;
+    if (!userId || this.loadingUserIds().has(userId)) return;
+    this.loadingUserIds.update(set => {
+      const next = new Set(set);
+      next.add(userId);
+      return next;
+    });
     const isFollowing = user.isFollowing;
-    const endpoint = `/api/users/${user.id || user._id}/${isFollowing ? 'unfollow' : 'follow'}`;
+    const endpoint = `/api/users/${userId}/${isFollowing ? 'unfollow' : 'follow'}`;
     this.http.post(endpoint, {}).subscribe({
       next: () => {
-        this.followingQuery.refetch();
-        this.followersQuery.refetch();
-        this.auth.userQuery.refetch();
+        Promise.all([
+          this.followingQuery.refetch(),
+          this.followersQuery.refetch(),
+          this.auth.userQuery.refetch()
+        ]).then(() => {
+          this.loadingUserIds.update(set => {
+            const next = new Set(set);
+            next.delete(userId);
+            return next;
+          });
+        }).catch(() => {
+          this.loadingUserIds.update(set => {
+            const next = new Set(set);
+            next.delete(userId);
+            return next;
+          });
+        });
       },
+      error: () => {
+        this.loadingUserIds.update(set => {
+          const next = new Set(set);
+          next.delete(userId);
+          return next;
+        });
+      }
     });
   }
 }

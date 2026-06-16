@@ -55,6 +55,13 @@ export class UsersController {
   }
 
   @Public()
+  @Get('count')
+  async getUserCount() {
+    const count = await this.usersService.countUsers();
+    return { count };
+  }
+
+  @Public()
   @Get('leaderboard')
   async getLeaderboard(@Query('userId') userId?: string) {
     return this.usersService.getLeaderboard(0, 30, userId);

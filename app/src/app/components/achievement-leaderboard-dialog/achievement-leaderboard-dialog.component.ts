@@ -71,6 +71,14 @@ export class AchievementLeaderboardDialogComponent {
       ),
   }));
 
+  userCountQuery = injectQuery(() => ({
+    queryKey: ['userCount'],
+    queryFn: () =>
+      lastValueFrom(
+        this.http.get<{ count: number }>('/api/users/count')
+      ),
+  }));
+
   getAchievementClass(type: AchievementType): string {
     return getAchievementClass(type);
   }
