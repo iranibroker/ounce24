@@ -306,22 +306,42 @@
   },
   "achievement": {
     "emptyState": "Başarı bulunamadı",
+    "leaderboard": {
+      "title": "Rozet Liderlik Tablosu",
+      "empty": "Henüz kimse bu rozeti kazanmadı",
+      "earnedTimes": "{{count}} kez"
+    },
     "newAchievementDialog": {
       "title": "Yeni Başarı 🎉"
+    },
+    "reward": "Ödül: {{count}} GEM",
+    "description": {
+      "WEEK_WIN": "Haftalık liderlik tablosunu 1. sırada tamamlayarak kazanılır.",
+      "MONTH_WIN": "Aylık liderlik tablosunu 1. sırada tamamlayarak kazanılır.",
+      "BEST_SIGNAL_WEEK": "Hafta boyunca kapatılan en yüksek puanlı sinyali paylaşarak kazanılır.",
+      "BEST_SIGNAL_MONTH": "Ay boyunca kapatılan en yüksek puanlı sinyali paylaşarak kazanılır.",
+      "HATRIK_20_POINTS": "20+ puan alan ardışık 3 sinyal (hat-trick) paylaşarak kazanılır.",
+      "FIFTY_POINT": "Tek bir sinyalde 50+ puan kazanarak elde edilir.",
+      "FIVE_STREAK_R1": "Kapatılan sinyallerde 5 kazanç serisi (her biri R/R >= 1) elde ederek kazanılır.",
+      "WINRATE_60_IN_30": "Bir miladi ayda %60+ kazanma oranı (en az 10 sinyal) elde ederek kazanılır.",
+      "OCTOPUS_WEEK_WIN": "Haftalık Ahtapot tahmin liderlik tablosunda 1. olarak kazanılır.",
+      "OCTOPUS_MONTH_WIN": "Aylık Ahtapot tahmin liderlik tablosunda 1. olarak kazanılır.",
+      "OCTOPUS_5_STREAK": "Üst üste 5 gün boyunca altın fiyatı yönünü doğru tahmin ederek kazanılır.",
+      "OCTOPUS_10_STREAK": "Üst üste 10 gün boyunca altın fiyatı yönünü doğru tahmin ederek kazanılır."
     },
     "type": {
       "WEEK_WIN": "Haftanın Kazananı",
       "MONTH_WIN": "Ayın Kazananı",
       "BEST_SIGNAL_WEEK": "Haftanın En İyi Sinyali",
       "BEST_SIGNAL_MONTH": "Ayın En İyi Sinyali",
-      "HATRIK_20_POINTS": "20 Puanlık Sinyal Hat-trick'i",
-      "FIFTY_POINT": "50+ Puanlık Sinyal",
-      "FIVE_STREAK_R1": "5 Kapalı Kazanç Sinyali (R/R >= 1)",
-      "WINRATE_60_IN_30": "Bir miladi ayda %60+ Kazanma Oranı (En az 10 sinyal)",
+      "HATRIK_20_POINTS": "20 Puan Hat-trick",
+      "FIFTY_POINT": "50+ Puan Sinyal",
+      "FIVE_STREAK_R1": "5 Sinyal Serisi",
+      "WINRATE_60_IN_30": "%60+ Kazanma Oranı",
       "OCTOPUS_WEEK_WIN": "Haftalık Ahtapot Kazananı",
       "OCTOPUS_MONTH_WIN": "Aylık Ahtapot Kazananı",
-      "OCTOPUS_5_STREAK": "Ahtapot 5 Doğru Tahmin Serisi",
-      "OCTOPUS_10_STREAK": "Ahtapot 10 Doğru Tahmin Serisi"
+      "OCTOPUS_5_STREAK": "Ahtapot 5'li Seri",
+      "OCTOPUS_10_STREAK": "Ahtapot 10'lu Seri"
     },
     "category": {
       "competition": "Yarışma Başarıları",
@@ -637,7 +657,7 @@
       "individualTitle": "Bireysel Başarılar",
       "individualDesc": "20 puanlık sinyal hat-trick'i, 50+ puanlık sinyal veya 5 kazanç serisi kilidini açarak 30 GEM kazanın. Bir miladi ayda %60+ kazanma oranı başarısının kilidini açarak 50 GEM kazanın.",
       "octopusTitle": "Ahtapot Tahmin Mücadelesi",
-      "octopusDesc": "Ahtapot başarıları ve günlük tahminler şu anda GEM kazandırmamaktadır."
+      "octopusDesc": "Günlük tahminler GEM kazandırmaz, ancak Ahtapot başarıları 10 ila 100 GEM arasında ödül kazandırır."
     },
     "historyEmpty": "İşlem geçmişi bulunamadı",
     "actions": {

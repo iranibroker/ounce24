@@ -328,19 +328,34 @@
     "newAchievementDialog": {
       "title": "New Achievement 🎉"
     },
+    "reward": "Reward: {{count}} Gems",
+    "description": {
+      "WEEK_WIN": "Earned by finishing 1st on the weekly leaderboard.",
+      "MONTH_WIN": "Earned by finishing 1st on the monthly leaderboard.",
+      "BEST_SIGNAL_WEEK": "Earned by posting the highest-scoring signal closed during a week.",
+      "BEST_SIGNAL_MONTH": "Earned by posting the highest-scoring signal closed during a month.",
+      "HATRIK_20_POINTS": "Earned by getting a hattrick (3 in a row) of signals scoring 20+ points.",
+      "FIFTY_POINT": "Earned by posting a single signal scoring 50+ points.",
+      "FIVE_STREAK_R1": "Earned by achieving a 5-win streak of closed signals (each with risk/reward >= 1).",
+      "WINRATE_60_IN_30": "Earned by achieving a win rate of 60%+ in a Gregorian month (minimum 10 signals).",
+      "OCTOPUS_WEEK_WIN": "Earned by finishing 1st on the weekly Octopus prediction leaderboard.",
+      "OCTOPUS_MONTH_WIN": "Earned by finishing 1st on the monthly Octopus prediction leaderboard.",
+      "OCTOPUS_5_STREAK": "Earned by predicting 5 correct daily gold price directions in a row.",
+      "OCTOPUS_10_STREAK": "Earned by predicting 10 correct daily gold price directions in a row."
+    },
     "type": {
       "WEEK_WIN": "Week Winner",
       "MONTH_WIN": "Month Winner",
       "BEST_SIGNAL_WEEK": "Best Weekly Signal",
       "BEST_SIGNAL_MONTH": "Best Monthly Signal",
-      "HATRIK_20_POINTS": "Hattrick of 20pt Signals",
-      "FIFTY_POINT": "50+ Points Signal",
-      "FIVE_STREAK_R1": "5-Win Streak (R/R >= 1)",
-      "WINRATE_60_IN_30": "60%+ Win Rate in a Gregorian month (Min 10 signals)",
+      "HATRIK_20_POINTS": "20pt Hattrick",
+      "FIFTY_POINT": "50+ Pt Signal",
+      "FIVE_STREAK_R1": "5-Win Streak",
+      "WINRATE_60_IN_30": "60%+ Win Rate",
       "OCTOPUS_WEEK_WIN": "Octopus Weekly Winner",
       "OCTOPUS_MONTH_WIN": "Octopus Monthly Winner",
-      "OCTOPUS_5_STREAK": "5 Correct Predictions Streak",
-      "OCTOPUS_10_STREAK": "10 Correct Predictions Streak"
+      "OCTOPUS_5_STREAK": "5-Prediction Streak",
+      "OCTOPUS_10_STREAK": "10-Prediction Streak"
     },
     "category": {
       "competition": "Competition Achievements",
@@ -656,7 +671,7 @@
       "individualTitle": "Individual Achievements",
       "individualDesc": "Earn 30 gems for unlocking Hattrick of 20pt, 50+ Points Signal, or 5-Win Streak. Earn 50 gems for unlocking the Win Rate 60%+ in a Gregorian month achievement.",
       "octopusTitle": "Octopus Prediction Challenge",
-      "octopusDesc": "Octopus achievements and daily predictions currently do not award gems."
+      "octopusDesc": "Daily predictions do not award gems, but Octopus achievements award between 10 to 100 gems."
     },
     "historyEmpty": "No transaction logs found",
     "actions": {

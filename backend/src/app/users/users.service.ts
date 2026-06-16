@@ -975,10 +975,10 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
       [AchievementType.FiftyPoint]: 30,
       [AchievementType.FiveStreakR1]: 30,
       [AchievementType.Winrate60In30]: 50,
-      [AchievementType.OctopusWeekWin]: 0,
-      [AchievementType.OctopusMonthWin]: 0,
-      [AchievementType.Octopus5Streak]: 0,
-      [AchievementType.Octopus10Streak]: 0,
+      [AchievementType.OctopusWeekWin]: 10,
+      [AchievementType.OctopusMonthWin]: 30,
+      [AchievementType.Octopus5Streak]: 20,
+      [AchievementType.Octopus10Streak]: 100,
     };
 
     const reward = rewardMap[type] || 0;

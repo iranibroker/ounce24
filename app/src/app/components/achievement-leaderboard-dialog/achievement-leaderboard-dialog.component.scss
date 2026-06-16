@@ -148,3 +148,108 @@ mat-dialog-content.dialog-content-container {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   font-family: 'Outfit', sans-serif;
 }
+
+.achievement-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+
+  &.gold-achievement {
+    background: linear-gradient(135deg, rgba(255, 167, 81, 0.08), rgba(255, 167, 81, 0.02));
+    border: 1px solid rgba(255, 167, 81, 0.2);
+    .reward-tag {
+      background: rgba(255, 167, 81, 0.12);
+      color: #FFA751;
+      border: 1px solid rgba(255, 167, 81, 0.25);
+    }
+  }
+
+  &.purple-achievement {
+    background: linear-gradient(135deg, rgba(243, 85, 218, 0.08), rgba(243, 85, 218, 0.02));
+    border: 1px solid rgba(243, 85, 218, 0.2);
+    .reward-tag {
+      background: rgba(243, 85, 218, 0.12);
+      color: #F355DA;
+      border: 1px solid rgba(243, 85, 218, 0.25);
+    }
+  }
+
+  &.blue-achievement {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.08), rgba(79, 172, 254, 0.02));
+    border: 1px solid rgba(79, 172, 254, 0.2);
+    .reward-tag {
+      background: rgba(79, 172, 254, 0.12);
+      color: #4FACFE;
+      border: 1px solid rgba(79, 172, 254, 0.25);
+    }
+  }
+
+  &.orange-achievement {
+    background: linear-gradient(135deg, rgba(255, 147, 15, 0.08), rgba(255, 147, 15, 0.02));
+    border: 1px solid rgba(255, 147, 15, 0.2);
+    .reward-tag {
+      background: rgba(255, 147, 15, 0.12);
+      color: #FF930F;
+      border: 1px solid rgba(255, 147, 15, 0.25);
+    }
+  }
+
+  &.green-achievement {
+    background: linear-gradient(135deg, rgba(40, 199, 111, 0.08), rgba(40, 199, 111, 0.02));
+    border: 1px solid rgba(40, 199, 111, 0.2);
+    .reward-tag {
+      background: rgba(40, 199, 111, 0.12);
+      color: #28C76F;
+      border: 1px solid rgba(40, 199, 111, 0.25);
+    }
+  }
+
+  .badge-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    
+    .badge-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .badge-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .description {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    .reward-tag {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      
+      .reward-icon {
+        display: flex;
+      }
+    }
+  }
+}

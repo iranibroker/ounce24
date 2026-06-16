@@ -3,6 +3,19 @@
   {{ 'achievement.leaderboard.title' | translate }}: {{ 'achievement.type.' + data.type | translate }}
 </h2>
 <mat-dialog-content class="dialog-content-container">
+  <div class="achievement-detail-header" [class]="getAchievementClass(data.type)">
+    <div class="badge-wrapper">
+      <img src="images/achievements/{{ data.type }}.png" class="badge-image" alt="" />
+    </div>
+    <div class="badge-info">
+      <p class="description">{{ 'achievement.description.' + data.type | translate }}</p>
+      <div class="reward-tag">
+        <ng-icon name="saxDiamondsBold" class="reward-icon" size="16px"></ng-icon>
+        <span>{{ 'achievement.reward' | translate: { count: rewardMap[data.type] } }}</span>
+      </div>
+    </div>
+  </div>
+
   @if (leaderboardQuery.isLoading()) {
     <app-data-loading />
   } @else {
