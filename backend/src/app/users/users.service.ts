@@ -388,24 +388,36 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // D. Winrate 60% in 30 signals (If R/R average upper 1): non-overlapping blocks of 30 signals where winrate >= 60% and average riskReward >= 1
+    // D. Winrate 60% in a calendar month (Min 10 signals): 60%+ win rate in a Gregorian month with at least 10 signals
     let winrate60Count = 0;
-    let m = 0;
-    while (m <= userSignals.length - 30) {
-      let wins = 0;
-      let totalRR = 0;
-      for (let k = 0; k < 30; k++) {
-        const sig = userSignals[m + k];
-        if ((sig.pip || 0) >= 0) wins++;
-        totalRR += sig.riskReward || 0;
+    const monthlySignalsMap = new Map<string, Signal[]>();
+    const now = new Date();
+    const currentUTCYear = now.getUTCFullYear();
+    const currentUTCMonth = now.getUTCMonth();
+
+    for (const sig of userSignals) {
+      if (!sig.closedAt) continue;
+      const closedDate = new Date(sig.closedAt);
+      const year = closedDate.getUTCFullYear();
+      const month = closedDate.getUTCMonth();
+
+      // Only check completed Gregorian calendar months
+      if (year < currentUTCYear || (year === currentUTCYear && month < currentUTCMonth)) {
+        const key = `${year}-${month}`;
+        if (!monthlySignalsMap.has(key)) {
+          monthlySignalsMap.set(key, []);
+        }
+        monthlySignalsMap.get(key)!.push(sig);
       }
-      const winrate = wins / 30;
-      const avgRR = totalRR / 30;
-      if (winrate >= 0.6 && avgRR >= 1) {
-        winrate60Count++;
-        m += 30;
-      } else {
-        m++;
+    }
+
+    for (const signalsInMonth of monthlySignalsMap.values()) {
+      if (signalsInMonth.length >= 10) {
+        const wins = signalsInMonth.filter((s) => (s.pip || 0) > 0).length;
+        const winrate = wins / signalsInMonth.length;
+        if (winrate >= 0.6) {
+          winrate60Count++;
+        }
       }
     }
 
@@ -761,6 +773,16 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
         user: winnerIdStr,
       });
       await this.awardGemsForAchievement(winnerIdStr, AchievementType.OctopusMonthWin);
+    }
+
+    // D. Award Winrate60In30 achievement to eligible users for the previous month
+    const userIdsWithSignals = Array.from(new Set(monthlySignals.map((sig) => sig.owner.toString())));
+    for (const userId of userIdsWithSignals) {
+      try {
+        await this.checkIndividualAchievements(userId);
+      } catch (err) {
+        console.error(`Failed to check achievements for user ${userId} in monthly cron:`, err);
+      }
     }
   }
 

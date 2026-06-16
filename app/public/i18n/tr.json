@@ -317,7 +317,7 @@
       "HATRIK_20_POINTS": "20 Puanlık Sinyal Hat-trick'i",
       "FIFTY_POINT": "50+ Puanlık Sinyal",
       "FIVE_STREAK_R1": "5 Kapalı Kazanç Sinyali (R/R >= 1)",
-      "WINRATE_60_IN_30": "%60+ Kazanma Oranı (30 Sinyal, R/R >= 1)",
+      "WINRATE_60_IN_30": "Bir miladi ayda %60+ Kazanma Oranı (En az 10 sinyal)",
       "OCTOPUS_WEEK_WIN": "Haftalık Ahtapot Kazananı",
       "OCTOPUS_MONTH_WIN": "Aylık Ahtapot Kazananı",
       "OCTOPUS_5_STREAK": "Ahtapot 5 Doğru Tahmin Serisi",
@@ -635,7 +635,7 @@
       "bestSignalMonthTitle": "Ayın En İyi Sinyali",
       "bestSignalMonthDesc": "Ay boyunca kapatılan en yüksek puanlı sinyali paylaşarak 40 GEM kazanın.",
       "individualTitle": "Bireysel Başarılar",
-      "individualDesc": "20 puanlık sinyal hat-trick'i, 50+ puanlık sinyal veya 5 kazanç serisi kilidini açarak 30 GEM kazanın. %60+ kazanma oranı başarısının kilidini açarak 50 GEM kazanın.",
+      "individualDesc": "20 puanlık sinyal hat-trick'i, 50+ puanlık sinyal veya 5 kazanç serisi kilidini açarak 30 GEM kazanın. Bir miladi ayda %60+ kazanma oranı başarısının kilidini açarak 50 GEM kazanın.",
       "octopusTitle": "Ahtapot Tahmin Mücadelesi",
       "octopusDesc": "Ahtapot başarıları ve günlük tahminler şu anda GEM kazandırmamaktadır."
     },
