@@ -429,7 +429,7 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
 
     for (const signalsInMonth of monthlySignalsMap.values()) {
       if (signalsInMonth.length >= 10) {
-        const wins = signalsInMonth.filter((s) => (s.pip || 0) > 0).length;
+        const wins = signalsInMonth.filter((s) => (s.pip || 0) > 0 && (s.riskReward || 0) >= 1).length;
         const winrate = wins / signalsInMonth.length;
         if (winrate >= 0.6) {
           winrate60Count++;
