@@ -341,9 +341,7 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
       .exec();
 
     const existingCounts = {
-      [AchievementType.Hatrik20Points]: existingAchievements.filter((a) => a.type === AchievementType.Hatrik20Points).length,
       [AchievementType.FiftyPoint]: existingAchievements.filter((a) => a.type === AchievementType.FiftyPoint).length,
-      [AchievementType.FiveStreakR1]: existingAchievements.filter((a) => a.type === AchievementType.FiveStreakR1).length,
       [AchievementType.Winrate60In30]: existingAchievements.filter((a) => a.type === AchievementType.Winrate60In30).length,
     };
 
@@ -351,13 +349,20 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     const fiftyPointCount = userSignals.filter((s) => (s.score || 0) >= 50).length;
 
     // B. Hatrik 20 points signals: non-overlapping blocks of 3 consecutive signals where each score >= 20
+    const lastHatrikAch = existingAchievements
+      .filter((a) => a.type === AchievementType.Hatrik20Points)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    const hatrikSignals = lastHatrikAch
+      ? userSignals.filter((s) => s.closedAt && new Date(s.closedAt) > new Date(lastHatrikAch.createdAt))
+      : userSignals;
+
     let hatrikCount = 0;
     let i = 0;
-    while (i <= userSignals.length - 3) {
+    while (i <= hatrikSignals.length - 3) {
       if (
-        (userSignals[i].score || 0) >= 20 &&
-        (userSignals[i + 1].score || 0) >= 20 &&
-        (userSignals[i + 2].score || 0) >= 20
+        (hatrikSignals[i].score || 0) >= 20 &&
+        (hatrikSignals[i + 1].score || 0) >= 20 &&
+        (hatrikSignals[i + 2].score || 0) >= 20
       ) {
         hatrikCount++;
         i += 3;
@@ -367,12 +372,19 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     }
 
     // C. 5 streak signal without lose (R/R upper 1): non-overlapping blocks of 5 consecutive signals where each pip >= 0 and riskReward >= 1
+    const lastFiveStreakAch = existingAchievements
+      .filter((a) => a.type === AchievementType.FiveStreakR1)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    const fiveStreakSignals = lastFiveStreakAch
+      ? userSignals.filter((s) => s.closedAt && new Date(s.closedAt) > new Date(lastFiveStreakAch.createdAt))
+      : userSignals;
+
     let fiveStreakCount = 0;
     let j = 0;
-    while (j <= userSignals.length - 5) {
+    while (j <= fiveStreakSignals.length - 5) {
       let validStreak = true;
       for (let k = 0; k < 5; k++) {
-        const sig = userSignals[j + k];
+        const sig = fiveStreakSignals[j + k];
         const isWin = (sig.pip || 0) >= 0;
         const rr = sig.riskReward || 0;
         if (!isWin || rr < 1) {
@@ -428,17 +440,11 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
         toInsert.push({ type: AchievementType.FiftyPoint, user: userId });
       }
     }
-    if (hatrikCount > existingCounts[AchievementType.Hatrik20Points]) {
-      const diff = hatrikCount - existingCounts[AchievementType.Hatrik20Points];
-      for (let x = 0; x < diff; x++) {
-        toInsert.push({ type: AchievementType.Hatrik20Points, user: userId });
-      }
+    for (let x = 0; x < hatrikCount; x++) {
+      toInsert.push({ type: AchievementType.Hatrik20Points, user: userId });
     }
-    if (fiveStreakCount > existingCounts[AchievementType.FiveStreakR1]) {
-      const diff = fiveStreakCount - existingCounts[AchievementType.FiveStreakR1];
-      for (let x = 0; x < diff; x++) {
-        toInsert.push({ type: AchievementType.FiveStreakR1, user: userId });
-      }
+    for (let x = 0; x < fiveStreakCount; x++) {
+      toInsert.push({ type: AchievementType.FiveStreakR1, user: userId });
     }
     if (winrate60Count > existingCounts[AchievementType.Winrate60In30]) {
       const diff = winrate60Count - existingCounts[AchievementType.Winrate60In30];
@@ -479,17 +485,19 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
       })
       .exec();
 
-    const existing5Counts = existingAchievements.filter((a) => a.type === AchievementType.Octopus5Streak).length;
-    const existing10Counts = existingAchievements.filter((a) => a.type === AchievementType.Octopus10Streak).length;
+    const last5StreakAch = existingAchievements
+      .filter((a) => a.type === AchievementType.Octopus5Streak)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    const fiveStreakPredictions = last5StreakAch
+      ? predictions.filter((p) => p.voteDate && new Date(p.voteDate) > new Date(last5StreakAch.createdAt))
+      : predictions;
 
     let fiveStreaks = 0;
-    let tenStreaks = 0;
-
     let i = 0;
-    while (i <= predictions.length - 5) {
+    while (i <= fiveStreakPredictions.length - 5) {
       let isStreak = true;
       for (let k = 0; k < 5; k++) {
-        if (predictions[i + k].points !== 1) {
+        if (fiveStreakPredictions[i + k].points !== 1) {
           isStreak = false;
           break;
         }
@@ -502,11 +510,19 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
+    const last10StreakAch = existingAchievements
+      .filter((a) => a.type === AchievementType.Octopus10Streak)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    const tenStreakPredictions = last10StreakAch
+      ? predictions.filter((p) => p.voteDate && new Date(p.voteDate) > new Date(last10StreakAch.createdAt))
+      : predictions;
+
+    let tenStreaks = 0;
     let j = 0;
-    while (j <= predictions.length - 10) {
+    while (j <= tenStreakPredictions.length - 10) {
       let isStreak = true;
       for (let k = 0; k < 10; k++) {
-        if (predictions[j + k].points !== 1) {
+        if (tenStreakPredictions[j + k].points !== 1) {
           isStreak = false;
           break;
         }
@@ -520,17 +536,11 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
     }
 
     const toInsert: any[] = [];
-    if (fiveStreaks > existing5Counts) {
-      const diff = fiveStreaks - existing5Counts;
-      for (let x = 0; x < diff; x++) {
-        toInsert.push({ type: AchievementType.Octopus5Streak, user: userId });
-      }
+    for (let x = 0; x < fiveStreaks; x++) {
+      toInsert.push({ type: AchievementType.Octopus5Streak, user: userId });
     }
-    if (tenStreaks > existing10Counts) {
-      const diff = tenStreaks - existing10Counts;
-      for (let x = 0; x < diff; x++) {
-        toInsert.push({ type: AchievementType.Octopus10Streak, user: userId });
-      }
+    for (let x = 0; x < tenStreaks; x++) {
+      toInsert.push({ type: AchievementType.Octopus10Streak, user: userId });
     }
 
     if (toInsert.length > 0) {
