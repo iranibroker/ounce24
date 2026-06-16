@@ -169,8 +169,18 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
         if (updatedUser.totalSignals > 0) {
           const pipeline = this.redis.pipeline();
           pipeline.zadd('ounce:leaderboard:totalScore', updatedUser.totalScore || 0, userIdStr);
-          pipeline.zadd('ounce:leaderboard:weekScore', updatedUser.weekScore || 0, userIdStr);
-          pipeline.zadd('ounce:leaderboard:monthScore', updatedUser.monthScore || 0, userIdStr);
+          
+          if (updatedUser.weekSignals > 0) {
+            pipeline.zadd('ounce:leaderboard:weekScore', updatedUser.weekScore || 0, userIdStr);
+          } else {
+            pipeline.zrem('ounce:leaderboard:weekScore', userIdStr);
+          }
+
+          if (updatedUser.monthSignals > 0) {
+            pipeline.zadd('ounce:leaderboard:monthScore', updatedUser.monthScore || 0, userIdStr);
+          } else {
+            pipeline.zrem('ounce:leaderboard:monthScore', userIdStr);
+          }
           await pipeline.exec();
         } else {
           const pipeline = this.redis.pipeline();
@@ -187,16 +197,19 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
 
   async getLeaderboard(skip = 0, limit = 10, userId?: string, week = false, month = false) {
     let sort: any = { totalScore: -1 };
+    let queryCondition: any = { totalSignals: { $gt: 0 } };
     if (week) {
       sort = { weekScore: -1 };
+      queryCondition = { weekSignals: { $gt: 0 } };
     } else if (month) {
       sort = { monthScore: -1 };
+      queryCondition = { monthSignals: { $gt: 0 } };
     }
     const publicFields = 'name title defaultScore avatar avatarSource avgRiskReward score totalScore totalSignals winRate weekScore monthScore createdAt weekSignals weekWinSignals monthSignals monthWinSignals';
 
     // Only return users who have at least 1 signal to match the leaderboard requirement
     const users = await this.userModel
-      .find({ totalSignals: { $gt: 0 } })
+      .find(queryCondition)
       .select(publicFields)
       .sort(sort)
       .skip(skip)
@@ -216,7 +229,18 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
         .select(publicFields)
         .exec();
 
-      if (user && user.totalSignals > 0) {
+      let conditionMet = false;
+      if (user) {
+        if (week) {
+          conditionMet = user.weekSignals > 0;
+        } else if (month) {
+          conditionMet = user.monthSignals > 0;
+        } else {
+          conditionMet = user.totalSignals > 0;
+        }
+      }
+
+      if (user && conditionMet) {
         let key = 'ounce:leaderboard:totalScore';
         if (week) {
           key = 'ounce:leaderboard:weekScore';
@@ -531,7 +555,7 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
       const users = await this.userModel
         .find(
           { totalSignals: { $gt: 0 } },
-          { _id: 1, totalScore: 1, weekScore: 1, monthScore: 1 }
+          { _id: 1, totalScore: 1, weekScore: 1, monthScore: 1, weekSignals: 1, monthSignals: 1 }
         )
         .exec();
 
@@ -544,8 +568,12 @@ export class UsersService implements OnModuleInit, OnModuleDestroy {
         const userIdStr = (user._id || user.id)?.toString();
         if (userIdStr) {
           pipeline.zadd('ounce:leaderboard:totalScore', user.totalScore || 0, userIdStr);
-          pipeline.zadd('ounce:leaderboard:weekScore', user.weekScore || 0, userIdStr);
-          pipeline.zadd('ounce:leaderboard:monthScore', user.monthScore || 0, userIdStr);
+          if (user.weekSignals > 0) {
+            pipeline.zadd('ounce:leaderboard:weekScore', user.weekScore || 0, userIdStr);
+          }
+          if (user.monthSignals > 0) {
+            pipeline.zadd('ounce:leaderboard:monthScore', user.monthScore || 0, userIdStr);
+          }
         }
       }
 

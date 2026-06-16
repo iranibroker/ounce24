@@ -70,12 +70,17 @@ export class UserStatsService {
 
   async getLeaderBoard(fromDate?: Date, toDate?: Date) {
     const users = await this.userModel.find().exec();
+    const rankedUsers: User[] = [];
     for (const user of users) {
-      user.score = this.getUserScore(user, fromDate, toDate);
+      const signals = this.getUserSignals(user.id, fromDate, toDate);
+      if (signals && signals.length > 0) {
+        user.score = this.getUserScore(user, fromDate, toDate);
+        rankedUsers.push(user);
+      }
     }
 
-    users.sort((a, b) => b.score - a.score);
-    return users;
+    rankedUsers.sort((a, b) => b.score - a.score);
+    return rankedUsers;
   }
 
   async getLeaderBoardMessage(options?: {
