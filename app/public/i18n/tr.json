@@ -330,18 +330,18 @@
       "OCTOPUS_10_STREAK": "Üst üste 10 gün boyunca altın fiyatı yönünü doğru tahmin ederek kazanılır."
     },
     "type": {
-      "WEEK_WIN": "Haftanın Kazananı",
-      "MONTH_WIN": "Ayın Kazananı",
-      "BEST_SIGNAL_WEEK": "Haftanın En İyi Sinyali",
-      "BEST_SIGNAL_MONTH": "Ayın En İyi Sinyali",
-      "HATRIK_20_POINTS": "20 Puan Hat-trick",
-      "FIFTY_POINT": "50+ Puan Sinyal",
-      "FIVE_STREAK_R1": "5 Sinyal Serisi",
-      "WINRATE_60_IN_30": "%60+ Kazanma Oranı",
-      "OCTOPUS_WEEK_WIN": "Haftalık Ahtapot Kazananı",
-      "OCTOPUS_MONTH_WIN": "Aylık Ahtapot Kazananı",
-      "OCTOPUS_5_STREAK": "Ahtapot 5'li Seri",
-      "OCTOPUS_10_STREAK": "Ahtapot 10'lu Seri"
+      "WEEK_WIN": "Haftalık Şampiyon",
+      "MONTH_WIN": "Aylık Şampiyon",
+      "BEST_SIGNAL_WEEK": "Haftalık Başyapıt",
+      "BEST_SIGNAL_MONTH": "Aylık Başyapıt",
+      "HATRIK_20_POINTS": "Hat-trick",
+      "FIFTY_POINT": "Büyük Av",
+      "FIVE_STREAK_R1": "Yenilmez",
+      "WINRATE_60_IN_30": "Keskin Nişancı",
+      "OCTOPUS_WEEK_WIN": "Haftalık Kahin",
+      "OCTOPUS_MONTH_WIN": "Aylık Kahin",
+      "OCTOPUS_5_STREAK": "Gümüş Kahin",
+      "OCTOPUS_10_STREAK": "Nostradamus"
     },
     "category": {
       "competition": "Yarışma Başarıları",

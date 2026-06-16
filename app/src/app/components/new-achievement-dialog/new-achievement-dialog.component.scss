@@ -39,10 +39,16 @@ main {
   text-align: center;
   align-items: center;
 
-  img {
-    width: 160px;
-    height: auto;
-    filter: drop-shadow(0 8px 24px rgba(251, 191, 36, 0.2));
+  .achievement-icon {
+    display: flex;
+    font-size: 96px;
+    filter: drop-shadow(0 8px 24px currentColor);
+
+    &.gold-achievement { color: #FFA751; }
+    &.purple-achievement { color: #F355DA; }
+    &.blue-achievement { color: #4FACFE; }
+    &.orange-achievement { color: #FF930F; }
+    &.green-achievement { color: #28C76F; }
   }
 
   .achievement-name {

@@ -344,18 +344,18 @@
       "OCTOPUS_10_STREAK": "Earned by predicting 10 correct daily gold price directions in a row."
     },
     "type": {
-      "WEEK_WIN": "Week Winner",
-      "MONTH_WIN": "Month Winner",
-      "BEST_SIGNAL_WEEK": "Best Weekly Signal",
-      "BEST_SIGNAL_MONTH": "Best Monthly Signal",
-      "HATRIK_20_POINTS": "20pt Hattrick",
-      "FIFTY_POINT": "50+ Pt Signal",
-      "FIVE_STREAK_R1": "5-Win Streak",
-      "WINRATE_60_IN_30": "60%+ Win Rate",
-      "OCTOPUS_WEEK_WIN": "Octopus Weekly Winner",
-      "OCTOPUS_MONTH_WIN": "Octopus Monthly Winner",
-      "OCTOPUS_5_STREAK": "5-Prediction Streak",
-      "OCTOPUS_10_STREAK": "10-Prediction Streak"
+      "WEEK_WIN": "Weekly Champion",
+      "MONTH_WIN": "Monthly Champion",
+      "BEST_SIGNAL_WEEK": "Weekly Masterpiece",
+      "BEST_SIGNAL_MONTH": "Monthly Masterpiece",
+      "HATRIK_20_POINTS": "Hattrick",
+      "FIFTY_POINT": "Big Catch",
+      "FIVE_STREAK_R1": "Invincible",
+      "WINRATE_60_IN_30": "The Sniper",
+      "OCTOPUS_WEEK_WIN": "Weekly Oracle",
+      "OCTOPUS_MONTH_WIN": "Monthly Oracle",
+      "OCTOPUS_5_STREAK": "Silver Oracle",
+      "OCTOPUS_10_STREAK": "Nostradamus"
     },
     "category": {
       "competition": "Competition Achievements",

@@ -344,18 +344,18 @@
       "OCTOPUS_10_STREAK": "با ثبت ۱۰ پیش‌بینی روزانه درست پیاپی جهت حرکت قیمت طلا به دست می‌آید."
     },
     "type": {
-      "WEEK_WIN": "برنده هفته",
-      "MONTH_WIN": "برنده ماه",
-      "BEST_SIGNAL_WEEK": "بهترین سیگنال هفته",
-      "BEST_SIGNAL_MONTH": "بهترین سیگنال ماه",
-      "HATRIK_20_POINTS": "هت‌تریک ۲۰ امتیاز",
-      "FIFTY_POINT": "سیگنال ۵۰+ امتیاز",
-      "FIVE_STREAK_R1": "۵ برد پیاپی",
-      "WINRATE_60_IN_30": "وین‌ریت ۶۰٪+",
-      "OCTOPUS_WEEK_WIN": "برنده هفته اختاپوس",
-      "OCTOPUS_MONTH_WIN": "برنده ماه اختاپوس",
-      "OCTOPUS_5_STREAK": "۵ پیش‌بینی پیاپی",
-      "OCTOPUS_10_STREAK": "۱۰ پیش‌بینی پیاپی"
+      "WEEK_WIN": "سلطان هفته",
+      "MONTH_WIN": "سلطان ماه",
+      "BEST_SIGNAL_WEEK": "شاهکار هفته",
+      "BEST_SIGNAL_MONTH": "شاهکار ماه",
+      "HATRIK_20_POINTS": "هت‌تریک",
+      "FIFTY_POINT": "شکار بزرگ",
+      "FIVE_STREAK_R1": "شکست‌ناپذیر",
+      "WINRATE_60_IN_30": "تک‌تیرانداز",
+      "OCTOPUS_WEEK_WIN": "پیشگوی هفته",
+      "OCTOPUS_MONTH_WIN": "پیشگوی ماه",
+      "OCTOPUS_5_STREAK": "پیشگوی نقره‌ای",
+      "OCTOPUS_10_STREAK": "نوستراداموس"
     },
     "category": {
       "competition": "دستاوردهای مسابقاتی",

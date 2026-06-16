@@ -149,107 +149,103 @@ mat-dialog-content.dialog-content-container {
   font-family: 'Outfit', sans-serif;
 }
 
-.achievement-detail-header {
+.dialog-title-centered {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.15rem;
+  padding: 16px 24px 8px 24px !important;
+}
+
+.achievement-detail-centered-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 20px;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px 12px 24px;
+  margin-bottom: 8px;
   box-sizing: border-box;
+  position: relative;
 
   &.gold-achievement {
-    background: linear-gradient(135deg, rgba(255, 167, 81, 0.08), rgba(255, 167, 81, 0.02));
-    border: 1px solid rgba(255, 167, 81, 0.2);
-    .reward-tag {
-      background: rgba(255, 167, 81, 0.12);
-      color: #FFA751;
-      border: 1px solid rgba(255, 167, 81, 0.25);
-    }
+    .badge-icon { color: #FFA751; }
   }
 
   &.purple-achievement {
-    background: linear-gradient(135deg, rgba(243, 85, 218, 0.08), rgba(243, 85, 218, 0.02));
-    border: 1px solid rgba(243, 85, 218, 0.2);
-    .reward-tag {
-      background: rgba(243, 85, 218, 0.12);
-      color: #F355DA;
-      border: 1px solid rgba(243, 85, 218, 0.25);
-    }
+    .badge-icon { color: #F355DA; }
   }
 
   &.blue-achievement {
-    background: linear-gradient(135deg, rgba(79, 172, 254, 0.08), rgba(79, 172, 254, 0.02));
-    border: 1px solid rgba(79, 172, 254, 0.2);
-    .reward-tag {
-      background: rgba(79, 172, 254, 0.12);
-      color: #4FACFE;
-      border: 1px solid rgba(79, 172, 254, 0.25);
-    }
+    .badge-icon { color: #4FACFE; }
   }
 
   &.orange-achievement {
-    background: linear-gradient(135deg, rgba(255, 147, 15, 0.08), rgba(255, 147, 15, 0.02));
-    border: 1px solid rgba(255, 147, 15, 0.2);
-    .reward-tag {
-      background: rgba(255, 147, 15, 0.12);
-      color: #FF930F;
-      border: 1px solid rgba(255, 147, 15, 0.25);
-    }
+    .badge-icon { color: #FF930F; }
   }
 
   &.green-achievement {
-    background: linear-gradient(135deg, rgba(40, 199, 111, 0.08), rgba(40, 199, 111, 0.02));
-    border: 1px solid rgba(40, 199, 111, 0.2);
-    .reward-tag {
-      background: rgba(40, 199, 111, 0.12);
-      color: #28C76F;
-      border: 1px solid rgba(40, 199, 111, 0.25);
-    }
+    .badge-icon { color: #28C76F; }
   }
 
   .badge-wrapper {
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    
-    .badge-image {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #181818;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    z-index: 5;
+
+    .badge-icon {
+      font-size: 38px;
+      filter: drop-shadow(0 4px 10px currentColor);
     }
   }
 
-  .badge-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    
-    .description {
-      margin: 0;
-      font-size: 0.82rem;
-      font-weight: 500;
-      line-height: 1.4;
-      color: var(--mat-sys-on-surface-variant);
+  .badge-name {
+    margin: 0 0 6px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .description {
+    margin: 0 0 12px 0;
+    font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--mat-sys-outline);
+    max-width: 90%;
+  }
+
+  .reward-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 176, 255, 0.08);
+    color: #00b0ff;
+    border: 1px solid rgba(0, 176, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+
+    .reward-gem-icon {
+      color: #00b0ff;
+      filter: drop-shadow(0 0 4px rgba(0, 176, 255, 0.4));
+      display: flex;
     }
 
-    .reward-tag {
-      display: inline-flex;
-      align-items: center;
-      align-self: flex-start;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      
-      .reward-icon {
-        display: flex;
-      }
+    .reward-amount {
+      line-height: 1;
     }
   }
 }

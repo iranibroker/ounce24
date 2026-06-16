@@ -874,3 +874,17 @@ mat-tab-group,
 .cdk-overlay-container {
   z-index: 11000 !important;
 }
+
+// Leaderboard dialog panel custom style to allow overlapping floating badge icon
+.achievement-leaderboard-dialog-panel {
+  overflow: visible !important;
+  
+  .cdk-dialog-container,
+  .mat-mdc-dialog-container,
+  .mdc-dialog__container,
+  .mdc-dialog__surface,
+  .mat-mdc-dialog-surface,
+  .mat-mdc-dialog-inner-container {
+    overflow: visible !important;
+  }
+}

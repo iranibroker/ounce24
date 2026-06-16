@@ -3,10 +3,12 @@
 </h2>
 <mat-dialog-content>
   <main>
-    <img
-      src="images/achievements/{{ achievement.type }}.png"
-      alt="Achievement Icon"
-    />
+    <ng-icon
+      [name]="getAchievementIcon(achievement.type)"
+      [class]="getAchievementClass(achievement.type)"
+      class="achievement-icon"
+      size="96px"
+    ></ng-icon>
     <div class="achievement-name">
       {{ achievement.type | achievementType }}
     </div>

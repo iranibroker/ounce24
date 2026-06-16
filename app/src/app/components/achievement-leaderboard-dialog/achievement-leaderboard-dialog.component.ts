@@ -2,6 +2,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { saxCrownOutline, saxStarOutline, saxCupOutline } from '@ng-icons/iconsax/outline';
 import { saxDiamondsBold } from '@ng-icons/iconsax/bold';
 import { Component, Inject, inject } from '@angular/core';
+import { ACHIEVEMENT_ICONS_MAP, getAchievementIcon, getAchievementClass } from '../../shared/utils/achievement-helper';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { SHARED } from '../../shared';
@@ -34,6 +35,7 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
       saxStarOutline,
       saxCupOutline,
       saxDiamondsBold,
+      ...ACHIEVEMENT_ICONS_MAP
     }),
   ],
 })
@@ -70,27 +72,11 @@ export class AchievementLeaderboardDialogComponent {
   }));
 
   getAchievementClass(type: AchievementType): string {
-    switch (type) {
-      case AchievementType.WeekWin:
-      case AchievementType.MonthWin:
-      case AchievementType.BestSignalWeek:
-      case AchievementType.BestSignalMonth:
-        return 'gold-achievement';
-      case AchievementType.OctopusWeekWin:
-      case AchievementType.OctopusMonthWin:
-      case AchievementType.Octopus5Streak:
-      case AchievementType.Octopus10Streak:
-        return 'purple-achievement';
-      case AchievementType.FiftyPoint:
-      case AchievementType.Winrate60In30:
-        return 'blue-achievement';
-      case AchievementType.Hatrik20Points:
-        return 'orange-achievement';
-      case AchievementType.FiveStreakR1:
-        return 'green-achievement';
-      default:
-        return 'gold-achievement';
-    }
+    return getAchievementClass(type);
+  }
+
+  getAchievementIcon(type: AchievementType): string {
+    return getAchievementIcon(type);
   }
 
   onUserClick(userId: string): void {

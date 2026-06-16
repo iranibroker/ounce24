@@ -330,18 +330,18 @@
       "OCTOPUS_10_STREAK": "يتم الحصول عليها عند تحقيق 10 توقعات يومية صحيحة متتالية لاتجاه سعر الذهب."
     },
     "type": {
-      "WEEK_WIN": "فائز الأسبوع",
-      "MONTH_WIN": "فائز الشهر",
-      "BEST_SIGNAL_WEEK": "أفضل إشارة أسبوعية",
-      "BEST_SIGNAL_MONTH": "أفضل إشارة شهرية",
-      "HATRIK_20_POINTS": "هاتريك 20 نقطة",
-      "FIFTY_POINT": "إشارة 50+ نقطة",
-      "FIVE_STREAK_R1": "5 صفقات متتالية",
-      "WINRATE_60_IN_30": "نسبة نجاح 60%+",
-      "OCTOPUS_WEEK_WIN": "فائز الأخطبوط الأسبوعي",
-      "OCTOPUS_MONTH_WIN": "فائز الأخطبوط الشهري",
-      "OCTOPUS_5_STREAK": "5 توقعات متتالية",
-      "OCTOPUS_10_STREAK": "10 توقعات متتالية"
+      "WEEK_WIN": "بطل الأسبوع",
+      "MONTH_WIN": "بطل الشهر",
+      "BEST_SIGNAL_WEEK": "تحفة الأسبوع",
+      "BEST_SIGNAL_MONTH": "تحفة الشهر",
+      "HATRIK_20_POINTS": "هاتريك",
+      "FIFTY_POINT": "صيد كبير",
+      "FIVE_STREAK_R1": "لا يقهر",
+      "WINRATE_60_IN_30": "قناص",
+      "OCTOPUS_WEEK_WIN": "عراف الأسبوع",
+      "OCTOPUS_MONTH_WIN": "عراف الشهر",
+      "OCTOPUS_5_STREAK": "عراف فضي",
+      "OCTOPUS_10_STREAK": "نوستراداموس"
     },
     "category": {
       "competition": "إنجازات المسابقات",

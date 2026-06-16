@@ -1,20 +1,15 @@
-<h2 mat-dialog-title>
-  <ng-icon name="saxCupOutline" size="20px" class="title-icon"></ng-icon>
-  {{ 'achievement.leaderboard.title' | translate }}: {{ 'achievement.type.' + data.type | translate }}
-</h2>
-<mat-dialog-content class="dialog-content-container">
-  <div class="achievement-detail-header" [class]="getAchievementClass(data.type)">
-    <div class="badge-wrapper">
-      <img src="images/achievements/{{ data.type }}.png" class="badge-image" alt="" />
-    </div>
-    <div class="badge-info">
-      <p class="description">{{ 'achievement.description.' + data.type | translate }}</p>
-      <div class="reward-tag">
-        <ng-icon name="saxDiamondsBold" class="reward-icon" size="16px"></ng-icon>
-        <span>{{ 'achievement.reward' | translate: { count: rewardMap[data.type] } }}</span>
-      </div>
-    </div>
+<div class="achievement-detail-centered-header" [class]="getAchievementClass(data.type)">
+  <div class="badge-wrapper">
+    <ng-icon [name]="getAchievementIcon(data.type)" class="badge-icon"></ng-icon>
   </div>
+  <h3 class="badge-name">{{ 'achievement.type.' + data.type | translate }}</h3>
+  <p class="description">{{ 'achievement.description.' + data.type | translate }}</p>
+  <div class="reward-row">
+    <ng-icon name="saxDiamondsBold" class="reward-gem-icon" size="18px"></ng-icon>
+    <span class="reward-amount">+{{ rewardMap[data.type] }}</span>
+  </div>
+</div>
+<mat-dialog-content class="dialog-content-container">
 
   @if (leaderboardQuery.isLoading()) {
     <app-data-loading />
@@ -56,7 +51,6 @@
       </div>
     } @else {
       <app-empty-state
-        iconName="saxCupOutline"
         [text]="'achievement.leaderboard.empty' | translate"
       />
     }
