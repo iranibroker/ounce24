@@ -135,7 +135,9 @@
       <!-- Blur Overlay / Locked State -->
       <div class="blur-overlay" *ngIf="priceService.isMarketOpen() && !myVoteQuery.data()?.voted">
         <div class="lock-card glass-panel">
-          <span class="lock-icon">🔒</span>
+          <span class="lock-icon">
+            <ng-icon name="saxLockOutline" size="24px"></ng-icon>
+          </span>
           <p class="lock-desc">{{ 'octopus.sentimentLocked' | translate }}</p>
         </div>
       </div>
@@ -153,9 +155,10 @@
       <mat-tab [label]="'octopus.leaderboard.weekly' | translate">
         <div class="tab-content">
           <div class="tab-header-timer">
-            <span>Weekly Leaderboard</span>
-            <span class="timer-val">
-              ⏰ Ends in: {{ weekCountdownText() }}
+            <span>{{ 'leaderboard.weeklyTitle' | translate }}</span>
+            <span class="timer-val" *ngIf="weekCountdown() as time">
+              <ng-icon name="saxClockOutline" size="14px"></ng-icon>
+              {{ 'leaderboard.endsIn' | translate }} {{ time.days }}{{ 'time.day' | translate }} {{ time.hours }}{{ 'time.hour' | translate }} {{ time.minutes }}{{ 'time.minute' | translate }}
             </span>
           </div>
           <app-data-loading *ngIf="weeklyLeaderboardQuery.isLoading()"></app-data-loading>
@@ -203,9 +206,10 @@
       <mat-tab [label]="'octopus.leaderboard.monthly' | translate">
         <div class="tab-content">
           <div class="tab-header-timer">
-            <span>{{ currentMonthName }} Leaderboard</span>
-            <span class="timer-val">
-              ⏰ Ends in: {{ monthCountdownText() }}
+            <span>{{ 'leaderboard.monthlyTitle' | translate: { month: currentMonthName } }}</span>
+            <span class="timer-val" *ngIf="monthCountdown() as time">
+              <ng-icon name="saxClockOutline" size="14px"></ng-icon>
+              {{ 'leaderboard.endsIn' | translate }} {{ time.days }}{{ 'time.day' | translate }} {{ time.hours }}{{ 'time.hour' | translate }} {{ time.minutes }}{{ 'time.minute' | translate }}
             </span>
           </div>
           <app-data-loading *ngIf="monthlyLeaderboardQuery.isLoading()"></app-data-loading>
@@ -289,6 +293,46 @@
               </span>
               <mat-divider></mat-divider>
             </a>
+          </mat-nav-list>
+        </div>
+      </mat-tab>
+
+      <!-- My History Tab -->
+      <mat-tab [label]="'octopus.leaderboard.history' | translate">
+        <div class="tab-content">
+          <app-data-loading *ngIf="historyQuery.isLoading()"></app-data-loading>
+          
+          <mat-nav-list *ngIf="!historyQuery.isLoading() && historyQuery.data() as history">
+            <div class="empty-state" *ngIf="history.length === 0">
+              {{ 'octopus.history.empty' | translate }}
+            </div>
+            
+            <div 
+              *ngFor="let item of history"
+              class="history-row"
+            >
+              <div class="history-left">
+                <span class="history-date">{{ item.voteDate | date:'mediumDate' }}</span>
+                <span class="history-price">&#64; ${{ item.votePrice | number:'1.2-2' }}</span>
+              </div>
+              <div class="history-right">
+                <div class="direction-indicator" [class.up]="item.direction === 'up'" [class.down]="item.direction === 'down'">
+                  <ng-icon [name]="item.direction === 'up' ? 'saxTrendUpBold' : 'saxTrendDownBold'" size="16px"></ng-icon>
+                  <span>{{ ('octopus.predict' + (item.direction === 'up' ? 'Up' : 'Down')) | translate }}</span>
+                </div>
+                <div class="history-outcome">
+                  @if (item.points != null) {
+                    <span class="outcome-price">Close: ${{ item.closePrice | number:'1.2-2' }}</span>
+                    <span class="outcome-star" [class.win]="item.points > 0">
+                      <span class="star-amount">{{ item.points > 0 ? '+1' : '0' }}</span>
+                      <ng-icon name="saxStarOutline" size="14px" class="star-icon"></ng-icon>
+                    </span>
+                  } @else {
+                    <span class="outcome-pending">{{ 'octopus.status.pending' | translate }}</span>
+                  }
+                </div>
+              </div>
+            </div>
           </mat-nav-list>
         </div>
       </mat-tab>

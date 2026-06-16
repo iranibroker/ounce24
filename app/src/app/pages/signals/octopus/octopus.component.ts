@@ -17,6 +17,8 @@ import {
   saxInfoCircleOutline,
   saxArrowUpOutline,
   saxArrowDownOutline,
+  saxClockOutline,
+  saxLockOutline,
 } from '@ng-icons/iconsax/outline';
 import { saxTrendUpBold, saxTrendDownBold } from '@ng-icons/iconsax/bold';
 import { OuncePriceService } from '../../../services/ounce-price.service';
@@ -101,6 +103,8 @@ function getVotingState(now: Date, cutoffHour: number): { enabled: boolean; next
       saxInfoCircleOutline,
       saxArrowUpOutline,
       saxArrowDownOutline,
+      saxClockOutline,
+      saxLockOutline,
       saxTrendUpBold,
       saxTrendDownBold
     })
@@ -121,9 +125,15 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
   votingState = signal<{ enabled: boolean; nextTransition: Date }>({ enabled: true, nextTransition: new Date() });
   countdownText = signal<string>('00:00:00');
-  currentMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date());
-  monthCountdownText = signal<string>('');
-  weekCountdownText = signal<string>('');
+  get currentMonthName(): string {
+    const lang = this.translate.currentLang;
+    const locale = lang === 'fa' ? 'fa-IR-u-ca-gregory' :
+                   lang === 'ar' ? 'ar-SA-u-ca-gregory' :
+                   lang === 'tr' ? 'tr-TR' : 'en-US';
+    return new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date());
+  }
+  monthCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
+  weekCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
   isSubmitting = signal<boolean>(false);
   isEditing = signal<boolean>(false);
   private timer: any = null;
@@ -217,6 +227,16 @@ export class OctopusComponent implements OnInit, OnDestroy {
     };
   });
 
+  // User's past Octopus predictions history query
+  historyQuery = injectQuery(() => {
+    const user = this.authService.userQuery.data();
+    return {
+      queryKey: ['octopusHistory', user?.id],
+      queryFn: () => lastValueFrom(this.http.get<any[]>('/api/octopus/me/history')),
+      enabled: !!user?.id,
+    };
+  });
+
   private startCountdown() {
     this.updateCountdown();
     this.timer = setInterval(() => this.updateCountdown(), 1000);
@@ -256,12 +276,12 @@ export class OctopusComponent implements OnInit, OnDestroy {
     const nextMonthStart = new Date(Date.UTC(currentYear, currentMonth + 1, 1, 0, 0, 0, 0));
     const monthDiff = nextMonthStart.getTime() - now.getTime();
     if (monthDiff <= 0) {
-      this.monthCountdownText.set('0d 0h 0m');
+      this.monthCountdown.set({ days: 0, hours: 0, minutes: 0 });
     } else {
       const days = Math.floor(monthDiff / 86400000);
       const hoursLeft = Math.floor((monthDiff % 86400000) / 3600000);
       const minsLeft = Math.floor((monthDiff % 3600000) / 60000);
-      this.monthCountdownText.set(`${days}d ${hoursLeft}h ${minsLeft}m`);
+      this.monthCountdown.set({ days, hours: hoursLeft, minutes: minsLeft });
     }
 
     // Calculate week countdown (ends on Friday 17:00 America/New_York trading close)
@@ -303,12 +323,12 @@ export class OctopusComponent implements OnInit, OnDestroy {
 
     const weekDiff = targetDate.getTime() - now.getTime();
     if (weekDiff <= 0) {
-      this.weekCountdownText.set('0d 0h 0m');
+      this.weekCountdown.set({ days: 0, hours: 0, minutes: 0 });
     } else {
       const days = Math.floor(weekDiff / 86400000);
       const hoursLeft = Math.floor((weekDiff % 86400000) / 3600000);
       const minsLeft = Math.floor((weekDiff % 3600000) / 60000);
-      this.weekCountdownText.set(`${days}d ${hoursLeft}h ${minsLeft}m`);
+      this.weekCountdown.set({ days, hours: hoursLeft, minutes: minsLeft });
     }
   }
 
@@ -329,6 +349,7 @@ export class OctopusComponent implements OnInit, OnDestroy {
       this.queryClient.invalidateQueries({ queryKey: ['octopusVote', user?.id] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusSentiment'] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusScores', user?.id] });
+      this.queryClient.invalidateQueries({ queryKey: ['octopusHistory', user?.id] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusLeaderboardWeekly'] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusLeaderboardMonthly'] });
       this.queryClient.invalidateQueries({ queryKey: ['octopusLeaderboardTotal'] });

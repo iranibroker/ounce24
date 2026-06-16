@@ -6,7 +6,7 @@
     "cancel": "İptal",
     "confirm": "Onayla",
     "copyPrompt": "İpucunu Kopyala",
-    "copied": "Kopyalandı! ✅"
+    "copied": "Kopyalandı!"
   },
   "bottomNav": {
     "home": "Ana Sayfa",
@@ -83,7 +83,7 @@
       "unfollowSuccess": "Sinyal başarıyla yer imlerinden kaldırıldı",
       "aiShield": "Akıllı Kalkan",
       "aiShieldDesc": "Yapay zeka tabanlı risksiz, takip eden ve erken çıkış uyarıları alın (tavsiye başına 1 GEM)",
-      "aiShieldSuccess": "Akıllı Kalkan etkinleştirildi! 🛡️",
+      "aiShieldSuccess": "Akıllı Kalkan etkinleştirildi!",,
       "aiShieldDeactivated": "Akıllı Kalkan devre dışı bırakıldı",
       "aiShieldPremiumGemsRequired": "Bu bölüm premium erişim gerektiriyor. En az 20 GEM'e sahip olmalısınız.",
       "premium": "Premium"
@@ -400,7 +400,7 @@
   "octopus": {
     "title": "Ahtapot",
     "subtitle": "Günlük Ons Fiyat Tahmini",
-    "description": "Günün piyasa kapanış fiyatının mevcut fiyattan daha yüksek mi yoksa daha düşük mü olacağını tahmin edin. Doğru tahminler için 1 yıldız ⭐ kazanın.",
+    "description": "Günün piyasa kapanış fiyatının mevcut fiyattan daha yüksek mi yoksa daha düşük mü olacağını tahmin edin. Doğru tahminler için 1 yıldız kazanın.",
     "cutoffWarning": "Tahminler yalnızca {{time}} tarihinden önce yapılabilir veya düzenlenebilir.",
     "votingOpensIn": "Tahminler şurada başlayacak:",
     "votingClosesIn": "Tahminler şurada kapanacak:",
@@ -415,17 +415,21 @@
     "leaderboard": {
       "title": "Ahtapot Liderlik Tablosu",
       "weekly": "Haftalık",
-      "monthly": "Monthly",
+      "monthly": "Aylık",
       "total": "Toplam",
       "starsCount": "{{value}} Yıldız",
-      "empty": "Henüz sıralama yok"
+      "empty": "Henüz sıralama yok",
+      "history": "Tahmin Geçmişim"
+    },
+    "history": {
+      "empty": "Geçmişinizde henüz herhangi bir tahmin bulunmamaktadır."
     },
     "score": {
       "weekly": "Bu haftanın yıldızları: {{value}}",
       "total": "Toplam yıldız: {{value}}"
     },
     "status": {
-      "correct": "Doğru tahmin (+1 yıldız) ⭐",
+      "correct": "Doğru tahmin (+1 yıldız)",,
       "incorrect": "Yanlış tahmin (0 yıldız)",
       "pending": "Kapanış için bekleniyor"
     },
@@ -740,5 +744,10 @@
       "mute": "Sesi kapat",
       "unmute": "Lo-Fi müzik çal"
     }
+  },
+  "time": {
+    "day": "g",
+    "hour": "s",
+    "minute": "dk"
   }
 }

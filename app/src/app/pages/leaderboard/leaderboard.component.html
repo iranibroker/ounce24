@@ -18,8 +18,9 @@
       <ng-template matTabContent>
         <div class="tab-header-timer">
           <span>{{ 'leaderboard.weeklyTitle' | translate }}</span>
-          <span class="timer-val">
-            ⏰ {{ weekCountdownText() }}
+          <span class="timer-val" *ngIf="weekCountdown() as time">
+            <ng-icon name="saxClockOutline" size="14px"></ng-icon>
+            {{ 'leaderboard.endsIn' | translate }} {{ time.days }}{{ 'time.day' | translate }} {{ time.hours }}{{ 'time.hour' | translate }} {{ time.minutes }}{{ 'time.minute' | translate }}
           </span>
         </div>
         <app-leaderboard-table [data]="queryWeek.data()" period="week" [userCount]="userCountQuery.data()?.count" />
@@ -29,8 +30,9 @@
       <ng-template matTabContent>
         <div class="tab-header-timer">
           <span>{{ 'leaderboard.monthlyTitle' | translate: { month: currentMonthName } }}</span>
-          <span class="timer-val">
-            ⏰ {{ monthCountdownText() }}
+          <span class="timer-val" *ngIf="monthCountdown() as time">
+            <ng-icon name="saxClockOutline" size="14px"></ng-icon>
+            {{ 'leaderboard.endsIn' | translate }} {{ time.days }}{{ 'time.day' | translate }} {{ time.hours }}{{ 'time.hour' | translate }} {{ time.minutes }}{{ 'time.minute' | translate }}
           </span>
         </div>
         <app-leaderboard-table [data]="queryMonth.data()" period="month" [userCount]="userCountQuery.data()?.count" />

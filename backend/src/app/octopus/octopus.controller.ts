@@ -83,4 +83,16 @@ export class OctopusController {
     const date = dateStr ? new Date(dateStr) : undefined;
     return this.octopusService.getUserVote(user.id, date);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/history')
+  getUserHistory(
+    @LoginUser() user: { id: string },
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 0;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.octopusService.getUserHistory(user.id, pageNum, limitNum);
+  }
 }

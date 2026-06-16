@@ -6,7 +6,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "copyPrompt": "Copy Prompt",
-    "copied": "Copied! ✅"
+    "copied": "Copied!"
   },
   "bottomNav": {
     "home": "Home",
@@ -83,7 +83,7 @@
       "unfollowSuccess": "Signal unbookmarked successfully",
       "aiShield": "Smart Shield",
       "aiShieldDesc": "Get AI-driven risk-free, trailing and exit alerts (1 GEM per suggestion)",
-      "aiShieldSuccess": "Smart Shield activated! 🛡️",
+      "aiShieldSuccess": "Smart Shield activated!",
       "aiShieldDeactivated": "Smart Shield deactivated",
       "aiShieldPremiumGemsRequired": "This section requires premium access. You must have at least 20 gems.",
       "premium": "Premium"
@@ -414,7 +414,7 @@
   "octopus": {
     "title": "Octopus",
     "subtitle": "Daily Ounce Price Guess",
-    "description": "Predict whether the day's market closing price will be higher or lower than the current price. Earn 1 star ⭐ for correct predictions.",
+    "description": "Predict whether the day's market closing price will be higher or lower than the current price. Earn 1 star for correct predictions.",
     "cutoffWarning": "Predictions can only be placed or edited before {{time}}.",
     "votingOpensIn": "Predictions open in:",
     "votingClosesIn": "Predictions close in:",
@@ -432,14 +432,18 @@
       "monthly": "Monthly",
       "total": "Total",
       "starsCount": "{{value}} Stars",
-      "empty": "No rankings yet"
+      "empty": "No rankings yet",
+      "history": "My History"
+    },
+    "history": {
+      "empty": "No predictions found in your history."
     },
     "score": {
       "weekly": "This week's stars: {{value}}",
       "total": "Total stars: {{value}}"
     },
     "status": {
-      "correct": "Correct prediction (+1 star) ⭐",
+      "correct": "Correct prediction (+1 star)",
       "incorrect": "Incorrect prediction (0 stars)",
       "pending": "Waiting for market close to settle"
     },
@@ -754,5 +758,10 @@
       "mute": "Mute sound",
       "unmute": "Play lo-fi beat"
     }
+  },
+  "time": {
+    "day": "d",
+    "hour": "h",
+    "minute": "m"
   }
 }

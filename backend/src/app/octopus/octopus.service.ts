@@ -9,9 +9,6 @@ import { EVENTS } from '../consts';
 /** Gold market close: 22:00 UTC (after NY session, COMEX daily break) */
 const MARKET_CLOSE_HOUR_UTC = 22;
 
-/** Iran timezone: UTC+3:30. Users can change prediction until a specific cutoff hour Iran time. */
-const IRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
-
 function getCutoffHour(): number {
   const envVal = process.env.OCTOPUS_CUTOFF_HOUR;
   if (envVal) {
@@ -53,20 +50,37 @@ export class OctopusService {
     return getCutoffHour();
   }
 
-  private getTehranCalendarDate(date: Date): Date {
-    const tehranTime = new Date(date.getTime() + IRAN_OFFSET_MS);
-    const y = tehranTime.getUTCFullYear();
-    const m = tehranTime.getUTCMonth();
-    const d = tehranTime.getUTCDate();
-    return new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
+  private getTradingDayDate(date: Date): Date {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(date);
+    const partVal = (type: string) => parseInt(parts.find((p) => p.type === type)!.value, 10);
+
+    const year = partVal('year');
+    const month = partVal('month') - 1;
+    const day = partVal('day');
+    const hour = partVal('hour');
+
+    const nyDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+    if (hour >= 18) {
+      nyDate.setUTCDate(nyDate.getUTCDate() + 1);
+    }
+    return nyDate;
   }
 
-  /** True if user can change prediction: same calendar day in Iran, before cutoff hour UTC. */
+  /** True if user can change prediction: same trading day, before cutoff hour UTC. */
   private canChangePrediction(voteDate: Date): boolean {
     const now = new Date();
-    const currentTehranDate = this.getTehranCalendarDate(now);
+    const currentTradingDate = this.getTradingDayDate(now);
 
-    if (voteDate.getTime() !== currentTehranDate.getTime()) {
+    if (voteDate.getTime() !== currentTradingDate.getTime()) {
       return false;
     }
 
@@ -76,7 +90,7 @@ export class OctopusService {
 
   async vote(userId: string, direction: OctopusDirection) {
     const now = new Date();
-    const voteDate = this.getTehranCalendarDate(now);
+    const voteDate = this.getTradingDayDate(now);
 
     const isMarketOpen = this.ouncePriceService.isMarketOpen(now);
     if (!isMarketOpen) {
@@ -136,8 +150,8 @@ export class OctopusService {
 
   async getSentiment(date?: Date) {
     const voteDate = date
-      ? this.getTehranCalendarDate(date)
-      : this.getTehranCalendarDate(new Date());
+      ? this.getTradingDayDate(date)
+      : this.getTradingDayDate(new Date());
 
     const predictions = await this.predictionModel
       .find({ voteDate })
@@ -160,7 +174,7 @@ export class OctopusService {
 
   /** Settle predictions for the given date (uses close price from market close) */
   async settlePredictions(forDate: Date) {
-    const voteDate = this.getTehranCalendarDate(forDate);
+    const voteDate = this.getTradingDayDate(forDate);
     const unsettled = await this.predictionModel
       .find({ voteDate, points: { $exists: false } })
       .exec();
@@ -196,9 +210,7 @@ export class OctopusService {
   @OnEvent(EVENTS.MARKET_CLOSED)
   async settleDailyPredictions() {
     const today = new Date();
-    // Adjust by subtracting 4 hours to get the correct trading day's calendar date in Tehran
-    const settleDate = new Date(today.getTime() - 4 * 60 * 60 * 1000);
-    return this.settlePredictions(settleDate);
+    return this.settlePredictions(today);
   }
 
   private getWeekRange(): { start: Date; end: Date } {
@@ -395,8 +407,8 @@ export class OctopusService {
 
   async getUserVote(userId: string, date?: Date) {
     const voteDate = date
-      ? this.getTehranCalendarDate(date)
-      : this.getTehranCalendarDate(new Date());
+      ? this.getTradingDayDate(date)
+      : this.getTradingDayDate(new Date());
 
     const prediction = await this.predictionModel
       .findOne({ user: userId, voteDate })
@@ -426,5 +438,16 @@ export class OctopusService {
       settled,
       canChange,
     };
+  }
+
+  async getUserHistory(userId: string, page = 0, limit = 20) {
+    const skip = page * limit;
+    return this.predictionModel
+      .find({ user: userId })
+      .sort({ voteDate: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean()
+      .exec();
   }
 }

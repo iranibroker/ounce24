@@ -1,5 +1,5 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { saxInfoCircleOutline } from '@ng-icons/iconsax/outline';
+import { saxInfoCircleOutline, saxClockOutline } from '@ng-icons/iconsax/outline';
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '@ounce24/types';
@@ -35,7 +35,7 @@ import { OctopusBannerComponent } from '../../components/octopus-banner/octopus-
     NgIcon,
     OctopusBannerComponent
   ],
-  providers: [provideIcons({ saxInfoCircleOutline })],
+  providers: [provideIcons({ saxInfoCircleOutline, saxClockOutline })],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })
@@ -46,11 +46,15 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   public translate = inject(TranslateService);
 
   get currentMonthName(): string {
-    return new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date());
+    const lang = this.translate.currentLang;
+    const locale = lang === 'fa' ? 'fa-IR-u-ca-gregory' :
+                   lang === 'ar' ? 'ar-SA-u-ca-gregory' :
+                   lang === 'tr' ? 'tr-TR' : 'en-US';
+    return new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date());
   }
 
-  monthCountdownText = signal<string>('');
-  weekCountdownText = signal<string>('');
+  monthCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
+  weekCountdown = signal<{ days: number; hours: number; minutes: number }>({ days: 0, hours: 0, minutes: 0 });
   private timer: any = null;
 
   ngOnInit() {
@@ -73,12 +77,12 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     const nextMonthStart = new Date(Date.UTC(currentYear, currentMonth + 1, 1, 0, 0, 0, 0));
     const monthDiff = nextMonthStart.getTime() - now.getTime();
     if (monthDiff <= 0) {
-      this.monthCountdownText.set('0d 0h 0m');
+      this.monthCountdown.set({ days: 0, hours: 0, minutes: 0 });
     } else {
       const days = Math.floor(monthDiff / 86400000);
       const hrs = Math.floor((monthDiff % 86400000) / 3600000);
       const mins = Math.floor((monthDiff % 3600000) / 60000);
-      this.monthCountdownText.set(`${days}d ${hrs}h ${mins}m`);
+      this.monthCountdown.set({ days, hours: hrs, minutes: mins });
     }
 
     // Weekly Countdown (ends on Friday 17:00 America/New_York trading close)
@@ -120,12 +124,12 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
     const weekDiff = targetDate.getTime() - now.getTime();
     if (weekDiff <= 0) {
-      this.weekCountdownText.set('0d 0h 0m');
+      this.weekCountdown.set({ days: 0, hours: 0, minutes: 0 });
     } else {
       const days = Math.floor(weekDiff / 86400000);
       const hrs = Math.floor((weekDiff % 86400000) / 3600000);
       const mins = Math.floor((weekDiff % 3600000) / 60000);
-      this.weekCountdownText.set(`${days}d ${hrs}h ${mins}m`);
+      this.weekCountdown.set({ days, hours: hrs, minutes: mins });
     }
   }
 
