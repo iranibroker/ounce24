@@ -66,6 +66,65 @@
   padding: 16px 0;
 }
 
+.month-separator-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 4px;
+  width: 100%;
+}
+
+.month-separator-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--mat-sys-outline-variant) 50%,
+    transparent
+  );
+
+  &:first-child {
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--mat-sys-outline-variant)
+    );
+  }
+
+  &:last-child {
+    background: linear-gradient(
+      to left,
+      transparent,
+      var(--mat-sys-outline-variant)
+    );
+  }
+}
+
+.month-separator-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  .calendar-icon {
+    color: var(--mat-sys-primary);
+    display: flex;
+  }
+
+  .month-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+  }
+}
+
 .toolbar-avatar {
   width: 32px;
   height: 32px;

@@ -191,6 +191,16 @@
         <div class="list-container">
           @if (signals()?.length > 0) {
             @for (signal of signals(); track $index) {
+              @if (shouldShowMonthSeparator($index)) {
+                <div class="month-separator-container">
+                  <div class="month-separator-line"></div>
+                  <div class="month-separator-badge">
+                    <ng-icon name="saxCalendarOutline" size="14px" class="calendar-icon"></ng-icon>
+                    <span class="month-name">{{ getMonthSeparator(signal.createdAt) }}</span>
+                  </div>
+                  <div class="month-separator-line"></div>
+                </div>
+              }
               <app-signal-card [signal]="signal" [showScore]="true" />
             }
           } @else if (signals() && signals()?.length === 0) {

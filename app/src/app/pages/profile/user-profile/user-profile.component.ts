@@ -188,6 +188,35 @@ export class UserProfileComponent {
     return this.signalsQuery.data()?.pages?.flat();
   });
 
+  shouldShowMonthSeparator(index: number): boolean {
+    const signalsList = this.signals();
+    if (!signalsList || index < 0 || index >= signalsList.length) return false;
+
+    const currentSignal = signalsList[index];
+    if (!currentSignal.createdAt) return false;
+
+    if (index === 0) return true;
+
+    const prevSignal = signalsList[index - 1];
+    if (!prevSignal.createdAt) return true;
+
+    const currentDate = new Date(currentSignal.createdAt);
+    const prevDate = new Date(prevSignal.createdAt);
+
+    return currentDate.getFullYear() !== prevDate.getFullYear() ||
+           currentDate.getMonth() !== prevDate.getMonth();
+  }
+
+  getMonthSeparator(dateStr: Date | string | undefined): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const lang = this.translate.currentLang;
+    const locale = lang === 'fa' ? 'fa-IR-u-ca-gregory' :
+                   lang === 'ar' ? 'ar-SA-u-ca-gregory' :
+                   lang === 'tr' ? 'tr-TR' : 'en-US';
+    return new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long' }).format(date);
+  }
+
   achievements = computed(() => {
     return this.achievementsQuery.data() || [];
   });
