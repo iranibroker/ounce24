@@ -12,15 +12,24 @@ To prevent data discrepancies and performance issues, all feature developments m
 
 ### Core Service
 - **Service**: `OuncePriceService` (located in `backend/src/app/ounce-price/ounce-price.service.ts`)
-- **Get Current Price**: `ouncePriceService.current`
-- **Get Market Status**: `ouncePriceService.isMarketOpen(date?: Date)`
+- **Get Current Price**: `ouncePriceService.current` (cached price, updated in real time via subscription to the TradingView feed).
+- **Get Market Status**:
+  - `ouncePriceService.isMarketOpen()` returns the current cached market state (managed reactively).
+  - `ouncePriceService.isMarketOpen(date: Date)` calculates the market status dynamically for any specific date/time (crucial for checking cutoff bounds on specific transactions).
 - **Dynamic Adaptor Pausing**: `QuoteService` automatically pauses streaming quote connections when the market is closed. Do **NOT** create custom websocket reconnect routines or watchdogs.
+
+### Scheduled Market Transitions (America/New_York Timezone)
+The market status is updated via cron jobs configured in the New York timezone (Eastern Time):
+- **Daily Break / Weekend Close**: `@Cron('0 17 * * 1-5', { timeZone: 'America/New_York' })`
+  - Sets `marketOpen` to `false`, stops `QuoteService`, and emits `EVENTS.MARKET_CLOSED`.
+- **Daily Reopen**: `@Cron('0 18 * * 0-4', { timeZone: 'America/New_York' })`
+  - Sets `marketOpen` to `true`, starts `QuoteService`, and emits `EVENTS.MARKET_OPENED`.
 
 ### Event-Driven Tasks (No Arbitrary Crons)
 - Do **NOT** use time-based calendar crons for tasks dependent on market close/open transitions.
 - Use NestJS `@OnEvent` decorators to listen to market events:
-  - **`EVENTS.MARKET_CLOSED`** (`market.closed`): Fired at daily close/weekend close.
-    - Check if day in NY is Friday using:
+  - **`EVENTS.MARKET_CLOSED`** (`market.closed`): Fired at daily close / weekend close.
+    - To check if it is the weekend close (Friday close in New York), use:
       ```typescript
       const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'long' });
       if (formatter.format(new Date()) === 'Friday') { /* weekend close */ }
@@ -37,7 +46,8 @@ To prevent data discrepancies and performance issues, all feature developments m
 - **Signals**:
   - Price: `priceService.value()`
   - Market status: `priceService.isMarketOpen()`
-- **Initial Load**: The service automatically calls `/api/ounce-price/current` on startup. Do **NOT** hardcode fallback dummy prices (like `$2,345.67`) in HTML templates.
+- **Initialization**: The service fetches `/api/ounce-price/current` on startup. Do **NOT** hardcode fallback dummy prices (like `$2,345.67`) in HTML templates.
+- **SSE Stream Connection**: The service establishes a Server-Sent Events (SSE) subscription to `/api/ounce-price/stream` for real-time price and state updates. It handles reconnection automatically on error with a 5-second backoff.
 
 ### Reactive UI Updates
 - Do **NOT** use polling or intervals to check if the market has opened/closed.
