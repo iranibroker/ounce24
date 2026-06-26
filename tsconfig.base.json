@@ -17,11 +17,17 @@
     "noImplicitAny": false,
     "baseUrl": ".",
     "paths": {
+      "@ng-icons/iconsax/bold": [
+        "node_modules/@ng-icons/iconsax/types/ng-icons-iconsax-bold.d.ts"
+      ],
+      "@ng-icons/iconsax/bulk": [
+        "node_modules/@ng-icons/iconsax/types/ng-icons-iconsax-bulk.d.ts"
+      ],
+      "@ng-icons/iconsax/outline": [
+        "node_modules/@ng-icons/iconsax/types/ng-icons-iconsax-outline.d.ts"
+      ],
       "@ounce24/types": ["types/src/index.ts"],
-      "@ounce24/utils": ["utils/src/index.ts"],
-      "@ng-icons/iconsax/outline": ["node_modules/@ng-icons/iconsax/types/ng-icons-iconsax-outline.d.ts"],
-      "@ng-icons/iconsax/bold": ["node_modules/@ng-icons/iconsax/types/ng-icons-iconsax-bold.d.ts"],
-      "@ng-icons/iconsax/bulk": ["node_modules/@ng-icons/iconsax/types/ng-icons-iconsax-bulk.d.ts"]
+      "@ounce24/utils": ["utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

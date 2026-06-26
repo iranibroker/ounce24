@@ -47,6 +47,10 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
   ? 20
   : Number(process.env.MIN_SIGNAL_SCORE);
 
+const GEM_BYPASS_DAILY_LIMIT = isNaN(Number(process.env.GEM_BYPASS_DAILY_LIMIT))
+  ? 5
+  : Number(process.env.GEM_BYPASS_DAILY_LIMIT);
+
 const AI_GENERATION_THRESHOLD = isNaN(Number(process.env.AI_GENERATION_THRESHOLD))
   ? 75
   : Number(process.env.AI_GENERATION_THRESHOLD);
@@ -278,13 +282,45 @@ export class SignalsService {
       .exec();
 
     if (todaySignals.length >= MAX_DAILY_SIGNAL) {
-      throw new HttpException(
-        {
-          translationKey: 'signal.maxDaily',
-          data: MAX_DAILY_SIGNAL,
-        },
-        HttpStatus.REQUEST_TIMEOUT,
-      );
+      if (signal.acceptGem) {
+        if ((owner.gem || 0) < GEM_BYPASS_DAILY_LIMIT) {
+          throw new HttpException(
+            {
+              translationKey: 'insufficientGems',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        
+        const currentGems = owner.gem || 0;
+        await this.userModel.findByIdAndUpdate(owner._id, {
+          $inc: { gem: -GEM_BYPASS_DAILY_LIMIT },
+        }).exec();
+
+        await this.gemLogModel.create({
+          user: owner._id,
+          gemsChange: -GEM_BYPASS_DAILY_LIMIT,
+          gemsBefore: currentGems,
+          gemsAfter: currentGems - GEM_BYPASS_DAILY_LIMIT,
+          action: GemLogAction.BypassDailyLimit,
+        });
+
+        // Deduct gems locally on owner object for subsequent checks in this function
+        owner.gem = currentGems - GEM_BYPASS_DAILY_LIMIT;
+        signal.gem = GEM_BYPASS_DAILY_LIMIT;
+      } else {
+        throw new HttpException(
+          {
+            translationKey: 'signal.maxDailyGemRequired',
+            data: {
+              limit: MAX_DAILY_SIGNAL,
+              gemCost: GEM_BYPASS_DAILY_LIMIT,
+              userGems: owner.gem || 0,
+            },
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
 
     if (signal.instantEntry) {

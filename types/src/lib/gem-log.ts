@@ -8,6 +8,7 @@ export enum GemLogAction {
   UnlockAchievement = 'unlock_achievement',
   AiShieldEnable = 'ai_shield_enable',
   FirstSignalReward = 'first_signal_reward',
+  BypassDailyLimit = 'bypass_daily_limit',
 }
 
 export class GemLog {

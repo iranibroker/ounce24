@@ -178,25 +178,64 @@ export class AddSignalComponent {
         instantEntry: formValue.instantEntry,
         generationAnalysis: formValue.generationAnalysis,
         successProbability: formValue.successProbability,
+        acceptGem: false,
       };
 
-      this.http.post('/api/signals', signal).subscribe({
-        next: () => {
-          this.snackBar.open(
-            this.translateService.instant('addSignal.success'),
-            this.translateService.instant('app.close'),
-            { duration: 3000 }
-          );
-          this.analyticsService.trackEvent('signal_created', {
-            signal,
-          });
-          this.router.navigate(['/signals']);
-        },
-        error: (error) => {
-          this.isSubmitting = false;
-        },
-      });
+      this.postSignal(signal);
     }
+  }
+
+  postSignal(signal: any): void {
+    this.http.post('/api/signals', signal).subscribe({
+      next: () => {
+        this.snackBar.open(
+          this.translateService.instant('addSignal.success'),
+          this.translateService.instant('app.close'),
+          { duration: 3000 }
+        );
+        this.analyticsService.trackEvent('signal_created', {
+          signal,
+        });
+        this.router.navigate(['/signals']);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        const apiError = error?.error;
+        if (apiError?.translationKey === 'signal.maxDailyGemRequired') {
+          const limit = apiError.data?.limit || 5;
+          const gemCost = apiError.data?.gemCost || 5;
+          const userGems = apiError.data?.userGems || 0;
+
+          const descMsg = this.translateService.instant('apiError.signal.maxDailyGemRequired', {
+            limit,
+            gemCost,
+            userGems
+          });
+
+          this.dialog.open(GemRequiredDialogComponent, {
+            width: '400px',
+            data: {
+              description: descMsg,
+              accept: true,
+              acceptText: this.translateService.instant('gemDialog.accept')
+            }
+          }).afterClosed().subscribe((accepted) => {
+            if (accepted) {
+              if (userGems < gemCost) {
+                this.snackBar.open(
+                  this.translateService.instant('apiError.insufficientGems'),
+                  this.translateService.instant('app.close'),
+                  { duration: 3000 }
+                );
+                return;
+              }
+              this.isSubmitting = true;
+              this.postSignal({ ...signal, acceptGem: true });
+            }
+          });
+        }
+      },
+    });
   }
 
   analyzeWithAI(): void {

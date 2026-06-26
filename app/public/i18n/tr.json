@@ -301,6 +301,7 @@
       "invalidEntry": "Geçersiz sinyal girişi",
       "maxActive": "Maksimum aktif sinyal sayısına ulaştınız ({{value}})",
       "maxDaily": "Maksimum günlük sinyal sayısına ulaştınız ({{value}})",
+      "maxDailyGemRequired": "Günlük limitiniz olan {{limit}} sinyale ulaştınız. Daha fazla sinyal göndermek için {{gemCost}} elmas ödemelisiniz. (Elmaslarınız: {{userGems}})",
       "near": "Bu giriş fiyatına yakın bir sinyaliniz var",
       "marketClosed": "Piyasa kapalıyken sinyal oluşturulamaz"
     }

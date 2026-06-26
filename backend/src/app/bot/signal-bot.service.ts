@@ -49,6 +49,10 @@ const MIN_SIGNAL_SCORE = isNaN(Number(process.env.MIN_SIGNAL_SCORE))
   ? 20
   : Number(process.env.MIN_SIGNAL_SCORE);
 
+const GEM_BYPASS_DAILY_LIMIT = isNaN(Number(process.env.GEM_BYPASS_DAILY_LIMIT))
+  ? 5
+  : Number(process.env.GEM_BYPASS_DAILY_LIMIT);
+
 const APP_URL = process.env.APP_URL || 'https://app.ounce24.com';
 
 @Public()
@@ -354,10 +358,49 @@ export class SignalBotService extends BaseBot {
       .populate('owner')
       .exec();
     if (todaySignals.length >= MAX_DAILY_SIGNAL) {
-      ctx.reply(
-        `You cannot create more than ${MAX_DAILY_SIGNAL} signals per day. Use /my_signals to manage your signals.`,
-      );
-      return;
+      const lang = user?.language || 'fa';
+      const limit = MAX_DAILY_SIGNAL;
+      const gemCost = GEM_BYPASS_DAILY_LIMIT;
+      const userGems = user.gem || 0;
+      
+      let message = '';
+      if (lang === 'fa') {
+        message = `⚠️ <b>حد مجاز روزانه پر شده است</b>\n\n` +
+                  `شما سقف روزانه ثبت ${limit} سیگنال را پر کرده‌اید. برای ثبت سیگنال بیشتر باید ${gemCost} الماس پرداخت کنید.\n\n` +
+                  `💎 الماس‌های شما: ${userGems} الماس`;
+      } else {
+        message = `⚠️ <b>Daily Limit Reached</b>\n\n` +
+                  `You have reached your daily limit of ${limit} signals. To submit another signal, you must pay ${gemCost} gems.\n\n` +
+                  `💎 Your gems: ${userGems} Gems`;
+      }
+      
+      if (userGems >= gemCost) {
+        const btnText = lang === 'fa' ? `پرداخت ${gemCost} الماس و شروع ثبت 💎` : `Pay ${gemCost} gems & start 💎`;
+        await ctx.reply(message, {
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: btnText,
+                  callback_data: 'start_signal_with_bypass',
+                },
+                {
+                  text: lang === 'fa' ? 'لغو' : 'Cancel',
+                  callback_data: 'cancel_new_signal',
+                }
+              ]
+            ]
+          }
+        });
+        return;
+      } else {
+        const noGemsMessage = lang === 'fa' 
+          ? `${message}\n\n❌ تعداد الماس‌های شما برای پرداخت کافی نیست.` 
+          : `${message}\n\n❌ You do not have enough gems to proceed.`;
+        await ctx.reply(noGemsMessage, { parse_mode: 'HTML' });
+        return;
+      }
     }
 
     await ctx.reply('Choose signal type:', {
@@ -393,9 +436,11 @@ export class SignalBotService extends BaseBot {
       return;
     }
     const isSell = ctx.callbackQuery['data'] === 'new_sell_signal';
+    const existingData = this.getStateData<any>(ctx.from.id) || {};
     const signal = {
       type: isSell ? SignalType.Sell : SignalType.Buy,
       createdOuncePrice: this.ouncePriceService.current,
+      acceptGem: existingData.acceptGem || false,
     } as Signal;
 
     ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
@@ -575,7 +620,56 @@ export class SignalBotService extends BaseBot {
             }
           }
         }
-      } catch (error) {
+      } catch (error: any) {
+        const response = error?.response;
+        if (response && response.translationKey === 'signal.maxDailyGemRequired') {
+          const limit = response.data?.limit || 5;
+          const gemCost = response.data?.gemCost || 5;
+          const userGems = response.data?.userGems || 0;
+          const lang = user.language || 'fa';
+          
+          let message = '';
+          if (lang === 'fa') {
+            message = `⚠️ <b>حد مجاز روزانه پر شده است</b>\n\n` +
+                      `شما سقف روزانه ثبت ${limit} سیگنال را پر کرده‌اید. برای ثبت این سیگنال باید ${gemCost} الماس پرداخت کنید.\n\n` +
+                      `💎 الماس‌های شما: ${userGems} الماس`;
+          } else {
+            message = `⚠️ <b>Daily Limit Reached</b>\n\n` +
+                      `You have reached your daily limit of ${limit} signals. To submit this signal, you must pay ${gemCost} gems.\n\n` +
+                      `💎 Your gems: ${userGems} Gems`;
+          }
+
+          if (userGems >= gemCost) {
+            this.setStateData(ctx.from.id, { ...signal, acceptGem: true });
+            const btnText = lang === 'fa' ? `ثبت با پرداخت ${gemCost} الماس 💎` : `Submit by paying ${gemCost} gems 💎`;
+            await ctx.reply(message, {
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: btnText,
+                      callback_data: 'confirm_daily_bypass',
+                    },
+                    {
+                      text: lang === 'fa' ? 'لغو' : 'Cancel',
+                      callback_data: 'cancel_new_signal',
+                    }
+                  ]
+                ]
+              }
+            });
+            return;
+          } else {
+            const noGemsMessage = lang === 'fa' 
+              ? `${message}\n\n❌ تعداد الماس‌های شما کافی نیست.` 
+              : `${message}\n\n❌ You do not have enough gems.`;
+            await ctx.reply(noGemsMessage, { parse_mode: 'HTML' });
+            BaseBot.userStates.delete(ctx.from.id);
+            return;
+          }
+        }
+
         ctx.reply('Something went wrong. Please try again.');
         BaseBot.userStates.delete(ctx.from.id);
       }
@@ -1259,6 +1353,108 @@ You can do this once every 15 days. ${
     }
 
     this.publishService.addAction(signal.telegramBot, signal.id, func);
+  }
+
+  @Action('start_signal_with_bypass')
+  async startSignalWithBypass(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    ctx.answerCbQuery();
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+    
+    // Initialize state with acceptGem: true
+    this.setState<any>(ctx.from.id, {
+      state: UserStateType.NewSignal,
+      data: { acceptGem: true }
+    });
+    
+    await ctx.reply('Choose signal type:', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: SignalTypeText[SignalType.Sell],
+              callback_data: 'new_sell_signal',
+            },
+            {
+              text: SignalTypeText[SignalType.Buy],
+              callback_data: 'new_buy_signal',
+            },
+          ],
+        ],
+      },
+    });
+  }
+
+  @Action('cancel_new_signal')
+  async cancelNewSignal(@Ctx() ctx: Context) {
+    BaseBot.userStates.delete(ctx.from.id);
+    const lang = await this.getUserLang(ctx.from.id);
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+    await ctx.reply(lang === 'fa' ? 'ثبت سیگنال لغو شد.' : 'Signal creation canceled.');
+    ctx.answerCbQuery();
+  }
+
+  @Action('confirm_daily_bypass')
+  async confirmDailyBypass(@Ctx() ctx: Context) {
+    if (!(await this.isValid(ctx))) return;
+    const state = this.getState<any>(ctx.from.id);
+    const signal = this.getStateData<Signal>(ctx.from.id);
+    if (!signal || state?.state !== UserStateType.NewSignal || !signal.acceptGem) {
+      ctx.answerCbQuery('Invalid state');
+      return;
+    }
+    
+    ctx.answerCbQuery();
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {});
+    
+    const user = await this.getUser(ctx.from.id);
+    try {
+      const createdSignal = await this.signalsService.addSignal({
+        ...signal,
+        owner: user,
+      });
+      if (createdSignal) {
+        BaseBot.userStates.delete(ctx.from.id);
+        const lang = createdSignal.owner.language || 'fa';
+        const t = getTranslation(lang);
+        const typeStr = createdSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
+        const alertMessage = t.pushNotifications.signalCreated(typeStr);
+        const signalInfo = formatSignalDetails(createdSignal, lang);
+        const telegramMessage = `📢 <b>${t.pushNotifications.signalStatusTitle}</b>\n\n${alertMessage}\n\n${signalInfo}`;
+
+        await this.bot.telegram.sendMessage(
+          createdSignal.owner.telegramId,
+          telegramMessage,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: t.pushNotifications.viewAndApply,
+                    web_app: { url: `${APP_URL}/signals/${createdSignal._id.toString()}` },
+                  },
+                ],
+              ],
+            },
+          },
+        );
+
+        if (process.env.PUBLISH_CHANNEL_ID) {
+          if (!createdSignal.publishable) {
+            ctx.reply(
+              `Your signal was saved but not published to the channel. Minimum score (total or weekly) to publish is ${MIN_SIGNAL_SCORE}. Your total: ${user.totalScore.toFixed(
+                2,
+              )}, weekly: ${user.weekScore.toFixed(2)}.\nWith more correct signals and higher score, your signals will be published automatically.\nUse /my_closed_signals to see past signals and /my_signals to manage active ones.`,
+            );
+            return;
+          }
+        }
+      }
+    } catch (error: any) {
+      ctx.reply('Something went wrong. Please try again.');
+      BaseBot.userStates.delete(ctx.from.id);
+    }
   }
 
   getSignalFromMessage(@Ctx() ctx: Context) {

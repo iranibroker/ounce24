@@ -315,6 +315,7 @@
       "invalidEntry": "Invalid signal entry",
       "maxActive": "You have reached the maximum number of active signals ({{value}})",
       "maxDaily": "You have reached the maximum number of daily signals ({{value}})",
+      "maxDailyGemRequired": "You have reached your daily limit of {{limit}} signals. To submit more signals, you must pay {{gemCost}} gems. (Your gems: {{userGems}})",
       "near": "You have a signal near this entry price",
       "marketClosed": "Signals cannot be created while the market is closed"
     }

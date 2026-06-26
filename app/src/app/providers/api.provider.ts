@@ -52,7 +52,7 @@ class ApiInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((err) => {
         console.log(err.error);
-        if (err.error?.translationKey) {
+        if (err.error?.translationKey && err.error?.translationKey !== 'signal.maxDailyGemRequired') {
           this.translate
             .get(`apiError.${err.error?.translationKey}`, {
               value: err.error?.data,

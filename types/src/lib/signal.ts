@@ -96,6 +96,7 @@ export class Signal {
   riskReward: number;
   score: number;
   gem?: number;
+  acceptGem?: boolean;
 
   static activeTrigger(signal: Signal, ouncePrice: number) {
     if (
