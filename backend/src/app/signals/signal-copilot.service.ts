@@ -662,7 +662,6 @@ export class SignalCopilotService implements OnModuleInit {
     try {
       const signalIdStr = (signal.id || (signal as any)._id).toString();
       const cached = this.signalCache.get(signalIdStr);
-      if (!cached) return;
 
       const populatedSignal = await this.signalModel
         .findById(signalIdStr)
@@ -673,13 +672,56 @@ export class SignalCopilotService implements OnModuleInit {
 
       const ownerId = populatedSignal.owner ? ((populatedSignal.owner as any)._id || (populatedSignal.owner as any).id || populatedSignal.owner).toString() : '';
 
-      for (const sub of cached.subscriptions.values()) {
-        if (sub.userId === ownerId) continue;
-        if (!sub.followStatus) continue;
-        // Skip if user has disabled signal-follow notifications
-        if (!sub.notifSignalFollow) continue;
+      // Set of user IDs to avoid duplicate notifications
+      const notifiedUserIds = new Set<string>();
+      const recipients: Array<{ userId: string; telegramId?: number; language: string }> = [];
 
-        const lang = sub.language || 'fa';
+      // 1. Gather recipients from specific signal subscriptions (if cached)
+      if (cached) {
+        for (const sub of cached.subscriptions.values()) {
+          if (sub.userId === ownerId) continue;
+          if (!sub.followStatus) continue;
+          if (!sub.notifSignalFollow) continue;
+
+          recipients.push({
+            userId: sub.userId,
+            telegramId: sub.telegramId,
+            language: sub.language,
+          });
+          notifiedUserIds.add(sub.userId);
+        }
+      }
+
+      // 2. Gather recipients from trader follows
+      if (ownerId) {
+        const follows = await this.followModel
+          .find({ following: ownerId })
+          .populate('follower')
+          .exec();
+
+        for (const follow of follows) {
+          const follower = follow.follower as any;
+          if (!follower) continue;
+          const followerIdStr = (follower._id || follower.id).toString();
+          
+          if (followerIdStr === ownerId) continue;
+          if (notifiedUserIds.has(followerIdStr)) continue;
+          if (follower.notifSignalFollow === false) continue;
+
+          recipients.push({
+            userId: followerIdStr,
+            telegramId: follower.telegramId,
+            language: follower.language || 'fa',
+          });
+          notifiedUserIds.add(followerIdStr);
+        }
+      }
+
+      // 3. Send notifications to all gathered recipients
+      for (const recipient of recipients) {
+        if (!recipient.telegramId) continue;
+
+        const lang = recipient.language || 'fa';
         const t = getTranslation(lang);
         const typeStr = populatedSignal.type === SignalType.Buy ? t.pushNotifications.buy : t.pushNotifications.sell;
         const entryPrice = populatedSignal.entryPrice;
@@ -697,39 +739,26 @@ export class SignalCopilotService implements OnModuleInit {
 
         const title = `📢 ${t.pushNotifications.signalStatusTitle}`;
 
-        // 1. WebPush (Disabled - Telegram active)
-        /*
-        const pushPayload = JSON.stringify({
-          title,
-          body: message,
-          icon: '/assets/icons/icon-192x192.png',
-          data: { url: `/signals/${signalIdStr}` },
-        });
-        await this.webPushService.sendNotificationToUser(sub.userId, pushPayload);
-        */
+        const signalInfo = formatSignalDetails(populatedSignal, lang);
+        const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n${signalInfo}`;
 
-        // 2. Telegram Bot
-        if (sub.telegramId) {
-          const signalInfo = formatSignalDetails(populatedSignal, lang);
-          const telegramMessage = `📢 <b>${title}</b>\n\n${message}\n\n${signalInfo}`;
-          await this.bot.telegram
-            .sendMessage(sub.telegramId, telegramMessage, {
-              parse_mode: 'HTML',
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: t.pushNotifications.viewAndApply,
-                      web_app: { url: `${APP_URL}/signals/${signalIdStr}` },
-                    },
-                  ],
+        await this.bot.telegram
+          .sendMessage(recipient.telegramId, telegramMessage, {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: t.pushNotifications.viewAndApply,
+                    web_app: { url: `${APP_URL}/signals/${signalIdStr}` },
+                  },
                 ],
-              },
-            })
-            .catch((err) => {
-              this.logger.error(`Failed to send follower Telegram alert to user ${sub.userId}:`, err);
-            });
-        }
+              ],
+            },
+          })
+          .catch((err) => {
+            this.logger.error(`Failed to send follower Telegram alert to user ${recipient.userId}:`, err);
+          });
       }
     } catch (error) {
       this.logger.error('Error notifying followers of status change:', error);
