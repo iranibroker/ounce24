@@ -21,6 +21,7 @@ import { OunceAlarmsModule } from './ounce-alarms/ounce-alarms.module';
 import { AppTokenModule } from './app-token/app-token.module';
 import { OctopusModule } from './octopus/octopus.module';
 import { WebPushModule } from './web-push/web-push.module';
+import { McpModule } from './mcp/mcp.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { WebPushModule } from './web-push/web-push.module';
     AppTokenModule,
     OctopusModule,
     WebPushModule,
+    McpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  mongodb-mcp:
+    image: ghcr.io/mongodb-js/mongodb-mcp-server:latest
+    container_name: ounce24-mongodb-mcp
+    environment:
+      - MONGODB_URI=${MONGO_URI:-mongodb://localhost:27017/ounce24}
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
