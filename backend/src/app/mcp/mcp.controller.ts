@@ -10,7 +10,9 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { McpService } from './mcp.service';
+import { Public } from '../auth/public.decorator';
 
+@Public()
 @Controller('mcp')
 export class McpController {
   private readonly logger = new Logger(McpController.name);
@@ -18,10 +20,49 @@ export class McpController {
 
   constructor(private readonly mcpService: McpService) {}
 
+  private isAuthorized(req: Request): boolean {
+    const expectedKey = process.env.MCP_API_KEY;
+    if (!expectedKey) return true; // Dev mode (no key configured)
+
+    const authHeader =
+      typeof req.headers['authorization'] === 'string'
+        ? req.headers['authorization']
+        : '';
+    const apiKeyHeader =
+      req.headers['x-api-key'] || req.headers['x-mcp-api-key'] || '';
+    const queryKey = req.query.apiKey || req.query.token || '';
+
+    let providedKey = '';
+    if (authHeader) {
+      providedKey = authHeader.replace(/^Bearer\s+/i, '').trim();
+    } else if (apiKeyHeader) {
+      providedKey = (
+        Array.isArray(apiKeyHeader) ? apiKeyHeader[0] : String(apiKeyHeader)
+      ).trim();
+    } else if (queryKey) {
+      providedKey = (
+        Array.isArray(queryKey) ? String(queryKey[0]) : String(queryKey)
+      ).trim();
+    }
+
+    return providedKey === expectedKey;
+  }
+
   // Dual Transport: SSE stream endpoint or Non-SSE health check
   @Get()
   @Get('sse')
   handleGet(@Req() req: Request, @Res() res: Response) {
+    if (!this.isAuthorized(req)) {
+      this.logger.warn(`Unauthorized MCP GET request attempt from ${req.ip}`);
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized: Invalid or missing MCP API key',
+        },
+      });
+    }
+
     const acceptHeader = req.headers['accept'] || '';
 
     // If client requested SSE stream
@@ -80,31 +121,8 @@ export class McpController {
     const body = req.body || {};
     const reqId = body.id !== undefined ? body.id : null;
 
-    // Flexible Authentication Check
-    const authHeader =
-      typeof req.headers['authorization'] === 'string'
-        ? req.headers['authorization']
-        : '';
-    const apiKeyHeader =
-      req.headers['x-api-key'] || req.headers['x-mcp-api-key'] || '';
-    const queryKey = req.query.apiKey || req.query.token || '';
-
-    let providedKey = '';
-    if (authHeader) {
-      providedKey = authHeader.replace(/^Bearer\s+/i, '').trim();
-    } else if (apiKeyHeader) {
-      providedKey = (
-        Array.isArray(apiKeyHeader) ? apiKeyHeader[0] : String(apiKeyHeader)
-      ).trim();
-    } else if (queryKey) {
-      providedKey = (
-        Array.isArray(queryKey) ? String(queryKey[0]) : String(queryKey)
-      ).trim();
-    }
-
-    const expectedKey = process.env.MCP_API_KEY;
-    if (expectedKey && providedKey !== expectedKey) {
-      this.logger.warn(`Unauthorized MCP request attempt from ${req.ip}`);
+    if (!this.isAuthorized(req)) {
+      this.logger.warn(`Unauthorized MCP POST request attempt from ${req.ip}`);
       return res.status(HttpStatus.OK).json({
         jsonrpc: '2.0',
         id: reqId,
