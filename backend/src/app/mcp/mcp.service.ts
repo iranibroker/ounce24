@@ -15,6 +15,7 @@ import {
   Follow,
 } from '@ounce24/types';
 import { PushSubscription } from '../schemas/push-subscription.schema';
+import { McpRole } from './mcp.types';
 
 @Injectable()
 export class McpService {
@@ -36,8 +37,34 @@ export class McpService {
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
-  getToolsList() {
-    return [
+  /**
+   * Sanitizes display names to ensure phone numbers, emails, or telegram handles are not leaked as user names.
+   */
+  private sanitizeDisplayName(nameOrTitle?: string | null, userId?: any): string {
+    if (!nameOrTitle || typeof nameOrTitle !== 'string') {
+      const fallbackId = userId ? String(userId).slice(-4) : 'User';
+      return `Trader_${fallbackId}`;
+    }
+    const clean = nameOrTitle.trim();
+    // Check if it resembles a phone number (e.g., starts with +, 09, contains > 6 continuous digits)
+    const isPhone =
+      /^(\+?\d[\d\s\-().]{6,}\d)$/.test(clean) ||
+      /\b(09\d{9}|\+?98\d{10})\b/.test(clean) ||
+      /\d{7,}/.test(clean);
+    // Check if it resembles an email
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean);
+    // Check if it contains a telegram username handle (@...)
+    const isTgHandle = /^@[a-zA-Z0-9_]{3,}$/.test(clean);
+
+    if (isPhone || isEmail || isTgHandle) {
+      const fallbackId = userId ? String(userId).slice(-4) : 'User';
+      return `Trader_${fallbackId}`;
+    }
+    return clean;
+  }
+
+  getToolsList(role: McpRole = 'admin') {
+    const tools = [
       {
         name: 'get_database_summary',
         description:
@@ -50,7 +77,9 @@ export class McpService {
       {
         name: 'get_users_list',
         description:
-          'دریافت لیست و فیلتر پیشرفته کاربران Ounce24 بر اساس بازه تاریخ ثبت‌نام (fromDate, toDate)، بازه تاریخ ارسال سیگنال توسط کاربر (signalFromDate, signalToDate)، حداقل/حداکثر تعداد سیگنال (minSignals, maxSignals)، حداقل/حداکثر امتیاز (minScore, maxScore)، حداقل/حداکثر وین‌ریت (minWinRate, maxWinRate)، کانال احراز هویت (sources)، و صفحه‌بندی (skip, take).',
+          role === 'analyst'
+            ? 'دریافت لیست و تحلیل رفتار معامله‌گران و کاربران Ounce24 به صورت کاملاً امن و ناشناس‌شده (حفظ حریم خصوصی: بدون شماره تلفن، ایمیل، یا آیدی تلگرام) بر اساس بازه تاریخ ثبت‌نام، فعالیت سیگنال، امتیاز، وین‌ریت، کانال جذب و صفحه‌بندی.'
+            : 'دریافت لیست و فیلتر پیشرفته کاربران Ounce24 بر اساس بازه تاریخ ثبت‌نام (fromDate, toDate)، بازه تاریخ ارسال سیگنال توسط کاربر (signalFromDate, signalToDate)، حداقل/حداکثر تعداد سیگنال (minSignals, maxSignals)، حداقل/حداکثر امتیاز (minScore, maxScore)، حداقل/حداکثر وین‌ریت (minWinRate, maxWinRate)، کانال احراز هویت (sources)، و صفحه‌بندی (skip, take).',
         inputSchema: {
           type: 'object',
           properties: {
@@ -436,28 +465,40 @@ export class McpService {
         },
       },
     ];
+
+    if (role === 'analyst') {
+      return tools.filter((tool) => tool.name !== 'query_collection_raw');
+    }
+
+    return tools;
   }
 
-  async executeTool(name: string, args: Record<string, any> = {}) {
+  async executeTool(name: string, args: Record<string, any> = {}, role: McpRole = 'admin') {
+    if (role === 'analyst' && name === 'query_collection_raw') {
+      throw new Error(
+        "Access denied: 'query_collection_raw' is restricted to admin tokens to protect customer privacy.",
+      );
+    }
+
     switch (name) {
       case 'get_database_summary':
         return this.getDatabaseSummary();
       case 'get_users_list':
-        return this.getUsersList(args);
+        return this.getUsersList(args, role);
       case 'get_user_analytics':
         return this.getUserAnalytics(args);
       case 'get_signals_list':
-        return this.getSignalsList(args);
+        return this.getSignalsList(args, role);
       case 'get_signals_overview':
         return this.getSignalsOverview(args);
       case 'get_leaderboard':
-        return this.getLeaderboard(args);
+        return this.getLeaderboard(args, role);
       case 'get_ai_usage_stats':
         return this.getAiUsageStats(args);
       case 'get_gem_analytics':
-        return this.getGemAnalytics(args);
+        return this.getGemAnalytics(args, role);
       case 'get_octopus_analytics':
-        return this.getOctopusAnalytics(args);
+        return this.getOctopusAnalytics(args, role);
       case 'query_collection_raw':
         return this.queryCollectionRaw(args);
       default:
@@ -527,7 +568,7 @@ export class McpService {
   }
 
   // 2. Comprehensive Users List & Multi-Filter Query
-  private async getUsersList(args: Record<string, any>) {
+  private async getUsersList(args: Record<string, any>, role: McpRole = 'admin') {
     const {
       fromDate,
       toDate,
@@ -654,28 +695,52 @@ export class McpService {
         take: effectiveTake,
         hasMore: effectiveSkip + users.length < totalMatching,
       },
-      users: users.map((u: any) => ({
-        id: u._id,
-        name: u.name || u.title || 'کاربر بدون نام',
-        title: u.title || null,
-        phone: u.phone || null,
-        email: u.email || null,
-        telegramUsername: u.telegramUsername || null,
-        telegramId: u.telegramId || null,
-        googleId: u.googleId || null,
-        avatarSource: u.avatarSource || null,
-        totalScore: u.totalScore || 0,
-        weekScore: u.weekScore || 0,
-        monthScore: u.monthScore || 0,
-        score: u.score || 0,
-        winRate: u.winRate || 0,
-        totalSignals: u.totalSignals || 0,
-        weekSignals: u.weekSignals || 0,
-        monthSignals: u.monthSignals || 0,
-        gemBalance: u.gem || 0,
-        language: u.language || 'en',
-        registeredAt: u.createdAt,
-      })),
+      users: users.map((u: any) => {
+        if (role === 'analyst') {
+          return {
+            id: u._id,
+            name: this.sanitizeDisplayName(u.name || u.title, u._id),
+            title: this.sanitizeDisplayName(u.title, u._id),
+            avatarSource:
+              u.avatarSource ||
+              (u.telegramId ? 'telegram' : u.phone ? 'phone' : u.googleId ? 'google' : 'web'),
+            totalScore: u.totalScore || 0,
+            weekScore: u.weekScore || 0,
+            monthScore: u.monthScore || 0,
+            score: u.score || 0,
+            winRate: u.winRate || 0,
+            totalSignals: u.totalSignals || 0,
+            weekSignals: u.weekSignals || 0,
+            monthSignals: u.monthSignals || 0,
+            gemBalance: u.gem || 0,
+            language: u.language || 'en',
+            registeredAt: u.createdAt,
+          };
+        }
+
+        return {
+          id: u._id,
+          name: u.name || u.title || 'کاربر بدون نام',
+          title: u.title || null,
+          phone: u.phone || null,
+          email: u.email || null,
+          telegramUsername: u.telegramUsername || null,
+          telegramId: u.telegramId || null,
+          googleId: u.googleId || null,
+          avatarSource: u.avatarSource || null,
+          totalScore: u.totalScore || 0,
+          weekScore: u.weekScore || 0,
+          monthScore: u.monthScore || 0,
+          score: u.score || 0,
+          winRate: u.winRate || 0,
+          totalSignals: u.totalSignals || 0,
+          weekSignals: u.weekSignals || 0,
+          monthSignals: u.monthSignals || 0,
+          gemBalance: u.gem || 0,
+          language: u.language || 'en',
+          registeredAt: u.createdAt,
+        };
+      }),
     };
   }
 
@@ -771,7 +836,7 @@ export class McpService {
   }
 
   // 4. Signals List & Advanced Filtering
-  private async getSignalsList(args: Record<string, any>) {
+  private async getSignalsList(args: Record<string, any>, role: McpRole = 'admin') {
     const {
       fromDate,
       toDate,
@@ -896,7 +961,15 @@ export class McpService {
         minPrice: s.minPrice,
         closedOuncePrice: s.closedOuncePrice || null,
         createdOuncePrice: s.createdOuncePrice,
-        owner: s.owner ? { id: s.owner._id, name: s.owner.name || s.owner.title } : null,
+        owner: s.owner
+          ? {
+              id: s.owner._id,
+              name:
+                role === 'analyst'
+                  ? this.sanitizeDisplayName(s.owner.name || s.owner.title, s.owner._id)
+                  : (s.owner.name || s.owner.title),
+            }
+          : null,
         riskFree: s.riskFree || false,
         aiCopilotActive: s.aiCopilotActive || false,
         gemReward: s.gem || 0,
@@ -1001,7 +1074,7 @@ export class McpService {
   }
 
   // 6. Dedicated Leaderboard Tool
-  private async getLeaderboard(args: Record<string, any>) {
+  private async getLeaderboard(args: Record<string, any>, role: McpRole = 'admin') {
     const {
       metric = 'totalScore',
       fromDate,
@@ -1031,7 +1104,11 @@ export class McpService {
       this.userModel.countDocuments(query),
       this.userModel
         .find(query)
-        .select('name title score totalScore weekScore monthScore winRate totalSignals gem telegramUsername createdAt')
+        .select(
+          role === 'analyst'
+            ? 'name title score totalScore weekScore monthScore winRate totalSignals gem createdAt'
+            : 'name title score totalScore weekScore monthScore winRate totalSignals gem telegramUsername createdAt',
+        )
         .sort(sortOptions)
         .skip(effectiveSkip)
         .limit(effectiveTake)
@@ -1048,7 +1125,10 @@ export class McpService {
       leaderboard: topUsers.map((u: any, index: number) => ({
         rank: effectiveSkip + index + 1,
         id: u._id,
-        name: u.name || u.title || 'کاربر بدون نام',
+        name:
+          role === 'analyst'
+            ? this.sanitizeDisplayName(u.name || u.title, u._id)
+            : (u.name || u.title || 'کاربر بدون نام'),
         metricValue: u[metric] || 0,
         totalScore: u.totalScore || 0,
         weekScore: u.weekScore || 0,
@@ -1172,7 +1252,7 @@ export class McpService {
   }
 
   // 8. Gem Economy Analytics & Logs
-  private async getGemAnalytics(args: Record<string, any>) {
+  private async getGemAnalytics(args: Record<string, any>, role: McpRole = 'admin') {
     const {
       fromDate,
       toDate,
@@ -1213,7 +1293,7 @@ export class McpService {
       ]),
       this.gemLogModel
         .find(query)
-        .populate('user', 'name title phone')
+        .populate('user', role === 'analyst' ? 'name title' : 'name title phone')
         .sort({ createdAt: -1 })
         .skip(effectiveSkip)
         .limit(effectiveTake)
@@ -1241,7 +1321,15 @@ export class McpService {
       })),
       recentLogs: gemLogs.map((g: any) => ({
         id: g._id,
-        user: g.user ? { id: g.user._id, name: g.user.name || g.user.title } : null,
+        user: g.user
+          ? {
+              id: g.user._id,
+              name:
+                role === 'analyst'
+                  ? this.sanitizeDisplayName(g.user.name || g.user.title, g.user._id)
+                  : (g.user.name || g.user.title),
+            }
+          : null,
         gemsChange: g.gemsChange,
         gemsBefore: g.gemsBefore,
         gemsAfter: g.gemsAfter,
@@ -1252,7 +1340,7 @@ export class McpService {
   }
 
   // 9. Octopus Predictions Analytics
-  private async getOctopusAnalytics(args: Record<string, any>) {
+  private async getOctopusAnalytics(args: Record<string, any>, role: McpRole = 'admin') {
     const { fromDate, toDate, direction, skip = 0, take = 50 } = args;
 
     const query: any = {};
@@ -1294,7 +1382,15 @@ export class McpService {
       ),
       predictions: predictions.map((p: any) => ({
         id: p._id,
-        user: p.user ? { id: p.user._id, name: p.user.name || p.user.title } : null,
+        user: p.user
+          ? {
+              id: p.user._id,
+              name:
+                role === 'analyst'
+                  ? this.sanitizeDisplayName(p.user.name || p.user.title, p.user._id)
+                  : (p.user.name || p.user.title),
+            }
+          : null,
         direction: p.direction,
         votePrice: p.votePrice,
         voteDate: p.voteDate,

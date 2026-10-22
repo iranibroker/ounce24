@@ -11,18 +11,26 @@ import {
 import { Request, Response } from 'express';
 import { McpService } from './mcp.service';
 import { Public } from '../auth/public.decorator';
+import { McpRole, McpAuthResult } from './mcp.types';
 
 @Public()
 @Controller('mcp')
 export class McpController {
   private readonly logger = new Logger(McpController.name);
-  private activeSseSessions = new Map<string, Response>();
+  private activeSseSessions = new Map<string, { res: Response; role: McpRole }>();
 
   constructor(private readonly mcpService: McpService) {}
 
-  private isAuthorized(req: Request): boolean {
-    const expectedKey = process.env.MCP_API_KEY;
-    if (!expectedKey) return true; // Dev mode (no key configured)
+  private resolveAuth(req: Request): McpAuthResult {
+    const adminKey = process.env.MCP_API_KEY;
+    const analystKey =
+      process.env.MCP_ANALYST_API_KEY ||
+      (adminKey ? `${adminKey}_analyst` : undefined);
+
+    // Dev mode fallback: If no keys are set in environment, allow full access as admin
+    if (!adminKey && !analystKey) {
+      return { authorized: true, role: 'admin' };
+    }
 
     const authHeader =
       typeof req.headers['authorization'] === 'string'
@@ -45,14 +53,27 @@ export class McpController {
       ).trim();
     }
 
-    return providedKey === expectedKey;
+    if (!providedKey) {
+      return { authorized: false, role: 'analyst' };
+    }
+
+    if (adminKey && providedKey === adminKey) {
+      return { authorized: true, role: 'admin' };
+    }
+
+    if (analystKey && providedKey === analystKey) {
+      return { authorized: true, role: 'analyst' };
+    }
+
+    return { authorized: false, role: 'analyst' };
   }
 
   // Dual Transport: SSE stream endpoint or Non-SSE health check
   @Get()
   @Get('sse')
   handleGet(@Req() req: Request, @Res() res: Response) {
-    if (!this.isAuthorized(req)) {
+    const auth = this.resolveAuth(req);
+    if (!auth.authorized) {
       this.logger.warn(`Unauthorized MCP GET request attempt from ${req.ip}`);
       return res.status(HttpStatus.UNAUTHORIZED).json({
         jsonrpc: '2.0',
@@ -77,7 +98,7 @@ export class McpController {
       res.setHeader('X-Accel-Buffering', 'no');
       res.flushHeaders();
 
-      this.activeSseSessions.set(sessionId, res);
+      this.activeSseSessions.set(sessionId, { res, role: auth.role });
 
       const host = req.headers.host || 'localhost:3000';
       const protocol = req.protocol || 'http';
@@ -108,6 +129,7 @@ export class McpController {
     return res.status(HttpStatus.OK).json({
       name: 'Ounce24 Product & DB Analytics MCP',
       status: 'active',
+      role: auth.role,
       version: '1.0.0',
       protocolVersion: '2024-11-05',
     });
@@ -121,7 +143,18 @@ export class McpController {
     const body = req.body || {};
     const reqId = body.id !== undefined ? body.id : null;
 
-    if (!this.isAuthorized(req)) {
+    let auth = this.resolveAuth(req);
+
+    // Fallback: If request is part of an active SSE session, inherit session's authenticated role
+    const sessionId = req.query.sessionId as string;
+    if (!auth.authorized && sessionId && this.activeSseSessions.has(sessionId)) {
+      const session = this.activeSseSessions.get(sessionId);
+      if (session) {
+        auth = { authorized: true, role: session.role };
+      }
+    }
+
+    if (!auth.authorized) {
       this.logger.warn(`Unauthorized MCP POST request attempt from ${req.ip}`);
       return res.status(HttpStatus.OK).json({
         jsonrpc: '2.0',
@@ -155,6 +188,7 @@ export class McpController {
             serverInfo: {
               name: 'Ounce24 Product & DB Analytics MCP',
               version: '1.0.0',
+              role: auth.role,
             },
           };
           break;
@@ -165,7 +199,7 @@ export class McpController {
 
         case 'tools/list':
           resultPayload = {
-            tools: this.mcpService.getToolsList(),
+            tools: this.mcpService.getToolsList(auth.role),
           };
           break;
 
@@ -186,6 +220,7 @@ export class McpController {
           const toolResult = await this.mcpService.executeTool(
             toolName,
             toolArgs,
+            auth.role,
           );
 
           resultPayload = {
@@ -218,16 +253,15 @@ export class McpController {
       }
 
       // If SSE session ID exists and connection is open, optionally write message event
-      const sessionId = req.query.sessionId as string;
       if (sessionId && this.activeSseSessions.has(sessionId)) {
-        const sseRes = this.activeSseSessions.get(sessionId);
-        if (sseRes && !sseRes.writableEnded) {
+        const session = this.activeSseSessions.get(sessionId);
+        if (session && !session.res.writableEnded) {
           const sseData = JSON.stringify({
             jsonrpc: '2.0',
             id: reqId,
             result: resultPayload,
           });
-          sseRes.write(`event: message\ndata: ${sseData}\n\n`);
+          session.res.write(`event: message\ndata: ${sseData}\n\n`);
         }
       }
 
